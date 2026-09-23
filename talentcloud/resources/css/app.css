@@ -1,3 +1,17 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Design system Broadsheet: fuente → tokens → preflight → base → componentes → utilidades. */
+
+/* Source Serif 4 alojada en el proyecto (subconjunto latino: cubre el español),
+   con la cursiva real al peso del cuerpo, como exige el design system. */
+@import '@fontsource/source-serif-4/latin-400.css';
+@import '@fontsource/source-serif-4/latin-400-italic.css';
+@import '@fontsource/source-serif-4/latin-600.css';
+
+@import './broadsheet/tokens.css';
+
+@import 'tailwindcss/base';
+@import './broadsheet/base.css';
+
+@import 'tailwindcss/components';
+@import './broadsheet/components.css';
+
+@import 'tailwindcss/utilities';
