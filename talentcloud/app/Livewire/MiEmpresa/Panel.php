@@ -1,0 +1,218 @@
+<?php
+
+namespace App\Livewire\MiEmpresa;
+
+use App\DTO\DatosEmpresaData;
+use App\DTO\InvitacionData;
+use App\Enums\Rol;
+use App\Models\Empresa;
+use App\Models\Invitacion;
+use App\Models\User;
+use App\Repositories\Contracts\EmpresaRepository;
+use App\Repositories\Contracts\EquipoRepository;
+use App\Services\Empresas\ActualizarEmpresa;
+use App\Services\Equipo\CambiarEstadoUsuario;
+use App\Services\Equipo\InvitacionNoValida;
+use App\Services\Equipo\InvitarUsuario;
+use Illuminate\Contracts\View\View;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Title;
+use Livewire\Component;
+
+/** Pantalla "Mi empresa" de la cuenta de empresa (prototipo: isMiEmpresa). */
+#[Title('Mi empresa')]
+class Panel extends Component
+{
+    // Invitar usuario.
+    public bool $mostrarInvitacion = false;
+
+    public string $invitadoNombre = '';
+
+    public string $invitadoEmail = '';
+
+    public string $invitadoRol = 'reclutador';
+
+    // Datos de la empresa.
+    public bool $mostrarDatos = false;
+
+    public string $nombre = '';
+
+    public string $sector = '';
+
+    public string $sitioWeb = '';
+
+    public string $descripcion = '';
+
+    // Desactivar / reactivar usuario.
+    public bool $mostrarConfirmacionUsuario = false;
+
+    #[Locked]
+    public ?int $usuarioSeleccionado = null;
+
+    // Revocar invitación.
+    public bool $mostrarConfirmacionInvitacion = false;
+
+    #[Locked]
+    public ?int $invitacionSeleccionada = null;
+
+    public function mount(): void
+    {
+        $this->authorize('view', $this->empresa());
+    }
+
+    public function abrirInvitacion(): void
+    {
+        $this->authorize('invitar', $this->empresa());
+
+        $this->resetValidation();
+        $this->reset('invitadoNombre', 'invitadoEmail', 'invitadoRol');
+        $this->mostrarInvitacion = true;
+    }
+
+    public function invitar(InvitarUsuario $invitar): void
+    {
+        $empresa = $this->empresa();
+        $this->authorize('invitar', $empresa);
+
+        $datos = $this->validate([
+            'invitadoNombre' => ['required', 'string', 'max:255'],
+            'invitadoEmail' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
+            'invitadoRol' => ['required', Rule::in(array_map(fn (Rol $r) => $r->value, Rol::internosDeEmpresa()))],
+        ], attributes: [
+            'invitadoNombre' => 'nombre',
+            'invitadoEmail' => 'correo',
+            'invitadoRol' => 'rol',
+        ]);
+
+        /** @var User $actor */
+        $actor = auth()->user();
+
+        try {
+            $invitar->ejecutar($empresa, new InvitacionData($datos['invitadoNombre'], $datos['invitadoEmail'], Rol::from($datos['invitadoRol'])), $actor);
+        } catch (InvitacionNoValida $e) {
+            $this->addError('invitadoEmail', $e->getMessage());
+
+            return;
+        }
+
+        $this->mostrarInvitacion = false;
+        $this->dispatch('invitacion-enviada');
+    }
+
+    public function confirmarRevocacion(int $id): void
+    {
+        $this->authorize('invitar', $this->empresa());
+
+        $this->invitacionSeleccionada = $this->invitacionPendiente($id)->id;
+        $this->mostrarConfirmacionInvitacion = true;
+    }
+
+    public function revocarInvitacion(): void
+    {
+        $this->authorize('invitar', $this->empresa());
+
+        $this->invitacionPendiente((int) $this->invitacionSeleccionada)->delete();
+
+        $this->mostrarConfirmacionInvitacion = false;
+    }
+
+    public function confirmarCambioUsuario(int $id): void
+    {
+        $this->authorize('gestionar', $usuario = $this->usuario($id));
+
+        $this->usuarioSeleccionado = $usuario->id;
+        $this->mostrarConfirmacionUsuario = true;
+    }
+
+    public function cambiarEstadoUsuario(CambiarEstadoUsuario $cambiar): void
+    {
+        $usuario = $this->usuario((int) $this->usuarioSeleccionado);
+        $this->authorize('gestionar', $usuario);
+
+        $cambiar->ejecutar($usuario);
+
+        $this->mostrarConfirmacionUsuario = false;
+    }
+
+    public function abrirDatos(): void
+    {
+        $empresa = $this->empresa();
+        $this->authorize('update', $empresa);
+
+        $this->resetValidation();
+        $this->nombre = $empresa->nombre;
+        $this->sector = (string) $empresa->sector;
+        $this->sitioWeb = (string) $empresa->sitio_web;
+        $this->descripcion = (string) $empresa->descripcion;
+        $this->mostrarDatos = true;
+    }
+
+    public function guardarDatos(ActualizarEmpresa $actualizar): void
+    {
+        $empresa = $this->empresa();
+        $this->authorize('update', $empresa);
+
+        $datos = $this->validate([
+            'nombre' => ['required', 'string', 'max:255', Rule::unique('empresas', 'nombre')->ignore($empresa->id)],
+            'sector' => ['nullable', 'string', 'max:120'],
+            'sitioWeb' => ['nullable', 'url', 'max:255'],
+            'descripcion' => ['nullable', 'string', 'max:2000'],
+        ], attributes: ['sitioWeb' => 'sitio web']);
+
+        $actualizar->ejecutar($empresa, new DatosEmpresaData(
+            nombre: $datos['nombre'],
+            sector: $datos['sector'] ?: null,
+            sitioWeb: $datos['sitioWeb'] ?: null,
+            descripcion: $datos['descripcion'] ?: null,
+        ));
+
+        $this->mostrarDatos = false;
+    }
+
+    public function render(EquipoRepository $equipo, EmpresaRepository $empresas): View
+    {
+        $empresa = $empresas->conConteos($this->empresa());
+
+        return view('livewire.mi-empresa.panel', [
+            'empresa' => $empresa,
+            'usuarios' => $equipo->usuariosDe($empresa),
+            'invitaciones' => $equipo->invitacionesPendientesDe($empresa),
+            'seleccionado' => $this->usuarioSeleccionado ? User::find($this->usuarioSeleccionado) : null,
+            'roles' => array_combine(
+                array_map(fn (Rol $r) => $r->value, Rol::internosDeEmpresa()),
+                array_map(fn (Rol $r) => $r->etiquetaEnEmpresa(), Rol::internosDeEmpresa()),
+            ),
+        ]);
+    }
+
+    private function empresa(): Empresa
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        abort_if($user->empresa === null, 403);
+
+        return $user->empresa;
+    }
+
+    /** Con el filtro por empresa, una invitación de otra empresa no se encuentra. */
+    private function invitacionPendiente(int $id): Invitacion
+    {
+        $invitacion = Invitacion::query()->whereKey($id)->whereNull('aceptada_at')->first();
+
+        abort_if($invitacion === null, 404);
+
+        return $invitacion;
+    }
+
+    /** Solo usuarios de la propia empresa: los de otra dan 404. */
+    private function usuario(int $id): User
+    {
+        $usuario = User::query()->deEmpresa($this->empresa()->id)->find($id);
+
+        abort_if($usuario === null, 404);
+
+        return $usuario;
+    }
+}

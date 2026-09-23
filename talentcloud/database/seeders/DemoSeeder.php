@@ -76,7 +76,7 @@ class DemoSeeder extends Seeder
 
         // "Ana López — Administradora — Invitado" de Mi empresa.
         $invitacion = Invitacion::firstOrNew(['email' => 'ana.lopez@nimbus.com']);
-        $invitacion->fill(['rol' => Rol::Empresa, 'token_hash' => hash('sha256', Str::random(40)), 'expira_at' => now()->addDays(7)]);
+        $invitacion->fill(['nombre' => 'Ana López', 'rol' => Rol::Empresa, 'token_hash' => hash('sha256', Str::random(40)), 'expira_at' => now()->addDays(7)]);
         $invitacion->empresa_id = $nimbus->id;
         $invitacion->save();
 

@@ -4,6 +4,7 @@ namespace App\Livewire\Forms;
 
 use App\Enums\Rol;
 use App\Models\User;
+use App\Tenancy\VerificarAcceso;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -76,6 +77,15 @@ class LoginForm extends Form
 
             throw ValidationException::withMessages([
                 'form.rol' => 'Esta cuenta no tiene acceso como '.$rol->etiqueta().'.',
+            ]);
+        }
+
+        // Usuario desactivado o empresa suspendida: no se abre la sesión.
+        if (($motivo = VerificarAcceso::motivoDeBloqueo($user)) !== null) {
+            Auth::guard('web')->logout();
+
+            throw ValidationException::withMessages([
+                'form.email' => $motivo,
             ]);
         }
 

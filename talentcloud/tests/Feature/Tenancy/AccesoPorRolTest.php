@@ -3,7 +3,7 @@
 use App\Models\Empresa;
 use App\Models\User;
 use App\Policies\EmpresaPolicy;
-use App\Tenancy\VerificarEmpresaActiva;
+use App\Tenancy\VerificarAcceso;
 
 /*
  * Matriz de permisos por rol (plan §3) y empresas suspendidas.
@@ -55,7 +55,7 @@ it('cierra la sesión de los usuarios de una empresa suspendida', function () {
     $this->actingAs($reclutador)
         ->get('/dashboard')
         ->assertRedirect(route('login'))
-        ->assertSessionHas('status', VerificarEmpresaActiva::MENSAJE);
+        ->assertSessionHas('status', VerificarAcceso::EMPRESA_SUSPENDIDA);
 
     $this->assertGuest();
 });

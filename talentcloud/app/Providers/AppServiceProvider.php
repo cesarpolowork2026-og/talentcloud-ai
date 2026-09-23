@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,5 +25,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Detecta consultas N+1 fuera de producción.
         Model::preventLazyLoading(! $this->app->isProduction());
+
+        // Fechas en español ("23 sep", "30 de septiembre").
+        Carbon::setLocale(config('app.locale'));
     }
 }

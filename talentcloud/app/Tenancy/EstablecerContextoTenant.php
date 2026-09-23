@@ -2,7 +2,6 @@
 
 namespace App\Tenancy;
 
-use App\Enums\Rol;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
@@ -18,18 +17,10 @@ class EstablecerContextoTenant
 
     public function handle(Request $request, Closure $next): Response
     {
-        $this->contexto->limpiar();
-
         $user = $request->user();
 
-        if ($user instanceof User) {
-            if ($user->tieneRol(Rol::Admin)) {
-                $this->contexto->establecerGlobal();
-            } elseif ($user->empresa_id !== null) {
-                $this->contexto->establecer($user->empresa_id);
-            }
-            // Postulantes: sin contexto. Acceden a sus datos por relaciones explícitas.
-        }
+        // Postulantes: sin contexto. Acceden a sus datos por relaciones explícitas.
+        $this->contexto->establecerParaUsuario($user instanceof User ? $user : null);
 
         return $next($request);
     }

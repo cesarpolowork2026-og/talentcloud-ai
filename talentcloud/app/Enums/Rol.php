@@ -32,6 +32,25 @@ enum Rol: string
         };
     }
 
+    /** Rol en la tabla "Usuarios internos" de Mi empresa. */
+    public function etiquetaEnEmpresa(): string
+    {
+        return match ($this) {
+            self::Empresa => 'Admin de empresa',
+            default => $this->etiqueta(),
+        };
+    }
+
+    /**
+     * Roles que una empresa puede asignar al invitar a su equipo.
+     *
+     * @return list<self>
+     */
+    public static function internosDeEmpresa(): array
+    {
+        return [self::Reclutador, self::Empresa];
+    }
+
     /** Admin, empresa y reclutador gestionan procesos de selección; el postulante no. */
     public function esPersonalDeSeleccion(): bool
     {

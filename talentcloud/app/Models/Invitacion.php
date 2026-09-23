@@ -24,7 +24,7 @@ class Invitacion extends Model
 
     protected $table = 'invitaciones';
 
-    protected $fillable = ['email', 'rol', 'token_hash', 'expira_at', 'aceptada_at'];
+    protected $fillable = ['nombre', 'email', 'rol', 'token_hash', 'expira_at', 'aceptada_at'];
 
     protected $hidden = ['token_hash'];
 

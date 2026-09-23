@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+use App\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -44,7 +46,14 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Autentica al usuario y fija su contexto de empresa, como hace el middleware
+ * del grupo web. Necesario con Livewire::test(), que no pasa por el middleware.
+ */
+function actuarComo(User $user): User
 {
-    // ..
+    test()->actingAs($user);
+    app(TenantContext::class)->establecerParaUsuario($user);
+
+    return $user;
 }

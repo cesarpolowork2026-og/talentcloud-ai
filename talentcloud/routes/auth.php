@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Livewire\Auth\AceptarInvitacion;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -11,6 +12,11 @@ Route::middleware('guest')->group(function () {
 
     Volt::route('registro/postulante', 'pages.auth.register-postulante')
         ->name('register.postulante');
+
+    // Enlace del correo de invitación a un equipo.
+    Route::get('invitacion/{token}', AceptarInvitacion::class)
+        ->middleware('throttle:20,1')
+        ->name('invitacion.aceptar');
 
     Volt::route('login', 'pages.auth.login')
         ->name('login');

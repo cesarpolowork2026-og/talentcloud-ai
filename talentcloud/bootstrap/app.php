@@ -1,7 +1,7 @@
 <?php
 
 use App\Tenancy\EstablecerContextoTenant;
-use App\Tenancy\VerificarEmpresaActiva;
+use App\Tenancy\VerificarAcceso;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // En el grupo web (tras la sesión), así también cubren las peticiones de Livewire:
         // primero se expulsa a los usuarios de empresas suspendidas, luego se fija el tenant.
         $middleware->web(append: [
-            VerificarEmpresaActiva::class,
+            VerificarAcceso::class,
             EstablecerContextoTenant::class,
         ]);
 
@@ -26,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // modelos de la URL se resolverían sin empresa y darían 404.
         $middleware->prependToPriorityList(
             before: SubstituteBindings::class,
-            prepend: VerificarEmpresaActiva::class,
+            prepend: VerificarAcceso::class,
         );
         $middleware->prependToPriorityList(
             before: SubstituteBindings::class,

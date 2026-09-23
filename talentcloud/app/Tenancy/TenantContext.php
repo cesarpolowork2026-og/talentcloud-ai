@@ -2,6 +2,8 @@
 
 namespace App\Tenancy;
 
+use App\Enums\Rol;
+use App\Models\User;
 use Closure;
 
 /**
@@ -35,6 +37,25 @@ class TenantContext
     {
         $this->empresaId = null;
         $this->global = true;
+    }
+
+    /**
+     * Contexto que corresponde a un usuario: global para el admin SaaS, su
+     * empresa para empresa y reclutador, ninguno para el postulante.
+     */
+    public function establecerParaUsuario(?User $user): void
+    {
+        $this->limpiar();
+
+        if ($user === null) {
+            return;
+        }
+
+        if ($user->tieneRol(Rol::Admin)) {
+            $this->establecerGlobal();
+        } elseif ($user->empresa_id !== null) {
+            $this->establecer($user->empresa_id);
+        }
     }
 
     public function limpiar(): void

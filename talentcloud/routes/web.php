@@ -1,5 +1,7 @@
 <?php
 
+use App\Livewire\Empresas;
+use App\Livewire\MiEmpresa;
 use App\Support\Navegacion;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +18,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Personal de selección: admin SaaS, empresa y reclutador.
     Route::middleware('rol:admin|empresa|reclutador')->group(function () {
         Route::view('dashboard', 'dashboard')->name('dashboard');
+    });
+
+    // Admin SaaS.
+    Route::middleware('rol:admin')->group(function () {
+        Route::get('empresas', Empresas\Listado::class)->name('empresas.index');
+    });
+
+    // Cuenta de empresa.
+    Route::middleware('rol:empresa')->group(function () {
+        Route::get('mi-empresa', MiEmpresa\Panel::class)->name('mi-empresa');
     });
 
     // Postulante.

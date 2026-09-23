@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -21,6 +22,7 @@ use Spatie\Permission\Traits\HasRoles;
  * empresa_id no es asignable en masa: lo fijan los servicios de registro e invitación.
  *
  * @property int|null $empresa_id
+ * @property Carbon|null $desactivado_at
  * @property-read Empresa|null $empresa
  */
 class User extends Authenticatable implements MustVerifyEmail
@@ -66,7 +68,13 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'notificaciones_email' => 'boolean',
+            'desactivado_at' => 'datetime',
         ];
+    }
+
+    public function estaActivo(): bool
+    {
+        return $this->desactivado_at === null;
     }
 
     /** Rol principal del usuario. Cada cuenta tiene un único rol de la plataforma. */
