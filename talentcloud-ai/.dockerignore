@@ -1,0 +1,7 @@
+# Solo entra lo necesario para construir: pyproject.toml, uv.lock, README.md y src/.
+*
+!pyproject.toml
+!uv.lock
+!README.md
+!src/
+**/__pycache__

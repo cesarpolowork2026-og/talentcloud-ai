@@ -2,11 +2,15 @@
 
 namespace App\Providers;
 
+use App\Enums\MotorMatching;
 use App\Ia\HttpServicioIa;
 use App\Ia\ServicioIa;
 use App\Matching\FakeMatchingEngine;
+use App\Matching\HttpMatchingEngine;
 use App\Matching\MatchingEngineInterface;
+use App\Matching\MotorConRespaldo;
 use App\Tenancy\TenantContext;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
@@ -21,9 +25,14 @@ class AppServiceProvider extends ServiceProvider
         // Una instancia por petición o por Job: el contexto de empresa nunca se arrastra.
         $this->app->scoped(TenantContext::class);
 
-        // Motor de matching según MATCHING_ENGINE. El adaptador HTTP del servicio de IA llega el día 15.
-        $this->app->bind(MatchingEngineInterface::class, fn () => match (config('talentcloud.matching.motor')) {
-            default => new FakeMatchingEngine,
+        // Motor de matching: con MATCHING_ENGINE=http y el servicio de IA habilitado, el del servicio con
+        // respaldo en el análisis básico si falla; en cualquier otro caso, directamente el análisis básico.
+        $this->app->bind(MatchingEngineInterface::class, function (Application $app) {
+            $ia = $app->make(ServicioIa::class);
+
+            return config('talentcloud.matching.motor') === MotorMatching::Http->value && $ia->habilitado()
+                ? new MotorConRespaldo(new HttpMatchingEngine($ia), new FakeMatchingEngine)
+                : new FakeMatchingEngine;
         });
 
         $this->app->bind(ServicioIa::class, fn () => new HttpServicioIa(

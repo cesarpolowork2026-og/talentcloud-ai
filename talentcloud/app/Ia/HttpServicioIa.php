@@ -2,6 +2,8 @@
 
 namespace App\Ia;
 
+use App\Matching\MatchInput;
+use App\Matching\MatchResult;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
@@ -59,6 +61,11 @@ class HttpServicioIa implements ServicioIa
                 array_values($textos),
             ),
         ]));
+    }
+
+    public function evaluarMatching(MatchInput $entrada): MatchResult
+    {
+        return RespuestaDeMatching::leer($this->post('matching/evaluar', $entrada->aArreglo()), $entrada);
     }
 
     /**

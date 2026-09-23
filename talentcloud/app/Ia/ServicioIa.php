@@ -2,6 +2,9 @@
 
 namespace App\Ia;
 
+use App\Matching\MatchInput;
+use App\Matching\MatchResult;
+
 /**
  * Puerto hacia el servicio de IA (talentcloud-ai). La implementación real es
  * HttpServicioIa; en los tests se simula la respuesta HTTP con Http::fake().
@@ -31,4 +34,12 @@ interface ServicioIa
      * @throws RespuestaIaNoValida
      */
     public function generarEmbeddings(array $textos): EmbeddingsGenerados;
+
+    /**
+     * Matching explicado de una postulación: un resultado por requisito.
+     *
+     * @throws ServicioIaNoDisponible
+     * @throws RespuestaIaNoValida
+     */
+    public function evaluarMatching(MatchInput $entrada): MatchResult;
 }

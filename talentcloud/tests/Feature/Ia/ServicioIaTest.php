@@ -13,13 +13,6 @@ use Illuminate\Support\Sleep;
  * (talentcloud-ai/contrato/ejemplos), los mismos que valida el pytest.
  */
 
-function ejemploIa(string $nombre): array
-{
-    $ruta = dirname(__DIR__, 4).'/talentcloud-ai/contrato/ejemplos/'.$nombre.'.json';
-
-    return json_decode((string) file_get_contents($ruta), true, flags: JSON_THROW_ON_ERROR);
-}
-
 function clienteIa(?string $apiKey = 'clave', int $reintentos = 2): HttpServicioIa
 {
     return new HttpServicioIa(habilitado: true, url: 'http://ia.test', apiKey: $apiKey, timeout: 5, reintentos: $reintentos);
@@ -31,8 +24,8 @@ beforeEach(function () {
 });
 
 it('envía el análisis de CV con la clave y el cuerpo del contrato', function () {
-    Http::fake(['ia.test/cv/analizar' => Http::response(ejemploIa('analisis_cv'))]);
-    $entrada = ejemploIa('analisis_cv_input');
+    Http::fake(['ia.test/cv/analizar' => Http::response(ejemploDeContrato('analisis_cv'))]);
+    $entrada = ejemploDeContrato('analisis_cv_input');
 
     clienteIa()->analizarCv($entrada['cv']['id'], $entrada['cv']['texto'], $entrada['catalogo']);
 
@@ -42,7 +35,7 @@ it('envía el análisis de CV con la clave y el cuerpo del contrato', function (
 });
 
 it('lee el análisis de CV del ejemplo del contrato', function () {
-    Http::fake(['ia.test/cv/analizar' => Http::response(ejemploIa('analisis_cv'))]);
+    Http::fake(['ia.test/cv/analizar' => Http::response(ejemploDeContrato('analisis_cv'))]);
 
     $analisis = clienteIa()->analizarCv(42, 'texto', []);
 
@@ -76,7 +69,7 @@ it('genera embeddings conservando el id de cada texto', function () {
 });
 
 it('no envía la cabecera de clave si no hay clave configurada', function () {
-    Http::fake(['ia.test/cv/analizar' => Http::response(ejemploIa('analisis_cv'))]);
+    Http::fake(['ia.test/cv/analizar' => Http::response(ejemploDeContrato('analisis_cv'))]);
 
     clienteIa(apiKey: null)->analizarCv(1, 'texto', []);
 
@@ -86,7 +79,7 @@ it('no envía la cabecera de clave si no hay clave configurada', function () {
 it('reintenta los errores transitorios del servicio', function () {
     Http::fake(['ia.test/cv/analizar' => Http::sequence()
         ->push(['detail' => 'ocupado'], 503)
-        ->push(ejemploIa('analisis_cv'))]);
+        ->push(ejemploDeContrato('analisis_cv'))]);
 
     expect(clienteIa()->analizarCv(1, 'texto', [])->fragmentos)->toHaveCount(5);
     Http::assertSentCount(2);
@@ -121,16 +114,16 @@ it('rechaza respuestas fuera de contrato', function (array $respuesta, string $c
     expect(fn () => clienteIa()->analizarCv(1, 'texto', []))
         ->toThrow(RespuestaIaNoValida::class, "campo \"{$campo}\"");
 })->with([
-    'otra versión' => fn () => [[...ejemploIa('analisis_cv'), 'version' => 2], 'version'],
-    'sin modelo' => fn () => [array_diff_key(ejemploIa('analisis_cv'), ['modelo_embeddings' => 1]), 'modelo_embeddings'],
+    'otra versión' => fn () => [[...ejemploDeContrato('analisis_cv'), 'version' => 2], 'version'],
+    'sin modelo' => fn () => [array_diff_key(ejemploDeContrato('analisis_cv'), ['modelo_embeddings' => 1]), 'modelo_embeddings'],
     'embedding vacío' => function () {
-        $respuesta = ejemploIa('analisis_cv');
+        $respuesta = ejemploDeContrato('analisis_cv');
         $respuesta['fragmentos'][1]['embedding'] = [];
 
         return [$respuesta, 'fragmentos[1].embedding'];
     },
     'años como texto' => function () {
-        $respuesta = ejemploIa('analisis_cv');
+        $respuesta = ejemploDeContrato('analisis_cv');
         $respuesta['competencias'][0]['anios'] = 'cuatro';
 
         return [$respuesta, 'competencias[0].anios'];

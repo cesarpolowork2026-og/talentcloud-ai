@@ -7,7 +7,6 @@ cambiar un umbral es una decisión revisable, no un efecto secundario de ejecuta
 """
 
 import json
-from datetime import date
 from pathlib import Path
 
 from talentcloud_ai.calibracion import (
@@ -19,35 +18,13 @@ from talentcloud_ai.calibracion import (
     validacion_cruzada,
 )
 from talentcloud_ai.config import Settings
-from talentcloud_ai.contrato.comun import NivelCoincidencia
-from talentcloud_ai.contrato.matching import MatchInput
+from talentcloud_ai.conjunto_de_evaluacion import ConjuntoDeEvaluacion
 from talentcloud_ai.embeddings.fabrica import crear_embedder
 from talentcloud_ai.matching.calificacion import CALIBRADOS, UmbralesSemanticos
 from talentcloud_ai.matching.evaluador import EvaluadorDeMatching
 
 RAIZ = Path(__file__).resolve().parents[1]
-CONJUNTO = RAIZ / "evaluacion" / "conjunto.json"
 INFORME = RAIZ / "evaluacion" / "calibracion.json"
-CVS = RAIZ / "tests" / "datos" / "cvs"
-
-
-def cargar_casos(evaluador: EvaluadorDeMatching, conjunto: dict[str, object]) -> list[Caso]:
-    requisitos = conjunto["requisitos"]
-    assert isinstance(requisitos, list)
-    casos: list[Caso] = []
-    for cv in conjunto["cvs"]:  # type: ignore[attr-defined]
-        entrada = MatchInput.model_validate(
-            {
-                "version": 1,
-                "postulacion_id": 1,
-                "vacante": {"titulo": "Conjunto de evaluación"},
-                "requisitos": [{**r, "tipo": "obligatorio", "peso": 3} for r in requisitos],
-                "cv": {"id": 1, "texto": (CVS / f"{cv}.txt").read_text(encoding="utf-8")},
-            }
-        )
-        esperados = {r["id"]: NivelCoincidencia(r["esperado"][cv]) for r in requisitos}
-        casos += [Caso(cv, d, esperados[d.requisito.id]) for d in evaluador.diagnosticar(entrada)]
-    return casos
 
 
 def detalle(caso: Caso, umbrales: UmbralesSemanticos) -> dict[str, object]:
@@ -64,11 +41,9 @@ def detalle(caso: Caso, umbrales: UmbralesSemanticos) -> dict[str, object]:
 
 
 def main() -> None:
-    conjunto = json.loads(CONJUNTO.read_text(encoding="utf-8"))
+    conjunto = ConjuntoDeEvaluacion(RAIZ)
     settings = Settings(entorno="testing", embeddings_backend="sentence-transformers")
-    evaluador = EvaluadorDeMatching(date.fromisoformat(conjunto["fecha_referencia"]), crear_embedder(settings))
-
-    casos = cargar_casos(evaluador, conjunto)
+    casos = conjunto.casos(EvaluadorDeMatching(conjunto.fecha_referencia, crear_embedder(settings)))
     semanticos = [c for c in casos if c.diagnostico.exacta is None]
 
     mejor = buscar_umbrales(casos)

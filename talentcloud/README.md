@@ -21,7 +21,9 @@ php artisan migrate
 composer dev                  # servidor, cola (ia, default), Vite y servicio de IA (puerto 8001)
 ```
 
-Servicio de IA: con `IA_HABILITADA=true`, cada CV procesado se analiza (competencias, años, fragmentos con
+Servicio de IA: con `IA_HABILITADA=true` y `MATCHING_ENGINE=http`, el matching lo calcula el servicio (coincidencia
+exacta + similitud semántica, con evidencia y motivo); si no responde, se usa el análisis básico y
+`php artisan talentcloud:recalcular-matching --solo-basicos` lo rehace cuando vuelve. Además, cada CV procesado se analiza (competencias, años, fragmentos con
 embedding) y cada cambio de requisitos genera sus embeddings, en la cola `ia`. `IA_API_KEY` debe coincidir con
 `TALENTCLOUD_AI_API_KEY` de `talentcloud-ai/.env`. Con `IA_HABILITADA=false` todo funciona igual con el análisis
 básico. La primera vez, el servicio descarga el modelo (unos 470 MB).

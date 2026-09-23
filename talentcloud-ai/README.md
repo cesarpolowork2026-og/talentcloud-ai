@@ -32,6 +32,17 @@ La primera ejecución descarga el modelo en la caché de Hugging Face (unos 470 
 > ("Décimo"), así que la instalación editable no se importa. Por eso `--app-dir src` en uvicorn y
 > `pythonpath = ["src"]` en pytest; para scripts sueltos, `PYTHONPATH=src`. En Docker y en el CI no ocurre.
 
+## Imagen Docker (Cloud Run)
+
+```bash
+docker build -t talentcloud-ai .                                   # incluye el modelo (sin descargas al arrancar)
+docker run -p 8080:8080 -e TALENTCLOUD_AI_API_KEY=… talentcloud-ai
+```
+
+Multietapa con `uv sync --frozen` (dependencias en su propia capa), PyTorch CPU, modelo en `/modelos` con
+`HF_HUB_OFFLINE=1`, usuario sin privilegios, `PORT` de Cloud Run (8080 por defecto), un proceso por instancia y
+`/docs` desactivado (`TALENTCLOUD_AI_ENTORNO=production`). Unos 870 MB comprimida; arranca en ~13 s.
+
 ## Endpoints
 
 | Método | Ruta | Qué hace |
@@ -52,10 +63,13 @@ Por requisito, `matching/calificacion.py` decide con este orden de confianza:
    supera a una coincidencia exacta, y un fragmento dudoso nunca da "Coincide".
 3. **Sin evidencia**: 0 %; si es obligatorio, se dice en el motivo y en el resumen.
 
-Los umbrales de similitud (`matching/umbrales.py`) se calibran con el conjunto de `evaluacion/`:
+Los umbrales de similitud (`matching/umbrales.py`) se calibran con el conjunto de `evaluacion/`, y
+`evaluacion/evaluar.py` compara el servicio con el análisis básico de Laravel (resumen en `evaluacion/RESULTADOS.md`):
 
 ```bash
 uv run --extra ml python evaluacion/calibrar.py    # (Windows: PYTHONPATH=src) → evaluacion/calibracion.json
+php artisan talentcloud:evaluar-motor-basico       # desde talentcloud/ → evaluacion/predicciones_motor_basico.json
+uv run --extra ml python evaluacion/evaluar.py     # → evaluacion/resultados.json y RESULTADOS.md
 ```
 
 `evaluacion/conjunto.json` tiene 145 casos (29 requisitos × 5 CV de demostración) etiquetados por el equipo,

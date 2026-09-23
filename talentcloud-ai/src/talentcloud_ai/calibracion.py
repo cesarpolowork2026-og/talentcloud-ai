@@ -4,13 +4,13 @@ Cada caso guarda su diagnóstico (evidencia exacta y semántica, calculadas una 
 otros umbrales solo vuelve a calificar, con la misma función que usa el servicio en producción.
 """
 
-from collections import Counter
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 
 from talentcloud_ai.contrato.comun import NivelCoincidencia
 from talentcloud_ai.matching.calificacion import UmbralesSemanticos, calificar
 from talentcloud_ai.matching.evaluador import Diagnostico
+from talentcloud_ai.metricas import Niveles, niveles
 
 # Sin evidencia semántica: equivale a la coincidencia exacta sola (línea base).
 SOLO_EXACTA = UmbralesSemanticos(revisar=1.0, coincide=1.0)
@@ -40,16 +40,14 @@ class Medicion:
         return self.aciertos / self.total if self.total else 0.0
 
 
+def resultados(casos: Sequence[Caso], umbrales: UmbralesSemanticos) -> Niveles:
+    """Pares (esperado, predicho) con esos umbrales."""
+    return niveles((c.esperado, c.predecir(umbrales)) for c in casos)
+
+
 def medir(casos: Sequence[Caso], umbrales: UmbralesSemanticos) -> Medicion:
-    predichos = [(c.predecir(umbrales), c.esperado) for c in casos]
-    return Medicion(
-        umbrales=umbrales,
-        aciertos=sum(p is e for p, e in predichos),
-        total=len(predichos),
-        falsos_coincide=sum(
-            p is NivelCoincidencia.COINCIDE and e is NivelCoincidencia.NO_ENCONTRADO for p, e in predichos
-        ),
-    )
+    medidos = resultados(casos, umbrales)
+    return Medicion(umbrales, medidos.aciertos, medidos.total, medidos.falsos_coincide)
 
 
 def _candidatos(desde: float, hasta: float, paso: float) -> Iterator[UmbralesSemanticos]:
@@ -82,5 +80,4 @@ def validacion_cruzada(casos: Sequence[Caso], **busqueda: float) -> float:
 
 def matriz_de_confusion(casos: Sequence[Caso], umbrales: UmbralesSemanticos) -> dict[str, dict[str, int]]:
     """esperado → predicho → cantidad."""
-    conteo = Counter((c.esperado, c.predecir(umbrales)) for c in casos)
-    return {e.value: {p.value: conteo[(e, p)] for p in NivelCoincidencia} for e in NivelCoincidencia}
+    return resultados(casos, umbrales).matriz_de_confusion()

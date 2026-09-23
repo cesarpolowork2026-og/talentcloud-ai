@@ -1,0 +1,875 @@
+{
+    "motor": "fake",
+    "casos": [
+        {
+            "cv": "elena",
+            "requisito_id": 1,
+            "nivel": "coincide",
+            "porcentaje": 98
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 2,
+            "nivel": "coincide",
+            "porcentaje": 80
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 3,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 4,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 5,
+            "nivel": "revisar",
+            "porcentaje": 20
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 6,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 7,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 8,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 9,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 10,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 11,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 12,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 13,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 14,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 15,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 16,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 17,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 18,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 19,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 20,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 21,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 22,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 23,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 24,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 25,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 26,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 27,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 28,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "elena",
+            "requisito_id": 29,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 1,
+            "nivel": "coincide",
+            "porcentaje": 98
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 2,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 3,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 4,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 5,
+            "nivel": "coincide",
+            "porcentaje": 95
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 6,
+            "nivel": "coincide",
+            "porcentaje": 70
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 7,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 8,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 9,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 10,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 11,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 12,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 13,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 14,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 15,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 16,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 17,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 18,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 19,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 20,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 21,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 22,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 23,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 24,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 25,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 26,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 27,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 28,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "sofia",
+            "requisito_id": 29,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 1,
+            "nivel": "coincide",
+            "porcentaje": 80
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 2,
+            "nivel": "coincide",
+            "porcentaje": 70
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 3,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 4,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 5,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 6,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 7,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 8,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 9,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 10,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 11,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 12,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 13,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 14,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 15,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 16,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 17,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 18,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 19,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 20,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 21,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 22,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 23,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 24,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 25,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 26,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 27,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 28,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "marco",
+            "requisito_id": 29,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 1,
+            "nivel": "revisar",
+            "porcentaje": 20
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 2,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 3,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 4,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 5,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 6,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 7,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 8,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 9,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 10,
+            "nivel": "coincide",
+            "porcentaje": 70
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 11,
+            "nivel": "coincide",
+            "porcentaje": 70
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 12,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 13,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 14,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 15,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 16,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 17,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 18,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 19,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 20,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 21,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 22,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 23,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 24,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 25,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 26,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 27,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 28,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "ivan",
+            "requisito_id": 29,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 1,
+            "nivel": "coincide",
+            "porcentaje": 98
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 2,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 3,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 4,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 5,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 6,
+            "nivel": "coincide",
+            "porcentaje": 70
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 7,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 8,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 9,
+            "nivel": "coincide",
+            "porcentaje": 75
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 10,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 11,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 12,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 13,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 14,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 15,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 16,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 17,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 18,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 19,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 20,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 21,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 22,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 23,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 24,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 25,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 26,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 27,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 28,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        },
+        {
+            "cv": "lucia",
+            "requisito_id": 29,
+            "nivel": "no_encontrado",
+            "porcentaje": 0
+        }
+    ]
+}

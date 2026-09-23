@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "descripcion": "Competencias del catálogo que cada CV de demostración acredita (no basta una mención: \"interés en aprender\" o \"nociones\" no cuentan). Referencia para medir la extracción de /cv/analizar. Etiquetado por el equipo de desarrollo: pendiente de revisión por un reclutador.",
+  "cvs": {
+    "elena": [
+      "Java",
+      "Spring Boot",
+      "PostgreSQL",
+      "Docker",
+      "Git",
+      "Scrum",
+      "Pruebas automatizadas",
+      "Inglés"
+    ],
+    "sofia": [
+      "Java",
+      "Spring Boot",
+      "Kubernetes",
+      "Docker",
+      "PostgreSQL",
+      "AWS",
+      "Certificación AWS",
+      "CI/CD",
+      "Inglés"
+    ],
+    "marco": [
+      "Java",
+      "MySQL",
+      "SQL",
+      "Spring Boot",
+      "Git",
+      "Scrum"
+    ],
+    "ivan": [
+      "Figma",
+      "Research",
+      "Prototipado",
+      "Design systems"
+    ],
+    "lucia": [
+      "SQL",
+      "PostgreSQL",
+      "Python",
+      "Power BI",
+      "Excel avanzado",
+      "Java",
+      "Spring Boot",
+      "Docker",
+      "Kubernetes",
+      "AWS",
+      "Certificación AWS",
+      "Inglés"
+    ]
+  },
+  "notas": {
+    "elena": "Kubernetes solo como \"interés en aprender\": no se acredita.",
+    "sofia": "Solo menciona \"GitHub Actions\" (CI/CD): no acredita Git.",
+    "ivan": "\"Nociones de Java y HTML\": no acredita Java."
+  }
+}

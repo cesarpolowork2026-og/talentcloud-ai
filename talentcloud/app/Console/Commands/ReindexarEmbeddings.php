@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\ProcesaEnLote;
 use App\Enums\EstadoProcesamientoCv;
 use App\Ia\ServicioIa;
 use App\Jobs\AnalizarCvConIa;
@@ -12,8 +13,6 @@ use App\Services\Cvs\AnalizarCv;
 use App\Services\Vacantes\IndexarRequisitos;
 use App\Tenancy\TenantContext;
 use Illuminate\Console\Command;
-use Illuminate\Support\Collection;
-use Throwable;
 
 /**
  * Vuelve a analizar todos los CV y a generar los embeddings de todos los
@@ -22,6 +21,8 @@ use Throwable;
  */
 class ReindexarEmbeddings extends Command
 {
+    use ProcesaEnLote;
+
     protected $signature = 'talentcloud:reindexar-embeddings
         {--cvs : Solo los CV}
         {--requisitos : Solo los requisitos de las vacantes}
@@ -61,34 +62,5 @@ class ReindexarEmbeddings extends Command
         }
 
         return $fallos === 0 ? self::SUCCESS : self::FAILURE;
-    }
-
-    /**
-     * @template T
-     *
-     * @param  Collection<int, T>  $elementos
-     * @param  callable(T): mixed  $accion
-     * @return int fallos
-     */
-    private function procesar(string $nombre, Collection $elementos, callable $accion): int
-    {
-        $this->info(($this->option('sync') ? 'Procesando ' : 'Encolando ').$elementos->count()." {$nombre}…");
-        $fallos = 0;
-
-        $this->withProgressBar($elementos, function ($elemento) use ($accion, &$fallos) {
-            try {
-                $accion($elemento);
-            } catch (Throwable $e) {
-                $fallos++;
-                report($e);
-            }
-        });
-        $this->newLine();
-
-        if ($fallos > 0) {
-            $this->warn("{$fallos} {$nombre} no se pudieron procesar (ver el log).");
-        }
-
-        return $fallos;
     }
 }
