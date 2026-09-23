@@ -1,0 +1,112 @@
+{{-- Kanban del prototipo (TalentCloud App.dc.html, isKanban). --}}
+@use('App\Enums\EtapaPostulacion')
+<div>
+    @if (! $vacante)
+        <x-ui.page-header title="Kanban" subtitle="Seguimiento de postulaciones por vacante." />
+        <x-ui.empty-state icon="kanban" message="No hay vacantes abiertas para mostrar su Kanban.">
+            <x-ui.button :href="route('vacantes.index')" wire:navigate class="mt-3">Ir a Vacantes</x-ui.button>
+        </x-ui.empty-state>
+    @else
+        <x-ui.page-header :title="'Kanban · '.$vacante->titulo" :subtitle="$vacante->empresa?->nombre.' — '.$activas.' '.($activas === 1 ? 'postulación activa' : 'postulaciones activas').'.'">
+            <x-slot:breadcrumbs>
+                <x-ui.breadcrumb :items="[['label' => 'Vacantes', 'href' => route('vacantes.index')], ['label' => $vacante->titulo, 'href' => route('vacantes.show', $vacante)], ['label' => 'Kanban']]" />
+            </x-slot:breadcrumbs>
+            @if (count($otrasVacantes) > 1)
+                <x-slot:actions>
+                    <label for="kanban-vacante" class="sr-only">Cambiar de vacante</label>
+                    <x-ui.select
+                        id="kanban-vacante"
+                        :options="$otrasVacantes"
+                        :selected="$vacante->id"
+                        x-data
+                        x-on:change="Livewire.navigate('{{ url('vacantes') }}/' + $event.target.value + '/kanban')"
+                    />
+
+                </x-slot:actions>
+            @endif
+        </x-ui.page-header>
+
+        @error('tablero')
+            <p class="field-error -mt-3 mb-4 text-14" role="alert">{{ $message }}</p>
+        @enderror
+
+        @if (! $editable)
+            <p class="-mt-3 mb-4 text-13 text-neutral-600">La vacante está cerrada: el Kanban es de solo lectura.</p>
+        @endif
+
+        <div class="flex gap-4 overflow-x-auto pb-2">
+            @foreach ($columnas as $columna)
+                @php($etapa = $columna['etapa'])
+                <section class="flex flex-[0_0_220px] flex-col gap-3" aria-label="{{ $etapa->etiqueta() }}" wire:key="columna-{{ $etapa->value }}">
+                    <div class="flex justify-between text-12 uppercase tracking-[0.06em] text-neutral-600">
+                        <span>{{ $etapa->etiqueta() }}</span><span>{{ $columna['postulaciones']->count() }}</span>
+                    </div>
+
+                    <div
+                        class="flex min-h-[90px] flex-col gap-3"
+                        data-etapa="{{ $etapa->value }}"
+                        x-data="columnaKanban(@js($editable))"
+                    >
+                        @foreach ($columna['postulaciones'] as $postulacion)
+                            <div
+                                class="card elev-sm relative !p-3 {{ $editable ? 'cursor-grab' : 'cursor-pointer' }}"
+                                data-postulacion="{{ $postulacion->id }}"
+                                wire:key="postulacion-{{ $postulacion->id }}"
+                                wire:click="abrir({{ $postulacion->id }})"
+                                role="button"
+                                tabindex="0"
+                                x-on:keydown.enter.prevent="$wire.abrir({{ $postulacion->id }})"
+                                aria-label="{{ $postulacion->candidato?->nombre }}, {{ $etapa->etiqueta() }}"
+                            >
+                                @if ($editable && $etapa !== EtapaPostulacion::Descartado)
+                                    <button
+                                        type="button"
+                                        aria-label="Descartar a {{ $postulacion->candidato?->nombre }}"
+                                        wire:click.stop="confirmarDescarte({{ $postulacion->id }})"
+                                        class="absolute right-[6px] top-[6px] p-0.5 text-14 leading-none text-neutral-500 hover:text-accent-2-700"
+                                    >×</button>
+                                @endif
+                                <div class="pr-4 text-14 font-semibold">{{ $postulacion->candidato?->nombre }}</div>
+                                <div class="mt-0.5 text-13 text-neutral-700">{{ $postulacion->candidato?->titular }}</div>
+                                @if ($postulacion->matchPorcentaje() !== null)
+                                    <div class="mt-2"><x-ui.tag tone="accent">{{ $postulacion->matchPorcentaje() }}% match</x-ui.tag></div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endforeach
+        </div>
+
+        {{-- Detalle de la tarjeta (prototipo: openCard) + "Mover a…" --}}
+        <x-ui.dialog wire:model="mostrarDetalle" :title="$seleccionada?->candidato?->nombre" max-width="480px">
+            @if ($seleccionada)
+                <p class="m-0 whitespace-pre-line">{{ $seleccionada->candidato?->titular ?? 'Candidato' }}{{ $seleccionada->matchPorcentaje() !== null ? ' · '.$seleccionada->matchPorcentaje().'% de coincidencia con la vacante.' : '.' }}
+Columna: {{ $seleccionada->etapa->etiqueta() }}.</p>
+
+                @if ($editable)
+                    <form wire:submit="moverA" id="form-mover" class="mt-4">
+                        <x-ui.field label="Mover a" for="mover-etapa" error="etapaDestino">
+                            <x-ui.select wire:model="etapaDestino" id="mover-etapa" :options="$etapas" class="w-full" />
+                        </x-ui.field>
+                    </form>
+                @endif
+            @endif
+            <x-slot:actions>
+                <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
+                @if ($seleccionada)
+                    <x-ui.button :href="route('candidatos.show', $seleccionada->candidato_id)" wire:navigate>Ver candidato</x-ui.button>
+                    @if ($editable)
+                        <x-ui.button type="submit" form="form-mover" variant="primary">Mover</x-ui.button>
+                    @endif
+                @endif
+            </x-slot:actions>
+        </x-ui.dialog>
+
+        {{-- Descartar (textos del prototipo) --}}
+        @php($aDescartar = $seleccionada?->candidato?->nombre ?? '')
+        <x-ui.confirm wire:model="mostrarDescarte" :title="'Descartar a '.$aDescartar" action-label="Descartar" action="descartar">
+            El candidato se moverá fuera del proceso de esta vacante. Esta acción no elimina su perfil ni su CV.
+        </x-ui.confirm>
+    @endif
+</div>
