@@ -1,17 +1,8 @@
+{{-- Provisional: los indicadores, vacantes recientes y actividad llegan el día 17 del plan. --}}
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+    <x-slot:title>Dashboard</x-slot:title>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("You're logged in!") }}
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-ui.page-header title="Dashboard" subtitle="Resumen de la actividad de selección." />
+
+    <x-ui.empty-state icon="chart-bar" message="Los indicadores aparecerán cuando haya vacantes y postulaciones." />
 </x-app-layout>

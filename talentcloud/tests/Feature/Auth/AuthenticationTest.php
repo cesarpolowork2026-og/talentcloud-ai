@@ -8,11 +8,13 @@ test('login screen can be rendered', function () {
 
     $response
         ->assertOk()
-        ->assertSeeVolt('pages.auth.login');
+        ->assertSeeVolt('pages.auth.login')
+        ->assertSee('Bienvenido a TalentCloud')
+        ->assertSee('Ingresar como');
 });
 
 test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->reclutador()->create();
 
     $component = Volt::test('pages.auth.login')
         ->set('form.email', $user->email)
@@ -27,8 +29,39 @@ test('users can authenticate using the login screen', function () {
     $this->assertAuthenticated();
 });
 
+test('el rol por defecto del login es Reclutador, como en el prototipo', function () {
+    Volt::test('pages.auth.login')->assertSet('form.rol', 'reclutador');
+});
+
+test('cada rol puede ingresar eligiendo su propio rol', function (string $rol) {
+    $user = User::factory()->{$rol}()->create();
+
+    Volt::test('pages.auth.login')
+        ->set('form.email', $user->email)
+        ->set('form.password', 'password')
+        ->set('form.rol', $rol)
+        ->call('login')
+        ->assertHasNoErrors();
+
+    $this->assertAuthenticatedAs($user);
+})->with(['admin', 'empresa', 'reclutador', 'postulante']);
+
+test('no se puede ingresar con un rol que la cuenta no tiene', function () {
+    $user = User::factory()->postulante()->create();
+
+    Volt::test('pages.auth.login')
+        ->set('form.email', $user->email)
+        ->set('form.password', 'password')
+        ->set('form.rol', 'reclutador')
+        ->call('login')
+        ->assertHasErrors(['form.rol'])
+        ->assertNoRedirect();
+
+    $this->assertGuest();
+});
+
 test('users can not authenticate with invalid password', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->reclutador()->create();
 
     $component = Volt::test('pages.auth.login')
         ->set('form.email', $user->email)
@@ -44,7 +77,7 @@ test('users can not authenticate with invalid password', function () {
 });
 
 test('navigation menu can be rendered', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->reclutador()->create();
 
     $this->actingAs($user);
 
@@ -56,7 +89,7 @@ test('navigation menu can be rendered', function () {
 });
 
 test('users can logout', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->reclutador()->create();
 
     $this->actingAs($user);
 
@@ -66,7 +99,7 @@ test('users can logout', function () {
 
     $component
         ->assertHasNoErrors()
-        ->assertRedirect('/');
+        ->assertRedirect(route('login'));
 
     $this->assertGuest();
 });

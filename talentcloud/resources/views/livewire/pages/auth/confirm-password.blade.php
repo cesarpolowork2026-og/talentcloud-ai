@@ -3,9 +3,10 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Volt\Component;
 
-new #[Layout('layouts.guest')] class extends Component
+new #[Layout('layouts.guest')] #[Title('Confirmar contraseña')] class extends Component
 {
     public string $password = '';
 
@@ -33,30 +34,15 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
-    </div>
+<div class="contents">
+    <h2 class="mb-2 text-28">Confirma tu contraseña</h2>
+    <p class="mb-6 text-15 text-neutral-700">Es una zona protegida. Escribe tu contraseña para continuar.</p>
 
-    <form wire:submit="confirmPassword">
-        <!-- Password -->
-        <div>
-            <x-input-label for="password" :value="__('Password')" />
+    <form wire:submit="confirmPassword" class="grid gap-4">
+        <x-ui.field label="Contraseña" for="password" error="password">
+            <x-ui.input wire:model="password" id="password" type="password" error="password" required autofocus autocomplete="current-password" />
+        </x-ui.field>
 
-            <x-text-input wire:model="password"
-                          id="password"
-                          class="block mt-1 w-full"
-                          type="password"
-                          name="password"
-                          required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <div class="flex justify-end mt-4">
-            <x-primary-button>
-                {{ __('Confirm') }}
-            </x-primary-button>
-        </div>
+        <x-ui.button type="submit" variant="primary" block wire:loading.attr="disabled">Confirmar</x-ui.button>
     </form>
 </div>

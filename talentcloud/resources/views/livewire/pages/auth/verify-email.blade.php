@@ -4,9 +4,10 @@ use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Volt\Component;
 
-new #[Layout('layouts.guest')] class extends Component
+new #[Layout('layouts.guest')] #[Title('Verificar correo')] class extends Component
 {
     /**
      * Send an email verification notification to the user.
@@ -31,28 +32,20 @@ new #[Layout('layouts.guest')] class extends Component
     {
         $logout();
 
-        $this->redirect('/', navigate: true);
+        $this->redirect(route('login'), navigate: true);
     }
 }; ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
-    </div>
+<div class="contents">
+    <h2 class="mb-2 text-28">Verifica tu correo</h2>
+    <p class="mb-6 text-15 text-neutral-700">Te enviamos un enlace de verificación. Ábrelo para activar tu cuenta; si no lo encuentras, podemos enviarte otro.</p>
 
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-        </div>
+        <p class="mb-4 text-14 text-accent-700" role="status">Enviamos un nuevo enlace de verificación a tu correo.</p>
     @endif
 
-    <div class="mt-4 flex items-center justify-between">
-        <x-primary-button wire:click="sendVerification">
-            {{ __('Resend Verification Email') }}
-        </x-primary-button>
-
-        <button wire:click="logout" type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            {{ __('Log Out') }}
-        </button>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <x-ui.button variant="primary" wire:click="sendVerification" wire:loading.attr="disabled">Reenviar enlace</x-ui.button>
+        <x-ui.button variant="ghost" wire:click="logout">Cerrar sesión</x-ui.button>
     </div>
 </div>

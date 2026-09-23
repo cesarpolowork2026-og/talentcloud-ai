@@ -1,11 +1,14 @@
 <?php
 
+use App\Enums\Rol;
 use App\Livewire\Forms\LoginForm;
+use App\Support\Navegacion;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Volt\Component;
 
-new #[Layout('layouts.guest')] class extends Component
+new #[Layout('layouts.guest')] #[Title('Iniciar sesión')] class extends Component
 {
     public LoginForm $form;
 
@@ -20,52 +23,51 @@ new #[Layout('layouts.guest')] class extends Component
 
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirectIntended(default: Navegacion::rutaInicio(auth()->user()), navigate: true);
     }
 }; ?>
 
-<div>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+{{-- Formulario de Login.dc.html --}}
+<div class="contents">
+    <h2 class="mb-2 text-28">Bienvenido a TalentCloud</h2>
+    <p class="mb-6 text-15 text-neutral-700">Gestiona tu proceso de selección desde un solo lugar.</p>
 
-    <form wire:submit="login">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
-        </div>
+    @if (session('status'))
+        <p class="mb-4 text-14 text-accent-700" role="status">{{ session('status') }}</p>
+    @endif
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+    <form wire:submit="login" class="grid gap-4">
+        <x-ui.field label="Correo electrónico" for="email" error="form.email">
+            <x-ui.input wire:model="form.email" id="email" type="email" placeholder="reclutador@empresa.com" error="form.email" required autofocus autocomplete="username" />
+        </x-ui.field>
 
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+        <x-ui.field label="Contraseña" for="password" error="form.password">
+            <x-ui.input wire:model="form.password" id="password" type="password" placeholder="••••••••••••" error="form.password" required autocomplete="current-password" />
+        </x-ui.field>
 
-            <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
-        </div>
+        <x-ui.field error="form.rol">
+            <label id="rol-label">Ingresar como</label>
+            <x-ui.seg labelledby="rol-label">
+                @foreach (Rol::opciones() as $valor => $etiqueta)
+                    <x-ui.seg-option wire:model="form.rol" name="rol" value="{{ $valor }}">{{ $etiqueta }}</x-ui.seg-option>
+                @endforeach
+            </x-ui.seg>
+        </x-ui.field>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
+        <div class="-mt-2 flex flex-wrap items-center justify-between gap-2">
+            <x-ui.checkbox wire:model="form.remember" id="remember" name="remember">Recordarme</x-ui.checkbox>
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('Forgot your password?') }}
-                </a>
+                <a href="{{ route('password.request') }}" wire:navigate class="whitespace-nowrap text-14">¿Olvidaste tu contraseña?</a>
             @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
         </div>
+
+        <x-ui.button type="submit" variant="primary" block wire:loading.attr="disabled">Iniciar sesión</x-ui.button>
     </form>
+
+    <p class="mb-0 mt-4 text-center text-14">¿No tienes una cuenta? <a href="{{ route('register') }}" wire:navigate>Crear empresa</a></p>
+
+    <div class="mt-6 flex items-start gap-2 border-t border-divider pt-4">
+        <x-ui.icon name="lock" :size="15" class="mt-0.5 text-neutral-600" />
+        <span class="text-13 leading-[1.5] text-neutral-700">Tus decisiones de selección permanecen bajo control humano.</span>
+    </div>
 </div>

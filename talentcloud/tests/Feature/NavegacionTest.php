@@ -1,0 +1,82 @@
+<?php
+
+use App\Models\User;
+use App\Support\Navegacion;
+use Illuminate\Support\Facades\Route;
+
+/*
+ * La barra de navegación reproduce la del prototipo para cada rol.
+ */
+
+function etiquetasDe(User $user): array
+{
+    return array_column(Navegacion::enlaces($user), 'etiqueta');
+}
+
+$personal = ['Dashboard', 'Vacantes', 'Kanban', 'Candidatos', 'Matching', 'Entrevistas', 'Evaluaciones'];
+
+it('muestra al reclutador los módulos de selección', function () use ($personal) {
+    expect(etiquetasDe(User::factory()->reclutador()->create()))->toBe($personal);
+});
+
+it('añade Empresas al admin', function () use ($personal) {
+    expect(etiquetasDe(User::factory()->admin()->create()))->toBe([...$personal, 'Empresas']);
+});
+
+it('añade Mi empresa a la empresa', function () use ($personal) {
+    expect(etiquetasDe(User::factory()->empresa()->create()))->toBe([...$personal, 'Mi empresa']);
+});
+
+it('muestra al postulante solo sus postulaciones', function () {
+    expect(etiquetasDe(User::factory()->postulante()->create()))->toBe(['Mis postulaciones']);
+});
+
+it('no muestra enlaces a una cuenta sin rol', function () {
+    expect(Navegacion::enlaces(User::factory()->create()))->toBe([]);
+});
+
+it('usa la etiqueta e inicial de perfil del prototipo', function () {
+    $admin = User::factory()->admin()->create();
+    $postulante = User::factory()->postulante()->create(['name' => 'Marco Díaz']);
+
+    expect(Navegacion::etiquetaPerfil($admin))->toBe('Administrador SaaS')
+        ->and(Navegacion::inicial($admin))->toBe('A')
+        ->and(Navegacion::etiquetaPerfil($postulante))->toBe('Postulante · Marco Díaz')
+        ->and(Navegacion::inicial($postulante))->toBe('M');
+});
+
+it('renderiza la barra con la marca, los enlaces y el menú de perfil', function () {
+    $this->actingAs(User::factory()->admin()->create())
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertSeeInOrder(['TalentCloud', 'AI', 'Dashboard', 'Evaluaciones', 'Empresas'])
+        ->assertSee('Administrador SaaS')
+        ->assertSee('Mi perfil')
+        ->assertSee('Cerrar sesión')
+        ->assertSee('aria-current="page"', false);
+});
+
+it('muestra la página 404 del prototipo con la sesión del usuario', function () {
+    $this->actingAs(User::factory()->reclutador()->create())
+        ->get('/ruta-que-no-existe')
+        ->assertNotFound()
+        ->assertSee('Página no encontrada')
+        ->assertSee('La sección que buscas no existe o fue movida.')
+        ->assertSee('Volver a mi panel');
+});
+
+it('muestra la página 403 del prototipo', function () {
+    Route::middleware('web')->get('/_prueba-403', fn () => abort(403));
+
+    $this->actingAs(User::factory()->reclutador()->create())
+        ->get('/_prueba-403')
+        ->assertForbidden()
+        ->assertSee('Acceso restringido')
+        ->assertSee('No tienes permisos para ver esta sección con tu rol actual.');
+});
+
+it('muestra la 404 a un invitado con acceso al login', function () {
+    $this->get('/ruta-que-no-existe')
+        ->assertNotFound()
+        ->assertSee('Ir a iniciar sesión');
+});

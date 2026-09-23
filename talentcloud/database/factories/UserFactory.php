@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Rol;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -31,6 +32,31 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    public function conRol(Rol $rol): static
+    {
+        return $this->afterCreating(fn (User $user) => $user->assignRole($rol->value));
+    }
+
+    public function admin(): static
+    {
+        return $this->conRol(Rol::Admin);
+    }
+
+    public function empresa(): static
+    {
+        return $this->conRol(Rol::Empresa);
+    }
+
+    public function reclutador(): static
+    {
+        return $this->conRol(Rol::Reclutador);
+    }
+
+    public function postulante(): static
+    {
+        return $this->conRol(Rol::Postulante);
     }
 
     /**

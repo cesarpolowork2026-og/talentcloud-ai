@@ -1,8 +1,10 @@
 <?php
 
+use App\Support\Navegacion;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome');
+// Sin página pública: la raíz lleva al panel del usuario o al login.
+Route::get('/', fn () => redirect(Navegacion::rutaInicio(auth()->user())))->name('inicio');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -18,3 +20,6 @@ if (app()->environment('local')) {
 }
 
 require __DIR__.'/auth.php';
+
+// Las rutas inexistentes pasan por el middleware web para que la 404 reconozca la sesión.
+Route::fallback(fn () => abort(404));

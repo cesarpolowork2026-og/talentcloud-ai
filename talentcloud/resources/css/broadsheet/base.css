@@ -39,4 +39,8 @@
   ::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
 
   [x-cloak] { display: none !important; }
+
+  /* TalentCloud: durante wire:navigate el layout muestra el esqueleto del
+     prototipo en lugar de la barra de progreso de Livewire. */
+  #nprogress { display: none !important; }
 }

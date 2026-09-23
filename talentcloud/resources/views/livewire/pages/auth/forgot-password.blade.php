@@ -2,9 +2,10 @@
 
 use Illuminate\Support\Facades\Password;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Volt\Component;
 
-new #[Layout('layouts.guest')] class extends Component
+new #[Layout('layouts.guest')] #[Title('Recuperar contraseña')] class extends Component
 {
     public string $email = '';
 
@@ -36,26 +37,21 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
+<div class="contents">
+    <h2 class="mb-2 text-28">Recuperar contraseña</h2>
+    <p class="mb-6 text-15 text-neutral-700">Escribe tu correo y te enviaremos un enlace para crear una nueva contraseña.</p>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if (session('status'))
+        <p class="mb-4 text-14 text-accent-700" role="status">{{ session('status') }}</p>
+    @endif
 
-    <form wire:submit="sendPasswordResetLink">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+    <form wire:submit="sendPasswordResetLink" class="grid gap-4">
+        <x-ui.field label="Correo electrónico" for="email" error="email">
+            <x-ui.input wire:model="email" id="email" type="email" placeholder="reclutador@empresa.com" error="email" required autofocus />
+        </x-ui.field>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+        <x-ui.button type="submit" variant="primary" block wire:loading.attr="disabled">Enviar enlace</x-ui.button>
     </form>
+
+    <p class="mb-0 mt-4 text-center text-14"><a href="{{ route('login') }}" wire:navigate>Volver a iniciar sesión</a></p>
 </div>
