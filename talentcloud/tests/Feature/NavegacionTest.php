@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Empresa;
 use App\Models\User;
 use App\Support\Navegacion;
 use Illuminate\Support\Facades\Route;
@@ -43,6 +44,13 @@ it('usa la etiqueta e inicial de perfil del prototipo', function () {
         ->and(Navegacion::inicial($admin))->toBe('A')
         ->and(Navegacion::etiquetaPerfil($postulante))->toBe('Postulante · Marco Díaz')
         ->and(Navegacion::inicial($postulante))->toBe('M');
+});
+
+it('muestra la empresa en la etiqueta de perfil de empresa y reclutador', function () {
+    $nimbus = Empresa::factory()->create(['nombre' => 'Nimbus Corp']);
+
+    expect(Navegacion::etiquetaPerfil(User::factory()->deEmpresa($nimbus)->reclutador()->create()))->toBe('Reclutador · Nimbus Corp')
+        ->and(Navegacion::etiquetaPerfil(User::factory()->deEmpresa($nimbus)->empresa()->create()))->toBe('Empresa · Nimbus Corp');
 });
 
 it('renderiza la barra con la marca, los enlaces y el menú de perfil', function () {

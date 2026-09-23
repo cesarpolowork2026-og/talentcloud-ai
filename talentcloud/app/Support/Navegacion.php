@@ -74,7 +74,9 @@ class Navegacion
         return match ($rol) {
             Rol::Admin => $rol->etiquetaPerfil(),
             Rol::Postulante => $rol->etiquetaPerfil().' · '.$user->name,
-            default => $rol->etiquetaPerfil(),
+            Rol::Empresa, Rol::Reclutador => $user->empresa
+                ? $rol->etiquetaPerfil().' · '.$user->empresa->nombre
+                : $rol->etiquetaPerfil(),
         };
     }
 

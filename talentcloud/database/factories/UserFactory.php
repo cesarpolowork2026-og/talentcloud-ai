@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\Rol;
+use App\Models\Empresa;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -44,14 +45,28 @@ class UserFactory extends Factory
         return $this->conRol(Rol::Admin);
     }
 
+    /** Cuenta de empresa. Si no se indica con deEmpresa(), crea una empresa. */
     public function empresa(): static
     {
-        return $this->conRol(Rol::Empresa);
+        return $this->conEmpresaPorDefecto()->conRol(Rol::Empresa);
     }
 
+    /** Reclutador. Si no se indica con deEmpresa(), crea una empresa. */
     public function reclutador(): static
     {
-        return $this->conRol(Rol::Reclutador);
+        return $this->conEmpresaPorDefecto()->conRol(Rol::Reclutador);
+    }
+
+    public function deEmpresa(Empresa $empresa): static
+    {
+        return $this->state(fn () => ['empresa_id' => $empresa->id]);
+    }
+
+    private function conEmpresaPorDefecto(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'empresa_id' => $attributes['empresa_id'] ?? Empresa::factory(),
+        ]);
     }
 
     public function postulante(): static

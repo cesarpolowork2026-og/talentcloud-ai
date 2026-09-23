@@ -5,8 +5,12 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
 Route::middleware('guest')->group(function () {
+    // "Crear empresa" del login.
     Volt::route('register', 'pages.auth.register')
         ->name('register');
+
+    Volt::route('registro/postulante', 'pages.auth.register-postulante')
+        ->name('register.postulante');
 
     Volt::route('login', 'pages.auth.login')
         ->name('login');

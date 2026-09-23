@@ -3,13 +3,28 @@
 use App\Support\Navegacion;
 use Illuminate\Support\Facades\Route;
 
+/*
+ * Rutas por rol según la matriz de permisos del plan (sección 3), tomada del
+ * prototipo. Un rol sin acceso recibe la página 403 "Acceso restringido".
+ * El filtro por empresa de los datos lo aplica el TenantContext (grupo web).
+ */
+
 // Sin página pública: la raíz lleva al panel del usuario o al login.
 Route::get('/', fn () => redirect(Navegacion::rutaInicio(auth()->user())))->name('inicio');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Personal de selección: admin SaaS, empresa y reclutador.
+    Route::middleware('rol:admin|empresa|reclutador')->group(function () {
+        Route::view('dashboard', 'dashboard')->name('dashboard');
+    });
 
+    // Postulante.
+    Route::middleware('rol:postulante')->prefix('postulante')->name('postulante.')->group(function () {
+        Route::view('postulaciones', 'postulante.postulaciones')->name('postulaciones');
+    });
+});
+
+// Mi perfil: todos los roles.
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');

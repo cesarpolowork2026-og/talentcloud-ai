@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\Navegacion;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
@@ -30,7 +31,7 @@ new #[Layout('layouts.guest')] #[Title('Confirmar contraseña')] class extends C
 
         session(['auth.password_confirmed_at' => time()]);
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirectIntended(default: Navegacion::rutaInicio(Auth::user()), navigate: true);
     }
 }; ?>
 

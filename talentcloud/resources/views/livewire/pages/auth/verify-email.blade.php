@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Actions\Logout;
+use App\Support\Navegacion;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
@@ -15,7 +16,7 @@ new #[Layout('layouts.guest')] #[Title('Verificar correo')] class extends Compon
     public function sendVerification(): void
     {
         if (Auth::user()->hasVerifiedEmail()) {
-            $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+            $this->redirectIntended(default: Navegacion::rutaInicio(Auth::user()), navigate: true);
 
             return;
         }
