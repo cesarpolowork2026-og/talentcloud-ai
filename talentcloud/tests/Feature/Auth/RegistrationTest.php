@@ -28,7 +28,7 @@ test('crear empresa registra la empresa y su cuenta con rol empresa', function (
 
     $component->call('register');
 
-    $component->assertHasNoErrors()->assertRedirect(route('dashboard', absolute: false));
+    $component->assertHasNoErrors()->assertRedirect(route('onboarding', absolute: false));
 
     $this->assertAuthenticated();
 

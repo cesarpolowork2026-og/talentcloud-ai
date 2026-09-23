@@ -38,7 +38,8 @@ new #[Layout('layouts.guest')] #[Title('Crear empresa')] class extends Component
 
         Auth::login($user);
 
-        $this->redirect(route('dashboard', absolute: false), navigate: true);
+        // Como en el prototipo (?onboarding=1): la empresa nueva empieza por el checklist.
+        $this->redirect(route('onboarding', absolute: false), navigate: true);
     }
 }; ?>
 

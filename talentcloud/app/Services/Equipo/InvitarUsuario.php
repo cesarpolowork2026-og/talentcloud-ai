@@ -4,6 +4,7 @@ namespace App\Services\Equipo;
 
 use App\DTO\InvitacionData;
 use App\Enums\Rol;
+use App\Events\InvitacionEnviada;
 use App\Models\Empresa;
 use App\Models\Invitacion;
 use App\Models\User;
@@ -58,6 +59,8 @@ class InvitarUsuario
         Notification::route('mail', $email)->notifyNow(
             new InvitacionRecibida($empresa, $invitacion, $token, $invitador?->name),
         );
+
+        InvitacionEnviada::dispatch($empresa, $invitacion, $invitador);
 
         return $invitacion;
     }

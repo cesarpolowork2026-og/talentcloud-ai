@@ -22,6 +22,44 @@ enum EstadoVacante: string
         };
     }
 
+    /**
+     * Ciclo de vida: Borrador → Abierta ⇄ En revisión → Cerrada.
+     * Cerrada es final.
+     *
+     * @return list<self>
+     */
+    public function transiciones(): array
+    {
+        return match ($this) {
+            self::Borrador => [self::Abierta],
+            self::Abierta => [self::EnRevision, self::Cerrada],
+            self::EnRevision => [self::Abierta, self::Cerrada],
+            self::Cerrada => [],
+        };
+    }
+
+    public function puedePasarA(self $destino): bool
+    {
+        return in_array($destino, $this->transiciones(), true);
+    }
+
+    /** Texto del botón que lleva a este estado desde $origen. */
+    public function accionDesde(self $origen): string
+    {
+        return match ($this) {
+            self::Abierta => $origen === self::Borrador ? 'Publicar' : 'Reabrir',
+            self::EnRevision => 'Pasar a revisión',
+            self::Cerrada => 'Cerrar vacante',
+            self::Borrador => 'Volver a borrador',
+        };
+    }
+
+    /** Se pueden editar datos y requisitos mientras no esté cerrada. */
+    public function esEditable(): bool
+    {
+        return $this !== self::Cerrada;
+    }
+
     /** Tono de <x-ui.tag>, según tagFor() del prototipo. */
     public function tono(): string
     {

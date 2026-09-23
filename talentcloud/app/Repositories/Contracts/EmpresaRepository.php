@@ -31,4 +31,11 @@ interface EmpresaRepository
      * Carga los conteos de usuarios y vacantes activas en una empresa.
      */
     public function conConteos(Empresa $empresa): Empresa;
+
+    /**
+     * Marca un paso del onboarding con una actualización atómica de la clave
+     * JSON (sin leer y reescribir todo el objeto, que perdería cambios
+     * concurrentes) y refresca el modelo.
+     */
+    public function marcarPasoOnboarding(Empresa $empresa, string $paso): Empresa;
 }

@@ -2,6 +2,8 @@
 
 use App\Livewire\Empresas;
 use App\Livewire\MiEmpresa;
+use App\Livewire\Onboarding;
+use App\Livewire\Vacantes;
 use App\Support\Navegacion;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +20,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Personal de selección: admin SaaS, empresa y reclutador.
     Route::middleware('rol:admin|empresa|reclutador')->group(function () {
         Route::view('dashboard', 'dashboard')->name('dashboard');
+
+        Route::get('vacantes', Vacantes\Listado::class)->name('vacantes.index');
+        Route::get('vacantes/{vacante}', Vacantes\Detalle::class)->name('vacantes.show');
     });
 
     // Admin SaaS.
@@ -28,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Cuenta de empresa.
     Route::middleware('rol:empresa')->group(function () {
         Route::get('mi-empresa', MiEmpresa\Panel::class)->name('mi-empresa');
+        Route::get('bienvenida', Onboarding\Checklist::class)->name('onboarding');
     });
 
     // Postulante.

@@ -3,6 +3,7 @@
 namespace App\Services\Empresas;
 
 use App\DTO\DatosEmpresaData;
+use App\Events\PerfilEmpresaActualizado;
 use App\Models\Empresa;
 use App\Repositories\Contracts\EmpresaRepository;
 
@@ -13,11 +14,15 @@ class ActualizarEmpresa
 
     public function ejecutar(Empresa $empresa, DatosEmpresaData $datos): Empresa
     {
-        return $this->empresas->actualizar($empresa, [
+        $empresa = $this->empresas->actualizar($empresa, [
             'nombre' => $datos->nombre,
             'sector' => $datos->sector,
             'sitio_web' => $datos->sitioWeb,
             'descripcion' => $datos->descripcion,
         ]);
+
+        PerfilEmpresaActualizado::dispatch($empresa);
+
+        return $empresa;
     }
 }

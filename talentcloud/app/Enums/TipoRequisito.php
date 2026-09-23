@@ -21,6 +21,9 @@ enum TipoRequisito: string
     /** Tono de <x-ui.tag>, según tagFor() del prototipo. */
     public function tono(): string
     {
-        return 'neutral';
+        return match ($this) {
+            self::Obligatorio => 'outline',
+            self::Deseable => 'neutral',
+        };
     }
 }

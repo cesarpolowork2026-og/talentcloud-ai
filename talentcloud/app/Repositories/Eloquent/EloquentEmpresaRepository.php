@@ -27,6 +27,18 @@ class EloquentEmpresaRepository implements EmpresaRepository
         return $empresa;
     }
 
+    public function marcarPasoOnboarding(Empresa $empresa, string $paso): Empresa
+    {
+        Empresa::whereKey($empresa->id)
+            ->whereNull('onboarding')
+            ->update(['onboarding' => json_encode(array_fill_keys(Empresa::PASOS_ONBOARDING, false))]);
+
+        // jsonb_set sobre la clave: no pisa los pasos que otra petición haya marcado.
+        Empresa::whereKey($empresa->id)->update(['onboarding->'.$paso => true]);
+
+        return $empresa->refresh();
+    }
+
     public function consultaParaAdministracion(): Builder
     {
         return Empresa::query()->withCount($this->conteos());

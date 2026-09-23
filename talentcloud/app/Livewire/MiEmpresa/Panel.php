@@ -59,6 +59,13 @@ class Panel extends Component
     public function mount(): void
     {
         $this->authorize('view', $this->empresa());
+
+        // Accesos directos desde el onboarding: ?abrir=datos | ?abrir=invitar
+        match (request()->query('abrir')) {
+            'datos' => $this->abrirDatos(),
+            'invitar' => $this->abrirInvitacion(),
+            default => null,
+        };
     }
 
     public function abrirInvitacion(): void
