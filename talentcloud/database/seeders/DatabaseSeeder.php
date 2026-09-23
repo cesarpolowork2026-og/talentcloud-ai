@@ -2,24 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+/*
+ * Sin WithoutModelEvents: los eventos de los modelos aplican las reglas del
+ * tenant (BelongsToEmpresa) y normalizan las competencias.
+ */
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            CatalogoCompetenciasSeeder::class,
+            DemoSeeder::class,
         ]);
     }
 }

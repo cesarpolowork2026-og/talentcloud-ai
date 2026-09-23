@@ -22,6 +22,21 @@ composer dev                  # servidor, cola (ia, default) y Vite
 - App: http://localhost:8000
 - Correos capturados (Mailpit): http://localhost:8025
 
+## Datos de demostración
+
+`php artisan migrate:fresh --seed` carga los datos del prototipo. Todas las cuentas usan la contraseña `password`:
+
+| Cuenta | Rol | Empresa |
+| --- | --- | --- |
+| admin@talentcloud.ai | Admin SaaS | — |
+| admin@nimbus.com | Empresa | Nimbus Corp |
+| marta@nimbus.com | Reclutador | Nimbus Corp |
+| diego@nimbus.com | Reclutador | Nimbus Corp |
+| admin@vela.studio | Empresa | Vela Studio |
+| clara@vela.studio | Reclutador | Vela Studio |
+| admin@orbita.dev | Empresa | Orbita Labs (suspendida: no puede ingresar) |
+| marco@correo.com | Postulante | — |
+
 `docker compose` toma `DB_PASSWORD` del `.env`. Crea las bases `talentcloud` y `talentcloud_testing`, ambas con la extensión `vector`.
 
 ## Calidad

@@ -59,6 +59,22 @@ class Empresa extends Model
         return $this->hasMany(User::class);
     }
 
+    /**
+     * @return HasMany<Vacante, $this>
+     */
+    public function vacantes(): HasMany
+    {
+        return $this->hasMany(Vacante::class);
+    }
+
+    /**
+     * @return HasMany<Invitacion, $this>
+     */
+    public function invitaciones(): HasMany
+    {
+        return $this->hasMany(Invitacion::class);
+    }
+
     public function estaActiva(): bool
     {
         return $this->estado === EstadoEmpresa::Activa;

@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Tenancy\EmpresaScope;
 use Database\Factories\CandidatoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -55,5 +59,56 @@ class Candidato extends Model
     public function empresaOrigen(): BelongsTo
     {
         return $this->belongsTo(Empresa::class, 'empresa_origen_id');
+    }
+
+    /**
+     * @return HasMany<Cv, $this>
+     */
+    public function cvs(): HasMany
+    {
+        return $this->hasMany(Cv::class);
+    }
+
+    /**
+     * CV más reciente.
+     *
+     * @return HasOne<Cv, $this>
+     */
+    public function cvActual(): HasOne
+    {
+        return $this->hasOne(Cv::class)->latestOfMany();
+    }
+
+    /**
+     * Competencias manuales o extraídas del CV.
+     *
+     * @return BelongsToMany<Competencia, $this>
+     */
+    public function competencias(): BelongsToMany
+    {
+        return $this->belongsToMany(Competencia::class, 'candidato_competencia')
+            ->withPivot(['fuente', 'anios', 'evidencia'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Postulaciones visibles en el contexto actual (las de la empresa en curso).
+     *
+     * @return HasMany<Postulacion, $this>
+     */
+    public function postulaciones(): HasMany
+    {
+        return $this->hasMany(Postulacion::class);
+    }
+
+    /**
+     * Todas sus postulaciones, en cualquier empresa. Solo para el propio
+     * postulante ("Mis postulaciones") o tareas de plataforma.
+     *
+     * @return HasMany<Postulacion, $this>
+     */
+    public function postulacionesEnTodasLasEmpresas(): HasMany
+    {
+        return $this->hasMany(Postulacion::class)->withoutGlobalScope(EmpresaScope::class);
     }
 }

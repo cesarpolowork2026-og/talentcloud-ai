@@ -4,6 +4,8 @@ namespace App\Enums;
 
 enum EstadoEmpresa: string
 {
+    use EsEnumDeEstado;
+
     case Activa = 'activa';
     case Suspendida = 'suspendida';
 
