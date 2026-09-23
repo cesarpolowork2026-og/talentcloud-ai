@@ -1,0 +1,19 @@
+Marco Díaz
+Desarrollador Backend Junior · marco@correo.com
+
+Perfil
+Desarrollador backend con un año y medio de experiencia en Java, con ganas de crecer en equipos ágiles.
+
+Experiencia
+Desarrollador Junior — Soluciones Web SAC (2024 – actualidad)
+Mantenimiento de servicios en Java y consultas en MySQL.
+Participé en la migración de endpoints a Spring Boot junto al equipo senior.
+
+Prácticas profesionales — Municipalidad Distrital (2023)
+Reportes con SQL y automatización de tareas con scripts.
+
+Formación
+Computación e Informática — Instituto Tecnológico.
+
+Habilidades
+Java, MySQL, SQL, Git, Scrum.

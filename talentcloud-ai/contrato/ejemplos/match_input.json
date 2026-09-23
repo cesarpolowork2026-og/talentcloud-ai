@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "postulacion_id": 1,
+  "vacante": {
+    "titulo": "Desarrollador Backend",
+    "descripcion": "Buscamos una persona para diseñar y mantener servicios backend en Java."
+  },
+  "requisitos": [
+    {
+      "id": 1,
+      "competencia": "Java",
+      "sinonimos": [],
+      "tipo": "obligatorio",
+      "peso": 5,
+      "anios_minimos": 3,
+      "descripcion": null
+    },
+    {
+      "id": 2,
+      "competencia": "Spring Boot",
+      "sinonimos": [
+        "Spring",
+        "Spring Framework"
+      ],
+      "tipo": "obligatorio",
+      "peso": 4,
+      "anios_minimos": 2,
+      "descripcion": null
+    },
+    {
+      "id": 3,
+      "competencia": "PostgreSQL",
+      "sinonimos": [
+        "Postgres",
+        "psql"
+      ],
+      "tipo": "obligatorio",
+      "peso": 4,
+      "anios_minimos": null,
+      "descripcion": null
+    },
+    {
+      "id": 4,
+      "competencia": "Docker",
+      "sinonimos": [
+        "contenedores"
+      ],
+      "tipo": "deseable",
+      "peso": 3,
+      "anios_minimos": null,
+      "descripcion": null
+    },
+    {
+      "id": 5,
+      "competencia": "Kubernetes",
+      "sinonimos": [
+        "k8s"
+      ],
+      "tipo": "deseable",
+      "peso": 2,
+      "anios_minimos": null,
+      "descripcion": null
+    },
+    {
+      "id": 6,
+      "competencia": "Certificación AWS",
+      "sinonimos": [
+        "AWS Certified",
+        "AWS Solutions Architect",
+        "certificación de AWS"
+      ],
+      "tipo": "deseable",
+      "peso": 2,
+      "anios_minimos": null,
+      "descripcion": null
+    }
+  ],
+  "cv": {
+    "id": 1,
+    "texto": "Elena Ruiz\nDesarrolladora Backend · Lima · elena.ruiz@correo.com\n\nPerfil\nDesarrolladora backend con 5 años de experiencia con Java en proyectos backend de producción. Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos.\n\nExperiencia\nSenior Backend Developer — Fintech Andina (2022 – actualidad)\nDesarrollé APIs REST con Spring Boot en mi último puesto, para una plataforma de pagos de alto tráfico.\nDiseñé esquemas y consultas optimizadas en PostgreSQL, reduciendo a la mitad el tiempo de los reportes.\nContenedoricé servicios con Docker y Docker Compose para los entornos de desarrollo y pruebas.\n\nBackend Developer — Retail Digital (2020 – 2022)\nMicroservicios con Java 17 y Spring Boot, pruebas con JUnit y revisión de código en Git.\n\nFormación\nIngeniería de Sistemas — Universidad Nacional Mayor de San Marcos.\n\nHabilidades\nJava, Spring Boot, PostgreSQL, Docker, Git, Scrum.\n\nIntereses\nKubernetes (interés en aprender) y arquitectura en la nube.\n\nIdiomas\nEspañol nativo, inglés intermedio.\n"
+  }
+}

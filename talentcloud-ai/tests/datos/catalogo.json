@@ -1,0 +1,255 @@
+[
+  {
+    "id": 1,
+    "nombre": "Java",
+    "sinonimos": []
+  },
+  {
+    "id": 2,
+    "nombre": "Python",
+    "sinonimos": []
+  },
+  {
+    "id": 3,
+    "nombre": "PHP",
+    "sinonimos": []
+  },
+  {
+    "id": 4,
+    "nombre": "JavaScript",
+    "sinonimos": [
+      "JS",
+      "ECMAScript"
+    ]
+  },
+  {
+    "id": 5,
+    "nombre": "TypeScript",
+    "sinonimos": [
+      "TS"
+    ]
+  },
+  {
+    "id": 6,
+    "nombre": "Go",
+    "sinonimos": [
+      "Golang"
+    ]
+  },
+  {
+    "id": 7,
+    "nombre": "SQL",
+    "sinonimos": []
+  },
+  {
+    "id": 8,
+    "nombre": "Spring Boot",
+    "sinonimos": [
+      "Spring",
+      "Spring Framework"
+    ]
+  },
+  {
+    "id": 9,
+    "nombre": "Laravel",
+    "sinonimos": []
+  },
+  {
+    "id": 10,
+    "nombre": "React",
+    "sinonimos": [
+      "React.js",
+      "ReactJS"
+    ]
+  },
+  {
+    "id": 11,
+    "nombre": "Node.js",
+    "sinonimos": [
+      "Node",
+      "NodeJS"
+    ]
+  },
+  {
+    "id": 12,
+    "nombre": "Django",
+    "sinonimos": []
+  },
+  {
+    "id": 13,
+    "nombre": "PostgreSQL",
+    "sinonimos": [
+      "Postgres",
+      "psql"
+    ]
+  },
+  {
+    "id": 14,
+    "nombre": "MySQL",
+    "sinonimos": []
+  },
+  {
+    "id": 15,
+    "nombre": "MongoDB",
+    "sinonimos": [
+      "Mongo"
+    ]
+  },
+  {
+    "id": 16,
+    "nombre": "Power BI",
+    "sinonimos": [
+      "PowerBI"
+    ]
+  },
+  {
+    "id": 17,
+    "nombre": "Excel avanzado",
+    "sinonimos": [
+      "Excel"
+    ]
+  },
+  {
+    "id": 18,
+    "nombre": "Machine Learning",
+    "sinonimos": [
+      "ML",
+      "aprendizaje automático"
+    ]
+  },
+  {
+    "id": 19,
+    "nombre": "Docker",
+    "sinonimos": [
+      "contenedores"
+    ]
+  },
+  {
+    "id": 20,
+    "nombre": "Kubernetes",
+    "sinonimos": [
+      "k8s"
+    ]
+  },
+  {
+    "id": 21,
+    "nombre": "Terraform",
+    "sinonimos": []
+  },
+  {
+    "id": 22,
+    "nombre": "AWS",
+    "sinonimos": [
+      "Amazon Web Services"
+    ]
+  },
+  {
+    "id": 23,
+    "nombre": "Certificación AWS",
+    "sinonimos": [
+      "AWS Certified",
+      "AWS Solutions Architect",
+      "certificación de AWS"
+    ]
+  },
+  {
+    "id": 24,
+    "nombre": "Google Cloud",
+    "sinonimos": [
+      "GCP",
+      "Google Cloud Platform"
+    ]
+  },
+  {
+    "id": 25,
+    "nombre": "CI/CD",
+    "sinonimos": [
+      "integración continua",
+      "GitHub Actions",
+      "GitLab CI"
+    ]
+  },
+  {
+    "id": 26,
+    "nombre": "Git",
+    "sinonimos": [
+      "GitHub",
+      "GitLab"
+    ]
+  },
+  {
+    "id": 27,
+    "nombre": "Selenium",
+    "sinonimos": []
+  },
+  {
+    "id": 28,
+    "nombre": "Cypress",
+    "sinonimos": []
+  },
+  {
+    "id": 29,
+    "nombre": "Testing de APIs",
+    "sinonimos": [
+      "Postman",
+      "pruebas de API"
+    ]
+  },
+  {
+    "id": 30,
+    "nombre": "Pruebas automatizadas",
+    "sinonimos": [
+      "test automation",
+      "automatización de pruebas"
+    ]
+  },
+  {
+    "id": 31,
+    "nombre": "Figma",
+    "sinonimos": []
+  },
+  {
+    "id": 32,
+    "nombre": "Research",
+    "sinonimos": [
+      "UX research",
+      "investigación de usuarios"
+    ]
+  },
+  {
+    "id": 33,
+    "nombre": "Prototipado",
+    "sinonimos": [
+      "prototipos",
+      "wireframes"
+    ]
+  },
+  {
+    "id": 34,
+    "nombre": "Design systems",
+    "sinonimos": [
+      "sistema de diseño",
+      "sistemas de diseño"
+    ]
+  },
+  {
+    "id": 35,
+    "nombre": "Scrum",
+    "sinonimos": [
+      "metodologías ágiles",
+      "Agile"
+    ]
+  },
+  {
+    "id": 36,
+    "nombre": "Comunicación",
+    "sinonimos": []
+  },
+  {
+    "id": 37,
+    "nombre": "Inglés",
+    "sinonimos": [
+      "English"
+    ]
+  }
+]

@@ -2,9 +2,9 @@ name: talentcloud
 
 on:
   push:
-    paths: ['talentcloud/**', '.github/workflows/talentcloud.yml']
+    paths: ['talentcloud/**', 'talentcloud-ai/contrato/**', '.github/workflows/talentcloud.yml']
   pull_request:
-    paths: ['talentcloud/**', '.github/workflows/talentcloud.yml']
+    paths: ['talentcloud/**', 'talentcloud-ai/contrato/**', '.github/workflows/talentcloud.yml']
 
 jobs:
   check:
