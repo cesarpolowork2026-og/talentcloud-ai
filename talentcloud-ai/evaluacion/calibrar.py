@@ -99,7 +99,7 @@ def main() -> None:
             key=lambda x: -(x["similitud"] or 0),  # type: ignore[operator]
         ),
     }
-    INFORME.write_text(json.dumps(informe, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    INFORME.write_text(json.dumps(informe, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 
     print(f"Umbrales: revisar ≥ {mejor.umbrales.revisar}, coincide ≥ {mejor.umbrales.coincide}")
     print(
