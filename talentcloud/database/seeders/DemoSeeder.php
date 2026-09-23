@@ -13,9 +13,11 @@ use App\Enums\ModalidadEntrevista;
 use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
 use App\Enums\TipoRequisito;
+use App\Jobs\ExtraerTextoCv;
 use App\Models\Actividad;
 use App\Models\Candidato;
 use App\Models\Competencia;
+use App\Models\Cv;
 use App\Models\Empresa;
 use App\Models\Entrevista;
 use App\Models\Evaluacion;
@@ -25,9 +27,13 @@ use App\Models\Requisito;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Notifications\AvisoGeneral;
+use App\Services\Cvs\SubirCv;
 use App\Tenancy\TenantContext;
+use Database\Seeders\Demo\CvsDeDemostracion;
+use Database\Seeders\Demo\DocumentosDePrueba;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -149,6 +155,9 @@ class DemoSeeder extends Seeder
         $this->evaluacion($pMarco, $marta, [5, 6, 5, 5.6], EstadoEvaluacion::EnRevision);
         $this->evaluacion($pIvan, $diego, [8, 8, 7.6, 8], EstadoEvaluacion::Aprobado);
         $this->evaluacion($pPablo, $diego, [3, 3.4, 3, 3], EstadoEvaluacion::Pendiente);
+
+        // — CVs (archivos reales en el disco privado, procesados al sembrar) —
+        $this->sembrarCvs([$elena, $sofia, $marco, $ivan, $lucia, $pablo], $marta);
 
         // — Actividad reciente y notificaciones —
         $this->actividad($nimbus, null, 'cv.analizados', 'La IA analizó 6 CVs nuevos para Desarrollador Backend.', 40);
@@ -299,6 +308,42 @@ class DemoSeeder extends Seeder
         $actividad->empresa_id = $empresa->id;
         $actividad->created_at = now()->subMinutes($minutosAtras);
         $actividad->save();
+    }
+
+    /**
+     * @param  list<Candidato>  $candidatos
+     */
+    private function sembrarCvs(array $candidatos, User $subidoPor): void
+    {
+        $disco = config('talentcloud.cvs.disco');
+
+        foreach ($candidatos as $candidato) {
+            $datos = CvsDeDemostracion::CVS[$candidato->email] ?? null;
+
+            if ($datos === null || $candidato->cvs()->exists()) {
+                continue;
+            }
+
+            $esDocx = str_ends_with($datos['archivo'], '.docx');
+            $contenido = $esDocx ? DocumentosDePrueba::docx((string) $datos['texto']) : DocumentosDePrueba::pdf($datos['texto']);
+            $ruta = 'candidatos/'.$candidato->id.'/'.Str::uuid().($esDocx ? '.docx' : '.pdf');
+
+            Storage::disk($disco)->put($ruta, $contenido);
+
+            $cv = Cv::create([
+                'candidato_id' => $candidato->id,
+                'subido_por' => $candidato->user_id ?? $subidoPor->id,
+                'disco' => $disco,
+                'ruta' => $ruta,
+                'nombre_original' => $datos['archivo'],
+                'mime' => $esDocx ? SubirCv::MIMES['docx'] : SubirCv::MIMES['pdf'],
+                'tamano' => strlen($contenido),
+            ]);
+
+            ExtraerTextoCv::dispatchSync($cv->id);
+
+            Postulacion::sinFiltroDeEmpresa()->where('candidato_id', $candidato->id)->update(['cv_id' => $cv->id]);
+        }
     }
 
     private function competencia(string $nombre): Competencia

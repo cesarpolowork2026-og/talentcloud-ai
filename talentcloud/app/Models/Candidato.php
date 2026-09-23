@@ -102,6 +102,16 @@ class Candidato extends Model
     }
 
     /**
+     * Postulación más reciente visible en el contexto actual ("Postuló a …").
+     *
+     * @return HasOne<Postulacion, $this>
+     */
+    public function ultimaPostulacion(): HasOne
+    {
+        return $this->hasOne(Postulacion::class)->latestOfMany();
+    }
+
+    /**
      * Todas sus postulaciones, en cualquier empresa. Solo para el propio
      * postulante ("Mis postulaciones") o tareas de plataforma.
      *

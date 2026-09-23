@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\DescargarCvController;
+use App\Livewire\Candidatos;
 use App\Livewire\Empresas;
 use App\Livewire\MiEmpresa;
 use App\Livewire\Onboarding;
@@ -23,6 +25,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('vacantes', Vacantes\Listado::class)->name('vacantes.index');
         Route::get('vacantes/{vacante}', Vacantes\Detalle::class)->name('vacantes.show');
+
+        Route::get('candidatos', Candidatos\Listado::class)->name('candidatos.index');
+        Route::get('candidatos/{candidato}', Candidatos\Detalle::class)->name('candidatos.show');
     });
 
     // Admin SaaS.
@@ -41,6 +46,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::view('postulaciones', 'postulante.postulaciones')->name('postulaciones');
     });
 });
+
+// Descarga autorizada de CVs (personal de la empresa o el propio postulante).
+Route::get('cvs/{cv}/descargar', DescargarCvController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('cvs.descargar');
 
 // Mi perfil: todos los roles.
 Route::view('profile', 'profile')

@@ -38,6 +38,17 @@ return [
             'report' => false,
         ],
 
+        // CVs: privados, nunca servidos por URL pública. Se descargan por
+        // CvController tras autorizar. En producción: bucket privado (día 19).
+        'cvs' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/cvs'),
+            'serve' => false,
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => true,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
