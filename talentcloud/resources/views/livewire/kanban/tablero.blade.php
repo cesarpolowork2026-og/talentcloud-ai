@@ -96,6 +96,9 @@ Columna: {{ $seleccionada->etapa->etiqueta() }}.</p>
                 <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
                 @if ($seleccionada)
                     <x-ui.button :href="route('candidatos.show', $seleccionada->candidato_id)" wire:navigate>Ver candidato</x-ui.button>
+                    @if ($seleccionada->match_detalle)
+                        <x-ui.button :href="route('matching.show', $seleccionada)" wire:navigate>Ver matching</x-ui.button>
+                    @endif
                     @if ($editable)
                         <x-ui.button type="submit" form="form-mover" variant="primary">Mover</x-ui.button>
                     @endif

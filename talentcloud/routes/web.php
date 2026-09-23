@@ -4,6 +4,7 @@ use App\Http\Controllers\DescargarCvController;
 use App\Livewire\Candidatos;
 use App\Livewire\Empresas;
 use App\Livewire\Kanban;
+use App\Livewire\Matching;
 use App\Livewire\MiEmpresa;
 use App\Livewire\Onboarding;
 use App\Livewire\Vacantes;
@@ -26,6 +27,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('vacantes', Vacantes\Listado::class)->name('vacantes.index');
         Route::get('vacantes/{vacante}', Vacantes\Detalle::class)->name('vacantes.show');
+
+        Route::get('matching', Matching\Detalle::class)->name('matching.index');
+        Route::get('matching/{postulacion}', Matching\Detalle::class)->name('matching.show');
 
         Route::get('kanban', Kanban\Tablero::class)->name('kanban.index');
         Route::get('vacantes/{vacante}/kanban', Kanban\Tablero::class)->name('kanban.show');

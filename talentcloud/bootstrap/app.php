@@ -32,6 +32,11 @@ return Application::configure(basePath: dirname(__DIR__))
             before: SubstituteBindings::class,
             prepend: EstablecerContextoTenant::class,
         );
+        // Y el rol también: un rol sin acceso recibe 403 aunque el modelo no sea de su empresa.
+        $middleware->prependToPriorityList(
+            before: SubstituteBindings::class,
+            prepend: RoleMiddleware::class,
+        );
 
         $middleware->alias([
             'rol' => RoleMiddleware::class,

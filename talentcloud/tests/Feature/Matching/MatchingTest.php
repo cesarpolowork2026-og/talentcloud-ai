@@ -1,0 +1,156 @@
+<?php
+
+use App\Enums\EstadoVacante;
+use App\Enums\MotorMatching;
+use App\Enums\TipoRequisito;
+use App\Jobs\CalcularMatch;
+use App\Jobs\ExtraerTextoCv;
+use App\Livewire\Matching\Detalle;
+use App\Models\Candidato;
+use App\Models\Competencia;
+use App\Models\Cv;
+use App\Models\Empresa;
+use App\Models\MatchFeedback;
+use App\Models\Postulacion;
+use App\Models\Requisito;
+use App\Models\User;
+use App\Models\Vacante;
+use App\Services\Cvs\SubirCv;
+use App\Services\Postulaciones\PostularCandidato;
+use App\Services\Vacantes\GestionarRequisitos;
+use App\Tenancy\TenantContext;
+use Database\Seeders\Demo\DocumentosDePrueba;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
+
+beforeEach(function () {
+    Storage::fake('cvs');
+
+    $this->nimbus = Empresa::factory()->create(['nombre' => 'Nimbus Corp']);
+    $this->marta = User::factory()->deEmpresa($this->nimbus)->reclutador()->create();
+    $this->backend = Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Abierta)->create(['titulo' => 'Desarrollador Backend']);
+
+    $requisito = fn (string $nombre, TipoRequisito $tipo) => Requisito::factory()->create([
+        'vacante_id' => $this->backend->id,
+        'competencia_id' => Competencia::obtenerOCrear($nombre)->id,
+        'tipo' => $tipo,
+    ]);
+    $this->java = $requisito('Java', TipoRequisito::Obligatorio);
+    $this->kubernetes = $requisito('Kubernetes', TipoRequisito::Deseable);
+    $this->aws = $requisito('Certificación AWS', TipoRequisito::Obligatorio);
+
+    $this->elena = Candidato::factory()->create(['nombre' => 'Elena Ruiz']);
+    $cv = Cv::factory()->procesado("5 años de experiencia con Java en proyectos de alto tráfico.\nKubernetes (interés en aprender).")
+        ->create(['candidato_id' => $this->elena->id]);
+    $this->postulacion = Postulacion::factory()->paraVacante($this->backend)->create(['candidato_id' => $this->elena->id, 'cv_id' => $cv->id]);
+
+    CalcularMatch::dispatchSync($this->nimbus->id, $this->postulacion->id);
+
+    actuarComo($this->marta);
+});
+
+it('guarda el resultado explicado de la postulación', function () {
+    $postulacion = $this->postulacion->fresh();
+
+    expect($postulacion->match_motor)->toBe(MotorMatching::Fake)
+        ->and($postulacion->match_calculado_at)->not->toBeNull()
+        ->and($postulacion->match_score)->toBeGreaterThan(0)
+        ->and(collect($postulacion->match_detalle['requisitos'])->pluck('nivel')->all())->toBe(['coincide', 'revisar', 'no_encontrado']);
+});
+
+it('muestra la pantalla Matching inteligente del prototipo', function () {
+    $porcentaje = $this->postulacion->fresh()->matchPorcentaje();
+
+    $this->get('/matching/'.$this->postulacion->id)
+        ->assertOk()
+        ->assertSee('Matching inteligente')
+        ->assertSee('Elena Ruiz — Desarrollador Backend @ Nimbus Corp · '.$porcentaje.'% de coincidencia global.')
+        ->assertSeeInOrder(['Java', 'Coincide', 'Kubernetes', 'Revisar', 'Certificación AWS', 'No encontrado'])
+        ->assertSee('Ver evidencia')
+        ->assertSee('5 años de experiencia con Java')
+        ->assertSee('Requisito obligatorio')
+        ->assertSee('la decisión final permanece bajo control humano');
+});
+
+it('abre en /matching la postulación calculada más reciente', function () {
+    $this->get('/matching')->assertOk()->assertSee('Elena Ruiz — Desarrollador Backend');
+});
+
+it('muestra un estado vacío sin postulaciones calculadas', function () {
+    $this->postulacion->update(['match_score' => null, 'match_detalle' => null]);
+
+    $this->get('/matching')->assertOk()->assertSee('Todavía no hay postulaciones con matching calculado.');
+});
+
+it('marca y desmarca un resultado como incorrecto sin cambiar el matching', function () {
+    $antes = $this->postulacion->fresh()->match_score;
+
+    Livewire::test(Detalle::class, ['postulacion' => $this->postulacion])
+        ->call('marcarIncorrecto', $this->kubernetes->id)
+        ->assertSee('Marcaste este resultado como incorrecto.')
+        ->assertSee('Quitar marca de incorrecto');
+
+    expect(MatchFeedback::where('postulacion_id', $this->postulacion->id)->where('user_id', $this->marta->id)->pluck('requisito_id')->all())
+        ->toBe([$this->kubernetes->id])
+        ->and($this->postulacion->fresh()->match_score)->toBe($antes);
+
+    Livewire::test(Detalle::class, ['postulacion' => $this->postulacion])
+        ->call('marcarIncorrecto', $this->kubernetes->id)
+        ->assertDontSee('Marcaste este resultado como incorrecto.');
+
+    expect(MatchFeedback::count())->toBe(0);
+});
+
+it('no marca requisitos de otra vacante', function () {
+    $otro = Requisito::factory()->create(['vacante_id' => Vacante::factory()->deEmpresa($this->nimbus)->create()->id]);
+
+    Livewire::test(Detalle::class, ['postulacion' => $this->postulacion])
+        ->call('marcarIncorrecto', $otro->id)
+        ->assertNotFound();
+});
+
+it('recalcula al cambiar los requisitos, al postular y al procesar un CV', function () {
+    Queue::fake();
+
+    app(GestionarRequisitos::class)->quitar($this->backend, $this->aws);
+    Queue::assertPushed(CalcularMatch::class, fn (CalcularMatch $job) => $job->postulacionId === $this->postulacion->id && $job->empresaId === $this->nimbus->id);
+
+    $marco = Candidato::factory()->create();
+    $nueva = app(PostularCandidato::class)->ejecutar($this->backend, $marco);
+    Queue::assertPushed(CalcularMatch::class, fn (CalcularMatch $job) => $job->postulacionId === $nueva->id);
+
+    // La extracción corre de verdad; su evento CvProcesado programa el cálculo.
+    Queue::fakeExcept(ExtraerTextoCv::class);
+    app(SubirCv::class)->ejecutar($this->elena, UploadedFile::fake()->createWithContent('CV.docx', DocumentosDePrueba::docx('Java y Kubernetes en producción.')), null);
+    Queue::assertPushed(CalcularMatch::class, fn (CalcularMatch $job) => $job->postulacionId === $this->postulacion->id);
+});
+
+it('deja la coincidencia vacía si la vacante se queda sin requisitos', function () {
+    Requisito::where('vacante_id', $this->backend->id)->delete();
+
+    CalcularMatch::dispatchSync($this->nimbus->id, $this->postulacion->id);
+
+    expect($this->postulacion->fresh()->match_score)->toBeNull();
+
+    $this->get('/matching/'.$this->postulacion->id)
+        ->assertOk()
+        ->assertSee('Todavía no hay coincidencia calculada');
+});
+
+it('no muestra el matching de otra empresa', function () {
+    $ajena = app(TenantContext::class)->ejecutarGlobal(function () {
+        $vela = Empresa::factory()->create();
+
+        return Postulacion::factory()->paraVacante(Vacante::factory()->deEmpresa($vela)->create())->create();
+    });
+
+    $this->get('/matching/'.$ajena->id)->assertNotFound();
+});
+
+it('no deja entrar al postulante', function () {
+    $postulante = User::factory()->postulante()->create();
+
+    $this->actingAs($postulante)->get('/matching/'.$this->postulacion->id)->assertForbidden();
+});

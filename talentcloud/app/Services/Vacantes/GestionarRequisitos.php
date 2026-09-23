@@ -3,6 +3,7 @@
 namespace App\Services\Vacantes;
 
 use App\DTO\RequisitoData;
+use App\Events\RequisitosActualizados;
 use App\Models\Competencia;
 use App\Models\Requisito;
 use App\Models\Vacante;
@@ -26,10 +27,14 @@ class GestionarRequisitos
             throw new OperacionNoPermitida('La vacante ya tiene un requisito de '.$competencia->nombre.'.');
         }
 
-        return $this->vacantes->agregarRequisito($vacante, [
+        $requisito = $this->vacantes->agregarRequisito($vacante, [
             'competencia_id' => $competencia->id,
             ...$this->atributos($datos),
         ]);
+
+        RequisitosActualizados::dispatch($vacante);
+
+        return $requisito;
     }
 
     public function actualizar(Vacante $vacante, Requisito $requisito, RequisitoData $datos): Requisito
@@ -47,6 +52,8 @@ class GestionarRequisitos
             ...$this->atributos($datos),
         ]);
 
+        RequisitosActualizados::dispatch($vacante);
+
         return $requisito;
     }
 
@@ -55,6 +62,8 @@ class GestionarRequisitos
         $this->asegurarEditable($vacante);
 
         $requisito->delete();
+
+        RequisitosActualizados::dispatch($vacante);
     }
 
     /**

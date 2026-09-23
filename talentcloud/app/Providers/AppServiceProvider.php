@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Matching\FakeMatchingEngine;
+use App\Matching\MatchingEngineInterface;
 use App\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -16,6 +18,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Una instancia por petición o por Job: el contexto de empresa nunca se arrastra.
         $this->app->scoped(TenantContext::class);
+
+        // Motor de matching según MATCHING_ENGINE. El adaptador HTTP del servicio de IA llega el día 15.
+        $this->app->bind(MatchingEngineInterface::class, fn () => match (config('talentcloud.matching.motor')) {
+            default => new FakeMatchingEngine,
+        });
     }
 
     /**

@@ -28,7 +28,11 @@ class ExtraerTextoCv implements ShouldQueue
 
     public int $timeout = 120;
 
-    public function __construct(public int $cvId) {}
+    public function __construct(public int $cvId)
+    {
+        // Si se despacha dentro de una transacción, espera a que se confirme.
+        $this->afterCommit();
+    }
 
     public function handle(LectorDeCv $lector): void
     {

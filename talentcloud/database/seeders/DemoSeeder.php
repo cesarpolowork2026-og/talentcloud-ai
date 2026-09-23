@@ -13,6 +13,7 @@ use App\Enums\ModalidadEntrevista;
 use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
 use App\Enums\TipoRequisito;
+use App\Jobs\CalcularMatch;
 use App\Jobs\ExtraerTextoCv;
 use App\Models\Actividad;
 use App\Models\Candidato;
@@ -46,8 +47,9 @@ use Illuminate\Support\Str;
  * así que las entrevistas y evaluaciones de Iván Torres y Pablo Vega son de
  * "Desarrollador Backend" (donde también están en el Kanban del prototipo).
  *
- * Los CV y el detalle del matching se siembran cuando existan sus módulos
- * (días 9 y 11 del plan).
+ * Los CV son archivos reales generados al sembrar y el matching se calcula
+ * con el motor configurado (MATCHING_ENGINE): los porcentajes salen de la
+ * evidencia de cada CV, no de los números ilustrativos del prototipo.
  */
 class DemoSeeder extends Seeder
 {
@@ -131,18 +133,18 @@ class DemoSeeder extends Seeder
         $pablo = $this->candidato('Pablo Vega', 'pablo.vega@correo.com', 'QA Engineer', $orbita, ['Selenium']);
 
         // — Postulaciones: Kanban "Desarrollador Backend" del prototipo —
-        $pElena = $this->postulacion($backend, $elena, EtapaPostulacion::Postulado, 0, 88);
-        $pMarco = $this->postulacion($backend, $marco, EtapaPostulacion::Postulado, 1, 64);
-        $pSofia = $this->postulacion($backend, $sofia, EtapaPostulacion::EnRevision, 0, 91);
-        $pIvan = $this->postulacion($backend, $ivan, EtapaPostulacion::Entrevista, 0, 79);
-        $this->postulacion($backend, $lucia, EtapaPostulacion::Oferta, 0, 95);
-        $pPablo = $this->postulacion($backend, $pablo, EtapaPostulacion::Descartado, 0, 42);
+        $pElena = $this->postulacion($backend, $elena, EtapaPostulacion::Postulado, 0);
+        $pMarco = $this->postulacion($backend, $marco, EtapaPostulacion::Postulado, 1);
+        $pSofia = $this->postulacion($backend, $sofia, EtapaPostulacion::EnRevision, 0);
+        $pIvan = $this->postulacion($backend, $ivan, EtapaPostulacion::Entrevista, 0);
+        $this->postulacion($backend, $lucia, EtapaPostulacion::Oferta, 0);
+        $pPablo = $this->postulacion($backend, $pablo, EtapaPostulacion::Descartado, 0);
 
         // Postulaciones a la vacante de su perfil (lista de Candidatos y "Mis postulaciones").
-        $this->postulacion($designer, $ivan, EtapaPostulacion::EnRevision, 0, 79);
-        $pLuciaData = $this->postulacion($dataAnalyst, $lucia, EtapaPostulacion::Oferta, 0, 95);
-        $this->postulacion($qa, $pablo, EtapaPostulacion::Postulado, 0, 42);
-        $this->postulacion($devops, $marco, EtapaPostulacion::Descartado, 0, 58, '2026-08-20');
+        $this->postulacion($designer, $ivan, EtapaPostulacion::EnRevision, 0);
+        $pLuciaData = $this->postulacion($dataAnalyst, $lucia, EtapaPostulacion::Oferta, 0);
+        $this->postulacion($qa, $pablo, EtapaPostulacion::Postulado, 0);
+        $this->postulacion($devops, $marco, EtapaPostulacion::Descartado, 0, '2026-08-20');
 
         // — Entrevistas (pantalla "Entrevistas") —
         $this->entrevista($pElena, $marta, '2026-09-23 10:00', EstadoEntrevista::Confirmada);
@@ -158,6 +160,10 @@ class DemoSeeder extends Seeder
 
         // — CVs (archivos reales en el disco privado, procesados al sembrar) —
         $this->sembrarCvs([$elena, $sofia, $marco, $ivan, $lucia, $pablo], $marta);
+
+        // — Matching real de todas las postulaciones, calculado con el motor configurado —
+        Postulacion::sinFiltroDeEmpresa()->get(['id', 'empresa_id'])
+            ->each(fn (Postulacion $p) => CalcularMatch::dispatchSync($p->empresa_id, $p->id));
 
         // — Actividad reciente y notificaciones —
         $this->actividad($nimbus, null, 'cv.analizados', 'La IA analizó 6 CVs nuevos para Desarrollador Backend.', 40);
@@ -253,14 +259,13 @@ class DemoSeeder extends Seeder
         return $candidato;
     }
 
-    private function postulacion(Vacante $vacante, Candidato $candidato, EtapaPostulacion $etapa, int $orden, int $match, ?string $fecha = null): Postulacion
+    private function postulacion(Vacante $vacante, Candidato $candidato, EtapaPostulacion $etapa, int $orden, ?string $fecha = null): Postulacion
     {
         $postulacion = Postulacion::firstOrNew(['vacante_id' => $vacante->id, 'candidato_id' => $candidato->id]);
         $postulacion->fill([
             'etapa' => $etapa,
             'orden' => $orden,
             'etapa_cambiada_at' => now(),
-            'match_score' => $match,
         ]);
         $postulacion->empresa_id = $vacante->empresa_id;
         $postulacion->created_at = $fecha ? Carbon::parse($fecha.' 12:00') : $vacante->created_at->copy()->addDay();

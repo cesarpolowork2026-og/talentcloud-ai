@@ -37,16 +37,30 @@ it('reproduce el Kanban de Desarrollador Backend del prototipo', function () {
         ->orderBy('orden')
         ->get()
         ->groupBy(fn (Postulacion $p) => $p->etapa->value)
-        ->map(fn ($columna) => $columna->map(fn (Postulacion $p) => $p->candidato->nombre.' '.$p->matchPorcentaje())->all())
+        ->map(fn ($columna) => $columna->mapWithKeys(fn (Postulacion $p) => [$p->candidato->nombre => $p->matchPorcentaje()])->all())
         ->all());
 
-    expect($kanban)->toEqual([
-        EtapaPostulacion::Postulado->value => ['Elena Ruiz 88', 'Marco Díaz 64'],
-        EtapaPostulacion::EnRevision->value => ['Sofía Nieto 91'],
-        EtapaPostulacion::Entrevista->value => ['Iván Torres 79'],
-        EtapaPostulacion::Oferta->value => ['Lucía Prat 95'],
-        EtapaPostulacion::Descartado->value => ['Pablo Vega 42'],
+    expect(array_map('array_keys', $kanban))->toEqual([
+        EtapaPostulacion::Postulado->value => ['Elena Ruiz', 'Marco Díaz'],
+        EtapaPostulacion::EnRevision->value => ['Sofía Nieto'],
+        EtapaPostulacion::Entrevista->value => ['Iván Torres'],
+        EtapaPostulacion::Oferta->value => ['Lucía Prat'],
+        EtapaPostulacion::Descartado->value => ['Pablo Vega'],
     ]);
+});
+
+it('calcula el matching de la demo con el motor a partir de los CV', function () {
+    $match = app(TenantContext::class)->ejecutarPara($this->marta->empresa_id, fn () => Postulacion::query()
+        ->with('candidato')
+        ->whereHas('vacante', fn ($q) => $q->where('titulo', 'Desarrollador Backend'))
+        ->get()
+        ->mapWithKeys(fn (Postulacion $p) => [$p->candidato->nombre => $p->matchPorcentaje()]));
+
+    // Los porcentajes son los del motor, no números fijos: se comprueba su coherencia.
+    expect($match['Elena Ruiz'])->toBeGreaterThan($match['Marco Díaz'])
+        ->and($match['Lucía Prat'])->toBeGreaterThan($match['Marco Díaz'])
+        ->and($match['Sofía Nieto'])->toBeGreaterThan($match['Iván Torres'])
+        ->and($match['Pablo Vega'])->toBeNull(); // CV escaneado sin texto
 });
 
 it('muestra a Marta solo las vacantes, entrevistas y evaluaciones de Nimbus Corp', function () {

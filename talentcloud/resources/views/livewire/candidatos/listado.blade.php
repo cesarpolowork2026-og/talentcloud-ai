@@ -82,6 +82,9 @@ Extracto del CV: "{{ \Illuminate\Support\Str::limit(\Illuminate\Support\Str::squ
             @if ($seleccionado?->cvActual)
                 <x-ui.button :href="route('cvs.descargar', $seleccionado->cvActual)">Descargar CV</x-ui.button>
             @endif
+            @if ($seleccionado?->ultimaPostulacion?->match_detalle)
+                <x-ui.button :href="route('matching.show', $seleccionado->ultimaPostulacion)" wire:navigate>Ver matching</x-ui.button>
+            @endif
             @if ($seleccionado)
                 <x-ui.button variant="primary" :href="route('candidatos.show', $seleccionado)" wire:navigate>Ver candidato</x-ui.button>
             @endif

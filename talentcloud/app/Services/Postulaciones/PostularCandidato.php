@@ -4,6 +4,7 @@ namespace App\Services\Postulaciones;
 
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Events\PostulacionCreada;
 use App\Models\Candidato;
 use App\Models\Postulacion;
 use App\Models\Vacante;
@@ -22,7 +23,7 @@ class PostularCandidato
             throw new OperacionNoPermitida('Solo se puede postular a vacantes abiertas.');
         }
 
-        return DB::transaction(function () use ($vacante, $candidato): Postulacion {
+        $postulacion = DB::transaction(function () use ($vacante, $candidato): Postulacion {
             // El índice único (vacante_id, candidato_id) es la garantía final ante envíos simultáneos.
             $existe = Postulacion::sinFiltroDeEmpresa()
                 ->where('vacante_id', $vacante->id)
@@ -51,5 +52,9 @@ class PostularCandidato
 
             return $postulacion;
         });
+
+        PostulacionCreada::dispatch($postulacion);
+
+        return $postulacion;
     }
 }

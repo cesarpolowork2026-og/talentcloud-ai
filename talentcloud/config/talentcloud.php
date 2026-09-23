@@ -11,4 +11,14 @@ return [
         'mimes' => ['pdf', 'docx'],
     ],
 
+    /*
+    | Motor de matching: "fake" (reglas y palabras clave, sin IA) o "http"
+    | (servicio de IA en FastAPI, a partir del día 15 del plan).
+    */
+    'matching' => [
+        'motor' => env('MATCHING_ENGINE', 'fake'),
+        'url' => env('MATCHING_URL', 'http://127.0.0.1:8001'),
+        'timeout' => (int) env('MATCHING_TIMEOUT', 20),
+    ],
+
 ];

@@ -121,18 +121,19 @@ Lucía Prat
 Analista de Datos · Remoto · lucia.prat@correo.com
 
 Perfil
-Analista de datos con 5 años de experiencia convirtiendo datos de negocio en decisiones.
+Analista de datos con 5 años de experiencia convirtiendo datos de negocio en decisiones, y 6 años de experiencia previa con Java como desarrolladora backend.
 
 Experiencia
 Data Analyst — Comercial del Pacífico (2021 – actualidad)
 Consultas SQL avanzadas sobre PostgreSQL y BigQuery; modelos de datos para ventas.
 Automatización de reportes con Python (pandas) y tableros en Power BI para gerencia.
 
-Analista de Inteligencia Comercial — Distribuidora Sur (2019 – 2021)
-Reportes en Excel avanzado y SQL; segmentación de clientes.
+Desarrolladora Backend — Fintech Andina (2015 – 2021)
+Servicios de pagos en Java con Spring Boot sobre PostgreSQL, desplegados con Docker en Kubernetes.
+Obtuve la certificación AWS Solutions Architect – Associate.
 
 Habilidades
-SQL, Python, Power BI, Excel avanzado, estadística, inglés intermedio.
+SQL, Python, Power BI, Excel avanzado, Java, Spring Boot, Docker, Kubernetes, inglés intermedio.
 TXT,
         ],
         // PDF escaneado (sin texto seleccionable): reproduce "Error al analizar el CV".

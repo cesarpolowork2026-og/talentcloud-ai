@@ -10,6 +10,7 @@ use App\Models\Candidato;
 use App\Models\Competencia;
 use App\Models\Empresa;
 use App\Models\Postulacion;
+use App\Models\Requisito;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Services\Cvs\SubirCv;
@@ -100,12 +101,13 @@ it('muestra el estado de error del CV con "Reintentar análisis"', function () {
 });
 
 it('abre el diálogo del CV con el extracto', function () {
+    Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Java')->id]);
     app(SubirCv::class)->ejecutar($this->elena, UploadedFile::fake()->createWithContent('CV.docx', DocumentosDePrueba::docx("Elena Ruiz\n5 años de experiencia con Java y Spring Boot en proyectos de alto tráfico.")), null);
 
     Livewire::test(Listado::class)
         ->call('verDetalle', $this->elena->id)
         ->assertSet('mostrarDetalle', true)
-        ->assertSee('Coincidencia: 88%')
+        ->assertSee('Coincidencia: 85%')
         ->assertSee('Extracto del CV:')
         ->assertSee('5 años de experiencia con Java');
 });

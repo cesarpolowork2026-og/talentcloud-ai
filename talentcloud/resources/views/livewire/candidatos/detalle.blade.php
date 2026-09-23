@@ -25,7 +25,13 @@
                             <tr wire:key="postulacion-{{ $postulacion->id }}">
                                 <td><a href="{{ route('vacantes.show', $postulacion->vacante_id) }}" wire:navigate>{{ $postulacion->vacante?->titulo }}</a></td>
                                 <td><x-ui.estado :valor="$postulacion->etapa" /></td>
-                                <td>{{ $postulacion->matchPorcentaje() !== null ? $postulacion->matchPorcentaje().'%' : '—' }}</td>
+                                <td>
+                                    @if ($postulacion->matchPorcentaje() !== null)
+                                        <a href="{{ route('matching.show', $postulacion) }}" wire:navigate>{{ $postulacion->matchPorcentaje() }}%</a>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                                 <td class="text-neutral-600">{{ Formato::fechaCorta($postulacion->created_at) }}</td>
                             </tr>
                         @endforeach
