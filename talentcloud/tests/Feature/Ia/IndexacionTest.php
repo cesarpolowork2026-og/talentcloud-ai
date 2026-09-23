@@ -202,17 +202,20 @@ it('genera el embedding de los requisitos al guardarlos', function () {
     expect($requisito->embedding?->toArray())->toHaveCount(384)
         ->and($requisito->embedding_modelo)->toBe('paraphrase-multilingual-MiniLM-L12-v2');
     Http::assertSent(fn (Request $request) => $request['textos'] === [
-        ['id' => $requisito->id, 'texto' => 'Kubernetes: al menos 2 años de experiencia. Operación de clústeres.'],
+        ['id' => $requisito->id, 'texto' => 'Kubernetes. Operación de clústeres.'],
     ]);
 });
 
-it('describe cada requisito para el embedding con sinónimos, años y detalle', function () {
-    $competencia = Competencia::obtenerOCrear('PostgreSQL');
-    $competencia->update(['sinonimos' => ['Postgres']]);
-    $requisito = Requisito::factory()->make(['competencia_id' => $competencia->id, 'anios_minimos' => 1, 'descripcion' => 'Consultas optimizadas.']);
+it('describe el requisito para el embedding igual que el servicio de IA', function () {
+    // Mismo caso que tests/test_evaluador.py::test_describe_el_requisito_sin_los_anios del servicio.
+    $this->kubernetes->update(['sinonimos' => ['k8s']]);
+    $requisito = Requisito::factory()->make([
+        'competencia_id' => $this->kubernetes->id,
+        'anios_minimos' => 2,
+        'descripcion' => 'Operación de clústeres en producción.',
+    ]);
 
-    expect(IndexarRequisitos::textoParaEmbedding($requisito))
-        ->toBe('PostgreSQL (Postgres): al menos 1 año de experiencia. Consultas optimizadas.');
+    expect(IndexarRequisitos::textoParaEmbedding($requisito))->toBe('Kubernetes (k8s). Operación de clústeres en producción.');
 });
 
 it('programa los embeddings con la empresa de la vacante', function () {

@@ -49,7 +49,7 @@ it('lee el análisis de CV del ejemplo del contrato', function () {
     expect($analisis->competencias)->toHaveCount(4)
         ->and(array_map(fn ($c) => $c->nombre, $analisis->competenciasAcreditadas()))->toBe(['Python', 'PostgreSQL', 'Google Cloud'])
         ->and($analisis->competencias[0]->anios)->toBe(4.0)
-        ->and($analisis->fragmentos)->toHaveCount(4)
+        ->and($analisis->fragmentos)->toHaveCount(5)
         ->and($analisis->fragmentos[0]->embedding)->toHaveCount(384)
         ->and($analisis->modeloEmbeddings)->toBe('determinista-hashing')
         ->and($analisis->experienciaTotalAnios)->toBe(3.7);
@@ -88,7 +88,7 @@ it('reintenta los errores transitorios del servicio', function () {
         ->push(['detail' => 'ocupado'], 503)
         ->push(ejemploIa('analisis_cv'))]);
 
-    expect(clienteIa()->analizarCv(1, 'texto', [])->fragmentos)->toHaveCount(4);
+    expect(clienteIa()->analizarCv(1, 'texto', [])->fragmentos)->toHaveCount(5);
     Http::assertSentCount(2);
 });
 

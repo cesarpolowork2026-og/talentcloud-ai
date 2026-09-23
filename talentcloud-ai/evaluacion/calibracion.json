@@ -1,0 +1,1247 @@
+{
+  "modelo": "paraphrase-multilingual-MiniLM-L12-v2",
+  "casos": 145,
+  "casos_sin_mencion_literal": 118,
+  "umbrales": {
+    "revisar": 0.54,
+    "coincide": 0.56
+  },
+  "exactitud": {
+    "hibrido_calibrado": 0.8897,
+    "solo_coincidencia_exacta": 0.8207,
+    "umbrales_vigentes_en_codigo": 0.8897,
+    "validacion_cruzada_dejando_un_cv_fuera": 0.8621,
+    "sin_mencion_literal": 0.8644
+  },
+  "falsos_coincide": {
+    "hibrido_calibrado": 0,
+    "solo_coincidencia_exacta": 0
+  },
+  "matriz_de_confusion": {
+    "coincide": {
+      "coincide": 31,
+      "revisar": 0,
+      "no_encontrado": 9
+    },
+    "revisar": {
+      "coincide": 0,
+      "revisar": 6,
+      "no_encontrado": 7
+    },
+    "no_encontrado": {
+      "coincide": 0,
+      "revisar": 0,
+      "no_encontrado": 92
+    }
+  },
+  "errores": [
+    {
+      "cv": "elena",
+      "requisito": "SQL",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4474,
+      "fragmento": "Diseñé esquemas y consultas optimizadas en PostgreSQL, reduciendo a la mitad el tiempo de los reportes."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Orquestación de contenedores",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4726,
+      "fragmento": "Contenedoricé servicios con Docker y Docker Compose para los entornos de desarrollo y pruebas."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Bases de datos relacionales",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.5397,
+      "fragmento": "Diseñé esquemas y consultas optimizadas en PostgreSQL, reduciendo a la mitad el tiempo de los reportes."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "SQL",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.495,
+      "fragmento": "Modelado de datos en PostgreSQL y caché con Redis."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Diseño de APIs REST",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4809,
+      "fragmento": "Ingeniera de software con 6 años construyendo servicios backend en Java y operando plataformas en Kubernetes."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Orquestación de contenedores",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3936,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Integración y despliegue continuos",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3119,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Computación en la nube",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.329,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Pruebas de software",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4869,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "marco",
+      "requisito": "PostgreSQL",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4673,
+      "fragmento": "Java, MySQL, SQL, Git, Scrum."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Diseño de APIs REST",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.5282,
+      "fragmento": "Mantenimiento de servicios en Java y consultas en MySQL."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Visualización de datos",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.5374,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Metodologías ágiles",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4348,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Diseño de interfaces",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.5018,
+      "fragmento": "Diseño de flujos y prototipos de alta fidelidad en Figma para una aplicación de banca."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Orquestación de contenedores",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3416,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Computación en la nube",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.368,
+      "fragmento": "Obtuve la certificación AWS Solutions Architect – Associate."
+    }
+  ],
+  "casos_semanticos": [
+    {
+      "cv": "ivan",
+      "requisito": "Investigación con usuarios",
+      "esperado": "coincide",
+      "predicho": "coincide",
+      "via": "semantica",
+      "similitud": 0.9694,
+      "fragmento": "Research con usuarios: entrevistas, pruebas de usabilidad y síntesis de hallazgos."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Bases de datos relacionales",
+      "esperado": "coincide",
+      "predicho": "coincide",
+      "via": "semantica",
+      "similitud": 0.6935,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Computación en la nube",
+      "esperado": "revisar",
+      "predicho": "revisar",
+      "via": "semantica",
+      "similitud": 0.6909,
+      "fragmento": "Kubernetes (interés en aprender) y arquitectura en la nube."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Bases de datos relacionales",
+      "esperado": "coincide",
+      "predicho": "coincide",
+      "via": "semantica",
+      "similitud": 0.6841,
+      "fragmento": "Consultas SQL avanzadas sobre PostgreSQL y BigQuery"
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Visualización de datos",
+      "esperado": "coincide",
+      "predicho": "coincide",
+      "via": "semantica",
+      "similitud": 0.6438,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Diseño de APIs REST",
+      "esperado": "coincide",
+      "predicho": "coincide",
+      "via": "semantica",
+      "similitud": 0.6031,
+      "fragmento": "Desarrollé APIs REST con Spring Boot en mi último puesto, para una plataforma de pagos de alto tráfico."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Pruebas de software",
+      "esperado": "coincide",
+      "predicho": "coincide",
+      "via": "semantica",
+      "similitud": 0.5723,
+      "fragmento": "Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Bases de datos relacionales",
+      "esperado": "coincide",
+      "predicho": "coincide",
+      "via": "semantica",
+      "similitud": 0.5699,
+      "fragmento": "Modelado de datos en PostgreSQL y caché con Redis."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Mensajería asíncrona",
+      "esperado": "coincide",
+      "predicho": "coincide",
+      "via": "semantica",
+      "similitud": 0.5656,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Metodologías ágiles",
+      "esperado": "revisar",
+      "predicho": "revisar",
+      "via": "semantica",
+      "similitud": 0.5481,
+      "fragmento": "Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Bases de datos relacionales",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.5397,
+      "fragmento": "Diseñé esquemas y consultas optimizadas en PostgreSQL, reduciendo a la mitad el tiempo de los reportes."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Liderazgo de equipos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.5384,
+      "fragmento": "Diseñador de producto con 4 años de experiencia llevando ideas desde la investigación hasta interfaces en producción."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Visualización de datos",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.5374,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Investigación con usuarios",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.5368,
+      "fragmento": "Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Diseño de APIs REST",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.5282,
+      "fragmento": "Mantenimiento de servicios en Java y consultas en MySQL."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Diseño de interfaces",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.5018,
+      "fragmento": "Diseño de flujos y prototipos de alta fidelidad en Figma para una aplicación de banca."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Pruebas de software",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4983,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "SQL",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.495,
+      "fragmento": "Modelado de datos en PostgreSQL y caché con Redis."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Visualización de datos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4886,
+      "fragmento": "Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Pruebas de software",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4869,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Desarrollo frontend con React",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4865,
+      "fragmento": "Figma, research, prototipado, sistemas de diseño, nociones de Java y HTML."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Diseño de APIs REST",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4809,
+      "fragmento": "Ingeniera de software con 6 años construyendo servicios backend en Java y operando plataformas en Kubernetes."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Pruebas de software",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4738,
+      "fragmento": "Automatización de reportes con Python (pandas) y tableros en Power BI para gerencia."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Orquestación de contenedores",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4726,
+      "fragmento": "Contenedoricé servicios con Docker y Docker Compose para los entornos de desarrollo y pruebas."
+    },
+    {
+      "cv": "marco",
+      "requisito": "PostgreSQL",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4673,
+      "fragmento": "Java, MySQL, SQL, Git, Scrum."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Mensajería asíncrona",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4649,
+      "fragmento": "Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Liderazgo de equipos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4648,
+      "fragmento": "Ingeniera de software con 6 años construyendo servicios backend en Java y operando plataformas en Kubernetes."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Diseño de APIs REST",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.463,
+      "fragmento": "Mantengo el sistema de diseño del producto junto al equipo de front-end."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Liderazgo de equipos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4624,
+      "fragmento": "Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Terraform",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4619,
+      "fragmento": "Kubernetes (interés en aprender) y arquitectura en la nube."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Seguridad informática",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4516,
+      "fragmento": "Research con usuarios: entrevistas, pruebas de usabilidad y síntesis de hallazgos."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Investigación con usuarios",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4513,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Mensajería asíncrona",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4511,
+      "fragmento": "Mantenimiento de servicios en Java y consultas en MySQL."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Metodologías ágiles",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4498,
+      "fragmento": "Mantengo el sistema de diseño del producto junto al equipo de front-end."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Visualización de datos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4496,
+      "fragmento": "Diseñador de producto con 4 años de experiencia llevando ideas desde la investigación hasta interfaces en producción."
+    },
+    {
+      "cv": "elena",
+      "requisito": "SQL",
+      "esperado": "revisar",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4474,
+      "fragmento": "Diseñé esquemas y consultas optimizadas en PostgreSQL, reduciendo a la mitad el tiempo de los reportes."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Pruebas de software",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4438,
+      "fragmento": "Research con usuarios: entrevistas, pruebas de usabilidad y síntesis de hallazgos."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Liderazgo de equipos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4384,
+      "fragmento": "Desarrollador backend con un año y medio de experiencia en Java, con ganas de crecer en equipos ágiles."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Metodologías ágiles",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4348,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Orquestación de contenedores",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4318,
+      "fragmento": "Diseño de flujos y prototipos de alta fidelidad en Figma para una aplicación de banca."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Investigación con usuarios",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4172,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Liderazgo de equipos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4129,
+      "fragmento": "Analista de datos con 5 años de experiencia convirtiendo datos de negocio en decisiones, y 6 años de experiencia previa con Java como desarrolladora backend."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Visualización de datos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4058,
+      "fragmento": "imágenes con Docker y despliegues con GitHub Actions."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Bases de datos relacionales",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.4006,
+      "fragmento": "Research con usuarios: entrevistas, pruebas de usabilidad y síntesis de hallazgos."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Orquestación de contenedores",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3936,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Certificación AWS",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3934,
+      "fragmento": "Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Mensajería asíncrona",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3924,
+      "fragmento": "Automatización de reportes con Python (pandas) y tableros en Power BI para gerencia."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Computación en la nube",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3899,
+      "fragmento": "Mantenimiento de servicios en Java y consultas en MySQL."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Desarrollo frontend con React",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3874,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Diseño de interfaces",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3843,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Investigación con usuarios",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3841,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Integración y despliegue continuos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3785,
+      "fragmento": "Diseño de flujos y prototipos de alta fidelidad en Figma para una aplicación de banca."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Metodologías ágiles",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.376,
+      "fragmento": "Orquesté más de 40 microservicios con Kubernetes y Helm"
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Certificación AWS",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3755,
+      "fragmento": "Diseñador de producto con 4 años de experiencia llevando ideas desde la investigación hasta interfaces en producción."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Metodologías ágiles",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3735,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Seguridad informática",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3732,
+      "fragmento": "Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Desarrollo frontend con React",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3713,
+      "fragmento": "imágenes con Docker y despliegues con GitHub Actions."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Mensajería asíncrona",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3705,
+      "fragmento": "Research con usuarios: entrevistas, pruebas de usabilidad y síntesis de hallazgos."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Computación en la nube",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.368,
+      "fragmento": "Obtuve la certificación AWS Solutions Architect – Associate."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Research",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3665,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Machine Learning",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3583,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Research",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3546,
+      "fragmento": "Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Integración y despliegue continuos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3525,
+      "fragmento": "Desarrollé APIs REST con Spring Boot en mi último puesto, para una plataforma de pagos de alto tráfico."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Machine Learning",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.349,
+      "fragmento": "Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Diseño de interfaces",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3482,
+      "fragmento": "Me enfoco en servicios confiables, pruebas automatizadas y buen diseño de datos."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Orquestación de contenedores",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3416,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Orquestación de contenedores",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3337,
+      "fragmento": "Mantenimiento de servicios en Java y consultas en MySQL."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Desarrollo frontend con React",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3291,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Computación en la nube",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.329,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Seguridad informática",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3228,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Diseño de interfaces",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3216,
+      "fragmento": "Obtuve la certificación AWS Solutions Architect – Associate."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Integración y despliegue continuos",
+      "esperado": "coincide",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3119,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Seguridad informática",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3119,
+      "fragmento": "Automatización de reportes con Python (pandas) y tableros en Power BI para gerencia."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Desarrollo frontend con React",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3113,
+      "fragmento": "Contenedoricé servicios con Docker y Docker Compose para los entornos de desarrollo y pruebas."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Diseño de APIs REST",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3007,
+      "fragmento": "Analista de datos con 5 años de experiencia convirtiendo datos de negocio en decisiones, y 6 años de experiencia previa con Java como desarrolladora backend."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Prototipado",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.3005,
+      "fragmento": "Microservicios con Java 17 y Spring Boot, pruebas con JUnit y revisión de código en Git."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Figma",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2962,
+      "fragmento": "imágenes con Docker y despliegues con GitHub Actions."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Computación en la nube",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2933,
+      "fragmento": "Research con usuarios: entrevistas, pruebas de usabilidad y síntesis de hallazgos."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Seguridad informática",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2912,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Python",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2889,
+      "fragmento": "Contenedoricé servicios con Docker y Docker Compose para los entornos de desarrollo y pruebas."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Diseño de interfaces",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2711,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Certificación AWS",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2622,
+      "fragmento": "Mantenimiento de servicios en Java y consultas en MySQL."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Research",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2616,
+      "fragmento": "imágenes con Docker y despliegues con GitHub Actions."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Prototipado",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2579,
+      "fragmento": "Java, Spring Boot, Docker, Kubernetes, PostgreSQL, AWS, CI/CD, inglés avanzado."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Integración y despliegue continuos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2574,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Integración y despliegue continuos",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2482,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Python",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2438,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Python",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2382,
+      "fragmento": "Research con usuarios: entrevistas, pruebas de usabilidad y síntesis de hallazgos."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Power BI",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2345,
+      "fragmento": "Microservicios con Java 17 y Spring Boot, pruebas con JUnit y revisión de código en Git."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Machine Learning",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2338,
+      "fragmento": "Research con usuarios: entrevistas, pruebas de usabilidad y síntesis de hallazgos."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Machine Learning",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2284,
+      "fragmento": "Desarrollador backend con un año y medio de experiencia en Java, con ganas de crecer en equipos ágiles."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Power BI",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.228,
+      "fragmento": "Research con usuarios: entrevistas, pruebas de usabilidad y síntesis de hallazgos."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Docker",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2229,
+      "fragmento": "Mantengo el sistema de diseño del producto junto al equipo de front-end."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Power BI",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2218,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Spring Boot",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2206,
+      "fragmento": "Diseño de flujos y prototipos de alta fidelidad en Figma para una aplicación de banca."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Research",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2123,
+      "fragmento": "Reportes con SQL y automatización de tareas con scripts."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Docker",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2024,
+      "fragmento": "Participé en la migración de endpoints a Spring Boot junto al equipo senior."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Prototipado",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.2,
+      "fragmento": "Desarrollador backend con un año y medio de experiencia en Java, con ganas de crecer en equipos ágiles."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Prototipado",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1907,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Terraform",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1861,
+      "fragmento": "Orquesté más de 40 microservicios con Kubernetes y Helm"
+    },
+    {
+      "cv": "ivan",
+      "requisito": "SQL",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1848,
+      "fragmento": "Research con usuarios: entrevistas, pruebas de usabilidad y síntesis de hallazgos."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Figma",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1775,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Figma",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1721,
+      "fragmento": "Microservicios con Java 17 y Spring Boot, pruebas con JUnit y revisión de código en Git."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Terraform",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1684,
+      "fragmento": "modelos de datos para ventas."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Machine Learning",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1581,
+      "fragmento": "Modelado de datos en PostgreSQL y caché con Redis."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Terraform",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1576,
+      "fragmento": "Figma, research, prototipado, sistemas de diseño, nociones de Java y HTML."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Figma",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1569,
+      "fragmento": "Java, MySQL, SQL, Git, Scrum."
+    },
+    {
+      "cv": "elena",
+      "requisito": "Selenium",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1547,
+      "fragmento": "Español nativo, inglés intermedio."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Kubernetes",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1538,
+      "fragmento": "Mantengo el sistema de diseño del producto junto al equipo de front-end."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "PostgreSQL",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1525,
+      "fragmento": "Research con usuarios: entrevistas, pruebas de usabilidad y síntesis de hallazgos."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Python",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1439,
+      "fragmento": "Servicios Java, integración con colas de mensajería y pruebas de carga."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Power BI",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1405,
+      "fragmento": "Desarrollador backend con un año y medio de experiencia en Java, con ganas de crecer en equipos ágiles."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Terraform",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1261,
+      "fragmento": "Participé en la migración de endpoints a Spring Boot junto al equipo senior."
+    },
+    {
+      "cv": "ivan",
+      "requisito": "Selenium",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.121,
+      "fragmento": "Wireframes, prototipos y pruebas A/B para comercio electrónico."
+    },
+    {
+      "cv": "marco",
+      "requisito": "Kubernetes",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.1108,
+      "fragmento": "Java, MySQL, SQL, Git, Scrum."
+    },
+    {
+      "cv": "sofia",
+      "requisito": "Selenium",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.0942,
+      "fragmento": "Orquesté más de 40 microservicios con Kubernetes y Helm"
+    },
+    {
+      "cv": "marco",
+      "requisito": "Selenium",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": 0.0521,
+      "fragmento": "Java, MySQL, SQL, Git, Scrum."
+    },
+    {
+      "cv": "lucia",
+      "requisito": "Selenium",
+      "esperado": "no_encontrado",
+      "predicho": "no_encontrado",
+      "via": "semantica",
+      "similitud": -0.0057,
+      "fragmento": "Obtuve la certificación AWS Solutions Architect – Associate."
+    }
+  ]
+}

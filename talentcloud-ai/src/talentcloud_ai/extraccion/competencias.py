@@ -94,3 +94,8 @@ def es_mencion_dudosa(oracion_normalizada: str, posicion: int, seccion: SeccionC
     if seccion is SeccionCv.INTERESES:
         return True
     return _MARCADORES_DUDOSOS.search(clausula(oracion_normalizada, posicion)) is not None
+
+
+def es_fragmento_dudoso(texto: str, seccion: SeccionCv) -> bool:
+    """Un fragmento entero (una cláusula) que habla de interés o nivel básico, no de experiencia."""
+    return seccion is SeccionCv.INTERESES or _MARCADORES_DUDOSOS.search(normalizar(texto)) is not None

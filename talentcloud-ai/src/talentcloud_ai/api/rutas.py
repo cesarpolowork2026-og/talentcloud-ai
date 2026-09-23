@@ -43,5 +43,5 @@ def embeddings_de_requisitos(entrada: EmbeddingsInput, embedder: EmbedderDep) ->
 
 
 @protegido.post("/matching/evaluar", summary="Evalúa una postulación requisito por requisito, con evidencia")
-def evaluar_matching(entrada: MatchInput, hoy: HoyDep) -> MatchResult:
-    return EvaluadorDeMatching(hoy).evaluar(entrada)
+def evaluar_matching(entrada: MatchInput, embedder: EmbedderDep, hoy: HoyDep) -> MatchResult:
+    return EvaluadorDeMatching(hoy, embedder).evaluar(entrada)

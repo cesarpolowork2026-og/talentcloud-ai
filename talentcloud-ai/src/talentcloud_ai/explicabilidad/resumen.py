@@ -11,12 +11,12 @@ def _lista(nombres: Sequence[str]) -> str:
 
 
 def resumir(requisitos: Sequence[RequisitoInput], resultados: Sequence[RequisitoMatch]) -> str | None:
-    """Coincidencias y brechas en una frase: «Coincide en 4 de 6 requisitos. Para revisar: Kubernetes…»."""
+    """Coincidencias y brechas: «Coincide en 2 de 3 requisitos (Java y Docker). Sin evidencia: AWS (obligatorio).»"""
     if not resultados:
         return None
 
     tipos = {r.id: r.tipo for r in requisitos}
-    coinciden = sum(r.nivel is NivelCoincidencia.COINCIDE for r in resultados)
+    coinciden = [r.competencia for r in resultados if r.nivel is NivelCoincidencia.COINCIDE]
     revisar = [r.competencia for r in resultados if r.nivel is NivelCoincidencia.REVISAR]
     faltan = [
         r.competencia + (" (obligatorio)" if tipos.get(r.requisito_id) is TipoRequisito.OBLIGATORIO else "")
@@ -24,7 +24,10 @@ def resumir(requisitos: Sequence[RequisitoInput], resultados: Sequence[Requisito
         if r.nivel is NivelCoincidencia.NO_ENCONTRADO
     ]
 
-    partes = [f"Coincide en {coinciden} de {len(resultados)} requisitos."]
+    partes = [
+        f"Coincide en {len(coinciden)} de {len(resultados)} requisitos"
+        + (f" ({_lista(coinciden)})." if coinciden else ".")
+    ]
     if revisar:
         partes.append(f"Para revisar: {_lista(revisar)}.")
     if faltan:

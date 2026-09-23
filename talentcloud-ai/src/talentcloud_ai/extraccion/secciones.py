@@ -24,6 +24,9 @@ _ENCABEZADOS: dict[SeccionCv, str] = {
 }
 _PATRONES = {seccion: re.compile(rf"(?:{patron})") for seccion, patron in _ENCABEZADOS.items()}
 _MAX_LARGO_ENCABEZADO = 40
+# CV sin encabezados reconocibles: solo las primeras líneas cortas son el encabezado (nombre, contacto).
+_MAX_LINEAS_DE_ENCABEZADO = 3
+_MAX_LARGO_LINEA_DE_ENCABEZADO = 80
 
 
 @dataclass
@@ -66,7 +69,22 @@ def segmentar(texto: str) -> list[BloqueDeSeccion]:
     if actual.lineas:
         bloques.append(actual)
 
+    if len(bloques) == 1 and bloques[0].nombre is SeccionCv.ENCABEZADO:
+        bloques = _sin_encabezados(bloques[0].lineas)
+
     # Reenumera por si hubo encabezados sin contenido.
     for orden, bloque in enumerate(bloques):
         bloque.orden = orden
     return bloques
+
+
+def _sin_encabezados(todas: list[str]) -> list[BloqueDeSeccion]:
+    """Sin ningún encabezado de sección, el resto del CV no puede quedar como "encabezado" (se excluiría entero)."""
+    cantidad = 0
+    while (
+        cantidad < min(_MAX_LINEAS_DE_ENCABEZADO, len(todas) - 1)
+        and len(todas[cantidad]) <= _MAX_LARGO_LINEA_DE_ENCABEZADO
+    ):
+        cantidad += 1
+    bloques = [BloqueDeSeccion(SeccionCv.ENCABEZADO, None, 0, todas[:cantidad])] if cantidad else []
+    return [*bloques, BloqueDeSeccion(SeccionCv.OTROS, None, len(bloques), todas[cantidad:])]

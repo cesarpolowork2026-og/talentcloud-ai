@@ -2,7 +2,7 @@
   "version": 1,
   "score": 78.0,
   "motor": "http",
-  "resumen": "Coincide en 4 de 6 requisitos. Para revisar: Kubernetes. Sin evidencia: Certificación AWS.",
+  "resumen": "Coincide en 4 de 6 requisitos (Java, Spring Boot, PostgreSQL y Docker). Para revisar: Kubernetes. Sin evidencia: Certificación AWS.",
   "requisitos": [
     {
       "requisito_id": 1,

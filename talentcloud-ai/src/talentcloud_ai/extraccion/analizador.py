@@ -73,7 +73,11 @@ class AnalizadorDeCv:
 
     def menciones(self, texto: str) -> list[Mencion]:
         """Todas las menciones de competencias del catálogo, en orden de aparición."""
-        return self._recorrer(segmentar(texto)).menciones
+        return self.menciones_en(segmentar(texto))
+
+    def menciones_en(self, bloques: list[BloqueDeSeccion]) -> list[Mencion]:
+        """Como `menciones`, sobre un CV ya segmentado."""
+        return self._recorrer(bloques).menciones
 
     def _recorrer(self, bloques: list[BloqueDeSeccion]) -> _Recorrido:
         menciones: list[Mencion] = []

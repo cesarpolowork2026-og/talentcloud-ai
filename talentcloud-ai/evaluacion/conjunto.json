@@ -1,0 +1,485 @@
+{
+  "version": 1,
+  "descripcion": "Conjunto de evaluación del matching: requisitos × CV de demostración (tests/datos/cvs) con el nivel esperado. Criterio: \"coincide\" = el CV acredita experiencia; \"revisar\" = relacionado, dudoso o con menos años de los pedidos; \"no_encontrado\" = sin evidencia. Etiquetado por el equipo de desarrollo: pendiente de revisión por un reclutador.",
+  "fecha_referencia": "2026-09-23",
+  "cvs": [
+    "elena",
+    "sofia",
+    "marco",
+    "ivan",
+    "lucia"
+  ],
+  "requisitos": [
+    {
+      "id": 1,
+      "competencia": "Java",
+      "sinonimos": [],
+      "anios_minimos": 3,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "coincide",
+        "sofia": "coincide",
+        "marco": "revisar",
+        "ivan": "revisar",
+        "lucia": "coincide"
+      },
+      "nota": "Marco acredita 2,7 años (< 3); Iván solo \"nociones de Java\"."
+    },
+    {
+      "id": 2,
+      "competencia": "Spring Boot",
+      "sinonimos": [
+        "Spring",
+        "Spring Framework"
+      ],
+      "anios_minimos": 2,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "coincide",
+        "sofia": "coincide",
+        "marco": "coincide",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      }
+    },
+    {
+      "id": 3,
+      "competencia": "PostgreSQL",
+      "sinonimos": [
+        "Postgres",
+        "psql"
+      ],
+      "anios_minimos": null,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "coincide",
+        "sofia": "coincide",
+        "marco": "revisar",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      },
+      "nota": "Marco usa MySQL: base relacional relacionada, no la pedida."
+    },
+    {
+      "id": 4,
+      "competencia": "Docker",
+      "sinonimos": [
+        "contenedores"
+      ],
+      "anios_minimos": null,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "coincide",
+        "sofia": "coincide",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      }
+    },
+    {
+      "id": 5,
+      "competencia": "Kubernetes",
+      "sinonimos": [
+        "k8s"
+      ],
+      "anios_minimos": null,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "revisar",
+        "sofia": "coincide",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      },
+      "nota": "Elena solo lo menciona como \"interés en aprender\"."
+    },
+    {
+      "id": 6,
+      "competencia": "Certificación AWS",
+      "sinonimos": [
+        "AWS Certified",
+        "AWS Solutions Architect",
+        "certificación de AWS"
+      ],
+      "anios_minimos": null,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "coincide",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      }
+    },
+    {
+      "id": 7,
+      "competencia": "SQL",
+      "sinonimos": [],
+      "anios_minimos": 2,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "revisar",
+        "sofia": "revisar",
+        "marco": "revisar",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      },
+      "nota": "Elena y Sofía hacen consultas en PostgreSQL sin nombrar SQL; Marco acredita 1 año."
+    },
+    {
+      "id": 8,
+      "competencia": "Python",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      }
+    },
+    {
+      "id": 9,
+      "competencia": "Power BI",
+      "sinonimos": [
+        "PowerBI"
+      ],
+      "anios_minimos": null,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      }
+    },
+    {
+      "id": 10,
+      "competencia": "Figma",
+      "sinonimos": [],
+      "anios_minimos": 2,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "coincide",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 11,
+      "competencia": "Research",
+      "sinonimos": [
+        "UX research",
+        "investigación de usuarios"
+      ],
+      "anios_minimos": null,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "coincide",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 12,
+      "competencia": "Prototipado",
+      "sinonimos": [
+        "prototipos",
+        "wireframes"
+      ],
+      "anios_minimos": null,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "coincide",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 13,
+      "competencia": "Selenium",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 14,
+      "competencia": "Terraform",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 15,
+      "competencia": "Machine Learning",
+      "sinonimos": [
+        "ML",
+        "aprendizaje automático"
+      ],
+      "anios_minimos": null,
+      "descripcion": null,
+      "via": "catalogo",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 16,
+      "competencia": "Diseño de APIs REST",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Diseñar y construir APIs REST para servicios backend",
+      "via": "semantica",
+      "esperado": {
+        "elena": "coincide",
+        "sofia": "coincide",
+        "marco": "revisar",
+        "ivan": "no_encontrado",
+        "lucia": "no_encontrado"
+      },
+      "nota": "Marco migró endpoints: relacionado."
+    },
+    {
+      "id": 17,
+      "competencia": "Orquestación de contenedores",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Despliegue y operación de servicios en clústeres de contenedores",
+      "via": "semantica",
+      "esperado": {
+        "elena": "revisar",
+        "sofia": "coincide",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      },
+      "nota": "Elena contenedorizó con Docker, sin orquestar."
+    },
+    {
+      "id": 18,
+      "competencia": "Visualización de datos",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Construcción de tableros e informes para el negocio",
+      "via": "semantica",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "revisar",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      },
+      "nota": "Marco hizo reportes con SQL."
+    },
+    {
+      "id": 19,
+      "competencia": "Investigación con usuarios",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Entrevistas y pruebas de usabilidad con usuarios",
+      "via": "semantica",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "coincide",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 20,
+      "competencia": "Metodologías ágiles",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Trabajo en equipos con Scrum",
+      "via": "semantica",
+      "esperado": {
+        "elena": "revisar",
+        "sofia": "no_encontrado",
+        "marco": "coincide",
+        "ivan": "no_encontrado",
+        "lucia": "no_encontrado"
+      },
+      "nota": "Elena solo lista Scrum; Marco trabaja en equipos ágiles y lista Scrum."
+    },
+    {
+      "id": 21,
+      "competencia": "Integración y despliegue continuos",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Pipelines de CI/CD para desplegar servicios",
+      "via": "semantica",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "coincide",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 22,
+      "competencia": "Bases de datos relacionales",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Modelado de datos y consultas SQL",
+      "via": "semantica",
+      "esperado": {
+        "elena": "coincide",
+        "sofia": "coincide",
+        "marco": "coincide",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      }
+    },
+    {
+      "id": 23,
+      "competencia": "Computación en la nube",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Servicios en AWS u otra nube pública",
+      "via": "semantica",
+      "esperado": {
+        "elena": "revisar",
+        "sofia": "coincide",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "coincide"
+      },
+      "nota": "Elena: \"arquitectura en la nube\" como interés."
+    },
+    {
+      "id": 24,
+      "competencia": "Diseño de interfaces",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Diseño de interfaces y flujos de usuario",
+      "via": "semantica",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "coincide",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 25,
+      "competencia": "Mensajería asíncrona",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Integración de servicios mediante colas de mensajes",
+      "via": "semantica",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "coincide",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 26,
+      "competencia": "Pruebas de software",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Pruebas unitarias y automatizadas de servicios",
+      "via": "semantica",
+      "esperado": {
+        "elena": "coincide",
+        "sofia": "revisar",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "no_encontrado"
+      },
+      "nota": "Trampa: las pruebas de usabilidad y A/B de Iván no son pruebas de software."
+    },
+    {
+      "id": 27,
+      "competencia": "Liderazgo de equipos",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Liderar equipos de desarrollo de software",
+      "via": "semantica",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 28,
+      "competencia": "Seguridad informática",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Seguridad de aplicaciones y gestión de vulnerabilidades",
+      "via": "semantica",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "no_encontrado"
+      }
+    },
+    {
+      "id": 29,
+      "competencia": "Desarrollo frontend con React",
+      "sinonimos": [],
+      "anios_minimos": null,
+      "descripcion": "Interfaces web con React y TypeScript",
+      "via": "semantica",
+      "esperado": {
+        "elena": "no_encontrado",
+        "sofia": "no_encontrado",
+        "marco": "no_encontrado",
+        "ivan": "no_encontrado",
+        "lucia": "no_encontrado"
+      },
+      "nota": "Trampa: Iván trabaja \"junto al equipo de front-end\", no desarrolla frontend."
+    }
+  ]
+}

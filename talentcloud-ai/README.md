@@ -41,6 +41,28 @@ La primera ejecución descarga el modelo en la caché de Hugging Face (unos 470 
 | POST | `/requisitos/embeddings` | Vectores normalizados de los textos de los requisitos. |
 | POST | `/matching/evaluar` | `MatchInput` → `MatchResult`: porcentaje, nivel, evidencia y motivo por requisito; puntaje ponderado y resumen. |
 
+## Matching
+
+Por requisito, `matching/calificacion.py` decide con este orden de confianza:
+
+1. **Coincidencia exacta** (competencia o sinónimo en el CV): años acreditados frente a los pedidos, evidencia
+   laboral frente a una lista de habilidades, y menciones dudosas ("interés en aprender", "nociones") a "Revisar".
+2. **Similitud semántica** si el CV no nombra la competencia: el fragmento más parecido de los que describen lo que
+   la persona hizo (sin puestos ni formación), comparando el requisito completo, su nombre y su descripción. Nunca
+   supera a una coincidencia exacta, y un fragmento dudoso nunca da "Coincide".
+3. **Sin evidencia**: 0 %; si es obligatorio, se dice en el motivo y en el resumen.
+
+Los umbrales de similitud (`matching/umbrales.py`) se calibran con el conjunto de `evaluacion/`:
+
+```bash
+uv run --extra ml python evaluacion/calibrar.py    # (Windows: PYTHONPATH=src) → evaluacion/calibracion.json
+```
+
+`evaluacion/conjunto.json` tiene 145 casos (29 requisitos × 5 CV de demostración) etiquetados por el equipo,
+pendientes de revisión por un reclutador. El informe guarda umbrales, exactitud (híbrido, solo exacta, validación
+cruzada dejando un CV fuera), matriz de confusión y cada error con su similitud y fragmento. Los umbrales se copian
+a mano a `umbrales.py` (un test exige que coincidan con el informe).
+
 ## Contrato con Laravel
 
 Versión 1, congelada. Los modelos de `src/talentcloud_ai/contrato/` replican `App\Matching\*` de Laravel.
@@ -57,7 +79,8 @@ src/talentcloud_ai/
   extraccion/      texto, secciones, competencias, experiencia, certificaciones, fragmentos, analizador
   embeddings/      interfaz Embedder: sentence-transformers (extra ml) y "determinista" (sin modelo, tests)
   casos_de_uso.py  análisis de CV con embeddings y embeddings de textos (lo que llaman las rutas)
-  matching/        calificación por requisito, umbrales y puntaje global
+  matching/        evaluador, calificación (exacta + semántica), búsqueda semántica y umbrales calibrados
+  calibracion.py   búsqueda de umbrales, validación cruzada y matriz de confusión (la usa evaluacion/calibrar.py)
   explicabilidad/  motivos y resumen en lenguaje llano
 tests/datos/       CV de demostración y copia del catálogo de competencias de Laravel
 ```
@@ -66,5 +89,6 @@ tests/datos/       CV de demostración y copia del catálogo de competencias de 
 
 - Nunca se registra el cuerpo de las peticiones (contiene el CV); solo método, ruta, estado y duración.
 - Los fragmentos para embeddings excluyen el encabezado (nombre, contacto), los datos personales y las
-  referencias: el matching no usa nombre, género, edad, foto ni lugar de nacimiento.
+  referencias, y cualquier línea con correo, teléfono, URL de perfil o rasgos personales (`extraccion/privacidad.py`):
+  el matching no usa nombre, género, edad, foto ni lugar de nacimiento.
 - La documentación interactiva (`/docs`) se desactiva con `TALENTCLOUD_AI_ENTORNO=production`.
