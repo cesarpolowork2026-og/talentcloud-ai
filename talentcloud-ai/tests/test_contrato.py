@@ -2,6 +2,8 @@
 
 from collections.abc import Callable
 
+from fastapi.testclient import TestClient
+
 from talentcloud_ai.contrato.comun import Motor
 from talentcloud_ai.contrato.matching import MatchInput, MatchResult
 
@@ -34,3 +36,23 @@ def test_la_salida_tiene_exactamente_las_claves_que_lee_laravel(ejemplo: Callabl
 def test_la_entrada_tolera_campos_nuevos(ejemplo: Callable[[str], dict[str, object]]) -> None:
     entrada = MatchInput.model_validate({**ejemplo("match_input"), "campo_futuro": True})
     assert "campo_futuro" not in entrada.model_dump()
+
+
+CLAVES_ANALISIS_CV = {
+    "version",
+    "secciones",
+    "competencias",
+    "experiencia_total_anios",
+    "cargos",
+    "certificaciones",
+    "fragmentos",
+    "modelo_embeddings",
+}
+
+
+def test_el_analisis_de_cv_es_el_del_ejemplo(cliente: TestClient, ejemplo: Callable[[str], dict[str, object]]) -> None:
+    respuesta = cliente.post("/cv/analizar", json=ejemplo("analisis_cv_input"))
+
+    assert respuesta.status_code == 200
+    assert set(respuesta.json()) == CLAVES_ANALISIS_CV
+    assert respuesta.json() == ejemplo("analisis_cv")

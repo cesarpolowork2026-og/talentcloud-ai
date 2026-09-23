@@ -12,6 +12,13 @@ dependencies = [
     "tzdata>=2024.1",
 ]
 
+[project.optional-dependencies]
+# Modelo de embeddings real. Fuera de las dependencias base para que el CI y los tests no descarguen PyTorch.
+ml = [
+    "sentence-transformers>=5.0,<7",
+    "torch>=2.6",
+]
+
 [dependency-groups]
 dev = [
     "httpx>=0.28",
@@ -20,6 +27,15 @@ dev = [
     "pytest-cov>=6.0",
     "ruff>=0.11",
 ]
+
+# PyTorch solo para CPU (Cloud Run no tiene GPU): la imagen es varias veces más pequeña.
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [build-system]
 requires = ["hatchling"]
@@ -52,6 +68,11 @@ mypy_path = "src"
 packages = ["talentcloud_ai"]
 plugins = ["pydantic.mypy"]
 
+[[tool.mypy.overrides]]
+# Sin tipos publicados (y ausentes cuando no se instala el extra "ml").
+module = ["sentence_transformers", "sentence_transformers.*", "torch", "torch.*"]
+ignore_missing_imports = true
+
 [tool.pydantic-mypy]
 init_forbid_extra = true
 init_typed = true
@@ -62,6 +83,7 @@ testpaths = ["tests"]
 # y una ruta con tildes ("Décimo") rompe la instalación editable.
 pythonpath = ["src"]
 addopts = "-q --strict-markers"
+markers = ["modelo: usa el modelo real de embeddings (requiere el extra ml; se omite si no está instalado)"]
 
 [tool.coverage.run]
 source = ["talentcloud_ai"]

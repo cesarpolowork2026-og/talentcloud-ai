@@ -56,11 +56,12 @@ class Certificacion(Salida):
 
 
 class Fragmento(Salida):
-    """Unidad de texto para embeddings. Nunca incluye el encabezado ni los datos personales."""
+    """Unidad de texto con su embedding. Nunca incluye el encabezado ni los datos personales."""
 
     seccion: SeccionCv
     orden: int
     texto: str
+    embedding: list[float] | None = None
 
 
 class AnalisisCv(Salida):
@@ -71,3 +72,5 @@ class AnalisisCv(Salida):
     cargos: list[Cargo]
     certificaciones: list[Certificacion]
     fragmentos: list[Fragmento]
+    # Modelo que generó los embeddings de los fragmentos (para reindexar si cambia).
+    modelo_embeddings: str | None = None

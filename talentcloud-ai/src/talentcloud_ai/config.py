@@ -16,8 +16,9 @@ class Settings(BaseSettings):
     # en GCP el acceso lo restringe además Cloud Run (solo invocación autenticada).
     api_key: SecretStr | None = None
 
-    # "determinista" es un embedder sin modelo, para tests y desarrollo sin descargar pesos.
-    embeddings_backend: Literal["determinista", "sentence-transformers"] = "determinista"
+    # "sentence-transformers" requiere el extra "ml". "determinista" no usa modelo: para tests y para
+    # desarrollar sin descargar los pesos (los vectores no captan significado).
+    embeddings_backend: Literal["determinista", "sentence-transformers"] = "sentence-transformers"
     modelo_embeddings: str = "paraphrase-multilingual-MiniLM-L12-v2"
     dimensiones_embeddings: int = 384
 

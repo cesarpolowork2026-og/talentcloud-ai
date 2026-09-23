@@ -18,6 +18,12 @@ HOY = date(2026, 9, 23)
 API_KEY = "clave-de-prueba"
 
 
+def configuracion(**cambios: object) -> Settings:
+    """Settings de test: sin modelo real (embedder determinista) salvo que se pida otro."""
+    valores: dict[str, object] = {"entorno": "testing", "embeddings_backend": "determinista", **cambios}
+    return Settings.model_validate(valores)
+
+
 @pytest.fixture(scope="session")
 def catalogo() -> list[CompetenciaCatalogo]:
     """Copia del catálogo base de Laravel (CatalogoCompetenciasSeeder)."""
@@ -48,7 +54,7 @@ def ejemplo() -> Callable[[str], dict[str, object]]:
 
 @pytest.fixture
 def cliente() -> Iterator[TestClient]:
-    app = crear_app(Settings(entorno="testing", api_key=SecretStr(API_KEY)))
+    app = crear_app(configuracion(api_key=SecretStr(API_KEY)))
     app.dependency_overrides[hoy] = lambda: HOY
     with TestClient(app, headers={"X-Api-Key": API_KEY}) as cliente:
         yield cliente

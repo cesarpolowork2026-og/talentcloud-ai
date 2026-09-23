@@ -6,7 +6,8 @@ Stack: Laravel 12 · PHP 8.2 · Livewire 3 (Volt) + Alpine · Tailwind CSS 3 · 
 
 ## Requisitos
 
-PHP 8.2 con `pdo_pgsql`, `intl`, `zip`, `gd`; Composer 2; Node 20+; Docker Desktop.
+PHP 8.2 con `pdo_pgsql`, `intl`, `zip`, `gd`; Composer 2; Node 20+; Docker Desktop; Python 3.11 y
+[uv](https://docs.astral.sh/uv/) para el servicio de IA (`../talentcloud-ai`).
 
 ## Puesta en marcha
 
@@ -16,15 +17,23 @@ cp .env.example .env          # completar DB_PASSWORD
 composer install && npm install
 php artisan key:generate
 php artisan migrate
-composer dev                  # servidor, cola (ia, default) y Vite
+(cd ../talentcloud-ai && uv sync --extra ml)   # servicio de IA con el modelo de embeddings
+composer dev                  # servidor, cola (ia, default), Vite y servicio de IA (puerto 8001)
 ```
+
+Servicio de IA: con `IA_HABILITADA=true`, cada CV procesado se analiza (competencias, años, fragmentos con
+embedding) y cada cambio de requisitos genera sus embeddings, en la cola `ia`. `IA_API_KEY` debe coincidir con
+`TALENTCLOUD_AI_API_KEY` de `talentcloud-ai/.env`. Con `IA_HABILITADA=false` todo funciona igual con el análisis
+básico. La primera vez, el servicio descarga el modelo (unos 470 MB).
 
 - App: http://localhost:8000
 - Correos capturados (Mailpit): http://localhost:8025
 
 ## Datos de demostración
 
-`php artisan migrate:fresh --seed` carga los datos del prototipo. Todas las cuentas usan la contraseña `password`:
+`php artisan migrate:fresh --seed` carga los datos del prototipo; después, con el servicio de IA en marcha,
+`php artisan talentcloud:reindexar-embeddings --sync` analiza sus CV y requisitos (el seeder no depende del
+servicio). Todas las cuentas usan la contraseña `password`:
 
 | Cuenta | Rol | Empresa |
 | --- | --- | --- |

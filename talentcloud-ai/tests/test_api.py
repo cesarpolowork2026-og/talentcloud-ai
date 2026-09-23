@@ -4,19 +4,20 @@ from collections.abc import Callable
 from fastapi.testclient import TestClient
 
 from talentcloud_ai.api.dependencias import hoy
-from talentcloud_ai.config import Settings
 from talentcloud_ai.contrato.comun import MAX_TEXTO_CV
 from talentcloud_ai.embeddings.determinista import EmbedderDeterminista
 from talentcloud_ai.main import crear_app
+from tests.conftest import configuracion
 
 
 def test_informa_su_estado_sin_clave() -> None:
-    with TestClient(crear_app(Settings(entorno="testing"))) as cliente:
+    with TestClient(crear_app(configuracion())) as cliente:
         respuesta = cliente.get("/health")
 
     assert respuesta.status_code == 200
     assert respuesta.json()["estado"] == "ok"
     assert respuesta.json()["modelo_embeddings"] == "determinista-hashing"
+    assert respuesta.json()["dimensiones_embeddings"] == 384
 
 
 def test_exige_la_clave_de_api_en_los_endpoints_protegidos(
@@ -64,6 +65,8 @@ def test_analiza_un_cv(cliente: TestClient, cv: Callable[[str], str]) -> None:
     assert {c["competencia_id"]: c["dudosa"] for c in datos["competencias"]} == {7: False, 8: True}
     assert datos["cargos"][0]["organizacion"] == "Fintech Andina"
     assert all(f["seccion"] != "encabezado" for f in datos["fragmentos"])
+    assert datos["modelo_embeddings"] == "determinista-hashing"
+    assert all(len(f["embedding"]) == 384 for f in datos["fragmentos"])
 
 
 def test_genera_embeddings_normalizados(cliente: TestClient) -> None:
@@ -89,7 +92,7 @@ def test_el_embedder_determinista_es_estable_y_distingue_textos() -> None:
 
 
 def test_oculta_la_documentacion_en_produccion() -> None:
-    with TestClient(crear_app(Settings(entorno="production"))) as cliente:
+    with TestClient(crear_app(configuracion(entorno="production"))) as cliente:
         assert cliente.get("/docs").status_code == 404
         assert cliente.get("/openapi.json").status_code == 404
 

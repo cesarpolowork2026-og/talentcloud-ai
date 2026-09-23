@@ -3,12 +3,14 @@
 namespace App\Services\Candidatos;
 
 use App\Enums\FuenteCompetencia;
+use App\Ia\CompetenciaExtraida;
 use App\Models\Candidato;
 use App\Models\Competencia;
 
 /**
- * Competencias registradas a mano. Las extraídas del CV por la IA
- * (fuente = extraccion) no se editan aquí: se regeneran con cada análisis.
+ * Competencias del candidato. Las manuales se agregan y quitan una a una;
+ * las extraídas del CV por la IA (fuente = extraccion) no se editan a mano:
+ * se reemplazan en bloque con cada análisis.
  */
 class CompetenciasDelCandidato
 {
@@ -33,5 +35,25 @@ class CompetenciasDelCandidato
         $candidato->competencias()
             ->wherePivot('fuente', FuenteCompetencia::Manual->value)
             ->detach($competenciaId);
+    }
+
+    /**
+     * Sustituye las competencias extraídas del CV (las manuales no se tocan).
+     *
+     * @param  list<CompetenciaExtraida>  $extraidas
+     */
+    public function reemplazarExtraidas(int $candidatoId, array $extraidas): void
+    {
+        $candidato = Candidato::findOrFail($candidatoId);
+
+        $candidato->competencias()->wherePivot('fuente', FuenteCompetencia::Extraccion->value)->detach();
+
+        $candidato->competencias()->attach(collect($extraidas)->mapWithKeys(fn (CompetenciaExtraida $c) => [
+            $c->competenciaId => [
+                'fuente' => FuenteCompetencia::Extraccion->value,
+                'anios' => $c->anios,
+                'evidencia' => $c->evidencia,
+            ],
+        ])->all());
     }
 }

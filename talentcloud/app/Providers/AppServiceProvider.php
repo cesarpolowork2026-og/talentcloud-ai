@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Ia\HttpServicioIa;
+use App\Ia\ServicioIa;
 use App\Matching\FakeMatchingEngine;
 use App\Matching\MatchingEngineInterface;
 use App\Tenancy\TenantContext;
@@ -23,6 +25,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MatchingEngineInterface::class, fn () => match (config('talentcloud.matching.motor')) {
             default => new FakeMatchingEngine,
         });
+
+        $this->app->bind(ServicioIa::class, fn () => new HttpServicioIa(
+            habilitado: (bool) config('talentcloud.ia.habilitada'),
+            url: (string) config('talentcloud.ia.url'),
+            apiKey: config('talentcloud.ia.api_key') ?: null,
+            timeout: (int) config('talentcloud.ia.timeout'),
+            reintentos: (int) config('talentcloud.ia.reintentos'),
+        ));
     }
 
     /**

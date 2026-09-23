@@ -9,8 +9,31 @@ class BackendNoDisponibleError(RuntimeError):
     """El backend de embeddings configurado no está instalado en este entorno."""
 
 
+class DimensionesIncompatiblesError(RuntimeError):
+    """El modelo no produce vectores del tamaño que espera la base de datos (vector(384) en Laravel)."""
+
+
 def crear_embedder(settings: Settings) -> Embedder:
+    embedder = _construir(settings)
+    # Falla al iniciar, no al guardar: un vector de otro tamaño no cabe en la columna de pgvector.
+    if embedder.dimensiones != settings.dimensiones_embeddings:
+        raise DimensionesIncompatiblesError(
+            f"El modelo {embedder.modelo} produce {embedder.dimensiones} dimensiones; "
+            f"se esperaban {settings.dimensiones_embeddings}."
+        )
+    return embedder
+
+
+def _construir(settings: Settings) -> Embedder:
     if settings.embeddings_backend == "determinista":
         return EmbedderDeterminista(settings.dimensiones_embeddings)
-    # sentence-transformers llega el día 13, con su propio grupo de dependencias.
-    raise BackendNoDisponibleError(f"El backend de embeddings '{settings.embeddings_backend}' aún no está disponible.")
+
+    try:
+        # Importación diferida: solo existe con el extra "ml".
+        from talentcloud_ai.embeddings.sentence_transformers import EmbedderSentenceTransformers  # noqa: PLC0415
+    except ImportError as error:
+        raise BackendNoDisponibleError(
+            "sentence-transformers no está instalado: ejecuta `uv sync --extra ml`."
+        ) from error
+
+    return EmbedderSentenceTransformers(settings.modelo_embeddings)
