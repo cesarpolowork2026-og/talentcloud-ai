@@ -1,0 +1,31 @@
+# Servicios de desarrollo local. El PostgreSQL 17 instalado en Windows usa el 5432;
+# este contenedor (con pgvector) usa el 5433.
+services:
+  pgsql:
+    image: pgvector/pgvector:pg17
+    container_name: talentcloud-pgsql
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: talentcloud
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgsql-data:/var/lib/postgresql/data
+      - ./docker/pgsql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "talentcloud"]
+      interval: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: talentcloud-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Interfaz web: http://localhost:8025
+
+volumes:
+  pgsql-data:

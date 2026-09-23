@@ -1,0 +1,12 @@
+# Sistema operativo y editores
+Thumbs.db
+.DS_Store
+/.vscode
+/.idea
+
+# Servicio IA (Python)
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+talentcloud-ai/.env

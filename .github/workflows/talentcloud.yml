@@ -1,0 +1,67 @@
+name: talentcloud
+
+on:
+  push:
+    paths: ['talentcloud/**', '.github/workflows/talentcloud.yml']
+  pull_request:
+    paths: ['talentcloud/**', '.github/workflows/talentcloud.yml']
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: talentcloud
+
+    services:
+      pgsql:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: talentcloud_testing
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_pgsql, pgsql, intl, zip, gd, mbstring, fileinfo, bcmath
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: talentcloud/package-lock.json
+
+      - name: Dependencias PHP
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Dependencias y build de frontend
+        run: npm ci && npm run build
+
+      - name: Entorno
+        run: cp .env.example .env && php artisan key:generate
+
+      - name: Pint
+        run: vendor/bin/pint --test
+
+      - name: Larastan
+        run: composer analyse
+
+      - name: Tests
+        run: php artisan test
