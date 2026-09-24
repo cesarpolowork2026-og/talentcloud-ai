@@ -4,6 +4,7 @@ use App\DTO\RegistroPostulanteData;
 use App\Models\User;
 use App\Services\Registro\RegistrarPostulante;
 use App\Support\Navegacion;
+use App\Support\LimiteDeRegistros;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
@@ -28,6 +29,8 @@ new #[Layout('layouts.guest')] #[Title('Registro de postulante')] class extends 
         ], [
             'consentimiento.accepted' => 'Debes aceptar el tratamiento de tus datos para registrarte.',
         ]);
+
+        LimiteDeRegistros::contar('email');
 
         $user = $registrar->ejecutar(new RegistroPostulanteData(
             nombre: $validated['name'],

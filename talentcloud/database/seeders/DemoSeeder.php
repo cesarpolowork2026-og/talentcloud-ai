@@ -128,7 +128,7 @@ class DemoSeeder extends Seeder
         // — Candidatos (pantalla "Candidatos") con sus competencias —
         $elena = $this->candidato('Elena Ruiz', 'elena.ruiz@correo.com', 'Desarrolladora Backend', $nimbus, ['Java', 'Spring Boot', 'PostgreSQL']);
         $sofia = $this->candidato('Sofía Nieto', 'sofia.nieto@correo.com', 'Desarrolladora Backend', $nimbus, ['Java', 'Docker', 'Kubernetes']);
-        $marco = $this->candidato('Marco Díaz', 'marco@correo.com', 'Desarrollador Backend', null, ['Java', 'MySQL'], $marcoUsuario);
+        $marco = $this->candidato('Marco Díaz', 'marco@correo.com', 'Desarrollador Backend', null, ['Java', 'MySQL'], $marcoUsuario, anotadasPor: $nimbus);
         $ivan = $this->candidato('Iván Torres', 'ivan.torres@correo.com', 'Diseñador de Producto', $vela, ['Figma', 'Research']);
         $lucia = $this->candidato('Lucía Prat', 'lucia.prat@correo.com', 'Analista de Datos', $nimbus, ['SQL', 'Python']);
         $pablo = $this->candidato('Pablo Vega', 'pablo.vega@correo.com', 'QA Engineer', $orbita, ['Selenium']);
@@ -239,9 +239,9 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * @param  list<string>  $competencias
+     * @param  list<string>  $competencias  competencias manuales, anotadas por la empresa de origen (o por $anotadasPor)
      */
-    private function candidato(string $nombre, string $email, string $titular, ?Empresa $origen, array $competencias, ?User $usuario = null): Candidato
+    private function candidato(string $nombre, string $email, string $titular, ?Empresa $origen, array $competencias, ?User $usuario = null, ?Empresa $anotadasPor = null): Candidato
     {
         $candidato = Candidato::updateOrCreate(
             ['email' => $email],
@@ -254,10 +254,10 @@ class DemoSeeder extends Seeder
             ],
         );
 
-        $candidato->competencias()->syncWithPivotValues(
-            array_map(fn (string $c) => $this->competencia($c)->id, $competencias),
-            ['fuente' => FuenteCompetencia::Manual->value],
-        );
+        $candidato->todasLasCompetencias()
+            ->withPivotValue('fuente', FuenteCompetencia::Manual->value)
+            ->withPivotValue('empresa_id', ($anotadasPor ?? $origen)?->id)
+            ->sync(array_map(fn (string $c) => $this->competencia($c)->id, $competencias));
 
         return $candidato;
     }

@@ -33,7 +33,7 @@ class DashboardService
         $promedio = (clone $conMatch)->avg('match_score');
 
         return new ResumenDelDashboard(
-            vacantesActivas: Vacante::query()->whereIn('estado', [EstadoVacante::Abierta, EstadoVacante::EnRevision])->count(),
+            vacantesActivas: Vacante::query()->whereIn('estado', EstadoVacante::activos())->count(),
             candidatosEvaluados: Evaluacion::query()
                 ->join('postulaciones', 'postulaciones.id', '=', 'evaluaciones.postulacion_id')
                 ->distinct()

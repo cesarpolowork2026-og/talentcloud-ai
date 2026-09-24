@@ -66,6 +66,20 @@ it('invita a un reclutador por correo y lo muestra como Invitado', function () {
     Livewire::test(Panel::class)->assertSee('Ana López')->assertSee('Invitado');
 });
 
+it('si el correo no sale, avisa y no deja una invitación que nadie recibió', function () {
+    // Servidor SMTP inalcanzable: la conexión se rechaza al instante.
+    config(['mail.default' => 'smtp', 'mail.mailers.smtp.host' => '127.0.0.1', 'mail.mailers.smtp.port' => 1, 'mail.mailers.smtp.timeout' => 1]);
+
+    Livewire::test(Panel::class)
+        ->call('abrirInvitacion')
+        ->set('invitadoNombre', 'Ana López')
+        ->set('invitadoEmail', 'ana@nimbus.com')
+        ->call('invitar')
+        ->assertHasErrors(['invitadoEmail']);
+
+    expect(Invitacion::query()->withoutGlobalScope(EmpresaScope::class)->where('email', 'ana@nimbus.com')->exists())->toBeFalse();
+});
+
 it('no invita a un correo que ya tiene cuenta', function () {
     Livewire::test(Panel::class)
         ->set('invitadoNombre', 'Marta')

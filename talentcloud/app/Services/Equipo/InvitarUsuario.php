@@ -13,6 +13,7 @@ use App\Repositories\Contracts\EquipoRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 /**
  * Invita a una persona al equipo de una empresa. Genera un token de un solo
@@ -39,26 +40,33 @@ class InvitarUsuario
 
         $token = Str::random(64);
 
-        $invitacion = DB::transaction(function () use ($empresa, $datos, $email, $token, $invitador): Invitacion {
-            $this->equipo->retirarInvitacionesPendientes($empresa, $email);
+        try {
+            $invitacion = DB::transaction(function () use ($empresa, $datos, $email, $token, $invitador): Invitacion {
+                $this->equipo->retirarInvitacionesPendientes($empresa, $email);
 
-            $invitacion = $this->equipo->crearInvitacion($empresa, [
-                'nombre' => $datos->nombre,
-                'email' => $email,
-                'rol' => $datos->rol,
-                'token_hash' => hash('sha256', $token),
-                'expira_at' => now()->addDays(self::DIAS_VIGENCIA),
-            ]);
-            $invitacion->invitada_por = $invitador?->id;
-            $invitacion->save();
+                $invitacion = $this->equipo->crearInvitacion($empresa, [
+                    'nombre' => $datos->nombre,
+                    'email' => $email,
+                    'rol' => $datos->rol,
+                    'token_hash' => hash('sha256', $token),
+                    'expira_at' => now()->addDays(self::DIAS_VIGENCIA),
+                ]);
+                $invitacion->invitada_por = $invitador?->id;
+                $invitacion->save();
 
-            return $invitacion;
-        });
+                // Envío síncrono (el token en claro no se guarda en la cola) y dentro de la
+                // transacción: si el correo no sale, no queda una invitación que nadie recibió.
+                Notification::route('mail', $email)->notifyNow(
+                    new InvitacionRecibida($empresa, $invitacion, $token, $invitador?->name),
+                );
 
-        // Envío síncrono: el token en claro no se guarda en la cola.
-        Notification::route('mail', $email)->notifyNow(
-            new InvitacionRecibida($empresa, $invitacion, $token, $invitador?->name),
-        );
+                return $invitacion;
+            });
+        } catch (TransportExceptionInterface $e) {
+            report($e);
+
+            throw new InvitacionNoValida('No se pudo enviar el correo de invitación. Inténtalo de nuevo en unos minutos.');
+        }
 
         InvitacionEnviada::dispatch($empresa, $invitacion, $invitador);
 

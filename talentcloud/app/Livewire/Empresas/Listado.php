@@ -79,7 +79,9 @@ class Listado extends Component
 
     public function verDetalle(int $id): void
     {
-        $this->empresaSeleccionada = $this->empresa($id)->id;
+        $this->authorize('view', $empresa = $this->empresa($id));
+
+        $this->empresaSeleccionada = $empresa->id;
         $this->mostrarDetalle = true;
     }
 

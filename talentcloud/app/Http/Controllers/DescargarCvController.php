@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Cv;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -22,10 +24,19 @@ class DescargarCvController extends Controller
 
         if (! $esLocal && $disco->providesTemporaryUrls()) {
             return redirect()->away($disco->temporaryUrl($cv->ruta, now()->addMinutes(5), [
-                'ResponseContentDisposition' => 'attachment; filename="'.addslashes($cv->nombre_original).'"',
+                'ResponseContentDisposition' => self::disposicion($cv->nombre_original),
             ]));
         }
 
         return $disco->download($cv->ruta, $cv->nombre_original);
+    }
+
+    /** "attachment" con el nombre original bien codificado (tildes, comillas) y un respaldo ASCII. */
+    private static function disposicion(string $nombre): string
+    {
+        $ascii = Str::ascii($nombre);
+        $respaldo = preg_replace('/[^A-Za-z0-9._ -]/', '_', $ascii) ?: 'cv';
+
+        return HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, str_replace(['/', '\\'], '_', $nombre), $respaldo);
     }
 }

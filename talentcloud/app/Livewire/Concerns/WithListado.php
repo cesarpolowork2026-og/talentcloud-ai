@@ -160,9 +160,9 @@ trait WithListado
                         // "postulacion.candidato.nombre": relación anidada hasta el último punto.
                         $relacion = substr($campo, 0, (int) strrpos($campo, '.'));
                         $columna = substr($campo, (int) strrpos($campo, '.') + 1);
-                        $q->orWhereHas($relacion, fn (Builder $r) => $r->where($columna, 'ilike', $patron));
+                        $q->orWhereHas($relacion, fn (Builder $r) => $this->contieneSinTildes($r, $columna, $patron));
                     } else {
-                        $q->orWhere($q->qualifyColumn($campo), 'ilike', $patron);
+                        $this->contieneSinTildes($q, $campo, $patron, 'or');
                     }
                 }
             });
@@ -179,5 +179,20 @@ trait WithListado
 
         // Desempate estable para que la paginación no repita ni salte filas.
         return $consulta->orderBy($consulta->qualifyColumn('id'));
+    }
+
+    /**
+     * Coincidencia sin distinguir mayúsculas ni tildes ("sofia" encuentra a
+     * "Sofía"), con la extensión unaccent de PostgreSQL.
+     *
+     * @template TModel of Model
+     *
+     * @param  Builder<TModel>  $consulta
+     */
+    private function contieneSinTildes(Builder $consulta, string $columna, string $patron, string $union = 'and'): void
+    {
+        $columna = $consulta->getQuery()->getGrammar()->wrap($consulta->qualifyColumn($columna));
+
+        $consulta->whereRaw("unaccent({$columna}) ilike unaccent(?)", [$patron], $union);
     }
 }

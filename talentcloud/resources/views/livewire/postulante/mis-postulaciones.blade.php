@@ -26,7 +26,7 @@
 
         <div class="grid gap-3">
             <livewire:postulante.mi-curriculo />
-            <a href="{{ route('profile') }}" wire:navigate class="text-13 text-neutral-700 hover:text-accent-700">Eliminar mi cuenta y mis datos</a>
+            <a href="{{ route('profile') }}" wire:navigate class="text-13 text-neutral-700 underline hover:text-accent-700">Eliminar mi cuenta y mis datos</a>
         </div>
     </div>
 

@@ -44,12 +44,15 @@ it('niega la pantalla Empresas a los demás roles', function (string $rol) {
     $this->actingAs(User::factory()->{$rol}()->create())->get('/empresas')->assertForbidden();
 })->with(['empresa', 'reclutador', 'postulante']);
 
-it('cuenta usuarios y solo las vacantes abiertas', function () {
+it('cuenta usuarios y las vacantes activas (abiertas o en revisión), como el dashboard', function () {
+    Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::EnRevision)->create();
+    Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Borrador)->create();
+
     Livewire::test(Listado::class)
         ->assertViewHas('filas', function ($filas) {
             $nimbus = $filas->firstWhere('nombre', 'Nimbus Corp');
 
-            return $nimbus->usuarios_count === 3 && $nimbus->vacantes_activas_count === 2;
+            return $nimbus->usuarios_count === 3 && $nimbus->vacantes_activas_count === 3;
         });
 });
 

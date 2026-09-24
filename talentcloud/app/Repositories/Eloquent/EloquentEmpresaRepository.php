@@ -61,7 +61,7 @@ class EloquentEmpresaRepository implements EmpresaRepository
             'usuarios',
             'vacantes as vacantes_activas_count' => fn (Builder $q) => $q
                 ->withoutGlobalScope(EmpresaScope::class)
-                ->where('estado', EstadoVacante::Abierta),
+                ->whereIn('estado', EstadoVacante::activos()),
         ];
     }
 }

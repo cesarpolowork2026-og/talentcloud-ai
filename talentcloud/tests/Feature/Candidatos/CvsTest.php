@@ -41,6 +41,14 @@ it('rechaza un archivo dañado', function () {
     app(LectorDeCv::class)->leer('esto no es un pdf', SubirCv::MIMES['pdf']);
 })->throws(ArchivoIlegible::class);
 
+it('recorta un documento más largo que el máximo que acepta el servicio de IA', function () {
+    $largo = str_repeat("Experiencia con Java y Spring Boot en sistemas de pagos.\n", 4_000);
+
+    $texto = app(LectorDeCv::class)->leer(DocumentosDePrueba::docx($largo), SubirCv::MIMES['docx']);
+
+    expect(mb_strlen($texto))->toBe(LectorDeCv::MAXIMO_CARACTERES);
+});
+
 it('normaliza espacios y saltos de línea', function () {
     expect(LectorDeCv::normalizar("  Java\t\t y   Spring \r\n\r\n\r\n\r\nDocker  "))->toBe("Java y Spring\n\nDocker");
 });

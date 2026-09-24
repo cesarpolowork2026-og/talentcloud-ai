@@ -134,7 +134,7 @@ it('reemplaza el análisis anterior sin tocar las competencias manuales', functi
 
     expect($cv->fragmentos()->pluck('texto')->all())->toBe(['Solo uno.'])
         ->and(competenciasExtraidas($this->candidato))->toBe(['Java' => 3.0])
-        ->and($this->candidato->competencias()->wherePivot('fuente', FuenteCompetencia::Manual->value)->pluck('nombre')->all())->toBe(['Liderazgo']);
+        ->and($this->candidato->todasLasCompetencias()->wherePivot('fuente', FuenteCompetencia::Manual->value)->pluck('nombre')->all())->toBe(['Liderazgo']);
 });
 
 it('no deja que un CV anterior pise las competencias del CV vigente', function () {

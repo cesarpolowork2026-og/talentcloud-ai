@@ -3,6 +3,7 @@
 use App\DTO\RegistroEmpresaData;
 use App\Models\User;
 use App\Services\Registro\RegistrarEmpresa;
+use App\Support\LimiteDeRegistros;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
@@ -28,6 +29,8 @@ new #[Layout('layouts.guest')] #[Title('Crear empresa')] class extends Component
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ], attributes: ['empresa' => 'nombre de la empresa', 'name' => 'tu nombre']);
+
+        LimiteDeRegistros::contar('email');
 
         $user = $registrar->ejecutar(new RegistroEmpresaData(
             nombreEmpresa: $validated['empresa'],

@@ -54,6 +54,17 @@ enum EstadoVacante: string
         };
     }
 
+    /**
+     * "Vacantes activas" (Dashboard, Mi empresa, Empresas): procesos en curso,
+     * publicados y no cerrados.
+     *
+     * @return list<self>
+     */
+    public static function activos(): array
+    {
+        return [self::Abierta, self::EnRevision];
+    }
+
     /** Se pueden editar datos y requisitos mientras no esté cerrada. */
     public function esEditable(): bool
     {

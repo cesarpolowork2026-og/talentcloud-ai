@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\FuenteCompetencia;
 use App\Tenancy\EmpresaScope;
+use App\Tenancy\TenantContext;
 use Database\Factories\CandidatoFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,14 +49,6 @@ class Candidato extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
-     */
-    public function usuario(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    /**
      * @return BelongsTo<Empresa, $this>
      */
     public function empresaOrigen(): BelongsTo
@@ -90,14 +85,36 @@ class Candidato extends Model
     }
 
     /**
-     * Competencias manuales o extraídas del CV.
+     * Competencias visibles en el contexto actual: las extraídas del CV por la
+     * IA y las manuales de la empresa en curso (el admin SaaS ve todas). Las
+     * manuales son anotaciones de cada empresa sobre un candidato global.
      *
      * @return BelongsToMany<Competencia, $this>
      */
     public function competencias(): BelongsToMany
     {
+        $contexto = app(TenantContext::class);
+        $relacion = $this->todasLasCompetencias();
+
+        if ($contexto->esGlobal()) {
+            return $relacion;
+        }
+
+        return $relacion->where(fn (Builder $q) => $q
+            ->where('candidato_competencia.fuente', FuenteCompetencia::Extraccion->value)
+            ->when($contexto->tieneEmpresa(), fn (Builder $q) => $q->orWhere('candidato_competencia.empresa_id', $contexto->id())));
+    }
+
+    /**
+     * Todas sus competencias, de cualquier empresa. Para los servicios que las
+     * modifican (que acotan por fuente y empresa) y tareas de plataforma.
+     *
+     * @return BelongsToMany<Competencia, $this>
+     */
+    public function todasLasCompetencias(): BelongsToMany
+    {
         return $this->belongsToMany(Competencia::class, 'candidato_competencia')
-            ->withPivot(['fuente', 'anios', 'evidencia'])
+            ->withPivot(['fuente', 'empresa_id', 'anios', 'evidencia'])
             ->withTimestamps();
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Candidato;
 use App\Models\User;
 use Livewire\Volt\Volt;
 
@@ -47,6 +48,21 @@ test('profile information can be updated', function () {
     $this->assertSame('test@example.com', $user->email);
     $this->assertFalse($user->notificaciones_email);
     $this->assertNull($user->email_verified_at);
+});
+
+test('el postulante que cambia su nombre o correo actualiza su ficha de candidato', function () {
+    $user = User::factory()->postulante()->create();
+    $candidato = Candidato::factory()->create(['user_id' => $user->id, 'nombre' => $user->name, 'email' => $user->email]);
+
+    $this->actingAs($user);
+
+    Volt::test('profile.update-profile-information-form')
+        ->set('name', 'Marco A. Díaz')
+        ->set('email', 'marco.diaz@correo.com')
+        ->call('updateProfileInformation')
+        ->assertHasNoErrors();
+
+    expect($candidato->refresh()->only('nombre', 'email'))->toBe(['nombre' => 'Marco A. Díaz', 'email' => 'marco.diaz@correo.com']);
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {

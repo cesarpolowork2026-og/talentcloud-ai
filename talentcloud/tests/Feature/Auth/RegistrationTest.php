@@ -7,6 +7,7 @@ use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
 use App\Models\Candidato;
 use App\Models\User;
+use App\Support\LimiteDeRegistros;
 use Livewire\Volt\Volt;
 
 test('registration screen can be rendered', function () {
@@ -92,4 +93,20 @@ test('el postulante no puede registrarse sin aceptar el tratamiento de datos', f
 
     $this->assertGuest();
     expect(User::where('email', 'marco@correo.com')->exists())->toBeFalse();
+});
+
+test('limita las cuentas nuevas por conexión aunque el envío llegue por Livewire', function () {
+    foreach (range(1, LimiteDeRegistros::MAXIMO_POR_HORA + 1) as $i) {
+        auth()->logout();
+        $componente = Volt::test('pages.auth.register-postulante')
+            ->set('name', 'Persona '.$i)
+            ->set('email', "persona{$i}@correo.com")
+            ->set('password', 'password')
+            ->set('password_confirmation', 'password')
+            ->set('consentimiento', true)
+            ->call('register');
+    }
+
+    $componente->assertHasErrors('email');
+    expect(User::where('email', 'like', 'persona%')->count())->toBe(LimiteDeRegistros::MAXIMO_POR_HORA);
 });

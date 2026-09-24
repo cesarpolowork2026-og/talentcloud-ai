@@ -12,6 +12,12 @@ class LectorDeCv
     /** Menos caracteres útiles que esto se considera "sin texto". */
     private const MINIMO_CARACTERES = 40;
 
+    /**
+     * Tope de caracteres que se conservan (MAX_TEXTO_CV del contrato con el servicio de IA):
+     * un CV real es mucho menor; un documento más largo se recorta en vez de quedar sin análisis.
+     */
+    public const MAXIMO_CARACTERES = 200_000;
+
     /** @var list<ExtractorDeTexto> */
     private array $extractores;
 
@@ -33,7 +39,7 @@ class LectorDeCv
                     throw new ArchivoIlegible('El archivo no contiene texto seleccionable (parece un documento escaneado). Sube una versión en PDF con texto o en Word.');
                 }
 
-                return $texto;
+                return mb_substr($texto, 0, self::MAXIMO_CARACTERES);
             }
         }
 

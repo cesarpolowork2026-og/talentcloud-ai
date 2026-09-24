@@ -57,12 +57,17 @@
                     <p class="text-14 text-neutral-600">Sin competencias registradas.</p>
                 @else
                     <div class="flex flex-wrap gap-2">
-                        @foreach ($candidato->competencias as $competencia)
+                        {{-- Una etiqueta por competencia: si tu equipo también la anotó, se muestra la manual (se puede quitar). --}}
+                        @foreach ($candidato->competencias->groupBy('id') as $filas)
+                            @php
+                                $competencia = $filas->firstWhere('pivot.fuente', FuenteCompetencia::Manual->value) ?? $filas->first();
+                                $extraida = $filas->firstWhere('pivot.fuente', FuenteCompetencia::Extraccion->value);
+                            @endphp
                             @if ($competencia->pivot->fuente === FuenteCompetencia::Extraccion->value)
-                                <x-ui.tag tone="accent" title="{{ $competencia->pivot->evidencia }}">{{ $competencia->nombre }} · IA</x-ui.tag>
+                                <x-ui.tag tone="accent" title="{{ $competencia->pivot->evidencia }}" wire:key="comp-{{ $competencia->id }}">{{ $competencia->nombre }} · IA</x-ui.tag>
                             @else
-                                <span class="tag tag-outline gap-1" wire:key="comp-{{ $competencia->id }}">
-                                    {{ $competencia->nombre }}
+                                <span class="tag tag-outline gap-1" wire:key="comp-{{ $competencia->id }}" @if ($extraida) title="{{ $extraida->pivot->evidencia }}" @endif>
+                                    {{ $competencia->nombre }}{{ $extraida ? ' · IA' : '' }}
                                     @if ($puedeEditar)
                                         <button type="button" wire:click="quitarCompetencia({{ $competencia->id }})" class="leading-none" aria-label="Quitar {{ $competencia->nombre }}">×</button>
                                     @endif

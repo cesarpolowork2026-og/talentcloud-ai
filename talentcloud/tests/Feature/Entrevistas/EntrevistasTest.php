@@ -83,6 +83,9 @@ it('busca por candidato o por vacante', function () {
 
     Livewire::test(Listado::class)->set('busqueda', 'lucía')
         ->assertSee('Lucía Prat')->assertDontSeeHtml('>Elena Ruiz</td>');
+    // Sin distinguir tildes ni mayúsculas: se escribe como se escribe.
+    Livewire::test(Listado::class)->set('busqueda', 'LUCIA')
+        ->assertSee('Lucía Prat')->assertDontSeeHtml('>Elena Ruiz</td>');
     Livewire::test(Listado::class)->set('busqueda', 'backend')
         ->assertSeeHtml('>Elena Ruiz</td>')->assertDontSee('Lucía Prat');
 });

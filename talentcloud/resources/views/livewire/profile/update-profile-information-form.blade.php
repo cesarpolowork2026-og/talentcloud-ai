@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Services\Cuenta\ActualizarPerfil;
 use App\Support\Navegacion;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -26,8 +27,9 @@ new class extends Component
     /**
      * Update the profile information for the currently authenticated user.
      */
-    public function updateProfileInformation(): void
+    public function updateProfileInformation(ActualizarPerfil $actualizar): void
     {
+        /** @var User $user */
         $user = Auth::user();
 
         $validated = $this->validate([
@@ -36,13 +38,7 @@ new class extends Component
             'notificaciones_email' => ['boolean'],
         ]);
 
-        $user->fill($validated);
-
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
-
-        $user->save();
+        $actualizar->ejecutar($user, $validated['name'], $validated['email'], $validated['notificaciones_email']);
 
         $this->dispatch('profile-updated', name: $user->name);
     }

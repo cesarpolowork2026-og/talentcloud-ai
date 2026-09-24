@@ -6,25 +6,28 @@ use App\Enums\FuenteCompetencia;
 use App\Ia\CompetenciaExtraida;
 use App\Models\Candidato;
 use App\Models\Competencia;
+use App\Tenancy\TenantContext;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
- * Competencias del candidato. Las manuales se agregan y quitan una a una;
- * las extraídas del CV por la IA (fuente = extraccion) no se editan a mano:
- * se reemplazan en bloque con cada análisis.
+ * Competencias del candidato. Las manuales son anotaciones de la empresa en
+ * curso: se agregan y quitan una a una y solo las ve esa empresa. Las
+ * extraídas del CV por la IA (fuente = extraccion, sin empresa) no se editan
+ * a mano: se reemplazan en bloque con cada análisis.
  */
 class CompetenciasDelCandidato
 {
+    public function __construct(private readonly TenantContext $contexto) {}
+
     public function agregar(Candidato $candidato, string $nombre): Competencia
     {
         $competencia = Competencia::obtenerOCrear($nombre);
 
-        $yaExiste = $candidato->competencias()
-            ->wherePivot('fuente', FuenteCompetencia::Manual->value)
-            ->whereKey($competencia->id)
-            ->exists();
-
-        if (! $yaExiste) {
-            $candidato->competencias()->attach($competencia->id, ['fuente' => FuenteCompetencia::Manual->value]);
+        if (! $this->manualesDeLaEmpresa($candidato)->whereKey($competencia->id)->exists()) {
+            $candidato->todasLasCompetencias()->attach($competencia->id, [
+                'fuente' => FuenteCompetencia::Manual->value,
+                'empresa_id' => $this->contexto->id(),
+            ]);
         }
 
         return $competencia;
@@ -32,9 +35,7 @@ class CompetenciasDelCandidato
 
     public function quitar(Candidato $candidato, int $competenciaId): void
     {
-        $candidato->competencias()
-            ->wherePivot('fuente', FuenteCompetencia::Manual->value)
-            ->detach($competenciaId);
+        $this->manualesDeLaEmpresa($candidato)->detach($competenciaId);
     }
 
     /**
@@ -46,14 +47,29 @@ class CompetenciasDelCandidato
     {
         $candidato = Candidato::findOrFail($candidatoId);
 
-        $candidato->competencias()->wherePivot('fuente', FuenteCompetencia::Extraccion->value)->detach();
+        $candidato->todasLasCompetencias()->wherePivot('fuente', FuenteCompetencia::Extraccion->value)->detach();
 
-        $candidato->competencias()->attach(collect($extraidas)->mapWithKeys(fn (CompetenciaExtraida $c) => [
+        $candidato->todasLasCompetencias()->attach(collect($extraidas)->mapWithKeys(fn (CompetenciaExtraida $c) => [
             $c->competenciaId => [
                 'fuente' => FuenteCompetencia::Extraccion->value,
                 'anios' => $c->anios,
                 'evidencia' => $c->evidencia,
             ],
         ])->all());
+    }
+
+    /**
+     * Manuales de la empresa en curso (sin empresa, en modo global).
+     *
+     * @return BelongsToMany<Competencia, Candidato>
+     */
+    private function manualesDeLaEmpresa(Candidato $candidato): BelongsToMany
+    {
+        $relacion = $candidato->todasLasCompetencias()->wherePivot('fuente', FuenteCompetencia::Manual->value);
+        $empresaId = $this->contexto->id();
+
+        return $empresaId === null
+            ? $relacion->wherePivotNull('empresa_id')
+            : $relacion->wherePivot('empresa_id', $empresaId);
     }
 }
