@@ -53,10 +53,6 @@
                                 data-postulacion="{{ $postulacion->id }}"
                                 wire:key="postulacion-{{ $postulacion->id }}"
                                 wire:click="abrir({{ $postulacion->id }})"
-                                role="button"
-                                tabindex="0"
-                                x-on:keydown.enter.prevent="$wire.abrir({{ $postulacion->id }})"
-                                aria-label="{{ $postulacion->candidato?->nombre }}, {{ $etapa->etiqueta() }}"
                             >
                                 @if ($editable && $etapa !== EtapaPostulacion::Descartado)
                                     <button
@@ -66,7 +62,14 @@
                                         class="absolute right-[6px] top-[6px] p-0.5 text-14 leading-none text-neutral-500 hover:text-accent-2-700"
                                     >×</button>
                                 @endif
-                                <div class="pr-4 text-14 font-semibold">{{ $postulacion->candidato?->nombre }}</div>
+                                {{-- El nombre es el botón de la tarjeta (teclado y lectores de pantalla); la tarjeta
+                                     también se abre con un clic en cualquier parte. Sin botones anidados. --}}
+                                <button
+                                    type="button"
+                                    wire:click.stop="abrir({{ $postulacion->id }})"
+                                    aria-label="{{ $postulacion->candidato?->nombre }}, {{ $etapa->etiqueta() }}"
+                                    class="block pr-4 text-left text-14 font-semibold text-ink"
+                                >{{ $postulacion->candidato?->nombre }}</button>
                                 <div class="mt-0.5 text-13 text-neutral-700">{{ $postulacion->candidato?->titular }}</div>
                                 @if ($postulacion->matchPorcentaje() !== null)
                                     <div class="mt-2"><x-ui.tag tone="accent">{{ $postulacion->matchPorcentaje() }}% match</x-ui.tag></div>

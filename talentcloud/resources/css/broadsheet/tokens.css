@@ -17,7 +17,7 @@
   --color-neutral-300: #d7d3d3;
   --color-neutral-400: #bab6b6;
   --color-neutral-500: #9b9797;
-  --color-neutral-600: #7d7979;
+  --color-neutral-600: #6b6767; /* TalentCloud: el DS usa #7d7979 (3,84:1 sobre el fondo); #6b6767 da 4,98:1 (WCAG AA) */
   --color-neutral-700: #605d5d;
   --color-neutral-800: #444141;
   --color-neutral-900: #2d2b2b;

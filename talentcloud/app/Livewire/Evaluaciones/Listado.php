@@ -5,6 +5,7 @@ namespace App\Livewire\Evaluaciones;
 use App\DTO\EvaluacionData;
 use App\Enums\CriterioEvaluacion;
 use App\Enums\EstadoEvaluacion;
+use App\Exports\EvaluacionesExport;
 use App\Livewire\Concerns\WithListado;
 use App\Models\Evaluacion;
 use App\Models\Postulacion;
@@ -18,6 +19,8 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /** Pantalla "Evaluaciones" (prototipo: isEvaluaciones) + formulario por criterios. */
 #[Title('Evaluaciones')]
@@ -144,6 +147,14 @@ class Listado extends Component
         $validos = array_filter($this->puntajes, fn (string $p) => is_numeric($p) && $p >= 0 && $p <= CriterioEvaluacion::PUNTAJE_MAXIMO);
 
         return Evaluacion::promediar(array_map(fn (string $p) => ['nombre' => '', 'puntaje' => (float) $p], array_values($validos)));
+    }
+
+    /** "Exportar a Excel": lo que se ve, con la búsqueda y los filtros vigentes. */
+    public function exportar(EvaluacionRepository $evaluaciones): BinaryFileResponse
+    {
+        $this->authorize('viewAny', Evaluacion::class);
+
+        return Excel::download(new EvaluacionesExport($this->filtrar($evaluaciones->consultaListado()->latest())), 'evaluaciones-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function render(EvaluacionRepository $evaluaciones): View

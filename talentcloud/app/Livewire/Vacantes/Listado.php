@@ -6,6 +6,7 @@ use App\DTO\NuevaVacanteData;
 use App\Enums\EstadoVacante;
 use App\Enums\Modalidad;
 use App\Enums\Rol;
+use App\Exports\VacantesExport;
 use App\Livewire\Concerns\WithListado;
 use App\Models\Empresa;
 use App\Models\User;
@@ -18,6 +19,8 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /** Pantalla "Vacantes" (prototipo: isVacantes). */
 #[Title('Vacantes')]
@@ -158,6 +161,14 @@ class Listado extends Component
         }
 
         $this->redirectRoute('vacantes.show', $vacante, navigate: true);
+    }
+
+    /** "Exportar a Excel": lo que se ve, con la búsqueda y los filtros vigentes. */
+    public function exportar(VacanteRepository $vacantes): BinaryFileResponse
+    {
+        $this->authorize('viewAny', Vacante::class);
+
+        return Excel::download(new VacantesExport($this->filtrar($vacantes->consultaListado())), 'vacantes-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function render(VacanteRepository $vacantes): View

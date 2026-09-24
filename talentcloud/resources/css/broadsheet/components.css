@@ -191,4 +191,23 @@
   .tc-skel { animation: tc-pulse 1.2s ease-in-out infinite; background: var(--color-neutral-200); border-radius: var(--radius-md); }
   @keyframes tc-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
   @media (prefers-reduced-motion: reduce) { .tc-skel { animation: none; } }
+
+  /* TalentCloud: contraste AA (WCAG 1.4.3), medido con axe-core. El acento #0088b0 da 3,65:1 como
+     texto sobre el fondo y bajo texto claro: para texto y fondos de botón se usan los tonos 700
+     (5,7:1). El resto de usos del acento (bordes, barras, iconos) no cambia. */
+  .card-kicker, .tag-outline, .btn-ghost, .btn-ghost:hover { color: var(--color-accent-700); }
+  .tag-outline { border-color: var(--color-accent-700); }
+  .btn-primary { background: var(--color-accent-700); }
+  .btn-primary:hover { background: var(--color-accent-800); }
+  .btn-primary:active { background: var(--color-accent-900); }
+  .btn-danger { background: var(--color-accent-2-700); border-color: var(--color-accent-2-700); }
+  .btn-danger:hover { background: var(--color-accent-2-800); border-color: var(--color-accent-2-800); }
+  .nav a:hover, .nav a[aria-current='page'] { color: var(--color-accent-700); }
+  .seg-opt:has(input:checked) { background: var(--color-accent-700); }
+  /* Encabezados de tabla y metadatos de tarjeta: el DS mezcla el texto al 60 % (4,2:1 y 3,1:1). */
+  .table th { color: color-mix(in srgb, var(--color-text) 72%, transparent); }
+  .card-meta { color: var(--color-neutral-700); }
+
+  /* TalentCloud: en pantallas estrechas el selector "Ingresar como" (4 opciones) pasa a dos filas. */
+  .seg { flex-wrap: wrap; max-width: 100%; }
 }

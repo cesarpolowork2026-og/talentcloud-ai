@@ -3,11 +3,12 @@
 @use('App\Enums\FuenteCompetencia')
 <div>
     <x-ui.page-header title="Candidatos" subtitle="CVs recibidos y analizados por la IA.">
-        @if ($puedeRegistrar)
-            <x-slot:actions>
+        <x-slot:actions>
+            <x-ui.button wire:click="exportar" wire:loading.attr="disabled" wire:target="exportar">Exportar a Excel</x-ui.button>
+            @if ($puedeRegistrar)
                 <x-ui.button variant="primary" wire:click="abrirFormulario">+ Nuevo candidato</x-ui.button>
-            </x-slot:actions>
-        @endif
+            @endif
+        </x-slot:actions>
     </x-ui.page-header>
 
     <x-ui.listado-controles

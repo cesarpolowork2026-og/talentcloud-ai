@@ -43,4 +43,11 @@
   /* TalentCloud: durante wire:navigate el layout muestra el esqueleto del
      prototipo en lugar de la barra de progreso de Livewire. */
   #nprogress { display: none !important; }
+
+  /* TalentCloud: un enlace dentro de un texto no se distingue solo por el color (WCAG 1.4.1). */
+  p a, nav[aria-label="Ruta"] a { text-decoration: underline; }
+
+  /* TalentCloud: los hijos de una rejilla no la ensanchan más allá de la pantalla (una tabla o un
+     formulario anchos se adaptan o desplazan dentro de su propio contenedor). */
+  .grid > * { min-width: 0; }
 }

@@ -3,6 +3,7 @@
 <div>
     <x-ui.page-header title="Vacantes" :subtitle="$subtitulo" compact>
         <x-slot:actions>
+            <x-ui.button wire:click="exportar" wire:loading.attr="disabled" wire:target="exportar">Exportar a Excel</x-ui.button>
             @can('create', App\Models\Vacante::class)
                 <x-ui.button variant="primary" wire:click="abrirFormulario">+ Nueva vacante</x-ui.button>
             @endcan

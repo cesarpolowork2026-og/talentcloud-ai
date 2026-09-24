@@ -4,6 +4,7 @@ namespace App\Livewire\Candidatos;
 
 use App\DTO\NuevoCandidatoData;
 use App\Enums\EstadoVacante;
+use App\Exports\CandidatosExport;
 use App\Livewire\Concerns\WithListado;
 use App\Models\Candidato;
 use App\Models\Cv;
@@ -21,6 +22,8 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /** Pantalla "Candidatos" (prototipo: isCandidatos). */
 #[Title('Candidatos')]
@@ -162,6 +165,14 @@ class Listado extends Component
 
         $this->mostrarFormulario = false;
         $this->reset('nombre', 'email', 'telefono', 'titular', 'vacanteId', 'archivoCv', 'autorizado');
+    }
+
+    /** "Exportar a Excel": lo que se ve, con la búsqueda y los filtros vigentes. */
+    public function exportar(CandidatoRepository $candidatos): BinaryFileResponse
+    {
+        $this->authorize('viewAny', Candidato::class);
+
+        return Excel::download(new CandidatosExport($this->filtrar($candidatos->consultaListado())), 'candidatos-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function render(CandidatoRepository $candidatos): View

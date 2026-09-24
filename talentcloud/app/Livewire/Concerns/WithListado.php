@@ -135,6 +135,20 @@ trait WithListado
      */
     protected function listar(Builder $consulta): LengthAwarePaginator
     {
+        return $this->filtrar($consulta)->paginate($this->porPagina());
+    }
+
+    /**
+     * Búsqueda, filtro de estado y orden vigentes, sin paginar: lo que se ve en
+     * pantalla (la exportación a Excel usa esta misma consulta).
+     *
+     * @template TModel of Model
+     *
+     * @param  Builder<TModel>  $consulta
+     * @return Builder<TModel>
+     */
+    protected function filtrar(Builder $consulta): Builder
+    {
         $termino = trim($this->busqueda);
 
         if ($termino !== '') {
@@ -164,8 +178,6 @@ trait WithListado
         }
 
         // Desempate estable para que la paginación no repita ni salte filas.
-        $consulta->orderBy($consulta->qualifyColumn('id'));
-
-        return $consulta->paginate($this->porPagina());
+        return $consulta->orderBy($consulta->qualifyColumn('id'));
     }
 }
