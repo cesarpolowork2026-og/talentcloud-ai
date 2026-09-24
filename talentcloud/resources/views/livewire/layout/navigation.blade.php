@@ -85,8 +85,8 @@ new class extends Component
     x-data="{ notificaciones: false, perfil: false, menu: false }"
     x-on:keydown.escape.window="notificaciones = false; perfil = false; menu = false"
 >
-    <a href="{{ Navegacion::rutaInicio(auth()->user()) }}" wire:navigate class="nav-brand !text-18 !text-ink hover:!text-ink hover:!no-underline">
-        TalentCloud <x-ui.tag tone="outline" class="ml-1">AI</x-ui.tag>
+    <a href="{{ Navegacion::rutaInicio(auth()->user()) }}" wire:navigate class="nav-brand hover:!no-underline" aria-label="TalentCloud AI, inicio">
+        <x-marca />
     </a>
 
     {{-- Enlaces (escritorio) --}}

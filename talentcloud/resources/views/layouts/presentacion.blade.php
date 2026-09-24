@@ -18,7 +18,6 @@
         ['icono' => 'calendar-check', 'titulo' => 'Entrevistas y evaluaciones', 'texto' => 'Coordina entrevistas y evalúa por criterios.'],
     ];
 
-    $secciones = ['inicio' => 'Inicio', 'caracteristicas' => 'Características', 'beneficios' => 'Beneficios', 'seguridad' => 'Seguridad'];
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -32,34 +31,7 @@
 <div class="presentacion min-h-screen bg-bg" x-data="{ seccion: 'inicio' }">
     <a href="#acceso" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:shadow-md">Ir al inicio de sesión</a>
 
-    <header class="sticky top-0 z-40 border-b border-divider bg-bg">
-        <div class="mx-auto flex max-w-[1480px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-8">
-            <a href="#inicio" class="flex items-center gap-2 text-ink hover:text-ink hover:no-underline" aria-label="TalentCloud AI, inicio">
-                <x-ui.icon name="cloud" :size="30" class="text-accent-700" />
-                <span class="font-heading text-18 font-semibold tracking-[-0.01em] sm:text-22">TalentCloud</span>
-                <x-ui.tag tone="outline" class="max-[359px]:hidden">AI</x-ui.tag>
-            </a>
-
-            <nav aria-label="Secciones" class="mx-auto hidden gap-6 lg:flex xl:gap-8">
-                @foreach ($secciones as $ancla => $nombre)
-                    <a
-                        href="#{{ $ancla }}"
-                        class="border-b-2 py-2 text-15 hover:no-underline"
-                        :class="seccion === '{{ $ancla }}' ? 'border-accent-700 text-accent-700' : 'border-transparent text-ink hover:text-accent-700'"
-                        :aria-current="seccion === '{{ $ancla }}' ? 'true' : 'false'"
-                    >{{ $nombre }}</a>
-                @endforeach
-            </nav>
-
-            <div class="ml-auto flex items-center gap-2 lg:ml-0">
-                <x-ui.button variant="ghost" :href="route('register')" class="hidden whitespace-nowrap sm:inline-flex lg:hidden xl:inline-flex">Crear empresa</x-ui.button>
-                <x-ui.button href="#acceso" class="whitespace-nowrap" x-on:click="$nextTick(() => document.getElementById('email')?.focus({ preventScroll: true }))">
-                    <span class="sm:hidden">Ingresar</span><span class="hidden sm:inline">Iniciar sesión</span>
-                    <x-ui.icon name="arrow-right" :size="14" class="hidden sm:block" />
-                </x-ui.button>
-            </div>
-        </div>
-    </header>
+    <x-presentacion.cabecera en-presentacion />
 
     <main>
         {{-- Hero: mensaje, pantallas de la app y acceso. --}}
@@ -196,19 +168,7 @@
         </section>
     </main>
 
-    <footer class="border-t border-divider">
-        <div class="mx-auto flex max-w-[1480px] flex-wrap items-center gap-x-8 gap-y-3 px-4 py-6 text-13 text-neutral-700 sm:px-8">
-            <span class="flex items-center gap-2">
-                <x-ui.icon name="cloud" :size="18" class="text-accent-700" />
-                © {{ now()->year }} TalentCloud AI · Reclutamiento con IA explicable.
-            </span>
-            <nav aria-label="Pie de página" class="flex flex-wrap gap-6 sm:ml-auto">
-                @foreach ($secciones as $ancla => $nombre)
-                    <a href="#{{ $ancla }}">{{ $nombre }}</a>
-                @endforeach
-            </nav>
-        </div>
-    </footer>
+    <x-presentacion.pie />
 </div>
 @livewireScripts
 </body>

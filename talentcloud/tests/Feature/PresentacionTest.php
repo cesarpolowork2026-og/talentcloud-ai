@@ -32,3 +32,23 @@ it('lleva al postulante de la raíz y del login a sus postulaciones, no a un das
         ->get($ruta)
         ->assertRedirect(route('postulante.postulaciones'));
 })->with(['/', '/login']);
+
+it('usa la misma cabecera y pie en todas las pantallas públicas', function (string $ruta, int $estado) {
+    $this->get($ruta)
+        ->assertStatus($estado)
+        ->assertSee('aria-label="TalentCloud AI, inicio"', escape: false)
+        ->assertSee(route('inicio').'#caracteristicas', escape: false)
+        ->assertSee('aria-label="Pie de página"', escape: false);
+})->with([
+    'presentación' => ['/', 200],
+    'crear empresa' => ['/register', 200],
+    'registro de postulante' => ['/registro/postulante', 200],
+    'recuperar contraseña' => ['/forgot-password', 200],
+    'invitación' => ['/invitacion/token-inexistente', 200],
+    'página no encontrada' => ['/no-existe', 404],
+]);
+
+it('dirige el mensaje del registro de postulante al candidato', function () {
+    $this->get('/registro/postulante')->assertSee('Postula con tu CV y sigue cada proceso.');
+    $this->get('/register')->assertSee('Encuentra el talento que necesitas.');
+});

@@ -6,10 +6,7 @@
 
 <div class="flex h-full flex-col overflow-hidden rounded-lg border border-divider bg-bg shadow-md">
     <div class="flex shrink-0 items-center gap-3 border-b border-divider bg-white px-5 py-3">
-        <div class="flex items-baseline gap-1.5">
-            <span class="font-heading text-14 font-semibold">TalentCloud</span>
-            <span class="tag tag-outline !px-1.5 !py-0 !text-10">AI</span>
-        </div>
+        <x-marca tamano="pequeno" />
         <div class="mx-auto flex gap-3.5 text-11">
             @foreach (['Dashboard', 'Vacantes', 'Kanban', 'Candidatos', 'Matching', 'Entrevistas', 'Evaluaciones'] as $enlace)
                 <span @class(['text-accent-700 underline decoration-2 underline-offset-[6px]' => $enlace === $activo])>{{ $enlace }}</span>

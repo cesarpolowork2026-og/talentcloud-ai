@@ -29,8 +29,8 @@ new #[Layout('layouts.presentacion')] #[Title('Iniciar sesión')] class extends 
 
 {{-- Formulario de Login.dc.html, en la tarjeta de acceso de la presentación (layouts.presentacion). --}}
 <div class="contents">
-    <h2 class="mb-1 text-24">Iniciar sesión</h2>
-    <p class="mb-5 text-14 text-neutral-700">Bienvenido a TalentCloud. Ingresa con tu cuenta.</p>
+    <h2 class="mb-2 text-28">Iniciar sesión</h2>
+    <p class="mb-6 text-15 text-neutral-700">Bienvenido a TalentCloud. Ingresa con tu cuenta.</p>
 
     @if (session('status'))
         <p class="mb-4 text-14 text-accent-700" role="status">{{ session('status') }}</p>

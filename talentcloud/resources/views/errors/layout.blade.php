@@ -10,19 +10,18 @@
     @include('partials.head', ['title' => $titulo])
 </head>
 <body class="antialiased">
-    <div class="min-h-screen bg-bg">
+    <div class="flex min-h-screen flex-col bg-bg">
         @if ($usuario)
             <livewire:layout.navigation />
         @else
-            <nav class="nav">
-                <span class="nav-brand">TalentCloud <x-ui.tag tone="outline" class="ml-1">AI</x-ui.tag></span>
-            </nav>
+            {{-- Sin sesión: la cabecera de las páginas públicas. --}}
+            <x-presentacion.cabecera />
         @endif
 
-        <main class="mx-auto max-w-page px-4 py-6 sm:p-8">
+        <main class="mx-auto w-full max-w-page flex-1 px-4 py-6 sm:p-8">
             <div class="mx-auto my-8 max-w-[460px] text-center">
                 <x-ui.icon :name="$icono" :size="48" @class(['mx-auto', $colorIcono]) />
-                <h2 class="mb-2 mt-4 text-24">{{ $titulo }}</h2>
+                <h1 class="mb-2 mt-4 text-24">{{ $titulo }}</h1>
                 <p class="text-15 text-neutral-700">{{ $mensaje }}</p>
                 @if (! ($conNavegacion ?? true))
                     <x-ui.button variant="primary" class="mt-4" href="/">Volver al inicio</x-ui.button>
@@ -33,6 +32,10 @@
                 @endif
             </div>
         </main>
+
+        @unless ($usuario)
+            <x-presentacion.pie />
+        @endunless
     </div>
     @livewireScripts
 </body>
