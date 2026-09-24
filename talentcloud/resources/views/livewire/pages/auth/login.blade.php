@@ -8,7 +8,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Volt\Component;
 
-new #[Layout('layouts.guest')] #[Title('Iniciar sesión')] class extends Component
+new #[Layout('layouts.presentacion')] #[Title('Iniciar sesión')] class extends Component
 {
     public LoginForm $form;
 
@@ -27,10 +27,10 @@ new #[Layout('layouts.guest')] #[Title('Iniciar sesión')] class extends Compone
     }
 }; ?>
 
-{{-- Formulario de Login.dc.html --}}
+{{-- Formulario de Login.dc.html, en la tarjeta de acceso de la presentación (layouts.presentacion). --}}
 <div class="contents">
-    <h2 class="mb-2 text-28">Bienvenido a TalentCloud</h2>
-    <p class="mb-6 text-15 text-neutral-700">Gestiona tu proceso de selección desde un solo lugar.</p>
+    <h2 class="mb-1 text-24">Iniciar sesión</h2>
+    <p class="mb-5 text-14 text-neutral-700">Bienvenido a TalentCloud. Ingresa con tu cuenta.</p>
 
     @if (session('status'))
         <p class="mb-4 text-14 text-accent-700" role="status">{{ session('status') }}</p>
@@ -38,7 +38,7 @@ new #[Layout('layouts.guest')] #[Title('Iniciar sesión')] class extends Compone
 
     <form wire:submit="login" class="grid gap-4">
         <x-ui.field label="Correo electrónico" for="email" error="form.email">
-            <x-ui.input wire:model="form.email" id="email" type="email" placeholder="reclutador@empresa.com" error="form.email" required autofocus autocomplete="username" />
+            <x-ui.input wire:model="form.email" id="email" type="email" placeholder="reclutador@empresa.com" error="form.email" required :autofocus="request()->routeIs('login')" autocomplete="username" />
         </x-ui.field>
 
         <x-ui.field label="Contraseña" for="password" error="form.password">
@@ -47,7 +47,7 @@ new #[Layout('layouts.guest')] #[Title('Iniciar sesión')] class extends Compone
 
         <x-ui.field error="form.rol">
             <label id="rol-label">Ingresar como</label>
-            <x-ui.seg labelledby="rol-label">
+            <x-ui.seg labelledby="rol-label" class="seg-rejilla w-full">
                 @foreach (Rol::opciones() as $valor => $etiqueta)
                     <x-ui.seg-option wire:model="form.rol" name="rol" value="{{ $valor }}">{{ $etiqueta }}</x-ui.seg-option>
                 @endforeach
@@ -64,7 +64,7 @@ new #[Layout('layouts.guest')] #[Title('Iniciar sesión')] class extends Compone
         <x-ui.button type="submit" variant="primary" block wire:loading.attr="disabled">Iniciar sesión</x-ui.button>
     </form>
 
-    <p class="mb-0 mt-4 text-center text-14">¿No tienes una cuenta? <a href="{{ route('register') }}" wire:navigate>Crear empresa</a></p>
+    <p class="mb-0 mt-4 text-center text-14">¿No tienes una cuenta? <a href="{{ route('register') }}" wire:navigate class="whitespace-nowrap">Crear empresa</a> · <a href="{{ route('register.postulante') }}" wire:navigate class="whitespace-nowrap">Soy postulante</a></p>
 
     <div class="mt-6 flex items-start gap-2 border-t border-divider pt-4">
         <x-ui.icon name="lock" :size="15" class="mt-0.5 text-neutral-600" />

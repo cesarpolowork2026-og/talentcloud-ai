@@ -1,4 +1,5 @@
 import './bootstrap';
+import './presentacion';
 import Sortable from 'sortablejs';
 
 document.addEventListener('alpine:init', () => {

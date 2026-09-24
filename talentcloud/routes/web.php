@@ -12,8 +12,8 @@ use App\Livewire\MiEmpresa;
 use App\Livewire\Onboarding;
 use App\Livewire\Postulante;
 use App\Livewire\Vacantes;
-use App\Support\Navegacion;
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 /*
  * Rutas por rol según la matriz de permisos del plan (sección 3), tomada del
@@ -21,8 +21,9 @@ use Illuminate\Support\Facades\Route;
  * El filtro por empresa de los datos lo aplica el TenantContext (grupo web).
  */
 
-// Sin página pública: la raíz lleva al panel del usuario o al login.
-Route::get('/', fn () => redirect(Navegacion::rutaInicio(auth()->user())))->name('inicio');
+// Presentación con el login en el hero (layouts.presentacion). Con sesión iniciada,
+// el middleware guest lleva a la pantalla de inicio del rol (bootstrap/app.php).
+Volt::route('/', 'pages.auth.login')->middleware('guest')->name('inicio');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Personal de selección: admin SaaS, empresa y reclutador.

@@ -13,5 +13,6 @@
 
 @import 'tailwindcss/components';
 @import './broadsheet/components.css';
+@import './presentacion.css';
 
 @import 'tailwindcss/utilities';

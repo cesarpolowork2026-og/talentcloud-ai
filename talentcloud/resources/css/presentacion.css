@@ -1,0 +1,46 @@
+/*
+ * TalentCloud: página de presentación (/), con el login en el hero.
+ * Móvil: texto → acceso → pantallas → módulos. Desde 1024 px, dos columnas; desde 1400 px, tres.
+ */
+@layer components {
+  .presentacion-hero {
+    display: grid;
+    gap: var(--space-8);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'texto' 'acceso' 'pantallas' 'modulos';
+  }
+
+  @media (min-width: 1024px) {
+    .presentacion-hero {
+      grid-template-columns: minmax(0, 1fr) 380px;
+      grid-template-areas: 'texto acceso' 'modulos acceso' 'pantallas pantallas';
+      /* El alto de la tarjeta de acceso lo absorbe la fila de módulos, no el hueco entre texto y módulos. */
+      grid-template-rows: auto 1fr auto;
+      column-gap: 60px;
+      align-items: start;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .presentacion-hero {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr) 350px;
+      grid-template-areas: 'texto pantallas acceso' 'modulos modulos modulos';
+      grid-template-rows: auto auto;
+      column-gap: var(--space-8);
+      row-gap: 50px;
+      align-items: start;
+    }
+  }
+
+  .presentacion-texto { grid-area: texto; }
+  .presentacion-acceso { grid-area: acceso; }
+  .presentacion-pantallas { grid-area: pantallas; }
+  .presentacion-modulos { grid-area: modulos; }
+
+  /* Diapositivas apiladas en la misma celda: el cambio no mueve el resto de la página. */
+  .carrusel-pista { display: grid; }
+  .carrusel-pista > * { grid-area: 1 / 1; }
+
+  /* El destino de un ancla queda por debajo de la barra fija. */
+  .presentacion [id] { scroll-margin-top: 90px; }
+}
