@@ -36,7 +36,7 @@ new class extends Component
 }; ?>
 
 <x-ui.card class="!p-6">
-    <h3 class="mb-2 text-16">Eliminar mi cuenta</h3>
+    <h2 class="mb-2 text-16">Eliminar mi cuenta</h2>
     <p class="mb-4 text-14 text-neutral-700">Se eliminarán tu cuenta, tu CV y tus postulaciones. Esta acción no se puede deshacer.</p>
 
     <div>

@@ -81,7 +81,7 @@ new class extends Component
 
 {{-- Barra de navegación del prototipo (TalentCloud App.dc.html). --}}
 <nav
-    class="nav relative flex-wrap"
+    class="nav barra relative flex-wrap"
     x-data="{ notificaciones: false, perfil: false, menu: false }"
     x-on:keydown.escape.window="notificaciones = false; perfil = false; menu = false"
 >
@@ -93,7 +93,7 @@ new class extends Component
     <div class="hidden items-center gap-4 lg:flex">
         @foreach ($enlaces as $enlace)
             @if ($enlace['href'])
-                <a href="{{ $enlace['href'] }}" wire:navigate @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
+                <a href="{{ $enlace['href'] }}" wire:navigate class="barra-enlace" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
             @else
                 <a aria-disabled="true" tabindex="-1" title="Disponible próximamente" class="cursor-default opacity-[0.45]">{{ $enlace['etiqueta'] }}</a>
             @endif
@@ -111,11 +111,11 @@ new class extends Component
                 aria-label="Notificaciones"
                 x-bind:aria-expanded="notificaciones"
                 x-on:click="notificaciones = ! notificaciones; perfil = false"
-                class="relative flex rounded p-1 text-neutral-700 hover:text-accent"
+                class="barra-control relative flex rounded p-1"
             >
                 <x-ui.icon name="bell" :size="20" />
                 @if ($hayNoLeidas)
-                    <span class="absolute right-0.5 top-0.5 h-2 w-2 rounded-full bg-accent-2" aria-hidden="true"></span>
+                    <span class="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-accent-2 ring-2 ring-accent-800" aria-hidden="true"></span>
                     <span class="sr-only">Tienes notificaciones sin leer</span>
                 @endif
             </button>
@@ -155,7 +155,7 @@ new class extends Component
                 type="button"
                 x-bind:aria-expanded="perfil"
                 x-on:click="perfil = ! perfil; notificaciones = false"
-                class="flex items-center gap-2 text-13 text-neutral-700 hover:text-ink"
+                class="barra-control flex items-center gap-2 text-13"
             >
                 <span class="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-accent-100 text-12 font-semibold text-accent-700" aria-hidden="true">{{ $inicial }}</span>
                 <span class="hidden sm:inline">{{ $etiquetaPerfil }}</span>
@@ -184,7 +184,7 @@ new class extends Component
     <div x-show="menu" x-cloak class="flex w-full flex-col gap-1 pt-2 lg:hidden">
         @foreach ($enlaces as $enlace)
             @if ($enlace['href'])
-                <a href="{{ $enlace['href'] }}" wire:navigate class="py-2" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
+                <a href="{{ $enlace['href'] }}" wire:navigate class="barra-enlace py-2" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
             @else
                 <a aria-disabled="true" tabindex="-1" class="cursor-default py-2 opacity-[0.45]">{{ $enlace['etiqueta'] }}</a>
             @endif

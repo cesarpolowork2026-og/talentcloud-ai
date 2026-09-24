@@ -210,6 +210,28 @@
 
   /* TalentCloud: en pantallas estrechas el selector "Ingresar como" (4 opciones) pasa a dos filas. */
   .seg { flex-wrap: wrap; max-width: 100%; }
+  /* TalentCloud: marca (<x-marca>): nube en acento y nombre en tinta; en blanco sobre la barra. */
+  .marca-icono { color: var(--color-accent-700); }
+  .marca-nombre { color: var(--color-text); }
+
+  /* TalentCloud: barra superior en azul teal profundo (accent-800), igual en las páginas públicas
+     y en la app. Texto blanco (10:1), enlace activo en accent-300 (6,8:1) y foco en blanco. Los
+     menús que se abren desde la barra (.card) vuelven al color de texto normal. */
+  .barra { background: var(--color-accent-800); color: #fff; }
+  .barra :focus-visible { outline-color: #fff; }
+  .barra .marca-icono, .barra .marca-nombre { color: #fff; }
+  .barra .tag-outline { color: #fff; border-color: color-mix(in srgb, #fff 70%, transparent); }
+  .barra .barra-enlace { color: #fff; text-decoration: none; }
+  .barra .barra-enlace:hover { color: var(--color-accent-200); }
+  .barra .barra-enlace[aria-current='page'], .barra .barra-enlace[aria-current='true'] { color: var(--color-accent-300); border-color: var(--color-accent-300); }
+  .barra .barra-control { color: var(--color-accent-100); }
+  .barra .barra-control:hover { color: #fff; }
+  .barra .btn-ghost { color: var(--color-accent-200); }
+  .barra .btn-ghost:hover { color: #fff; background: color-mix(in srgb, #fff 12%, transparent); }
+  .barra .btn-secondary { background: #fff; border-color: #fff; color: var(--color-accent-800); }
+  .barra .btn-secondary:hover { background: var(--color-accent-100); color: var(--color-accent-900); }
+  .barra .card { color: var(--color-text); }
+
   /* TalentCloud: variante en rejilla de dos columnas ("Ingresar como" del acceso: 4 opciones en 2 filas parejas). */
   .seg-rejilla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .seg-rejilla .seg-opt { justify-content: center; }

@@ -13,7 +13,7 @@
         <div class="grid gap-8">
             {{-- Postulaciones --}}
             <section>
-                <h3 class="mb-3 text-16">Postulaciones</h3>
+                <h2 class="mb-3 text-16">Postulaciones</h2>
                 @if ($candidato->postulaciones->isEmpty())
                     <p class="text-14 text-neutral-600">Todavía no postuló a vacantes de tu empresa.</p>
                 @else
@@ -50,7 +50,7 @@
 
             {{-- Competencias --}}
             <section>
-                <h3 class="mb-1 text-16">Competencias</h3>
+                <h2 class="mb-1 text-16">Competencias</h2>
                 <p class="mb-3 text-13 text-neutral-600">Las competencias extraídas del CV por la IA se actualizan con cada análisis; las manuales las registra tu equipo.</p>
 
                 @if ($candidato->competencias->isEmpty())

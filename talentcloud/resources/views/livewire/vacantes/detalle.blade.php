@@ -35,7 +35,7 @@
     <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         {{-- Requisitos --}}
         <section>
-            <h3 class="mb-1 text-16">Requisitos</h3>
+            <h2 class="mb-1 text-16">Requisitos</h2>
             <p class="mb-3 text-13 text-neutral-600">La IA compara cada requisito con los CV y explica la evidencia; el peso define cuánto cuenta en la coincidencia global.</p>
 
             @if ($vacante->requisitos->isEmpty())

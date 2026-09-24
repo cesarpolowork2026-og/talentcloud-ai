@@ -10,7 +10,7 @@
     $secciones = ['inicio' => 'Inicio', 'caracteristicas' => 'Características', 'beneficios' => 'Beneficios', 'seguridad' => 'Seguridad'];
 @endphp
 
-<header class="sticky top-0 z-40 border-b border-divider bg-bg">
+<header class="barra sticky top-0 z-40">
     <div class="mx-auto flex max-w-[1480px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-8">
         <a href="{{ route('inicio') }}#inicio" class="hover:no-underline" aria-label="TalentCloud AI, inicio">
             <x-marca tamano="grande" />
@@ -21,12 +21,11 @@
                 @if ($enPresentacion)
                     <a
                         href="{{ route('inicio') }}#{{ $ancla }}"
-                        class="border-b-2 py-2 text-15 hover:no-underline"
-                        :class="seccion === '{{ $ancla }}' ? 'border-accent-700 text-accent-700' : 'border-transparent text-ink hover:text-accent-700'"
+                        class="barra-enlace border-b-2 border-transparent py-2 text-15"
                         :aria-current="seccion === '{{ $ancla }}' ? 'true' : 'false'"
                     >{{ $nombre }}</a>
                 @else
-                    <a href="{{ route('inicio') }}#{{ $ancla }}" class="border-b-2 border-transparent py-2 text-15 text-ink hover:text-accent-700 hover:no-underline">{{ $nombre }}</a>
+                    <a href="{{ route('inicio') }}#{{ $ancla }}" class="barra-enlace border-b-2 border-transparent py-2 text-15">{{ $nombre }}</a>
                 @endif
             @endforeach
         </nav>

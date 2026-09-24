@@ -39,7 +39,7 @@ new class extends Component
 }; ?>
 
 <x-ui.card class="!p-6">
-    <h3 class="mb-4 text-16">Contraseña</h3>
+    <h2 class="mb-4 text-16">Contraseña</h2>
 
     <form wire:submit="updatePassword" class="contents">
         <div class="grid gap-4">

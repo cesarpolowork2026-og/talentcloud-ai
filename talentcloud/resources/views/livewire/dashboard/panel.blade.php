@@ -16,7 +16,7 @@
 
     <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <section>
-            <h3 class="mb-3 text-16">Vacantes recientes</h3>
+            <h2 class="mb-3 text-16">Vacantes recientes</h2>
             @if ($resumen->vacantesRecientes->isEmpty())
                 <x-ui.empty-state icon="briefcase" message="Todavía no hay vacantes." />
             @else
@@ -37,7 +37,7 @@
         </section>
 
         <section>
-            <h3 class="mb-3 text-16">Actividad reciente</h3>
+            <h2 class="mb-3 text-16">Actividad reciente</h2>
             @forelse ($resumen->actividad as $actividad)
                 <div class="mb-3 flex gap-2 text-14" wire:key="actividad-{{ $actividad->id }}">
                     <x-ui.icon name="star-four" :size="15" class="mt-[3px] text-accent" />

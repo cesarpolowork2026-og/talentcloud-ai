@@ -5,7 +5,7 @@
     <div class="grid items-start gap-6 md:grid-cols-2">
         <section>
             <div class="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-                <h3 class="m-0 text-16">Usuarios internos</h3>
+                <h2 class="m-0 text-16">Usuarios internos</h2>
                 <div class="flex items-center gap-3">
                     <x-ui.action-message on="invitacion-enviada">Invitación enviada.</x-ui.action-message>
                     <x-ui.button wire:click="abrirInvitacion">+ Invitar usuario</x-ui.button>

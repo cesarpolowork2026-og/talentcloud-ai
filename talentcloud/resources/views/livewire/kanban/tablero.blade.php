@@ -59,7 +59,7 @@
                                         type="button"
                                         aria-label="Descartar a {{ $postulacion->candidato?->nombre }}"
                                         wire:click.stop="confirmarDescarte({{ $postulacion->id }})"
-                                        class="absolute right-[6px] top-[6px] p-0.5 text-14 leading-none text-neutral-500 hover:text-accent-2-700"
+                                        class="absolute right-[2px] top-[2px] grid h-6 w-6 place-items-center text-16 leading-none text-neutral-600 hover:text-accent-2-700"
                                     >×</button>
                                 @endif
                                 {{-- El nombre es el botón de la tarjeta (teclado y lectores de pantalla); la tarjeta
