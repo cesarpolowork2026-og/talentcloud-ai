@@ -3,6 +3,8 @@
 use App\Http\Controllers\DescargarCvController;
 use App\Livewire\Candidatos;
 use App\Livewire\Empresas;
+use App\Livewire\Entrevistas;
+use App\Livewire\Evaluaciones;
 use App\Livewire\Kanban;
 use App\Livewire\Matching;
 use App\Livewire\MiEmpresa;
@@ -33,6 +35,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('kanban', Kanban\Tablero::class)->name('kanban.index');
         Route::get('vacantes/{vacante}/kanban', Kanban\Tablero::class)->name('kanban.show');
+
+        Route::get('entrevistas', Entrevistas\Listado::class)->name('entrevistas.index');
+        Route::get('evaluaciones', Evaluaciones\Listado::class)->name('evaluaciones.index');
 
         Route::get('candidatos', Candidatos\Listado::class)->name('candidatos.index');
         Route::get('candidatos/{candidato}', Candidatos\Detalle::class)->name('candidatos.show');

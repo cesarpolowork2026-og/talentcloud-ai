@@ -35,7 +35,8 @@ trait WithListado
     public string $direccion = 'asc';
 
     /**
-     * Columnas donde se busca. "relacion.columna" busca en una relación.
+     * Columnas donde se busca. "relacion.columna" busca en una relación, también
+     * anidada ("postulacion.candidato.nombre").
      *
      * @return list<string>
      */
@@ -142,7 +143,9 @@ trait WithListado
             $consulta->where(function (Builder $q) use ($patron): void {
                 foreach ($this->camposBusqueda() as $campo) {
                     if (str_contains($campo, '.')) {
-                        [$relacion, $columna] = explode('.', $campo, 2);
+                        // "postulacion.candidato.nombre": relación anidada hasta el último punto.
+                        $relacion = substr($campo, 0, (int) strrpos($campo, '.'));
+                        $columna = substr($campo, (int) strrpos($campo, '.') + 1);
                         $q->orWhereHas($relacion, fn (Builder $r) => $r->where($columna, 'ilike', $patron));
                     } else {
                         $q->orWhere($q->qualifyColumn($campo), 'ilike', $patron);

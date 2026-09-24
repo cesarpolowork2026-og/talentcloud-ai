@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\CriterioEvaluacion;
 use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoEvaluacion;
@@ -293,8 +294,11 @@ class DemoSeeder extends Seeder
      */
     private function evaluacion(Postulacion $postulacion, User $evaluador, array $puntajes, EstadoEvaluacion $estado): void
     {
-        $nombres = ['Conocimiento técnico', 'Comunicación', 'Resolución de problemas', 'Ajuste cultural'];
-        $criterios = array_map(fn (string $n, int|float $p) => ['nombre' => $n, 'puntaje' => $p], $nombres, $puntajes);
+        $criterios = array_map(
+            fn (CriterioEvaluacion $c, int|float $p) => ['nombre' => $c->etiqueta(), 'puntaje' => $p],
+            CriterioEvaluacion::cases(),
+            $puntajes,
+        );
 
         $evaluacion = Evaluacion::firstOrNew(['postulacion_id' => $postulacion->id, 'evaluador_id' => $evaluador->id]);
         $evaluacion->fill([

@@ -4,11 +4,15 @@ namespace App\Providers;
 
 use App\Repositories\Contracts\CandidatoRepository;
 use App\Repositories\Contracts\EmpresaRepository;
+use App\Repositories\Contracts\EntrevistaRepository;
 use App\Repositories\Contracts\EquipoRepository;
+use App\Repositories\Contracts\EvaluacionRepository;
 use App\Repositories\Contracts\VacanteRepository;
 use App\Repositories\Eloquent\EloquentCandidatoRepository;
 use App\Repositories\Eloquent\EloquentEmpresaRepository;
+use App\Repositories\Eloquent\EloquentEntrevistaRepository;
 use App\Repositories\Eloquent\EloquentEquipoRepository;
+use App\Repositories\Eloquent\EloquentEvaluacionRepository;
 use App\Repositories\Eloquent\EloquentVacanteRepository;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,5 +25,7 @@ class RepositoryServiceProvider extends ServiceProvider
         CandidatoRepository::class => EloquentCandidatoRepository::class,
         EquipoRepository::class => EloquentEquipoRepository::class,
         VacanteRepository::class => EloquentVacanteRepository::class,
+        EntrevistaRepository::class => EloquentEntrevistaRepository::class,
+        EvaluacionRepository::class => EloquentEvaluacionRepository::class,
     ];
 }

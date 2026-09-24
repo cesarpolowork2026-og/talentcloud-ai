@@ -99,6 +99,14 @@ Columna: {{ $seleccionada->etapa->etiqueta() }}.</p>
                     @if ($seleccionada->match_detalle)
                         <x-ui.button :href="route('matching.show', $seleccionada)" wire:navigate>Ver matching</x-ui.button>
                     @endif
+                    @if ($editable && $seleccionada->etapa !== EtapaPostulacion::Descartado)
+                        @can('create', App\Models\Entrevista::class)
+                            <x-ui.button :href="route('entrevistas.index', ['programar' => $seleccionada->id])" wire:navigate>Programar entrevista</x-ui.button>
+                        @endcan
+                    @endif
+                    @can('create', App\Models\Evaluacion::class)
+                        <x-ui.button :href="route('evaluaciones.index', ['evaluar' => $seleccionada->id])" wire:navigate>Evaluar</x-ui.button>
+                    @endcan
                     @if ($editable)
                         <x-ui.button type="submit" form="form-mover" variant="primary">Mover</x-ui.button>
                     @endif
