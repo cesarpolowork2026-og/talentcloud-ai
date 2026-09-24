@@ -6,7 +6,7 @@ Stack: Laravel 12 · PHP 8.2 · Livewire 3 (Volt) + Alpine · Tailwind CSS 3 · 
 
 ## Requisitos
 
-PHP 8.2 con `pdo_pgsql`, `intl`, `zip`, `gd`; Composer 2; Node 20+; Docker Desktop; Python 3.11 y
+PHP 8.2 con `pdo_pgsql`, `intl`, `zip`, `gd` y **OPcache activo** (en XAMPP viene desactivado: en `php.ini`, `zend_extension=opcache`, `opcache.enable=1` y `opcache.revalidate_freq=0`; sin él cada página tarda segundos); Composer 2; Node 20+; Docker Desktop; Python 3.11 y
 [uv](https://docs.astral.sh/uv/) para el servicio de IA (`../talentcloud-ai`).
 
 ## Puesta en marcha
