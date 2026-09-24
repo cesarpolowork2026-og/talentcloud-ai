@@ -31,6 +31,7 @@ class AnalizarCv
             return false;
         }
 
+        $primeraVez = $cv->datos_estructurados === null;
         $analisis = $this->ia->analizarCv($cv->id, $cv->texto_extraido, $this->catalogo());
 
         DB::transaction(function () use ($cv, $analisis) {
@@ -44,7 +45,7 @@ class AnalizarCv
             }
         });
 
-        CvAnalizado::dispatch($cv);
+        CvAnalizado::dispatch($cv, $primeraVez);
 
         return true;
     }

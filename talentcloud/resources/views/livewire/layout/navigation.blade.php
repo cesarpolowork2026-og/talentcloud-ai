@@ -29,6 +29,32 @@ new class extends Component
         $this->redirect(route('login'), navigate: true);
     }
 
+    public function marcarComoLeidas(): void
+    {
+        $this->usuario()->unreadNotifications()->update(['read_at' => now()]);
+    }
+
+    /** Abre una notificación: la marca como leída y lleva a su pantalla, si tiene. */
+    public function abrirNotificacion(string $id): void
+    {
+        $notificacion = $this->usuario()->notifications()->find($id);
+        abort_if($notificacion === null, 404);
+
+        $notificacion->markAsRead();
+
+        if (filled($notificacion->data['url'] ?? null)) {
+            $this->redirect($notificacion->data['url'], navigate: true);
+        }
+    }
+
+    private function usuario(): User
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -95,9 +121,28 @@ new class extends Component
             </button>
 
             <div x-show="notificaciones" x-cloak x-transition.opacity.duration.100ms class="card elev-lg absolute right-0 top-[40px] z-20 w-[280px] p-3">
-                <div class="card-kicker mb-2">Notificaciones</div>
+                <div class="mb-2 flex items-baseline justify-between gap-2">
+                    <div class="card-kicker">Notificaciones</div>
+                    @if ($hayNoLeidas)
+                        <button type="button" wire:click="marcarComoLeidas" class="whitespace-nowrap text-12 text-accent-700 hover:underline">Marcar como leídas</button>
+                    @endif
+                </div>
                 @forelse ($notificaciones as $notificacion)
-                    <div class="border-t border-divider py-2 text-13 text-neutral-800">{{ $notificacion->data['texto'] ?? '' }}</div>
+                    <button
+                        type="button"
+                        wire:key="notificacion-{{ $notificacion->id }}"
+                        wire:click="abrirNotificacion('{{ $notificacion->id }}')"
+                        @class([
+                            'block w-full border-t border-divider py-2 text-left text-13 hover:text-accent-700',
+                            'font-semibold text-ink' => $notificacion->unread(),
+                            'text-neutral-800' => $notificacion->read(),
+                        ])
+                    >
+                        {{ $notificacion->data['texto'] ?? '' }}
+                        @if ($notificacion->unread())
+                            <span class="sr-only">(sin leer)</span>
+                        @endif
+                    </button>
                 @empty
                     <div class="border-t border-divider py-2 text-13 text-neutral-600">No tienes notificaciones.</div>
                 @endforelse

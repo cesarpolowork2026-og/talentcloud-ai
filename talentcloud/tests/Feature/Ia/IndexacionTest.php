@@ -229,3 +229,15 @@ it('programa los embeddings con la empresa de la vacante', function () {
     Queue::assertPushedOn('ia', GenerarEmbeddingsDeRequisitos::class,
         fn (GenerarEmbeddingsDeRequisitos $job) => $job->vacanteId === $vacante->id && $job->empresaId === $empresa->id);
 });
+
+it('distingue el primer análisis de un CV de un reanálisis', function () {
+    Event::fake([CvAnalizado::class]);
+    $cv = Cv::factory()->procesado('Java y Docker.')->create(['candidato_id' => $this->candidato->id]);
+    Http::fake(['ia.test/cv/analizar' => Http::response(respuestaDeAnalisis([[$this->java, 2.0]]))]);
+
+    app(AnalizarCv::class)->ejecutar($cv);
+    app(AnalizarCv::class)->ejecutar($cv->fresh());
+
+    Event::assertDispatched(CvAnalizado::class, fn (CvAnalizado $e) => $e->primeraVez);
+    Event::assertDispatched(CvAnalizado::class, fn (CvAnalizado $e) => ! $e->primeraVez);
+});

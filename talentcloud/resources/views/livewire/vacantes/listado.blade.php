@@ -40,19 +40,7 @@
     @endif
 
     {{-- Vista previa (diálogo del prototipo) --}}
-    <x-ui.dialog wire:model="mostrarVistaPrevia" :title="$seleccionada?->titulo" max-width="480px">
-        @if ($seleccionada)
-            <p class="m-0 whitespace-pre-line">{{ $seleccionada->empresa?->nombre }} · {{ $seleccionada->ubicacion ?? $seleccionada->modalidad->etiqueta() }}
-{{ $seleccionada->postulaciones_count }} {{ $seleccionada->postulaciones_count === 1 ? 'candidato' : 'candidatos' }} · Estado: {{ $seleccionada->estado->etiqueta() }}
-{{ $seleccionada->publicada_at ? 'Publicada el '.Formato::fechaCorta($seleccionada->publicada_at).'.' : 'Sin publicar (borrador).' }}</p>
-        @endif
-        <x-slot:actions>
-            <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
-            @if ($seleccionada)
-                <x-ui.button variant="primary" :href="route('vacantes.show', $seleccionada)" wire:navigate>Ver vacante</x-ui.button>
-            @endif
-        </x-slot:actions>
-    </x-ui.dialog>
+    <x-vacantes.vista-previa wire:model="mostrarVistaPrevia" :vacante="$seleccionada" />
 
     {{-- "Nueva vacante" (campos del prototipo + ubicación y modalidad) --}}
     <x-ui.dialog wire:model="mostrarFormulario" title="Nueva vacante" max-width="460px">

@@ -62,6 +62,16 @@ class Candidato extends Model
     }
 
     /**
+     * Cuenta de postulante, si el candidato se registró por su cuenta.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
      * @return HasMany<Cv, $this>
      */
     public function cvs(): HasMany

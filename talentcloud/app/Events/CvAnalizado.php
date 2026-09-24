@@ -10,5 +10,8 @@ class CvAnalizado
 {
     use Dispatchable;
 
-    public function __construct(public readonly Cv $cv) {}
+    /**
+     * @param  bool  $primeraVez  false al reanalizarlo (p. ej. talentcloud:reindexar-embeddings): no se vuelve a avisar.
+     */
+    public function __construct(public readonly Cv $cv, public readonly bool $primeraVez = true) {}
 }

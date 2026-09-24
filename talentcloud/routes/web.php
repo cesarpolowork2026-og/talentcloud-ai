@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DescargarCvController;
 use App\Livewire\Candidatos;
+use App\Livewire\Dashboard;
 use App\Livewire\Empresas;
 use App\Livewire\Entrevistas;
 use App\Livewire\Evaluaciones;
@@ -9,6 +10,7 @@ use App\Livewire\Kanban;
 use App\Livewire\Matching;
 use App\Livewire\MiEmpresa;
 use App\Livewire\Onboarding;
+use App\Livewire\Postulante;
 use App\Livewire\Vacantes;
 use App\Support\Navegacion;
 use Illuminate\Support\Facades\Route;
@@ -25,7 +27,7 @@ Route::get('/', fn () => redirect(Navegacion::rutaInicio(auth()->user())))->name
 Route::middleware(['auth', 'verified'])->group(function () {
     // Personal de selección: admin SaaS, empresa y reclutador.
     Route::middleware('rol:admin|empresa|reclutador')->group(function () {
-        Route::view('dashboard', 'dashboard')->name('dashboard');
+        Route::get('dashboard', Dashboard\Panel::class)->name('dashboard');
 
         Route::get('vacantes', Vacantes\Listado::class)->name('vacantes.index');
         Route::get('vacantes/{vacante}', Vacantes\Detalle::class)->name('vacantes.show');
@@ -56,7 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Postulante.
     Route::middleware('rol:postulante')->prefix('postulante')->name('postulante.')->group(function () {
-        Route::view('postulaciones', 'postulante.postulaciones')->name('postulaciones');
+        Route::get('postulaciones', Postulante\MisPostulaciones::class)->name('postulaciones');
     });
 });
 

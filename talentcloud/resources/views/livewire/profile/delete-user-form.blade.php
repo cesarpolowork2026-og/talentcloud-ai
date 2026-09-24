@@ -2,6 +2,7 @@
 
 use App\Enums\Rol;
 use App\Livewire\Actions\Logout;
+use App\Services\Cuenta\EliminarCuentaDePostulante;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Component;
@@ -16,7 +17,7 @@ new class extends Component
      * Elimina la cuenta del postulante autenticado. Las cuentas de empresa y
      * de reclutador las gestiona su empresa; la del admin, la plataforma.
      */
-    public function deleteUser(Logout $logout): void
+    public function deleteUser(Logout $logout, EliminarCuentaDePostulante $eliminar): void
     {
         /** @var User $user */
         $user = Auth::user();
@@ -27,7 +28,8 @@ new class extends Component
             'password' => ['required', 'string', 'current_password'],
         ]);
 
-        tap($user, $logout(...))->delete();
+        $logout();
+        $eliminar->ejecutar($user);
 
         $this->redirect(route('login'), navigate: true);
     }

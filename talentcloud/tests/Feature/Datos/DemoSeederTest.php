@@ -3,6 +3,7 @@
 use App\Enums\EstadoEmpresa;
 use App\Enums\EtapaPostulacion;
 use App\Enums\Rol;
+use App\Models\Actividad;
 use App\Models\Empresa;
 use App\Models\Entrevista;
 use App\Models\Evaluacion;
@@ -84,4 +85,19 @@ it('se puede ejecutar dos veces sin duplicar datos', function () {
             ->and(Postulacion::count())->toBe(10);
     });
     expect($this->marta->notifications()->count())->toBe(3);
+});
+
+it('ordena la campana y la actividad reciente como el prototipo', function () {
+    expect($this->marta->notifications()->latest()->get()->pluck('data.texto')->all())->toBe([
+        'Nuevo CV analizado para Desarrollador Backend (Elena Ruiz).',
+        'Entrevista de Iván Torres pendiente de confirmar.',
+        'Orbita Labs actualizó su plan a Starter.',
+    ]);
+
+    $actividad = app(TenantContext::class)->ejecutarPara($this->marta->empresa_id, fn () => Actividad::latest()->pluck('descripcion')->all());
+    expect($actividad)->toBe([
+        'La IA analizó 6 CVs nuevos para Desarrollador Backend.',
+        'Sofía Nieto avanzó a la etapa de entrevista.',
+        'Marta Solís aprobó la evaluación de Elena Ruiz.',
+    ]);
 });

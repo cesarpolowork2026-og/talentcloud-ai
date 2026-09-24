@@ -135,7 +135,7 @@ class DemoSeeder extends Seeder
 
         // — Postulaciones: Kanban "Desarrollador Backend" del prototipo —
         $pElena = $this->postulacion($backend, $elena, EtapaPostulacion::Postulado, 0);
-        $pMarco = $this->postulacion($backend, $marco, EtapaPostulacion::Postulado, 1);
+        $pMarco = $this->postulacion($backend, $marco, EtapaPostulacion::Postulado, 1, '2026-09-02');
         $pSofia = $this->postulacion($backend, $sofia, EtapaPostulacion::EnRevision, 0);
         $pIvan = $this->postulacion($backend, $ivan, EtapaPostulacion::Entrevista, 0);
         $this->postulacion($backend, $lucia, EtapaPostulacion::Oferta, 0);
@@ -167,15 +167,17 @@ class DemoSeeder extends Seeder
             ->each(fn (Postulacion $p) => CalcularMatch::dispatchSync($p->empresa_id, $p->id));
 
         // — Actividad reciente y notificaciones —
-        $this->actividad($nimbus, null, 'cv.analizados', 'La IA analizó 6 CVs nuevos para Desarrollador Backend.', 40);
-        $this->actividad($nimbus, $marta, 'postulacion.etapa', 'Sofía Nieto avanzó a la etapa de entrevista.', 30);
-        $this->actividad($orbita, null, 'vacante.creada', 'Orbita Labs publicó una nueva vacante en borrador.', 20);
-        $this->actividad($nimbus, $marta, 'evaluacion.aprobada', 'Marta Solís aprobó la evaluación de Elena Ruiz.', 10);
+        // Minutos atrás: el dashboard muestra lo más reciente primero, en el orden del prototipo.
+        $this->actividad($nimbus, null, 'cv.analizado', 'La IA analizó 6 CVs nuevos para Desarrollador Backend.', 10);
+        $this->actividad($nimbus, $marta, 'postulacion.etapa', 'Sofía Nieto avanzó a la etapa de entrevista.', 20);
+        $this->actividad($orbita, null, 'vacante.creada', 'Orbita Labs publicó una nueva vacante en borrador.', 30);
+        $this->actividad($nimbus, $marta, 'evaluacion.aprobada', 'Marta Solís aprobó la evaluación de Elena Ruiz.', 40);
 
+        // Notificaciones de la campana, de la más reciente a la más antigua (orden del prototipo).
         if ($marta->notifications()->doesntExist()) {
-            $marta->notify(new AvisoGeneral('Orbita Labs actualizó su plan a Starter.'));
-            $marta->notify(new AvisoGeneral('Entrevista de Iván Torres pendiente de confirmar.'));
-            $marta->notify(new AvisoGeneral('Nuevo CV analizado para Desarrollador Backend (Elena Ruiz).'));
+            $this->aviso($marta, 'Nuevo CV analizado para Desarrollador Backend (Elena Ruiz).', 5);
+            $this->aviso($marta, 'Entrevista de Iván Torres pendiente de confirmar.', 15);
+            $this->aviso($marta, 'Orbita Labs actualizó su plan a Starter.', 25);
         }
     }
 
@@ -308,6 +310,17 @@ class DemoSeeder extends Seeder
         ]);
         $evaluacion->empresa_id = $postulacion->empresa_id;
         $evaluacion->save();
+    }
+
+    /** Una notificación de la campana con su propia hora (creadas en el mismo segundo, su orden sería arbitrario). */
+    private function aviso(User $usuario, string $texto, int $minutosAtras): void
+    {
+        $usuario->notifications()->create([
+            'id' => (string) Str::uuid(),
+            'type' => AvisoGeneral::class,
+            'data' => ['texto' => $texto],
+            'created_at' => now()->subMinutes($minutosAtras),
+        ]);
     }
 
     private function actividad(Empresa $empresa, ?User $actor, string $tipo, string $descripcion, int $minutosAtras): void
