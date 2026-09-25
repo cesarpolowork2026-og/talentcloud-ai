@@ -27,6 +27,15 @@ class PostulacionPolicy
         return $this->esDelPersonal($user, $postulacion);
     }
 
+    /**
+     * Ver y escribir notas internas: solo el personal de la empresa (y el admin).
+     * No depende de view(): el postulante ve su postulación pero nunca las notas.
+     */
+    public function gestionarNotas(User $user, Postulacion $postulacion): bool
+    {
+        return $this->esDelPersonal($user, $postulacion);
+    }
+
     private function esDelPersonal(User $user, Postulacion $postulacion): bool
     {
         if ($user->tieneRol(Rol::Admin)) {

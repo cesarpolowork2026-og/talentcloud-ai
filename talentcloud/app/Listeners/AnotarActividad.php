@@ -8,7 +8,9 @@ use App\Events\CandidatoSePostulo;
 use App\Events\CvAnalizado;
 use App\Events\EntrevistaCancelada;
 use App\Events\EntrevistaProgramada;
+use App\Events\EntrevistaReprogramada;
 use App\Events\EvaluacionAprobada;
+use App\Events\NotaAgregada;
 use App\Events\PostulacionCambioDeEtapa;
 use App\Events\VacanteCreada;
 use App\Models\Postulacion;
@@ -94,6 +96,33 @@ class AnotarActividad
                 TipoActividad::EntrevistaProgramada,
                 "{$quien?->name} programó una entrevista con {$entrevista->postulacion->candidato?->nombre} para el ".Formato::fechaHora($entrevista->inicia_at).'.',
                 $quien,
+            );
+        }
+    }
+
+    public function handleNota(NotaAgregada $evento): void
+    {
+        $nota = $evento->nota->loadMissing(['autor', 'postulacion.candidato']);
+
+        if ($nota->postulacion !== null) {
+            $this->anotar(
+                $nota->postulacion,
+                TipoActividad::NotaAgregada,
+                "{$nota->autor?->name} dejó una nota sobre {$nota->postulacion->candidato?->nombre}.",
+                $nota->autor,
+            );
+        }
+    }
+
+    public function handleEntrevistaReprogramada(EntrevistaReprogramada $evento): void
+    {
+        $entrevista = $evento->entrevista->loadMissing('postulacion.candidato');
+
+        if ($entrevista->postulacion !== null) {
+            $this->anotar(
+                $entrevista->postulacion,
+                TipoActividad::EntrevistaReprogramada,
+                "Se reprogramó la entrevista de {$entrevista->postulacion->candidato?->nombre} al ".Formato::fechaHora($entrevista->inicia_at).'.',
             );
         }
     }

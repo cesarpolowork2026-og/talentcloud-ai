@@ -5,6 +5,7 @@ namespace App\Livewire\Candidatos;
 use App\Enums\EstadoVacante;
 use App\Models\Candidato;
 use App\Models\Competencia;
+use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Services\Candidatos\CompetenciasDelCandidato;
@@ -134,6 +135,8 @@ class Detalle extends Component
                 ->pluck('titulo', 'id')
                 ->all(),
             'catalogo' => Competencia::orderBy('nombre')->pluck('nombre'),
+            // "Notas del equipo": una por postulación de la empresa (nunca para el postulante).
+            'conNotas' => $candidato->postulaciones->filter(fn (Postulacion $p) => auth()->user()?->can('gestionarNotas', $p) ?? false)->values(),
         ])->title($candidato->nombre);
     }
 

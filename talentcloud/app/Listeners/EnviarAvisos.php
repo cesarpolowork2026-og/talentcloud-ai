@@ -9,6 +9,7 @@ use App\Events\CandidatoSePostulo;
 use App\Events\CvAnalizado;
 use App\Events\EntrevistaCancelada;
 use App\Events\EntrevistaProgramada;
+use App\Events\EntrevistaReprogramada;
 use App\Events\PostulacionCambioDeEtapa;
 use App\Events\VacanteCerrada;
 use App\Jobs\AvisarEstadoDePostulacion;
@@ -19,6 +20,7 @@ use App\Models\User;
 use App\Models\Vacante;
 use App\Notifications\AvisoCvAnalizado;
 use App\Notifications\AvisoDeEntrevista;
+use App\Notifications\AvisoEntrevistaReprogramada;
 use App\Notifications\AvisoNuevaPostulacion;
 use App\Services\Avisos\AvisoAlCandidato;
 use Illuminate\Notifications\Notification;
@@ -50,6 +52,15 @@ class EnviarAvisos
 
         $this->alEntrevistador($entrevista, AvisoDeEntrevista::canceladaParaEntrevistador($datos));
         $this->alCandidato($entrevista->postulacion?->candidato, AvisoDeEntrevista::canceladaParaCandidato($datos));
+    }
+
+    public function handleEntrevistaReprogramada(EntrevistaReprogramada $evento): void
+    {
+        $entrevista = $this->cargar($evento->entrevista);
+        $datos = DatosDeEntrevista::de($entrevista);
+
+        $this->alEntrevistador($entrevista, AvisoEntrevistaReprogramada::paraEntrevistador($datos, $evento->fechaAnterior));
+        $this->alCandidato($entrevista->postulacion?->candidato, AvisoEntrevistaReprogramada::paraCandidato($datos, $evento->fechaAnterior));
     }
 
     public function handleCv(CvAnalizado $evento): void

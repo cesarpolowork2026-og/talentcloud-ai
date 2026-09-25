@@ -132,6 +132,7 @@ class Tablero extends Component
 
         $postulaciones = Postulacion::query()
             ->with('candidato')
+            ->withCount('notas')
             ->where('vacante_id', $vacante->id)
             ->orderBy('orden')
             ->orderBy('id')

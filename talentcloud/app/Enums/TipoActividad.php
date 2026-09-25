@@ -10,6 +10,8 @@ enum TipoActividad: string
     case EvaluacionAprobada = 'evaluacion.aprobada';
     case EntrevistaProgramada = 'entrevista.programada';
     case EntrevistaCancelada = 'entrevista.cancelada';
+    case EntrevistaReprogramada = 'entrevista.reprogramada';
+    case NotaAgregada = 'postulacion.nota';
     case VacanteCreada = 'vacante.creada';
     case CandidatoSePostulo = 'postulacion.propia';
 }

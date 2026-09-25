@@ -37,8 +37,11 @@ interface EntrevistaRepository
      */
     public function delCandidato(Candidato $candidato): Collection;
 
-    /** El entrevistador ya tiene otra entrevista (no cancelada) que se cruza con ese intervalo. */
-    public function haySolapamiento(int $entrevistadorId, CarbonInterface $inicio, CarbonInterface $fin): bool;
+    /**
+     * El entrevistador ya tiene otra entrevista (no cancelada) que se cruza con
+     * ese intervalo. $salvoId: la entrevista que se reprograma no choca consigo misma.
+     */
+    public function haySolapamiento(int $entrevistadorId, CarbonInterface $inicio, CarbonInterface $fin, ?int $salvoId = null): bool;
 
     /**
      * @param  array<string, mixed>  $datos

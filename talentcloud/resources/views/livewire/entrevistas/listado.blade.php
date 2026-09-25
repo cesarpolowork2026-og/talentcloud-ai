@@ -1,4 +1,5 @@
 {{-- Pantalla "Entrevistas" del prototipo (TalentCloud App.dc.html, isEntrevistas). --}}
+@use('App\Support\EnlaceExterno')
 @use('App\Support\Formato')
 @use('App\Enums\ModalidadEntrevista')
 <div>
@@ -54,8 +55,8 @@ Fecha: {{ Formato::fechaHora($seleccionada->inicia_at) }} ({{ $seleccionada->dur
 Estado: {{ $seleccionada->estado->etiqueta() }}@if ($seleccionada->notas)
 
 Notas: {{ $seleccionada->notas }}@endif</p>
-            @if ($seleccionada->enlace)
-                <p class="m-0 mt-2"><a href="{{ $seleccionada->enlace }}" target="_blank" rel="noopener noreferrer">Abrir enlace de la videollamada</a></p>
+            @if ($enlace = EnlaceExterno::seguro($seleccionada->enlace))
+                <p class="m-0 mt-2"><a href="{{ $enlace }}" target="_blank" rel="noopener noreferrer">Abrir enlace de la videollamada</a></p>
             @endif
         @endif
         <x-slot:actions>
@@ -66,11 +67,44 @@ Notas: {{ $seleccionada->notas }}@endif</p>
                     @if ($seleccionada->estado->puedeCompletarse() && ! $seleccionada->inicia_at->isFuture())
                         <x-ui.button wire:click="completar({{ $seleccionada->id }})">Marcar como completada</x-ui.button>
                     @endif
+                    @if ($seleccionada->estado->puedeReprogramarse())
+                        <x-ui.button wire:click="abrirReprogramacion({{ $seleccionada->id }})">Reprogramar</x-ui.button>
+                    @endif
                     @if ($seleccionada->estado->puedeConfirmarse())
                         <x-ui.button variant="primary" wire:click="confirmar({{ $seleccionada->id }})">Confirmar</x-ui.button>
                     @endif
                 @endcan
             @endif
+        </x-slot:actions>
+    </x-ui.dialog>
+
+    {{-- Reprogramar: nueva fecha, duración, modalidad y enlace (un solo aviso al candidato y al entrevistador) --}}
+    <x-ui.dialog wire:model="mostrarReprogramacion" :title="'Reprogramar entrevista de '.$seleccionada?->postulacion?->candidato?->nombre" max-width="480px">
+        <form wire:submit="reprogramar" id="form-reprogramar-entrevista" class="grid gap-3">
+            @error('reprogramacion')
+                <p class="field-error m-0" role="alert">{{ $message }}</p>
+            @enderror
+            <div class="grid gap-3 sm:grid-cols-2">
+                <x-ui.field label="Nueva fecha y hora" for="reprogramar-inicio" error="reprogramacion.iniciaAt">
+                    <x-ui.input type="datetime-local" wire:model="reprogramacion.iniciaAt" id="reprogramar-inicio" error="reprogramacion.iniciaAt" />
+                </x-ui.field>
+                <x-ui.field label="Duración" for="reprogramar-duracion" error="reprogramacion.duracionMin">
+                    <x-ui.select wire:model="reprogramacion.duracionMin" id="reprogramar-duracion" :options="$duraciones" class="w-full" />
+                </x-ui.field>
+            </div>
+            <x-ui.field label="Modalidad" for="reprogramar-modalidad" error="reprogramacion.modalidad">
+                <x-ui.select wire:model.live="reprogramacion.modalidad" id="reprogramar-modalidad" :options="$modalidades" class="w-full" />
+            </x-ui.field>
+            @if ($reprogramacion->modalidad === ModalidadEntrevista::Videollamada->value)
+                <x-ui.field label="Enlace de la videollamada (opcional)" for="reprogramar-enlace" error="reprogramacion.enlace">
+                    <x-ui.input type="url" wire:model="reprogramacion.enlace" id="reprogramar-enlace" placeholder="https://meet.google.com/…" error="reprogramacion.enlace" />
+                </x-ui.field>
+            @endif
+            <p class="m-0 text-13 text-neutral-700">Se avisará al candidato y al entrevistador. Si estaba confirmada, vuelve a quedar pendiente de confirmar.</p>
+        </form>
+        <x-slot:actions>
+            <x-ui.button x-on:click="open = false">Cancelar</x-ui.button>
+            <x-ui.button type="submit" form="form-reprogramar-entrevista" variant="primary" wire:loading.attr="disabled" wire:target="reprogramar">Reprogramar</x-ui.button>
         </x-slot:actions>
     </x-ui.dialog>
 

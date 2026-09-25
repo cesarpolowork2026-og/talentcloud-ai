@@ -98,5 +98,13 @@
                 <x-ui.button variant="ghost" size="sm" class="mt-2" wire:click="recalcular">Recalcular coincidencia</x-ui.button>
             @endif
         @endif
+
+        @can('gestionarNotas', $postulacion)
+            <section id="notas" class="mt-8 max-w-[640px]">
+                <h2 class="mb-1 text-16">Notas del equipo</h2>
+                <p class="mb-3 text-13 text-neutral-700">Solo las ve tu equipo: nunca el candidato ni otras empresas.</p>
+                <livewire:postulaciones.notas :postulacion-id="$postulacion->id" :key="'notas-'.$postulacion->id" />
+            </section>
+        @endcan
     @endif
 </div>

@@ -86,6 +86,9 @@
             @if ($seleccionada)
                 <p class="m-0 whitespace-pre-line">{{ $seleccionada->candidato?->titular ?? 'Candidato' }}{{ $seleccionada->matchPorcentaje() !== null ? ' · '.$seleccionada->matchPorcentaje().'% de coincidencia con la vacante.' : '.' }}
 Columna: {{ $seleccionada->etapa->etiqueta() }}.</p>
+                <p class="m-0 mt-2 text-14">
+                    <a href="{{ route('matching.show', $seleccionada) }}#notas" wire:navigate>Notas del equipo ({{ $seleccionada->notas_count }})</a>
+                </p>
 
                 @if ($editable)
                     <form wire:submit="moverA" id="form-mover" class="mt-4">

@@ -60,10 +60,15 @@ class Listado extends Component
         $this->authorize('viewAny', Candidato::class);
     }
 
-    /** @return list<string> */
+    /**
+     * También por competencia: las extraídas por la IA y las manuales de la
+     * empresa en curso (la relación ya oculta las anotadas por otras empresas).
+     *
+     * @return list<string>
+     */
     protected function camposBusqueda(): array
     {
-        return ['nombre', 'titular'];
+        return ['nombre', 'titular', 'competencias.nombre'];
     }
 
     /** @return array<string, string> */

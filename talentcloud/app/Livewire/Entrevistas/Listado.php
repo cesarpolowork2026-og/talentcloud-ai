@@ -6,6 +6,7 @@ use App\DTO\NuevaEntrevistaData;
 use App\Enums\ModalidadEntrevista;
 use App\Enums\Rol;
 use App\Livewire\Concerns\WithListado;
+use App\Livewire\Forms\ReprogramacionForm;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\User;
@@ -13,6 +14,7 @@ use App\Repositories\Contracts\EntrevistaRepository;
 use App\Repositories\Contracts\EquipoRepository;
 use App\Services\Entrevistas\CambiarEstadoEntrevista;
 use App\Services\Entrevistas\ProgramarEntrevista;
+use App\Services\Entrevistas\ReprogramarEntrevista;
 use App\Services\Vacantes\OperacionNoPermitida;
 use Carbon\CarbonImmutable;
 use Closure;
@@ -55,6 +57,11 @@ class Listado extends Component
     public string $enlace = '';
 
     public string $notas = '';
+
+    // "Reprogramar" (sobre la entrevista seleccionada).
+    public bool $mostrarReprogramacion = false;
+
+    public ReprogramacionForm $reprogramacion;
 
     public function mount(): void
     {
@@ -167,6 +174,37 @@ class Listado extends Component
 
         $this->mostrarFormulario = false;
         $this->resetPage();
+    }
+
+    public function abrirReprogramacion(int $id): void
+    {
+        $entrevista = $this->entrevista($id);
+        $this->authorize('update', $entrevista);
+
+        $this->entrevistaSeleccionada = $entrevista->id;
+        $this->reprogramacion->cargar($entrevista);
+        $this->mostrarDetalle = false;
+        $this->mostrarReprogramacion = true;
+    }
+
+    public function reprogramar(ReprogramarEntrevista $reprogramar): void
+    {
+        abort_if($this->entrevistaSeleccionada === null, 404);
+        $entrevista = $this->entrevista($this->entrevistaSeleccionada);
+        $this->authorize('update', $entrevista);
+
+        $datos = $this->reprogramacion->datos();
+
+        try {
+            $reprogramar->ejecutar($entrevista, $datos);
+        } catch (OperacionNoPermitida $e) {
+            // La fecha tiene su campo; el resto de reglas (estado, candidato, entrevistador) va arriba del formulario.
+            $this->addError($e->campo === 'iniciaAt' ? 'reprogramacion.iniciaAt' : 'reprogramacion', $e->getMessage());
+
+            return;
+        }
+
+        $this->mostrarReprogramacion = false;
     }
 
     public function render(EntrevistaRepository $entrevistas): View

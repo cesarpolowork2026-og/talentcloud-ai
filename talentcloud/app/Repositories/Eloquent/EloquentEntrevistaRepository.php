@@ -45,10 +45,11 @@ class EloquentEntrevistaRepository implements EntrevistaRepository
             ->values();
     }
 
-    public function haySolapamiento(int $entrevistadorId, CarbonInterface $inicio, CarbonInterface $fin): bool
+    public function haySolapamiento(int $entrevistadorId, CarbonInterface $inicio, CarbonInterface $fin, ?int $salvoId = null): bool
     {
         // Dos intervalos se cruzan si cada uno empieza antes de que termine el otro.
         return Entrevista::query()
+            ->when($salvoId !== null, fn ($q) => $q->whereKeyNot($salvoId))
             ->where('entrevistador_id', $entrevistadorId)
             ->where('estado', '!=', EstadoEntrevista::Cancelada)
             ->where('inicia_at', '<', $fin)

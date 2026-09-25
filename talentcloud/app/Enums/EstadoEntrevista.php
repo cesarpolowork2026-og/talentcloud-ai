@@ -40,6 +40,12 @@ enum EstadoEntrevista: string
         return in_array($this, [self::Pendiente, self::Confirmada], true);
     }
 
+    /** Se puede cambiar de fecha mientras no se haya celebrado ni cancelado. */
+    public function puedeReprogramarse(): bool
+    {
+        return in_array($this, [self::Pendiente, self::Confirmada], true);
+    }
+
     /** Ocupa la agenda del entrevistador (para detectar solapamientos). */
     public function ocupaAgenda(): bool
     {

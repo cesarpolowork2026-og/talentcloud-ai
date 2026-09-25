@@ -48,6 +48,22 @@
                 @endif
             </section>
 
+            {{-- Notas internas del equipo, por postulación de esta empresa --}}
+            @if ($conNotas->isNotEmpty())
+                <section>
+                    <h2 class="mb-1 text-16">Notas del equipo</h2>
+                    <p class="mb-3 text-13 text-neutral-700">Solo las ve tu equipo: nunca el candidato ni otras empresas.</p>
+                    <div class="grid gap-6">
+                        @foreach ($conNotas as $postulacion)
+                            <div>
+                                <h3 class="mb-2 text-15">{{ $postulacion->vacante?->titulo }}</h3>
+                                <livewire:postulaciones.notas :postulacion-id="$postulacion->id" :key="'notas-'.$postulacion->id" />
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
             {{-- Competencias --}}
             <section>
                 <h2 class="mb-1 text-16">Competencias</h2>

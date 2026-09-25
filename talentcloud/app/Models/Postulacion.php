@@ -87,6 +87,16 @@ class Postulacion extends Model
     }
 
     /**
+     * Notas internas del equipo, de la más reciente a la más antigua.
+     *
+     * @return HasMany<Nota, $this>
+     */
+    public function notas(): HasMany
+    {
+        return $this->hasMany(Nota::class)->latest()->latest('id');
+    }
+
+    /**
      * @return BelongsTo<Cv, $this>
      */
     public function cv(): BelongsTo

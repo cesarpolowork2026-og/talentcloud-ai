@@ -204,6 +204,11 @@
   .btn-danger:hover { background: var(--color-accent-2-800); border-color: var(--color-accent-2-800); }
   .nav a:hover, .nav a[aria-current='page'] { color: var(--color-accent-700); }
   .seg-opt:has(input:checked) { background: var(--color-accent-700); }
+  /* Etiquetas de campo: el texto al 70 % da 4,06:1 sobre el fondo de los diálogos (surface). */
+  .field > label { color: var(--color-neutral-700); }
+  /* Cuerpo de diálogo: el DS lo aclara con opacity 0.85, que también aclara etiquetas y campos
+     (3,9:1). El mismo tono suave se consigue con el color del texto, sin tocar lo demás. */
+  .dialog-body { opacity: 1; color: var(--color-neutral-800); }
   /* Encabezados de tabla y metadatos de tarjeta: el DS mezcla el texto al 60 % (4,2:1 y 3,1:1). */
   .table th { color: color-mix(in srgb, var(--color-text) 72%, transparent); }
   .card-meta { color: var(--color-neutral-700); }
