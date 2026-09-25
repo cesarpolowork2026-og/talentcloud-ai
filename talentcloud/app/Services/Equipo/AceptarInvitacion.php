@@ -4,6 +4,8 @@ namespace App\Services\Equipo;
 
 use App\Models\User;
 use App\Repositories\Contracts\EquipoRepository;
+use App\Services\Empresas\LimitesDelPlan;
+use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -12,7 +14,10 @@ use Illuminate\Support\Facades\DB;
  */
 class AceptarInvitacion
 {
-    public function __construct(private readonly EquipoRepository $equipo) {}
+    public function __construct(
+        private readonly EquipoRepository $equipo,
+        private readonly LimitesDelPlan $limites,
+    ) {}
 
     public function ejecutar(string $token, string $nombre, string $password): User
     {
@@ -25,6 +30,13 @@ class AceptarInvitacion
 
             if ($this->equipo->existeUsuarioConEmail($invitacion->email)) {
                 throw new InvitacionNoValida('Ya existe una cuenta con este correo.');
+            }
+
+            // La invitación ya ocupaba lugar, pero el plan pudo bajar desde que se envió.
+            try {
+                $this->limites->verificarUsuarioActivo($invitacion->empresa_id);
+            } catch (OperacionNoPermitida) {
+                throw new InvitacionNoValida($invitacion->empresa?->nombre.' alcanzó el límite de usuarios de su plan. Pide a quien te invitó que libere un lugar y vuelve a abrir el enlace.');
             }
 
             $user = new User([

@@ -3,6 +3,7 @@
 namespace App\Services\Postulaciones;
 
 use App\Enums\EstadoProcesamientoCv;
+use App\Enums\OrigenPostulacion;
 use App\Events\CandidatoSePostulo;
 use App\Models\Cv;
 use App\Models\Postulacion;
@@ -57,7 +58,7 @@ class PostularmeAVacante
             throw new OperacionNoPermitida('Alcanzaste el máximo de postulaciones por hora. Inténtalo más tarde.');
         }
 
-        $postulacion = $this->postular->ejecutar($vacante, $candidato);
+        $postulacion = $this->postular->ejecutar($vacante, $candidato, OrigenPostulacion::Postulante);
         RateLimiter::hit($clave, 3600);
 
         CandidatoSePostulo::dispatch($postulacion, $postulante);

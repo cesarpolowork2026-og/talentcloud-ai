@@ -41,15 +41,57 @@
     @endif
 
     {{-- Detalle (diálogo informativo del prototipo) --}}
-    <x-ui.dialog wire:model="mostrarDetalle" :title="$seleccionada?->nombre" max-width="480px">
+    <x-ui.dialog wire:model="mostrarDetalle" :title="$seleccionada?->nombre" max-width="520px">
         @if ($seleccionada)
             <p class="m-0 whitespace-pre-line">Plan: {{ $seleccionada->plan->etiqueta() }}
 Usuarios: {{ $seleccionada->usuarios_count }}
 Vacantes activas: {{ $seleccionada->vacantes_activas_count }}
 Estado: {{ $seleccionada->estado->etiqueta() }}</p>
+
+            @if ($usoDeLaSeleccionada)
+                <section class="mt-4 grid gap-2" aria-labelledby="detalle-uso">
+                    <h2 id="detalle-uso" class="m-0 text-15">Uso del plan</h2>
+                    <x-empresas.uso-del-plan :uso="$usoDeLaSeleccionada" />
+                </section>
+            @endif
+
+            <section class="mt-4 grid gap-2" aria-labelledby="detalle-usuarios">
+                <h2 id="detalle-usuarios" class="m-0 text-15">Usuarios de la empresa</h2>
+                @if ($usuariosDeLaSeleccionada->isEmpty())
+                    <p class="m-0 text-14 text-neutral-700">Todavía no tiene usuarios: la invitación de su administrador sigue pendiente.</p>
+                @else
+                    <ul class="m-0 grid list-none gap-1 p-0 text-14">
+                        @foreach ($usuariosDeLaSeleccionada as $usuario)
+                            <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-divider pb-1 last:border-0" wire:key="detalle-usuario-{{ $usuario->id }}">
+                                <span>{{ $usuario->name }} <span class="text-13 text-neutral-700">· {{ $usuario->rol()?->etiquetaEnEmpresa() }}</span></span>
+                                <span class="text-13 {{ $usuario->estaActivo() ? 'text-neutral-700' : 'text-accent-2-700' }}">{{ $usuario->estaActivo() ? 'Activo' : 'Desactivado' }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </section>
         @endif
         <x-slot:actions>
             <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
+            @if ($seleccionada)
+                @can('cambiarPlan', $seleccionada)
+                    <x-ui.button variant="primary" wire:click="abrirCambioDePlan({{ $seleccionada->id }})">Cambiar plan</x-ui.button>
+                @endcan
+            @endif
+        </x-slot:actions>
+    </x-ui.dialog>
+
+    {{-- Cambiar plan --}}
+    <x-ui.dialog wire:model="mostrarCambioDePlan" :title="'Cambiar plan de '.$seleccionada?->nombre" max-width="460px">
+        <form wire:submit="cambiarPlan" id="form-cambiar-plan" class="grid gap-3">
+            <x-ui.field label="Plan" for="cambiar-plan" error="planNuevo" :hint="$planElegido?->descripcionDeLimites()">
+                <x-ui.select wire:model.live="planNuevo" id="cambiar-plan" :options="$planes" class="w-full" error="planNuevo" />
+            </x-ui.field>
+            <p class="m-0 text-13 text-neutral-700">Con un plan menor, la empresa conserva sus vacantes y usuarios aunque superen el nuevo límite; solo no podrá sumar más. Se avisará a la cuenta de la empresa.</p>
+        </form>
+        <x-slot:actions>
+            <x-ui.button x-on:click="open = false">Cancelar</x-ui.button>
+            <x-ui.button type="submit" form="form-cambiar-plan" variant="primary" wire:loading.attr="disabled" wire:target="cambiarPlan">Cambiar plan</x-ui.button>
         </x-slot:actions>
     </x-ui.dialog>
 

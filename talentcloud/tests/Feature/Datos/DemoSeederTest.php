@@ -8,6 +8,7 @@ use App\Models\Empresa;
 use App\Models\Entrevista;
 use App\Models\Evaluacion;
 use App\Models\Postulacion;
+use App\Models\PostulacionEtapa;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Tenancy\TenantContext;
@@ -85,6 +86,17 @@ it('se puede ejecutar dos veces sin duplicar datos', function () {
             ->and(Postulacion::count())->toBe(10);
     });
     expect($this->marta->notifications()->count())->toBe(3);
+});
+
+it('deja historial de etapas en cada postulación de la demo, sin duplicarlo al repetirse', function () {
+    $this->seed(DatabaseSeeder::class);
+
+    app(TenantContext::class)->ejecutarGlobal(function () {
+        $postulaciones = Postulacion::with('etapas')->get();
+
+        expect(PostulacionEtapa::count())->toBe($postulaciones->count());
+        $postulaciones->each(fn (Postulacion $p) => expect($p->etapas->last()?->etapa)->toBe($p->etapa));
+    });
 });
 
 it('ordena la campana y la actividad reciente como el prototipo', function () {

@@ -11,9 +11,11 @@ use App\Models\User;
 use App\Repositories\Contracts\EmpresaRepository;
 use App\Repositories\Contracts\EquipoRepository;
 use App\Services\Empresas\ActualizarEmpresa;
+use App\Services\Empresas\LimitesDelPlan;
 use App\Services\Equipo\CambiarEstadoUsuario;
 use App\Services\Equipo\InvitacionNoValida;
 use App\Services\Equipo\InvitarUsuario;
+use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
@@ -128,6 +130,7 @@ class Panel extends Component
     {
         $this->authorize('gestionar', $usuario = $this->usuario($id));
 
+        $this->resetValidation();
         $this->usuarioSeleccionado = $usuario->id;
         $this->mostrarConfirmacionUsuario = true;
     }
@@ -137,9 +140,13 @@ class Panel extends Component
         $usuario = $this->usuario((int) $this->usuarioSeleccionado);
         $this->authorize('gestionar', $usuario);
 
-        $cambiar->ejecutar($usuario);
-
         $this->mostrarConfirmacionUsuario = false;
+
+        try {
+            $cambiar->ejecutar($usuario);
+        } catch (OperacionNoPermitida $e) {
+            $this->addError('usuario', $e->getMessage());
+        }
     }
 
     public function abrirDatos(): void
@@ -177,12 +184,13 @@ class Panel extends Component
         $this->mostrarDatos = false;
     }
 
-    public function render(EquipoRepository $equipo, EmpresaRepository $empresas): View
+    public function render(EquipoRepository $equipo, EmpresaRepository $empresas, LimitesDelPlan $limites): View
     {
         $empresa = $empresas->conConteos($this->empresa());
 
         return view('livewire.mi-empresa.panel', [
             'empresa' => $empresa,
+            'uso' => $limites->uso($empresa),
             'usuarios' => $equipo->usuariosDe($empresa),
             'invitaciones' => $equipo->invitacionesPendientesDe($empresa),
             'seleccionado' => $this->usuarioSeleccionado ? User::find($this->usuarioSeleccionado) : null,

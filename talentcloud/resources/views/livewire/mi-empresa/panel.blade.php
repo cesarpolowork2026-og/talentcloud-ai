@@ -12,6 +12,10 @@
                 </div>
             </div>
 
+            @error('usuario')
+                <p class="field-error mb-3 text-14" role="alert">{{ $message }}</p>
+            @enderror
+
             <x-ui.table>
                 <x-slot:head>
                     <th>Nombre</th><th>Rol</th><th>Estado</th><th><span class="sr-only">Acciones</span></th>
@@ -59,7 +63,8 @@
 
         <div class="grid gap-4">
             <x-ui.card kicker="Plan" :title="$empresa->plan->etiqueta()">
-                <p class="card-body">{{ $empresa->vacantes_activas_count }} {{ $empresa->vacantes_activas_count === 1 ? 'vacante activa' : 'vacantes activas' }} · {{ $empresa->usuarios_count }} {{ $empresa->usuarios_count === 1 ? 'usuario' : 'usuarios' }}.</p>
+                <x-empresas.uso-del-plan :uso="$uso" />
+                <p class="card-body text-13">Para cambiar de plan, escribe al equipo de TalentCloud.</p>
             </x-ui.card>
 
             <x-ui.card kicker="Datos de la empresa" :title="$empresa->nombre">

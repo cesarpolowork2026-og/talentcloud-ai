@@ -7,12 +7,16 @@ use App\Models\User;
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
 use App\Services\Dashboard\DashboardService;
+use App\Services\Dashboard\EmbudoDeSeleccion;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-/** "Dashboard" del prototipo (isDashboard): indicadores, vacantes recientes y actividad reciente. */
+/**
+ * "Dashboard" del prototipo (isDashboard): indicadores, vacantes recientes y
+ * actividad reciente, más el embudo de selección (ampliación).
+ */
 #[Title('Dashboard')]
 class Panel extends Component
 {
@@ -22,6 +26,9 @@ class Panel extends Component
 
     #[Locked]
     public ?int $vacanteSeleccionada = null;
+
+    /** Filtro del embudo: id de una vacante visible, o '' para todas. */
+    public string $vacanteDelEmbudo = '';
 
     public function mount(): void
     {
@@ -38,15 +45,26 @@ class Panel extends Component
         $this->mostrarVistaPrevia = true;
     }
 
-    public function render(DashboardService $dashboard, VacanteRepository $vacantes): View
+    public function render(DashboardService $dashboard, EmbudoDeSeleccion $embudo, VacanteRepository $vacantes): View
     {
         /** @var User $usuario */
         $usuario = auth()->user();
+        $esAdmin = $usuario->tieneRol(Rol::Admin);
+
+        // Un id que no es de una vacante visible se trata como "todas".
+        $vacanteDelEmbudo = ctype_digit($this->vacanteDelEmbudo) ? $vacantes->buscar((int) $this->vacanteDelEmbudo) : null;
 
         return view('livewire.dashboard.panel', [
             'resumen' => $dashboard->resumen(),
+            'embudo' => $embudo->calcular($vacanteDelEmbudo?->id),
+            'vacantesDelEmbudo' => Vacante::query()
+                ->with('empresa:id,nombre')
+                ->orderBy('titulo')
+                ->get(['id', 'titulo', 'empresa_id'])
+                ->mapWithKeys(fn (Vacante $v) => [$v->id => $esAdmin ? $v->titulo.' · '.$v->empresa?->nombre : $v->titulo])
+                ->all(),
             'diasDelMatch' => DashboardService::DIAS_DEL_MATCH_PROMEDIO,
-            'subtitulo' => $usuario->tieneRol(Rol::Admin)
+            'subtitulo' => $esAdmin
                 ? 'Resumen de la actividad de selección en toda la plataforma.'
                 : 'Resumen de la actividad de selección de '.$usuario->empresa?->nombre.'.',
             'seleccionada' => $this->vacanteSeleccionada

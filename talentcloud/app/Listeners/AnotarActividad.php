@@ -11,6 +11,7 @@ use App\Events\EntrevistaProgramada;
 use App\Events\EntrevistaReprogramada;
 use App\Events\EvaluacionAprobada;
 use App\Events\NotaAgregada;
+use App\Events\PlanEmpresaCambiado;
 use App\Events\PostulacionCambioDeEtapa;
 use App\Events\VacanteCreada;
 use App\Models\Postulacion;
@@ -150,6 +151,19 @@ class AnotarActividad
             "{$vacante->empresa?->nombre} creó la vacante {$vacante->titulo}.",
             $vacante,
             $evento->autor,
+        );
+    }
+
+    public function handlePlan(PlanEmpresaCambiado $evento): void
+    {
+        $empresa = $evento->empresa;
+
+        $this->actividad->registrar(
+            $empresa->id,
+            TipoActividad::PlanCambiado,
+            "{$empresa->nombre} pasó del plan {$evento->anterior->etiqueta()} al plan {$empresa->plan->etiqueta()}.",
+            $empresa,
+            $evento->actor,
         );
     }
 

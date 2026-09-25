@@ -9,9 +9,13 @@ use App\Livewire\Concerns\WithListado;
 use App\Models\Empresa;
 use App\Models\User;
 use App\Repositories\Contracts\EmpresaRepository;
+use App\Repositories\Contracts\EquipoRepository;
 use App\Services\Empresas\CambiarEstadoEmpresa;
+use App\Services\Empresas\CambiarPlanEmpresa;
 use App\Services\Empresas\CrearEmpresa;
+use App\Services\Empresas\LimitesDelPlan;
 use App\Services\Equipo\InvitacionNoValida;
+use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
@@ -37,6 +41,11 @@ class Listado extends Component
     public bool $mostrarDetalle = false;
 
     public bool $mostrarConfirmacion = false;
+
+    // Cambiar plan.
+    public bool $mostrarCambioDePlan = false;
+
+    public string $planNuevo = '';
 
     #[Locked]
     public ?int $empresaSeleccionada = null;
@@ -103,6 +112,38 @@ class Listado extends Component
         $this->mostrarConfirmacion = false;
     }
 
+    public function abrirCambioDePlan(int $id): void
+    {
+        $this->authorize('cambiarPlan', $empresa = $this->empresa($id));
+
+        $this->resetValidation();
+        $this->empresaSeleccionada = $empresa->id;
+        $this->planNuevo = $empresa->plan->value;
+        $this->mostrarDetalle = false;
+        $this->mostrarCambioDePlan = true;
+    }
+
+    public function cambiarPlan(CambiarPlanEmpresa $cambiar): void
+    {
+        $empresa = $this->empresa((int) $this->empresaSeleccionada);
+        $this->authorize('cambiarPlan', $empresa);
+
+        $datos = $this->validate(['planNuevo' => ['required', Rule::enum(PlanEmpresa::class)]], attributes: ['planNuevo' => 'plan']);
+
+        /** @var User $admin */
+        $admin = auth()->user();
+
+        try {
+            $cambiar->ejecutar($empresa, PlanEmpresa::from($datos['planNuevo']), $admin);
+        } catch (OperacionNoPermitida $e) {
+            $this->addError('planNuevo', $e->getMessage());
+
+            return;
+        }
+
+        $this->mostrarCambioDePlan = false;
+    }
+
     public function abrirFormulario(): void
     {
         $this->authorize('create', Empresa::class);
@@ -140,17 +181,18 @@ class Listado extends Component
         $this->reset('nombre', 'plan', 'emailAdministrador');
     }
 
-    public function render(EmpresaRepository $empresas): View
+    public function render(EmpresaRepository $empresas, EquipoRepository $equipo, LimitesDelPlan $limites): View
     {
         $seleccionada = $this->empresaSeleccionada ? $empresas->buscar($this->empresaSeleccionada) : null;
 
         return view('livewire.empresas.listado', [
             'filas' => $this->listar($empresas->consultaParaAdministracion()),
             'seleccionada' => $seleccionada ? $empresas->conConteos($seleccionada) : null,
-            'planes' => array_combine(
-                array_column(PlanEmpresa::cases(), 'value'),
-                array_map(fn (PlanEmpresa $p) => $p->etiqueta(), PlanEmpresa::cases()),
-            ),
+            // Solo lectura: la gestión del equipo es de la propia empresa.
+            'usuariosDeLaSeleccionada' => $seleccionada && $this->mostrarDetalle ? $equipo->usuariosDe($seleccionada) : collect(),
+            'usoDeLaSeleccionada' => $seleccionada ? $limites->uso($seleccionada) : null,
+            'planes' => PlanEmpresa::opciones(),
+            'planElegido' => PlanEmpresa::tryFrom($this->planNuevo),
         ]);
     }
 

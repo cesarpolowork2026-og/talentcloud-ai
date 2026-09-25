@@ -10,6 +10,8 @@ use App\Models\Invitacion;
 use App\Models\User;
 use App\Notifications\InvitacionRecibida;
 use App\Repositories\Contracts\EquipoRepository;
+use App\Services\Empresas\LimitesDelPlan;
+use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
@@ -18,13 +20,17 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 /**
  * Invita a una persona al equipo de una empresa. Genera un token de un solo
  * uso (en la base solo queda su hash), vigente 7 días, y lo envía por correo.
- * Una nueva invitación al mismo correo reemplaza a la pendiente.
+ * Una nueva invitación al mismo correo reemplaza a la pendiente. Las
+ * invitaciones pendientes ocupan lugar en el límite de usuarios del plan.
  */
 class InvitarUsuario
 {
     public const DIAS_VIGENCIA = 7;
 
-    public function __construct(private readonly EquipoRepository $equipo) {}
+    public function __construct(
+        private readonly EquipoRepository $equipo,
+        private readonly LimitesDelPlan $limites,
+    ) {}
 
     public function ejecutar(Empresa $empresa, InvitacionData $datos, ?User $invitador): Invitacion
     {
@@ -42,6 +48,12 @@ class InvitarUsuario
 
         try {
             $invitacion = DB::transaction(function () use ($empresa, $datos, $email, $token, $invitador): Invitacion {
+                try {
+                    $this->limites->verificarInvitacion($empresa->id, $email);
+                } catch (OperacionNoPermitida $e) {
+                    throw new InvitacionNoValida($e->getMessage());
+                }
+
                 $this->equipo->retirarInvitacionesPendientes($empresa, $email);
 
                 $invitacion = $this->equipo->crearInvitacion($empresa, [

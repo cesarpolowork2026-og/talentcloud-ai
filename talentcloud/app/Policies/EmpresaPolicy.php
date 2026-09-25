@@ -40,6 +40,12 @@ class EmpresaPolicy
         return $user->tieneRol(Rol::Admin);
     }
 
+    /** Cambiar el plan (y con él, sus límites): solo el admin SaaS. */
+    public function cambiarPlan(User $user, Empresa $empresa): bool
+    {
+        return $user->tieneRol(Rol::Admin);
+    }
+
     /** Invitar reclutadores: la cuenta de empresa, a su propia empresa. */
     public function invitar(User $user, Empresa $empresa): bool
     {

@@ -10,6 +10,7 @@ use App\Events\CvAnalizado;
 use App\Events\EntrevistaCancelada;
 use App\Events\EntrevistaProgramada;
 use App\Events\EntrevistaReprogramada;
+use App\Events\PlanEmpresaCambiado;
 use App\Events\PostulacionCambioDeEtapa;
 use App\Events\VacanteCerrada;
 use App\Jobs\AvisarEstadoDePostulacion;
@@ -18,6 +19,7 @@ use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Notifications\AvisoCambioDePlan;
 use App\Notifications\AvisoCvAnalizado;
 use App\Notifications\AvisoDeEntrevista;
 use App\Notifications\AvisoEntrevistaReprogramada;
@@ -28,7 +30,8 @@ use Illuminate\Notifications\Notification;
 /**
  * Notificaciones (campana + correo según preferencia): entrevista programada o
  * cancelada al candidato y al entrevistador, CV analizado a quien lo subió,
- * postulación propia del candidato a la empresa, y cambios de estado y cierre
+ * postulación propia del candidato a la empresa, cambio de plan a la cuenta de
+ * empresa, y cambios de estado y cierre
  * del proceso al candidato (diferidos: AvisarEstadoDePostulacion). Nadie recibe
  * aviso de lo que hizo él mismo.
  */
@@ -111,6 +114,20 @@ class EnviarAvisos
             ->push($vacante->creador)
             ->filter(fn (?User $u) => $u !== null && $u->estaActivo() && $u->empresa_id === $vacante->empresa_id)
             ->unique('id')
+            ->each(fn (User $u) => $u->notify($aviso));
+    }
+
+    /** Cambio de plan por el admin SaaS: aviso a la cuenta de empresa. */
+    public function handlePlan(PlanEmpresaCambiado $evento): void
+    {
+        $empresa = $evento->empresa;
+        $aviso = AvisoCambioDePlan::de($empresa->nombre, $empresa->plan->etiqueta(), $empresa->plan->descripcionDeLimites(), route('mi-empresa'));
+
+        User::query()
+            ->deEmpresa($empresa->id)
+            ->role(Rol::Empresa->value)
+            ->whereNull('desactivado_at')
+            ->get()
             ->each(fn (User $u) => $u->notify($aviso));
     }
 

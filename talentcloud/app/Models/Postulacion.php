@@ -5,8 +5,11 @@ namespace App\Models;
 use App\Enums\EstadoDeMiPostulacion;
 use App\Enums\EtapaPostulacion;
 use App\Enums\MotorMatching;
+use App\Enums\OrigenPostulacion;
+use App\Observers\PostulacionObserver;
 use App\Tenancy\BelongsToEmpresa;
 use Database\Factories\PostulacionFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,8 +31,11 @@ use Illuminate\Support\Carbon;
  * @property array<string, mixed>|null $match_detalle
  * @property MotorMatching|null $match_motor
  * @property Carbon|null $etapa_cambiada_at
+ * @property OrigenPostulacion $origen
+ * @property Carbon $created_at
  * @property EstadoDeMiPostulacion|null $estado_avisado Último estado comunicado al postulante (no asignable en masa).
  */
+#[ObservedBy(PostulacionObserver::class)]
 class Postulacion extends Model
 {
     /** @use HasFactory<PostulacionFactory> */
@@ -44,6 +50,7 @@ class Postulacion extends Model
         'etapa',
         'orden',
         'etapa_cambiada_at',
+        'origen',
         'match_score',
         'match_detalle',
         'match_motor',
@@ -54,6 +61,7 @@ class Postulacion extends Model
     protected $attributes = [
         'etapa' => 'postulado',
         'orden' => 0,
+        'origen' => 'equipo',
     ];
 
     protected function casts(): array
@@ -62,6 +70,7 @@ class Postulacion extends Model
             'etapa' => EtapaPostulacion::class,
             'orden' => 'integer',
             'etapa_cambiada_at' => 'datetime',
+            'origen' => OrigenPostulacion::class,
             'estado_avisado' => EstadoDeMiPostulacion::class,
             'match_score' => 'decimal:2',
             'match_detalle' => 'array',
@@ -94,6 +103,16 @@ class Postulacion extends Model
     public function notas(): HasMany
     {
         return $this->hasMany(Nota::class)->latest()->latest('id');
+    }
+
+    /**
+     * Historial de etapas, de la más antigua a la más reciente.
+     *
+     * @return HasMany<PostulacionEtapa, $this>
+     */
+    public function etapas(): HasMany
+    {
+        return $this->hasMany(PostulacionEtapa::class)->orderBy('desde')->orderBy('id');
     }
 
     /**

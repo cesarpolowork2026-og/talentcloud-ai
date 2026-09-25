@@ -4,6 +4,7 @@ namespace App\Services\Postulaciones;
 
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Enums\OrigenPostulacion;
 use App\Events\PostulacionCreada;
 use App\Models\Candidato;
 use App\Models\Postulacion;
@@ -13,17 +14,18 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Crea la postulación de un candidato a una vacante abierta: entra en la
- * columna "Postulado" del Kanban, al final, con su CV más reciente.
+ * columna "Postulado" del Kanban, al final, con su CV más reciente. El
+ * origen distingue lo que registró el equipo de lo que postuló el candidato.
  */
 class PostularCandidato
 {
-    public function ejecutar(Vacante $vacante, Candidato $candidato): Postulacion
+    public function ejecutar(Vacante $vacante, Candidato $candidato, OrigenPostulacion $origen = OrigenPostulacion::Equipo): Postulacion
     {
         if ($vacante->estado !== EstadoVacante::Abierta) {
             throw new OperacionNoPermitida('Solo se puede postular a vacantes abiertas.');
         }
 
-        $postulacion = DB::transaction(function () use ($vacante, $candidato): Postulacion {
+        $postulacion = DB::transaction(function () use ($vacante, $candidato, $origen): Postulacion {
             // El índice único (vacante_id, candidato_id) es la garantía final ante envíos simultáneos.
             $existe = Postulacion::sinFiltroDeEmpresa()
                 ->where('vacante_id', $vacante->id)
@@ -46,6 +48,7 @@ class PostularCandidato
                 'etapa' => EtapaPostulacion::Postulado,
                 'orden' => $orden,
                 'etapa_cambiada_at' => now(),
+                'origen' => $origen,
             ]);
             $postulacion->empresa_id = $vacante->empresa_id;
             $postulacion->save();
