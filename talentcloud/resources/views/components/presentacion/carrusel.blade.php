@@ -12,7 +12,7 @@
     {{ $attributes->class('min-w-0') }}
     aria-roledescription="carrusel"
     aria-label="Pantallas de TalentCloud AI"
-    x-data="carruselPresentacion({{ $total }}, 3000)"
+    x-data="carruselPresentacion({{ $total }}, 4000)"
     x-on:mouseenter="suspender(true)"
     x-on:mouseleave="suspender(false)"
     x-on:focusin="suspender(true)"
