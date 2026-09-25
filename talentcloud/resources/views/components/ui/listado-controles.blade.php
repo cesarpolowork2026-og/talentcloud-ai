@@ -5,6 +5,7 @@
 @props([
     'placeholder' => 'Buscar…',
     'estados' => [],
+    'etiquetaEstados' => 'Filtrar por estado',
     'estadoActual' => '',
     'ordenes' => [],
     'direccion' => 'asc',
@@ -20,7 +21,7 @@
     />
 
     @if ($estados)
-        <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrar por estado">
+        <div class="flex flex-wrap gap-2" role="group" aria-label="{{ $etiquetaEstados }}">
             @foreach (['' => 'Todas'] + $estados as $valor => $etiqueta)
                 <button
                     type="button"

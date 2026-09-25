@@ -28,8 +28,8 @@ it('añade Mi empresa a la empresa', function () use ($personal) {
     expect(etiquetasDe(User::factory()->empresa()->create()))->toBe([...$personal, 'Mi empresa']);
 });
 
-it('muestra al postulante solo sus postulaciones', function () {
-    expect(etiquetasDe(User::factory()->postulante()->create()))->toBe(['Mis postulaciones']);
+it('muestra al postulante sus postulaciones y las vacantes abiertas', function () {
+    expect(etiquetasDe(User::factory()->postulante()->create()))->toBe(['Mis postulaciones', 'Vacantes']);
 });
 
 it('no muestra enlaces a una cuenta sin rol', function () {

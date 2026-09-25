@@ -18,6 +18,18 @@ class VacantePolicy
         return $user->rol()?->esPersonalDeSeleccion() ?? false;
     }
 
+    /** "Vacantes" del postulante: las publicadas de todas las empresas (ver VacanteRepository::publicadas). */
+    public function verPublicadas(User $user): bool
+    {
+        return $user->tieneRol(Rol::Postulante);
+    }
+
+    /** "Postular con mi CV": solo el postulante, por su cuenta. */
+    public function postular(User $user): bool
+    {
+        return $user->tieneRol(Rol::Postulante) && $user->candidato !== null;
+    }
+
     public function view(User $user, Vacante $vacante): bool
     {
         return $this->alcanza($user, $vacante);

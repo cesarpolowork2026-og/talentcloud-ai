@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Enums\EtapaPostulacion;
 use App\Enums\TipoActividad;
+use App\Events\CandidatoSePostulo;
 use App\Events\CvAnalizado;
 use App\Events\EntrevistaCancelada;
 use App\Events\EntrevistaProgramada;
@@ -12,6 +13,7 @@ use App\Events\PostulacionCambioDeEtapa;
 use App\Events\VacanteCreada;
 use App\Models\Postulacion;
 use App\Models\User;
+use App\Models\Vacante;
 use App\Services\Actividad\RegistroDeActividad;
 use App\Support\Formato;
 
@@ -33,6 +35,20 @@ class AnotarActividad
         };
 
         $this->anotar($postulacion, TipoActividad::EtapaCambiada, $descripcion, $evento->actor);
+    }
+
+    public function handleCandidatoSePostulo(CandidatoSePostulo $evento): void
+    {
+        $postulacion = $evento->postulacion->loadMissing('candidato');
+        // El postulante no tiene contexto de empresa: la vacante se lee sin ese filtro, por su id.
+        $titulo = Vacante::sinFiltroDeEmpresa()->whereKey($postulacion->vacante_id)->value('titulo');
+
+        $this->anotar(
+            $postulacion,
+            TipoActividad::CandidatoSePostulo,
+            "{$postulacion->candidato?->nombre} postuló a {$titulo}.",
+            $evento->postulante,
+        );
     }
 
     public function handleCv(CvAnalizado $evento): void

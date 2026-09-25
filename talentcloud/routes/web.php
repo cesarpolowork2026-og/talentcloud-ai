@@ -60,6 +60,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Postulante.
     Route::middleware('rol:postulante')->prefix('postulante')->name('postulante.')->group(function () {
         Route::get('postulaciones', Postulante\MisPostulaciones::class)->name('postulaciones');
+        // Vacantes publicadas de todas las empresas (ampliación sobre el prototipo). Sin model
+        // binding: el postulante no tiene contexto de empresa y la vacante se lee por su id.
+        Route::get('vacantes', Postulante\Vacantes::class)->name('vacantes');
+        Route::get('vacantes/{id}', Postulante\DetalleVacante::class)->whereNumber('id')->name('vacantes.show');
     });
 });
 

@@ -11,4 +11,5 @@ enum TipoActividad: string
     case EntrevistaProgramada = 'entrevista.programada';
     case EntrevistaCancelada = 'entrevista.cancelada';
     case VacanteCreada = 'vacante.creada';
+    case CandidatoSePostulo = 'postulacion.propia';
 }

@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Route;
 
 /**
  * Barra de navegación por rol, tal como la define el prototipo
- * (TalentCloud App.dc.html): el postulante ve "Mis postulaciones"; el personal
+ * (TalentCloud App.dc.html): el postulante ve "Mis postulaciones" (y "Vacantes",
+ * ampliación sobre el prototipo); el personal
  * de selección ve Dashboard…Evaluaciones; el admin añade "Empresas" y la
  * empresa "Mi empresa".
  */
@@ -28,7 +29,8 @@ class Navegacion
         $enlaces = [];
 
         if ($rol === Rol::Postulante) {
-            $enlaces[] = self::enlace('Mis postulaciones', 'postulante.postulaciones', 'postulante.*');
+            $enlaces[] = self::enlace('Mis postulaciones', 'postulante.postulaciones', 'postulante.postulaciones');
+            $enlaces[] = self::enlace('Vacantes', 'postulante.vacantes', 'postulante.vacantes*');
         }
 
         if ($rol->esPersonalDeSeleccion()) {

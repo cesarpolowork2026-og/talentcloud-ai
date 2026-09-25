@@ -7,7 +7,9 @@
 
     <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         @if ($postulaciones->isEmpty())
-            <x-ui.empty-state icon="briefcase" message="Todavía no tienes postulaciones." />
+            <x-ui.empty-state icon="briefcase" message="Todavía no tienes postulaciones.">
+                <x-ui.button variant="primary" class="mt-4" :href="route('postulante.vacantes')" wire:navigate>Ver vacantes abiertas</x-ui.button>
+            </x-ui.empty-state>
         @else
             <x-ui.table>
                 <x-slot:head>

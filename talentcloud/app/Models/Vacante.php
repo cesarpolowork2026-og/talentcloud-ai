@@ -56,6 +56,20 @@ class Vacante extends Model
     }
 
     /**
+     * "Madrid · Presencial". Si la ubicación repite la modalidad ("Remoto · Remoto"),
+     * se muestra una sola vez.
+     */
+    public function lugarYModalidad(): string
+    {
+        $modalidad = $this->modalidad->etiqueta();
+        $ubicacion = trim((string) $this->ubicacion);
+
+        return $ubicacion === '' || mb_strtolower($ubicacion) === mb_strtolower($modalidad)
+            ? $modalidad
+            : "{$ubicacion} · {$modalidad}";
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function creador(): BelongsTo

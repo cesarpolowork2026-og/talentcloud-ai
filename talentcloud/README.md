@@ -48,6 +48,8 @@ servicio). Todas las cuentas usan la contraseña `password`:
 | admin@orbita.dev | Empresa | Orbita Labs (suspendida: no puede ingresar) |
 | marco@correo.com | Postulante | — |
 
+El postulante ve las vacantes abiertas de las empresas activas en «Vacantes» y postula con su CV; la empresa recibe el aviso y la postulación entra en su Kanban con el matching de la IA.
+
 `docker compose` toma `DB_PASSWORD` del `.env`. Crea las bases `talentcloud` y `talentcloud_testing`, ambas con la extensión `vector`.
 
 ## Calidad

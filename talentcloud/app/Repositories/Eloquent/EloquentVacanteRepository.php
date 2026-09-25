@@ -3,11 +3,13 @@
 namespace App\Repositories\Eloquent;
 
 use App\Enums\EstadoEmpresa;
+use App\Enums\EstadoVacante;
 use App\Models\Empresa;
 use App\Models\Requisito;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
+use App\Tenancy\EmpresaScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -21,6 +23,27 @@ class EloquentVacanteRepository implements VacanteRepository
     public function buscar(int $id): ?Vacante
     {
         return Vacante::find($id);
+    }
+
+    public function publicadas(): Builder
+    {
+        return Vacante::sinFiltroDeEmpresa()
+            ->where('vacantes.estado', EstadoVacante::Abierta)
+            ->whereHas('empresa', fn (Builder $q) => $q->where('estado', EstadoEmpresa::Activa))
+            ->with([
+                'empresa:id,nombre',
+                // Requisito también lleva el filtro de empresa: el postulante no tiene contexto.
+                // Solo las columnas públicas (sin el embedding).
+                'requisitos' => fn ($q) => $q->withoutGlobalScope(EmpresaScope::class)
+                    ->select(['id', 'vacante_id', 'competencia_id', 'tipo', 'anios_minimos', 'orden'])
+                    ->with('competencia:id,nombre')
+                    ->orderBy('orden'),
+            ]);
+    }
+
+    public function buscarPublicada(int $id): ?Vacante
+    {
+        return $this->publicadas()->find($id);
     }
 
     public function conDetalle(Vacante $vacante): Vacante

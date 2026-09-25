@@ -20,6 +20,19 @@ interface VacanteRepository
 
     public function buscar(int $id): ?Vacante;
 
+    /**
+     * Vacantes que ve un postulante: abiertas y de empresas activas, de
+     * cualquier empresa, con la empresa y los requisitos. Es la única lectura
+     * de vacantes entre empresas y solo expone datos públicos (nunca
+     * postulaciones ni conteos de candidatos).
+     *
+     * @return Builder<Vacante>
+     */
+    public function publicadas(): Builder;
+
+    /** Una vacante de publicadas(), o null si no existe o ya no es pública. */
+    public function buscarPublicada(int $id): ?Vacante;
+
     /** Carga empresa, requisitos (con su competencia) y postulaciones_count. */
     public function conDetalle(Vacante $vacante): Vacante;
 
