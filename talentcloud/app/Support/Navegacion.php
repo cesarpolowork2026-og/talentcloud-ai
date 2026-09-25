@@ -45,6 +45,7 @@ class Navegacion
 
         if ($rol === Rol::Admin) {
             $enlaces[] = self::enlace('Empresas', 'empresas.index', 'empresas.*');
+            $enlaces[] = self::enlace('Calidad de la IA', 'calidad-ia', 'calidad-ia');
         }
 
         if ($rol === Rol::Empresa) {

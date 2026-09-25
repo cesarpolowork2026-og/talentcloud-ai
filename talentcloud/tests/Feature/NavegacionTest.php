@@ -20,8 +20,8 @@ it('muestra al reclutador los módulos de selección', function () use ($persona
     expect(etiquetasDe(User::factory()->reclutador()->create()))->toBe($personal);
 });
 
-it('añade Empresas al admin', function () use ($personal) {
-    expect(etiquetasDe(User::factory()->admin()->create()))->toBe([...$personal, 'Empresas']);
+it('añade Empresas y Calidad de la IA al admin', function () use ($personal) {
+    expect(etiquetasDe(User::factory()->admin()->create()))->toBe([...$personal, 'Empresas', 'Calidad de la IA']);
 });
 
 it('añade Mi empresa a la empresa', function () use ($personal) {

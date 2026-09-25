@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Tenancy\BelongsToEmpresa;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * "Marcar como incorrecto" en la pantalla de Matching.
@@ -12,6 +13,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $postulacion_id
  * @property int $requisito_id
+ * @property int|null $user_id
+ * @property string|null $comentario
+ * @property Carbon $created_at
  */
 class MatchFeedback extends Model
 {

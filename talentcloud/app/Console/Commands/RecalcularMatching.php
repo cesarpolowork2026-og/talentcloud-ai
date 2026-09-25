@@ -3,11 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\ProcesaEnLote;
-use App\Enums\MotorMatching;
 use App\Jobs\CalcularMatch;
-use App\Matching\FakeMatchingEngine;
-use App\Matching\MatchingEngineInterface;
 use App\Models\Postulacion;
+use App\Services\Postulaciones\RecalculoDeMatching;
 use Illuminate\Console\Command;
 
 /**
@@ -25,21 +23,17 @@ class RecalcularMatching extends Command
 
     protected $description = 'Recalcula el matching de las postulaciones con el motor configurado';
 
-    public function handle(MatchingEngineInterface $motor): int
+    public function handle(RecalculoDeMatching $recalculo): int
     {
-        if ($this->option('solo-basicos') && $motor instanceof FakeMatchingEngine) {
+        $soloBasicos = (bool) $this->option('solo-basicos');
+
+        if ($soloBasicos && ! $recalculo->mejoraLosBasicos()) {
             $this->error('El motor configurado es el análisis básico (MATCHING_ENGINE=fake o IA deshabilitada): no mejoraría nada.');
 
             return self::FAILURE;
         }
 
-        // Las postulaciones son de todas las empresas; cada cálculo corre con la suya (ConEmpresa).
-        $postulaciones = Postulacion::sinFiltroDeEmpresa()
-            ->when($this->option('solo-basicos'), fn ($q) => $q->where('match_motor', MotorMatching::Fake))
-            ->orderBy('id')
-            ->get(['id', 'empresa_id']);
-
-        $fallos = $this->procesar('postulaciones', $postulaciones, fn (Postulacion $p) => $this->option('sync')
+        $fallos = $this->procesar('postulaciones', $recalculo->postulaciones($soloBasicos), fn (Postulacion $p) => $this->option('sync')
             ? CalcularMatch::dispatchSync($p->empresa_id, $p->id)
             : CalcularMatch::para($p));
 

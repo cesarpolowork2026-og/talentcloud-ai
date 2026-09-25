@@ -10,6 +10,7 @@ use App\Livewire\Kanban;
 use App\Livewire\Matching;
 use App\Livewire\MiEmpresa;
 use App\Livewire\Onboarding;
+use App\Livewire\Plataforma;
 use App\Livewire\Postulante;
 use App\Livewire\Vacantes;
 use Illuminate\Support\Facades\Route;
@@ -49,6 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin SaaS.
     Route::middleware('rol:admin')->group(function () {
         Route::get('empresas', Empresas\Listado::class)->name('empresas.index');
+        Route::get('calidad-ia', Plataforma\CalidadIa::class)->name('calidad-ia');
     });
 
     // Cuenta de empresa.

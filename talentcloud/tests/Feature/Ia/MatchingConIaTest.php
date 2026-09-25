@@ -187,6 +187,19 @@ it('recalcula solo los resultados del análisis básico', function () {
     Queue::assertPushed(CalcularMatch::class, fn (CalcularMatch $job) => $job->postulacionId === $basica->id && $job->postulacionId !== $conIa->id);
 });
 
+it('sin opciones, encola todas las postulaciones de todas las empresas', function () {
+    Queue::fake();
+    $otraEmpresa = app(TenantContext::class)->ejecutarGlobal(fn () => Postulacion::factory()->create(['match_motor' => MotorMatching::Http]));
+    $total = Postulacion::sinFiltroDeEmpresa()->count();
+
+    $this->artisan('talentcloud:recalcular-matching')
+        ->expectsOutputToContain("Encolando {$total} postulaciones")
+        ->assertSuccessful();
+
+    Queue::assertPushed(CalcularMatch::class, $total);
+    Queue::assertPushed(CalcularMatch::class, fn (CalcularMatch $job) => $job->postulacionId === $otraEmpresa->id && $job->empresaId === $otraEmpresa->empresa_id);
+});
+
 it('no recalcula resultados básicos si el motor configurado es el básico', function () {
     Queue::fake();
     config(['talentcloud.matching.motor' => 'fake']);
