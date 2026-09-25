@@ -65,8 +65,8 @@
             <x-ui.card kicker="Datos de la empresa" :title="$empresa->nombre">
                 <p class="card-body">
                     {{ $empresa->sector ?? 'Sector sin indicar' }}
-                    @if ($empresa->sitio_web)
-                        · <a href="{{ $empresa->sitio_web }}" target="_blank" rel="noopener">{{ parse_url($empresa->sitio_web, PHP_URL_HOST) ?? $empresa->sitio_web }}</a>
+                    @if ($sitioWeb = \App\Support\EnlaceExterno::seguro($empresa->sitio_web))
+                        · <a href="{{ $sitioWeb }}" target="_blank" rel="noopener noreferrer">{{ \App\Support\EnlaceExterno::dominio($sitioWeb) }}</a>
                     @endif
                 </p>
                 @if ($empresa->descripcion)

@@ -3,6 +3,7 @@
 namespace App\Services\Vacantes;
 
 use App\Enums\EstadoVacante;
+use App\Events\VacanteCerrada;
 use App\Models\Requisito;
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
@@ -34,6 +35,12 @@ class CambiarEstadoVacante
             $datos['cerrada_at'] = now();
         }
 
-        return $this->vacantes->actualizar($vacante, $datos);
+        $vacante = $this->vacantes->actualizar($vacante, $datos);
+
+        if ($destino === EstadoVacante::Cerrada) {
+            VacanteCerrada::dispatch($vacante);
+        }
+
+        return $vacante;
     }
 }

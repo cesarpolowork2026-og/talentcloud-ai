@@ -2,9 +2,12 @@
 
 namespace App\Livewire\Postulante;
 
+use App\Enums\EstadoEntrevista;
 use App\Enums\NivelCoincidencia;
+use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\User;
+use App\Repositories\Contracts\EntrevistaRepository;
 use App\Tenancy\EmpresaScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -33,13 +36,21 @@ class MisPostulaciones extends Component
         $this->mostrarDetalle = true;
     }
 
-    public function render(): View
+    public function render(EntrevistaRepository $entrevistasRepo): View
     {
         $postulaciones = $this->postulaciones();
+        /** @var User $usuario */
+        $usuario = auth()->user();
+        $entrevistas = $usuario->candidato ? $entrevistasRepo->delCandidato($usuario->candidato) : collect();
 
         return view('livewire.postulante.mis-postulaciones', [
             'postulaciones' => $postulaciones,
             'seleccionada' => $postulaciones->firstWhere('id', $this->postulacionSeleccionada),
+            'entrevistasPorPostulacion' => $entrevistas->groupBy('postulacion_id'),
+            // Próximas: pendientes o confirmadas y aún por celebrarse.
+            'proximas' => $entrevistas
+                ->filter(fn (Entrevista $e) => in_array($e->estado, [EstadoEntrevista::Pendiente, EstadoEntrevista::Confirmada], true) && $e->inicia_at->isFuture())
+                ->values(),
         ]);
     }
 

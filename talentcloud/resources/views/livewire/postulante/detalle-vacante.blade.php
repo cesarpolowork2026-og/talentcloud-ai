@@ -1,6 +1,7 @@
 {{-- Detalle de una vacante publicada y "Postular con mi CV" (ampliación sobre el prototipo). --}}
 @use('App\Enums\EstadoProcesamientoCv')
 @use('App\Enums\TipoRequisito')
+@use('App\Support\EnlaceExterno')
 @use('App\Support\Formato')
 @php($cvListo = $cv?->estado_procesamiento === EstadoProcesamientoCv::Procesado)
 @php($cvAnalizandose = in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true))
@@ -29,6 +30,23 @@
                         <p class="mb-0 mt-3 text-13 text-neutral-700">Publicada el {{ Formato::fechaCorta($vacante->publicada_at) }}.</p>
                     @endif
                 </section>
+
+                @php($empresa = $vacante->empresa)
+                @php($sitioWeb = EnlaceExterno::seguro($empresa?->sitio_web))
+                @if ($empresa && ($empresa->sector || $empresa->descripcion || $sitioWeb))
+                    <section>
+                        <h2 class="mb-2 text-16">Sobre {{ $empresa->nombre }}</h2>
+                        @if ($empresa->sector)
+                            <p class="mb-2 text-13 text-neutral-700">{{ $empresa->sector }}</p>
+                        @endif
+                        @if ($empresa->descripcion)
+                            <p class="m-0 whitespace-pre-line text-15 text-neutral-800">{{ $empresa->descripcion }}</p>
+                        @endif
+                        @if ($sitioWeb)
+                            <p class="mb-0 mt-2 text-14"><a href="{{ $sitioWeb }}" target="_blank" rel="noopener noreferrer">{{ EnlaceExterno::dominio($sitioWeb) }}</a></p>
+                        @endif
+                    </section>
+                @endif
 
                 <section>
                     <h2 class="mb-1 text-16">Requisitos</h2>

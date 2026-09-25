@@ -31,7 +31,7 @@ class EloquentVacanteRepository implements VacanteRepository
             ->where('vacantes.estado', EstadoVacante::Abierta)
             ->whereHas('empresa', fn (Builder $q) => $q->where('estado', EstadoEmpresa::Activa))
             ->with([
-                'empresa:id,nombre',
+                'empresa:id,nombre,sector,sitio_web,descripcion',
                 // Requisito también lleva el filtro de empresa: el postulante no tiene contexto.
                 // Solo las columnas públicas (sin el embedding).
                 'requisitos' => fn ($q) => $q->withoutGlobalScope(EmpresaScope::class)

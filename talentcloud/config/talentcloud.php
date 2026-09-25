@@ -31,4 +31,13 @@ return [
         'motor' => env('MATCHING_ENGINE', 'fake'),
     ],
 
+    /*
+    | Avisos al postulante sobre el estado de su postulación: se envían con
+    | esta demora y solo si el estado sigue igual al enviarse (un arrastre
+    | accidental en el Kanban, deshecho a tiempo, no llega a avisarse).
+    */
+    'avisos' => [
+        'demora_minutos' => (int) env('AVISOS_DEMORA_MINUTOS', 10),
+    ],
+
 ];

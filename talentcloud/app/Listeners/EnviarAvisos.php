@@ -3,29 +3,37 @@
 namespace App\Listeners;
 
 use App\DTO\DatosDeEntrevista;
+use App\Enums\EtapaPostulacion;
 use App\Enums\Rol;
 use App\Events\CandidatoSePostulo;
 use App\Events\CvAnalizado;
 use App\Events\EntrevistaCancelada;
 use App\Events\EntrevistaProgramada;
+use App\Events\PostulacionCambioDeEtapa;
+use App\Events\VacanteCerrada;
+use App\Jobs\AvisarEstadoDePostulacion;
 use App\Models\Candidato;
 use App\Models\Entrevista;
+use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Notifications\AvisoCvAnalizado;
 use App\Notifications\AvisoDeEntrevista;
 use App\Notifications\AvisoNuevaPostulacion;
+use App\Services\Avisos\AvisoAlCandidato;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Notification as Notificaciones;
 
 /**
  * Notificaciones (campana + correo según preferencia): entrevista programada o
- * cancelada al candidato y al entrevistador, CV analizado a quien lo subió y
- * postulación propia del candidato a la empresa. Nadie recibe aviso de lo que
- * hizo él mismo.
+ * cancelada al candidato y al entrevistador, CV analizado a quien lo subió,
+ * postulación propia del candidato a la empresa, y cambios de estado y cierre
+ * del proceso al candidato (diferidos: AvisarEstadoDePostulacion). Nadie recibe
+ * aviso de lo que hizo él mismo.
  */
 class EnviarAvisos
 {
+    public function __construct(private readonly AvisoAlCandidato $avisoAlCandidato) {}
+
     public function handleEntrevistaProgramada(EntrevistaProgramada $evento): void
     {
         $entrevista = $this->cargar($evento->entrevista);
@@ -95,6 +103,28 @@ class EnviarAvisos
             ->each(fn (User $u) => $u->notify($aviso));
     }
 
+    /** Cambio de etapa: aviso diferido al candidato, salvo que lo haya hecho él mismo. */
+    public function handleEtapa(PostulacionCambioDeEtapa $evento): void
+    {
+        $postulacion = $evento->postulacion->loadMissing('candidato');
+
+        if ($evento->actor !== null && $evento->actor->id === $postulacion->candidato?->user_id) {
+            return;
+        }
+
+        AvisarEstadoDePostulacion::programar($postulacion);
+    }
+
+    /** Cierre de la vacante: aviso diferido a quienes seguían en el proceso (ni contratados ni descartados). */
+    public function handleVacanteCerrada(VacanteCerrada $evento): void
+    {
+        Postulacion::sinFiltroDeEmpresa()
+            ->where('vacante_id', $evento->vacante->id)
+            ->whereNotIn('etapa', [EtapaPostulacion::Contratado, EtapaPostulacion::Descartado])
+            ->get()
+            ->each(fn (Postulacion $postulacion) => AvisarEstadoDePostulacion::programar($postulacion));
+    }
+
     private function cargar(Entrevista $entrevista): Entrevista
     {
         return $entrevista->loadMissing(['entrevistador', 'postulacion.candidato.user']);
@@ -109,14 +139,9 @@ class EnviarAvisos
         }
     }
 
-    /** Con cuenta de postulante: campana y correo según su preferencia. Sin cuenta: solo correo. */
     private function alCandidato(?Candidato $candidato, Notification $aviso): void
     {
-        if ($candidato?->user !== null) {
-            $candidato->user->notify($aviso);
-        } elseif (filled($candidato?->email)) {
-            Notificaciones::route('mail', $candidato->email)->notify($aviso);
-        }
+        $this->avisoAlCandidato->enviar($candidato, $aviso);
     }
 
     private function usuarioActual(): ?User

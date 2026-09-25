@@ -27,6 +27,21 @@
         @endif
 
         <div class="grid gap-3">
+            @if ($proximas->isNotEmpty())
+                <x-ui.card elev="sm" class="!bg-white">
+                    <div class="card-kicker">Próximas entrevistas</div>
+                    <ul class="m-0 grid list-none gap-2 p-0">
+                        @foreach ($proximas as $entrevista)
+                            @php($suPostulacion = $postulaciones->firstWhere('id', $entrevista->postulacion_id))
+                            <x-postulante.entrevista
+                                :entrevista="$entrevista"
+                                :vacante="$suPostulacion?->vacante?->titulo.' · '.$suPostulacion?->vacante?->empresa?->nombre"
+                                wire:key="proxima-{{ $entrevista->id }}"
+                            />
+                        @endforeach
+                    </ul>
+                </x-ui.card>
+            @endif
             <livewire:postulante.mi-curriculo />
             <a href="{{ route('profile') }}" wire:navigate class="text-13 text-neutral-700 underline hover:text-accent-700">Eliminar mi cuenta y mis datos</a>
         </div>
@@ -41,6 +56,15 @@ Estado: {{ EstadoDeMiPostulacion::de($seleccionada)->etiqueta() }}
 Postulación enviada el {{ Formato::fechaCorta($seleccionada->created_at) }}.@if ($competencias)
 
 La IA identificó {{ $competencias[0] }} de {{ $competencias[1] }} competencias requeridas en tu CV.@endif</p>
+            @php($susEntrevistas = $entrevistasPorPostulacion->get($seleccionada->id, collect()))
+            @if ($susEntrevistas->isNotEmpty())
+                <h3 class="mb-0 mt-4 text-15">Entrevistas</h3>
+                <ul class="m-0 mt-2 grid list-none gap-2 p-0">
+                    @foreach ($susEntrevistas as $entrevista)
+                        <x-postulante.entrevista :entrevista="$entrevista" wire:key="entrevista-{{ $entrevista->id }}" />
+                    @endforeach
+                </ul>
+            @endif
         @endif
         <x-slot:actions>
             <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>

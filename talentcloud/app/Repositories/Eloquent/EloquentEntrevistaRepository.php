@@ -5,6 +5,7 @@ namespace App\Repositories\Eloquent;
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Models\Candidato;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Repositories\Contracts\EntrevistaRepository;
@@ -22,6 +23,15 @@ class EloquentEntrevistaRepository implements EntrevistaRepository
     public function buscar(int $id): ?Entrevista
     {
         return $this->consultaListado()->find($id);
+    }
+
+    public function delCandidato(Candidato $candidato): Collection
+    {
+        return Entrevista::sinFiltroDeEmpresa()
+            ->select(['id', 'empresa_id', 'postulacion_id', 'inicia_at', 'duracion_min', 'modalidad', 'enlace', 'estado'])
+            ->whereIn('postulacion_id', $candidato->postulacionesEnTodasLasEmpresas()->select('postulaciones.id'))
+            ->orderBy('inicia_at')
+            ->get();
     }
 
     public function postulacionesAgendables(): Collection

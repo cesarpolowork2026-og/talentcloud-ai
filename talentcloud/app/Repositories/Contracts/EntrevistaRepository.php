@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Contracts;
 
+use App\Models\Candidato;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
 use Carbon\CarbonInterface;
@@ -26,6 +27,15 @@ interface EntrevistaRepository
      * @return Collection<int, Postulacion>
      */
     public function postulacionesAgendables(): Collection;
+
+    /**
+     * Entrevistas de un candidato en todas las empresas, para su portal. Única
+     * lectura de entrevistas entre empresas: siempre a través de sus propias
+     * postulaciones y solo con columnas públicas (nunca las notas internas).
+     *
+     * @return Collection<int, Entrevista>
+     */
+    public function delCandidato(Candidato $candidato): Collection;
 
     /** El entrevistador ya tiene otra entrevista (no cancelada) que se cruza con ese intervalo. */
     public function haySolapamiento(int $entrevistadorId, CarbonInterface $inicio, CarbonInterface $fin): bool;

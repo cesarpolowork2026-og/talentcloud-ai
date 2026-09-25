@@ -32,6 +32,23 @@ enum EstadoDeMiPostulacion: string
         };
     }
 
+    /**
+     * Estado que se comunica al postulante con un aviso, o null si su situación
+     * actual no se anuncia: Postulado (acaba de postular), Entrevista (tiene su
+     * propio aviso al programarla) y Oferta (etapa interna: la empresa la
+     * comunica en persona).
+     */
+    public static function aAvisar(Postulacion $postulacion): ?self
+    {
+        return match (true) {
+            $postulacion->etapa === EtapaPostulacion::Contratado => self::Contratado,
+            $postulacion->etapa === EtapaPostulacion::Descartado => self::NoSeleccionado,
+            $postulacion->vacante?->estado === EstadoVacante::Cerrada => self::Cerrada,
+            $postulacion->etapa === EtapaPostulacion::EnRevision => self::EnRevision,
+            default => null,
+        };
+    }
+
     public function etiqueta(): string
     {
         return match ($this) {

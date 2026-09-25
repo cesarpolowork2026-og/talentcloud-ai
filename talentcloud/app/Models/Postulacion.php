@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EstadoDeMiPostulacion;
 use App\Enums\EtapaPostulacion;
 use App\Enums\MotorMatching;
 use App\Tenancy\BelongsToEmpresa;
@@ -27,6 +28,7 @@ use Illuminate\Support\Carbon;
  * @property array<string, mixed>|null $match_detalle
  * @property MotorMatching|null $match_motor
  * @property Carbon|null $etapa_cambiada_at
+ * @property EstadoDeMiPostulacion|null $estado_avisado Último estado comunicado al postulante (no asignable en masa).
  */
 class Postulacion extends Model
 {
@@ -60,6 +62,7 @@ class Postulacion extends Model
             'etapa' => EtapaPostulacion::class,
             'orden' => 'integer',
             'etapa_cambiada_at' => 'datetime',
+            'estado_avisado' => EstadoDeMiPostulacion::class,
             'match_score' => 'decimal:2',
             'match_detalle' => 'array',
             'match_motor' => MotorMatching::class,
