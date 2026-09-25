@@ -48,9 +48,11 @@
                         x-data="columnaKanban(@js($editable))"
                     >
                         @foreach ($columna['postulaciones'] as $postulacion)
+                            @php($arrastrable = $editable && ! $postulacion->estaRetirada())
                             <div
-                                class="card elev-sm relative !p-3 {{ $editable ? 'cursor-grab' : 'cursor-pointer' }}"
+                                class="card elev-sm relative !p-3 {{ $arrastrable ? 'cursor-grab' : 'cursor-pointer' }}"
                                 data-postulacion="{{ $postulacion->id }}"
+                                @unless ($arrastrable) data-fija @endunless
                                 wire:key="postulacion-{{ $postulacion->id }}"
                                 wire:click="abrir({{ $postulacion->id }})"
                             >

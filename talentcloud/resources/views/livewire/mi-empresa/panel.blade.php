@@ -88,6 +88,10 @@
     <x-ui.dialog wire:model="mostrarInvitacion" title="Invitar usuario" max-width="460px">
         <form wire:submit="invitar" id="form-invitar" class="grid gap-3">
             <p class="m-0">Se enviará una invitación por correo para unirse a {{ $empresa->nombre }}.</p>
+            @if ($uso->usuariosAlLimite())
+                {{-- Reenviar a un correo con invitación pendiente sí se permite: no se bloquea el formulario. --}}
+                <p class="m-0 text-14 text-accent-2-700">Tu plan {{ $uso->plan->etiqueta() }} ya tiene sus {{ $uso->limiteUsuarios() }} lugares ocupados, contando las invitaciones pendientes. Para invitar a alguien nuevo, revoca una invitación, desactiva un usuario o solicita un cambio de plan.</p>
+            @endif
             <x-ui.field label="Nombre" for="invitado-nombre" error="invitadoNombre">
                 <x-ui.input wire:model="invitadoNombre" id="invitado-nombre" placeholder="Nombre del reclutador" error="invitadoNombre" />
             </x-ui.field>

@@ -42,7 +42,12 @@ new #[Layout('layouts.guest')] #[Title('Registro de postulante')] class extends 
         Auth::login($user);
 
         // Si llegó desde "Postular" en la bolsa pública, vuelve a esa vacante (empleos.postular).
-        $this->redirectIntended(default: Navegacion::rutaInicio($user), navigate: true);
+        // Cualquier otro destino guardado (p. ej. una pantalla del personal) daría un 403 al postulante.
+        $destino = session()->pull('url.intended');
+        $this->redirect(
+            is_string($destino) && str_starts_with($destino, url('empleos').'/') ? $destino : Navegacion::rutaInicio($user),
+            navigate: true,
+        );
     }
 }; ?>
 

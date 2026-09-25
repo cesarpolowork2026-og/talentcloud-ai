@@ -7,6 +7,7 @@ use App\Enums\OrigenPostulacion;
 use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
 use App\Enums\TipoActividad;
+use App\Livewire\Auth\AceptarInvitacion as AceptarInvitacionPantalla;
 use App\Livewire\Dashboard\Panel as Dashboard;
 use App\Livewire\Empresas\Listado as Empresas;
 use App\Livewire\MiEmpresa\Panel as MiEmpresa;
@@ -458,3 +459,33 @@ it('solo el admin SaaS puede cambiar el plan', function (string $quien) {
     actuarComo($usuario);
     Livewire::test(Empresas::class)->assertForbidden();
 })->with(['cuenta de empresa', 'reclutador', 'postulante']);
+
+// — Auditoría de la ampliación 2 —
+
+it('con el equipo completo, la invitación sigue vigente y el formulario explica el motivo', function () {
+    invitacionConToken($this->vela, 'token-completo');
+    User::factory()->deEmpresa($this->vela)->reclutador()->create();
+    auth()->logout();
+
+    Livewire::test(AceptarInvitacionPantalla::class, ['token' => 'token-completo'])
+        ->set('name', 'Persona Nueva')
+        ->set('password', 'password-segura-1')
+        ->set('password_confirmation', 'password-segura-1')
+        ->call('aceptar')
+        ->assertSet('valida', true)
+        ->assertHasErrors('name')
+        ->assertSee('tu invitación sigue vigente')
+        ->assertDontSee('Invitación no válida');
+});
+
+it('avisa en el diálogo de invitación cuando el plan ya está completo', function () {
+    invitacionConToken($this->vela, 'token-pendiente');
+    actuarComo($this->cuentaVela);
+
+    Livewire::test(MiEmpresa::class)
+        ->call('abrirInvitacion')
+        ->assertSee('Tu plan Starter ya tiene sus 3 lugares ocupados');
+
+    actuarComo($this->cuentaNimbus);
+    Livewire::test(MiEmpresa::class)->call('abrirInvitacion')->assertDontSee('lugares ocupados');
+});

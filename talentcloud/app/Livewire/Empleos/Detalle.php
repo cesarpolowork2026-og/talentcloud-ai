@@ -31,6 +31,8 @@ class Detalle extends Component
         $vacante = $vacantes->buscarPublicada($this->vacanteId);
 
         return view('livewire.empleos.detalle', ['vacante' => $vacante])
-            ->title($vacante->titulo ?? 'Empleo');
+            ->title($vacante->titulo ?? 'Empleo')
+            ->layoutData(['descripcion' => $vacante === null ? null
+                : $vacante->titulo.' en '.$vacante->empresa?->nombre.' · '.$vacante->lugarYModalidad().'. Postula con tu CV en TalentCloud AI.']);
     }
 }

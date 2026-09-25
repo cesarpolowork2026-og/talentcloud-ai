@@ -20,6 +20,7 @@ final readonly class DatosDeEntrevista
         public int $duracionMin,
         public string $modalidad,
         public ?string $enlace,
+        public ?int $candidatoId = null,
     ) {}
 
     public static function de(Entrevista $entrevista): self
@@ -34,6 +35,7 @@ final readonly class DatosDeEntrevista
             duracionMin: $entrevista->duracion_min,
             modalidad: $entrevista->modalidad->etiqueta(),
             enlace: $entrevista->enlace,
+            candidatoId: $entrevista->postulacion?->candidato_id,
         );
     }
 }

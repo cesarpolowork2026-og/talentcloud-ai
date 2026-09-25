@@ -15,7 +15,9 @@
         <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
             @foreach ($filas as $vacante)
                 <x-vacantes.tarjeta-publica :vacante="$vacante" :href="route('postulante.vacantes.show', $vacante->id)" wire:key="vacante-{{ $vacante->id }}">
-                    @if (in_array($vacante->id, $postuladas, true))
+                    @if (($postuladas[$vacante->id] ?? null) === true)
+                        <x-ui.tag tone="outline">Retiraste tu postulación</x-ui.tag>
+                    @elseif (array_key_exists($vacante->id, $postuladas))
                         <x-ui.tag tone="accent">Ya postulaste</x-ui.tag>
                     @else
                         <x-ui.button size="sm" :href="route('postulante.vacantes.show', $vacante->id)" wire:navigate aria-label="Ver y postular a {{ $vacante->titulo }}">Ver y postular</x-ui.button>

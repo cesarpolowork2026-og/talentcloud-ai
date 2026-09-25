@@ -19,13 +19,14 @@ class AvisoCvAnalizado extends Notification implements ShouldQueue
     private function __construct(
         public readonly string $texto,
         public readonly string $url,
+        public readonly ?int $candidatoId = null,
     ) {
         $this->afterCommit();
     }
 
-    public static function paraReclutador(string $candidato, int $competencias, string $url): self
+    public static function paraReclutador(string $candidato, int $competencias, string $url, ?int $candidatoId = null): self
     {
-        return new self("Nuevo CV analizado de {$candidato}: ".self::competencias($competencias).'.', $url);
+        return new self("Nuevo CV analizado de {$candidato}: ".self::competencias($competencias).'.', $url, $candidatoId);
     }
 
     public static function paraPostulante(int $competencias, string $url): self
@@ -38,7 +39,8 @@ class AvisoCvAnalizado extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        return ['texto' => $this->texto, 'url' => $this->url];
+        // candidato_id: EliminarCuentaDePostulante borra los avisos que lo nombran.
+        return ['texto' => $this->texto, 'url' => $this->url, 'candidato_id' => $this->candidatoId];
     }
 
     public function toMail(object $notifiable): MailMessage

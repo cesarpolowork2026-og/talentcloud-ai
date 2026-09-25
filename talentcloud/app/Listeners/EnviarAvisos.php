@@ -90,7 +90,7 @@ class EnviarAvisos
 
         $quienLoSubio->notify($quienLoSubio->id === $candidato->user_id
             ? AvisoCvAnalizado::paraPostulante($competencias, route('postulante.postulaciones'))
-            : AvisoCvAnalizado::paraReclutador($candidato->nombre, $competencias, route('candidatos.show', $candidato)));
+            : AvisoCvAnalizado::paraReclutador($candidato->nombre, $competencias, route('candidatos.show', $candidato), $candidato->id));
     }
 
     /** Postulación propia del candidato: aviso a quien creó la vacante y a la cuenta de empresa. */
@@ -108,6 +108,7 @@ class EnviarAvisos
             (string) $postulacion->candidato?->nombre,
             $vacante->titulo,
             route('matching.show', $postulacion),
+            $postulacion->candidato_id,
         );
 
         $this->responsablesDe($vacante)->each(fn (User $u) => $u->notify($aviso));
@@ -127,6 +128,7 @@ class EnviarAvisos
             (string) $postulacion->candidato?->nombre,
             $vacante->titulo,
             route('kanban.show', $vacante),
+            $postulacion->candidato_id,
         );
 
         $this->responsablesDe($vacante)->each(fn (User $u) => $u->notify($aviso));

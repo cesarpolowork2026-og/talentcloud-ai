@@ -6,6 +6,7 @@ use App\Models\Actividad;
 use App\Models\Cv;
 use App\Models\Postulacion;
 use App\Models\User;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +15,7 @@ use Throwable;
 /**
  * "Eliminar mi cuenta y mis datos": la cuenta, el perfil de candidato, sus CV
  * (filas y archivos), postulaciones, entrevistas, evaluaciones (en cascada),
- * sus notificaciones y la actividad de las empresas que lo nombra.
+ * sus notificaciones, y la actividad y los avisos del personal que lo nombran.
  */
 class EliminarCuentaDePostulante
 {
@@ -30,6 +31,11 @@ class EliminarCuentaDePostulante
                 Actividad::sinFiltroDeEmpresa()
                     ->where('sujeto_type', (new Postulacion)->getMorphClass())
                     ->whereIn('sujeto_id', $postulaciones)
+                    ->delete();
+
+                // Avisos de la campana del personal que lo nombran (llevan candidato_id en data).
+                DatabaseNotification::query()
+                    ->whereRaw("(data::jsonb ->> 'candidato_id') = ?", [(string) $candidato->id])
                     ->delete();
             }
 

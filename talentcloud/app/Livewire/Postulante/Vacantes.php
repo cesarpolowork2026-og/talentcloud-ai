@@ -4,6 +4,7 @@ namespace App\Livewire\Postulante;
 
 use App\Enums\Modalidad;
 use App\Livewire\Concerns\WithListado;
+use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
@@ -60,7 +61,9 @@ class Vacantes extends Component
         return view('livewire.postulante.vacantes', [
             'filas' => $this->listar($vacantes->publicadas()->latest('publicada_at')),
             'modalidades' => Modalidad::opciones(),
-            'postuladas' => $user->candidato?->postulacionesEnTodasLasEmpresas()->pluck('vacante_id')->all() ?? [],
+            // vacante_id => retirada (bool): "Ya postulaste" o "Retirada".
+            'postuladas' => $user->candidato?->postulacionesEnTodasLasEmpresas()->get(['vacante_id', 'retirada_at'])
+                ->mapWithKeys(fn (Postulacion $p) => [$p->vacante_id => $p->estaRetirada()])->all() ?? [],
         ]);
     }
 }

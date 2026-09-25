@@ -42,8 +42,12 @@ class PostularmeAVacante
             throw new OperacionNoPermitida('Esta vacante ya no recibe postulaciones.');
         }
 
-        if ($candidato->postulacionesEnTodasLasEmpresas()->where('vacante_id', $vacante->id)->exists()) {
-            throw new OperacionNoPermitida('Ya postulaste a esta vacante.');
+        $anterior = $candidato->postulacionesEnTodasLasEmpresas()->where('vacante_id', $vacante->id)->first(['id', 'retirada_at']);
+
+        if ($anterior !== null) {
+            throw new OperacionNoPermitida($anterior->estaRetirada()
+                ? 'Retiraste tu postulación a esta vacante: no puedes volver a postular.'
+                : 'Ya postulaste a esta vacante.');
         }
 
         $cv = $candidato->cvActual;

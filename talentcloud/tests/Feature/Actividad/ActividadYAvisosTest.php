@@ -172,6 +172,7 @@ it('guarda el aviso en la campana con enlace a su pantalla', function () {
     expect($notificacion->data)->toBe([
         'texto' => 'Entrevista con Sofía Nieto para Desarrollador Backend el 25 sep · 10:00.',
         'url' => route('entrevistas.index'),
+        'candidato_id' => $this->sofia->candidato_id, // para borrarlo si el candidato elimina su cuenta
     ]);
 });
 

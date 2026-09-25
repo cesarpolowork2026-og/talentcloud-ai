@@ -19,13 +19,14 @@ class AvisoNuevaPostulacion extends Notification implements ShouldQueue
     private function __construct(
         public readonly string $texto,
         public readonly string $url,
+        public readonly ?int $candidatoId = null,
     ) {
         $this->afterCommit();
     }
 
-    public static function de(string $candidato, string $vacante, string $url): self
+    public static function de(string $candidato, string $vacante, string $url, ?int $candidatoId = null): self
     {
-        return new self("{$candidato} postuló a {$vacante}.", $url);
+        return new self("{$candidato} postuló a {$vacante}.", $url, $candidatoId);
     }
 
     /**
@@ -33,7 +34,8 @@ class AvisoNuevaPostulacion extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        return ['texto' => $this->texto, 'url' => $this->url];
+        // candidato_id: EliminarCuentaDePostulante borra los avisos que lo nombran.
+        return ['texto' => $this->texto, 'url' => $this->url, 'candidato_id' => $this->candidatoId];
     }
 
     public function toMail(object $notifiable): MailMessage

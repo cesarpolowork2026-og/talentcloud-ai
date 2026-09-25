@@ -36,7 +36,7 @@ class AceptarInvitacion
             try {
                 $this->limites->verificarUsuarioActivo($invitacion->empresa_id);
             } catch (OperacionNoPermitida) {
-                throw new InvitacionNoValida($invitacion->empresa?->nombre.' alcanzó el límite de usuarios de su plan. Pide a quien te invitó que libere un lugar y vuelve a abrir el enlace.');
+                throw new EquipoCompleto($invitacion->empresa?->nombre.' alcanzó el límite de usuarios de su plan. Pide a quien te invitó que libere un lugar y vuelve a intentarlo: tu invitación sigue vigente.');
             }
 
             $user = new User([

@@ -48,7 +48,7 @@ beforeEach(function () {
         $this->clara = User::factory()->deEmpresa($this->vela)->reclutador()->create();
 
         $this->backend = Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Abierta)
-            ->create(['titulo' => 'Desarrollador Backend', 'descripcion' => 'APIs REST de alto tráfico.', 'creada_por' => $this->marta->id]);
+            ->create(['titulo' => 'Desarrollador Backend', 'descripcion' => 'APIs REST de alto tráfico.', 'creada_por' => $this->marta->id, 'ubicacion' => 'Remoto', 'modalidad' => Modalidad::Remoto]);
         Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Java')->id, 'anios_minimos' => 3]);
         Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Docker')->id, 'tipo' => TipoRequisito::Deseable]);
 

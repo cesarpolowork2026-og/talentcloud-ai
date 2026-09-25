@@ -48,6 +48,6 @@ class Listado extends Component
         return view('livewire.empleos.listado', [
             'filas' => $this->listar($vacantes->publicadas()->latest('publicada_at')),
             'modalidades' => Modalidad::opciones(),
-        ]);
+        ])->layoutData(['descripcion' => 'Vacantes abiertas de las empresas en TalentCloud AI. Regístrate, sube tu CV una vez y postula en un clic.']);
     }
 }

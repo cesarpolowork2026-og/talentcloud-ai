@@ -65,11 +65,13 @@ class DetalleVacante extends Component
         // Null si dejó de ser pública mientras el postulante la miraba: la vista lo explica.
         $vacante = $vacantes->buscarPublicada($this->vacanteId);
         $candidato = $this->usuario()->candidato;
+        $suPostulacion = $candidato?->postulacionesEnTodasLasEmpresas()->where('vacante_id', $this->vacanteId)->first(['id', 'retirada_at']);
 
         return view('livewire.postulante.detalle-vacante', [
             'vacante' => $vacante,
             'cv' => $candidato?->cvActual,
-            'yaPostulo' => $candidato?->postulacionesEnTodasLasEmpresas()->where('vacante_id', $this->vacanteId)->exists() ?? false,
+            'yaPostulo' => $suPostulacion !== null,
+            'laRetiro' => $suPostulacion?->estaRetirada() ?? false,
         ])->title($vacante->titulo ?? 'Vacante');
     }
 

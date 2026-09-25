@@ -60,7 +60,8 @@ class AvisoDeEntrevista extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        return ['texto' => $this->texto(), 'url' => $this->url()];
+        // candidato_id: EliminarCuentaDePostulante borra los avisos que lo nombran.
+        return ['texto' => $this->texto(), 'url' => $this->url(), 'candidato_id' => $this->datos->candidatoId];
     }
 
     public function toMail(object $notifiable): MailMessage

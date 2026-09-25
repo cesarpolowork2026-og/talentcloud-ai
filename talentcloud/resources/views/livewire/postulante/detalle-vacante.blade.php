@@ -31,6 +31,10 @@
                         {{ $vacante->empresa?->nombre }} revisará tu CV y la IA ya lo está comparando con los requisitos.
                     </p>
                     <x-ui.button variant="primary" :href="route('postulante.postulaciones')" wire:navigate>Ver mis postulaciones</x-ui.button>
+                @elseif ($laRetiro)
+                    <div><x-ui.tag tone="outline">Retiraste tu postulación</x-ui.tag></div>
+                    <p class="m-0 text-14 text-neutral-800">Ya no participas en este proceso.</p>
+                    <x-ui.button :href="route('postulante.vacantes')" wire:navigate>Ver otras vacantes</x-ui.button>
                 @elseif ($yaPostulo)
                     <div><x-ui.tag tone="accent">Ya postulaste</x-ui.tag></div>
                     <p class="m-0 text-14 text-neutral-800">Sigue el estado de este proceso en tus postulaciones.</p>

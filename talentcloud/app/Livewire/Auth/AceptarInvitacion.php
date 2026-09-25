@@ -4,6 +4,7 @@ namespace App\Livewire\Auth;
 
 use App\Repositories\Contracts\EquipoRepository;
 use App\Services\Equipo\AceptarInvitacion as AceptarInvitacionService;
+use App\Services\Equipo\EquipoCompleto;
 use App\Services\Equipo\InvitacionNoValida;
 use App\Support\Navegacion;
 use Illuminate\Contracts\View\View;
@@ -67,6 +68,11 @@ class AceptarInvitacion extends Component
 
         try {
             $user = $aceptar->ejecutar($this->token, $datos['name'], $datos['password']);
+        } catch (EquipoCompleto $e) {
+            // La invitación sigue vigente: el formulario se queda y se explica el motivo.
+            $this->addError('name', $e->getMessage());
+
+            return;
         } catch (InvitacionNoValida $e) {
             $this->valida = false;
             $this->addError('name', $e->getMessage());

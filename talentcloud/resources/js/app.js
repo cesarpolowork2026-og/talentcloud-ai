@@ -18,7 +18,8 @@ document.addEventListener('alpine:init', () => {
             Sortable.create(this.$el, {
                 group: 'kanban',
                 animation: 150,
-                draggable: '[data-postulacion]',
+                // Las tarjetas fijas (postulación retirada por el candidato) no se arrastran.
+                draggable: '[data-postulacion]:not([data-fija])',
                 filter: 'button',
                 preventOnFilter: false,
                 ghostClass: 'kanban-fantasma',

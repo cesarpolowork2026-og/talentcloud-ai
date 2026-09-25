@@ -12,7 +12,9 @@ use App\Jobs\AvisarEstadoDePostulacion;
 use App\Livewire\Empleos\Detalle as EmpleoDetalle;
 use App\Livewire\Empleos\Listado as Empleos;
 use App\Livewire\Kanban\Tablero;
+use App\Livewire\Postulante\DetalleVacante as DetalleDelPostulante;
 use App\Livewire\Postulante\MisPostulaciones;
+use App\Livewire\Postulante\Vacantes as VacantesDelPostulante;
 use App\Models\Actividad;
 use App\Models\Candidato;
 use App\Models\Competencia;
@@ -25,15 +27,21 @@ use App\Models\Requisito;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Notifications\AvisoDeEntrevista;
+use App\Notifications\AvisoGeneral;
+use App\Notifications\AvisoNuevaPostulacion;
 use App\Notifications\AvisoPostulacionRetirada;
 use App\Services\Cuenta\ActualizarPerfil;
+use App\Services\Cuenta\EliminarCuentaDePostulante;
 use App\Services\Dashboard\EmbudoDeSeleccion;
 use App\Services\Postulaciones\MoverPostulacion;
+use App\Services\Postulaciones\PostularmeAVacante;
 use App\Services\Postulaciones\RetirarPostulacion;
 use App\Services\Vacantes\OperacionNoPermitida;
 use App\Tenancy\TenantContext;
+use Illuminate\Notifications\Channels\DatabaseChannel;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Livewire\Volt\Volt;
 
@@ -318,4 +326,65 @@ it('lleva a iniciar sesión o registrarse y vuelve a la vacante', function () {
         ->assertSessionHas('aviso');
 
     $this->get(route('empleos.postular', $this->borrador->id))->assertNotFound();
+});
+
+// — Auditoría de la ampliación 2 —
+
+it('tras retirarse, la vacante dice "Retiraste tu postulación" y no deja volver a postular', function () {
+    app(RetirarPostulacion::class)->ejecutar($this->postulacion, $this->marco);
+
+    Livewire::test(DetalleDelPostulante::class, ['id' => $this->backend->id])
+        ->assertSee('Retiraste tu postulación')
+        ->assertDontSee('Ya postulaste');
+    Livewire::test(VacantesDelPostulante::class)->assertSee('Retiraste tu postulación');
+
+    expect(fn () => app(PostularmeAVacante::class)->ejecutar($this->marco, $this->backend->id))
+        ->toThrow(OperacionNoPermitida::class, 'Retiraste tu postulación a esta vacante');
+});
+
+it('una tarjeta retirada no se puede arrastrar en el Kanban', function () {
+    $otra = app(TenantContext::class)->ejecutarGlobal(fn () => Postulacion::factory()->paraVacante($this->backend)->create());
+    app(RetirarPostulacion::class)->ejecutar($this->postulacion, $this->marco);
+    actuarComo($this->marta);
+
+    $html = Livewire::test(Tablero::class, ['vacante' => $this->backend])->html();
+
+    expect($html)->toMatch('/data-postulacion="'.$this->postulacion->id.'"\s+data-fija/')
+        ->and($html)->not->toMatch('/data-postulacion="'.$otra->id.'"\s+data-fija/');
+});
+
+it('al eliminar su cuenta, se borran también los avisos del personal que lo nombran', function () {
+    // Directo al canal de base de datos: Notification::fake() no guarda nada.
+    $campana = function (Illuminate\Notifications\Notification $aviso) {
+        $aviso->id = (string) Str::uuid();
+        app(DatabaseChannel::class)->send($this->marta, $aviso);
+    };
+    $campana(AvisoNuevaPostulacion::de('Marco Díaz', 'Desarrollador Backend', 'https://x.test', $this->candidato->id));
+    $campana(AvisoPostulacionRetirada::de('Marco Díaz', 'Desarrollador Backend', 'https://x.test', $this->candidato->id));
+    $campana(new AvisoGeneral('Aviso que no lo nombra.'));
+
+    app(EliminarCuentaDePostulante::class)->ejecutar($this->marco);
+
+    expect($this->marta->notifications()->pluck('data')->pluck('texto')->all())->toBe(['Aviso que no lo nombra.']);
+});
+
+it('un destino guardado ajeno a la bolsa de empleos no desvía al postulante recién registrado', function () {
+    auth()->logout();
+    session()->put('url.intended', url('/dashboard'));
+
+    Volt::test('pages.auth.register-postulante')
+        ->set('name', 'Ana Nueva')
+        ->set('email', 'ana2@correo.com')
+        ->set('password', 'password-segura-1')
+        ->set('password_confirmation', 'password-segura-1')
+        ->set('consentimiento', true)
+        ->call('register')
+        ->assertRedirect(route('postulante.postulaciones'));
+});
+
+it('describe cada vacante pública para buscadores', function () {
+    auth()->logout();
+
+    $this->get(route('empleos.show', $this->backend->id))
+        ->assertSee('<meta name="description" content="Desarrollador Backend en Nimbus Corp', false);
 });
