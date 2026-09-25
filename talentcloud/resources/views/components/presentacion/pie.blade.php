@@ -9,6 +9,7 @@
             @foreach (['inicio' => 'Inicio', 'caracteristicas' => 'Características', 'beneficios' => 'Beneficios', 'seguridad' => 'Seguridad'] as $ancla => $nombre)
                 <a href="{{ route('inicio') }}#{{ $ancla }}">{{ $nombre }}</a>
             @endforeach
+            <a href="{{ route('empleos.index') }}">Empleos</a>
         </nav>
     </div>
 </footer>

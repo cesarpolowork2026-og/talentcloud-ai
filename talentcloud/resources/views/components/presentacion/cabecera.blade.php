@@ -28,6 +28,11 @@
                     <a href="{{ route('inicio') }}#{{ $ancla }}" class="barra-enlace border-b-2 border-transparent py-2 text-15">{{ $nombre }}</a>
                 @endif
             @endforeach
+            <a
+                href="{{ route('empleos.index') }}"
+                class="barra-enlace border-b-2 border-transparent py-2 text-15"
+                @if (request()->routeIs('empleos.*')) aria-current="page" @endif
+            >Empleos</a>
         </nav>
 
         <div class="ml-auto flex items-center gap-2 lg:ml-0">

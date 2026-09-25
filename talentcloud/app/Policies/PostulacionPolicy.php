@@ -28,6 +28,18 @@ class PostulacionPolicy
     }
 
     /**
+     * Retirar la postulación: solo el propio postulante. Si puede hacerlo ahora
+     * (etapa, vacante) lo decide RetirarPostulacion.
+     */
+    public function retirar(User $user, Postulacion $postulacion): bool
+    {
+        // Por id: la postulación suele venir de un listado y no tiene cargado su candidato.
+        return $user->tieneRol(Rol::Postulante)
+            && $user->candidato !== null
+            && $postulacion->candidato_id === $user->candidato->id;
+    }
+
+    /**
      * Ver y escribir notas internas: solo el personal de la empresa (y el admin).
      * No depende de view(): el postulante ve su postulación pero nunca las notas.
      */

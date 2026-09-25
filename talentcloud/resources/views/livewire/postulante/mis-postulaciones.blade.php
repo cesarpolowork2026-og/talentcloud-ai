@@ -43,7 +43,10 @@
                 </x-ui.card>
             @endif
             <livewire:postulante.mi-curriculo />
-            <a href="{{ route('profile') }}" wire:navigate class="text-13 text-neutral-700 underline hover:text-accent-700">Eliminar mi cuenta y mis datos</a>
+            <p class="m-0 flex flex-wrap gap-x-4 gap-y-1 text-13">
+                <a href="{{ route('postulante.mis-datos') }}" download class="text-neutral-700 underline hover:text-accent-700">Descargar mis datos</a>
+                <a href="{{ route('profile') }}" wire:navigate class="text-neutral-700 underline hover:text-accent-700">Eliminar mi cuenta y mis datos</a>
+            </p>
         </div>
     </div>
 
@@ -65,9 +68,27 @@ La IA identificó {{ $competencias[0] }} de {{ $competencias[1] }} competencias 
                     @endforeach
                 </ul>
             @endif
+
+            @error('retiro')
+                <p class="field-error m-0 mt-3" role="alert">{{ $message }}</p>
+            @enderror
+            <x-ui.action-message on="postulacion-retirada" class="mt-3">Retiraste tu postulación. Avisamos a la empresa.</x-ui.action-message>
         @endif
         <x-slot:actions>
             <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
+            @if ($seleccionada && EstadoDeMiPostulacion::de($seleccionada)->puedeRetirarse())
+                <x-ui.button variant="ghost" wire:click="confirmarRetiro">Retirar postulación</x-ui.button>
+            @endif
         </x-slot:actions>
     </x-ui.dialog>
+
+    {{-- Retirar postulación --}}
+    <x-ui.confirm
+        wire:model="mostrarRetiro"
+        :title="'Retirar tu postulación a '.($seleccionada?->vacante?->titulo ?? '')"
+        action-label="Retirar postulación"
+        action="retirar"
+    >
+        {{ $seleccionada?->vacante?->empresa?->nombre }} dejará de considerarte para esta vacante y se cancelarán tus entrevistas pendientes. No se puede deshacer.
+    </x-ui.confirm>
 </div>

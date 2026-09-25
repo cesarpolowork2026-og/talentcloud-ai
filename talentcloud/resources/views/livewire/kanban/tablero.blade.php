@@ -71,7 +71,9 @@
                                     class="block pr-4 text-left text-14 font-semibold text-ink"
                                 >{{ $postulacion->candidato?->nombre }}</button>
                                 <div class="mt-0.5 text-13 text-neutral-700">{{ $postulacion->candidato?->titular }}</div>
-                                @if ($postulacion->matchPorcentaje() !== null)
+                                @if ($postulacion->estaRetirada())
+                                    <div class="mt-2"><x-ui.tag tone="outline">Retirada</x-ui.tag></div>
+                                @elseif ($postulacion->matchPorcentaje() !== null)
                                     <div class="mt-2"><x-ui.tag tone="accent">{{ $postulacion->matchPorcentaje() }}% match</x-ui.tag></div>
                                 @endif
                             </div>
@@ -85,12 +87,14 @@
         <x-ui.dialog wire:model="mostrarDetalle" :title="$seleccionada?->candidato?->nombre" max-width="480px">
             @if ($seleccionada)
                 <p class="m-0 whitespace-pre-line">{{ $seleccionada->candidato?->titular ?? 'Candidato' }}{{ $seleccionada->matchPorcentaje() !== null ? ' · '.$seleccionada->matchPorcentaje().'% de coincidencia con la vacante.' : '.' }}
-Columna: {{ $seleccionada->etapa->etiqueta() }}.</p>
+Columna: {{ $seleccionada->etapa->etiqueta() }}.@if ($seleccionada->estaRetirada())
+
+Retiró su postulación el {{ App\Support\Formato::fechaCorta($seleccionada->retirada_at) }}.@endif</p>
                 <p class="m-0 mt-2 text-14">
                     <a href="{{ route('matching.show', $seleccionada) }}#notas" wire:navigate>Notas del equipo ({{ $seleccionada->notas_count }})</a>
                 </p>
 
-                @if ($editable)
+                @if ($editable && ! $seleccionada->estaRetirada())
                     <form wire:submit="moverA" id="form-mover" class="mt-4">
                         <x-ui.field label="Mover a" for="mover-etapa" error="etapaDestino">
                             <x-ui.select wire:model="etapaDestino" id="mover-etapa" :options="$etapas" class="w-full" />
@@ -113,7 +117,7 @@ Columna: {{ $seleccionada->etapa->etiqueta() }}.</p>
                     @can('create', App\Models\Evaluacion::class)
                         <x-ui.button :href="route('evaluaciones.index', ['evaluar' => $seleccionada->id])" wire:navigate>Evaluar</x-ui.button>
                     @endcan
-                    @if ($editable)
+                    @if ($editable && ! $seleccionada->estaRetirada())
                         <x-ui.button type="submit" form="form-mover" variant="primary">Mover</x-ui.button>
                     @endif
                 @endif

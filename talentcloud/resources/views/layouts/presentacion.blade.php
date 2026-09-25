@@ -151,6 +151,9 @@
             </div>
         </section>
 
+        {{-- Bolsa pública: las vacantes abiertas más recientes (si hay). --}}
+        <x-presentacion.vacantes-abiertas />
+
         {{-- Llamada final --}}
         <section class="py-16">
             <div class="mx-auto grid max-w-[1480px] gap-6 px-4 sm:px-8 md:grid-cols-2">
@@ -162,7 +165,10 @@
                 <x-ui.card elev="sm" class="!bg-white !p-8">
                     <h2 class="m-0 text-24">¿Buscas empleo?</h2>
                     <p class="m-0 text-15 text-neutral-800">Regístrate, sube tu CV una sola vez y sigue el estado de tus postulaciones.</p>
-                    <div><x-ui.button :href="route('register.postulante')">Registrarme como postulante</x-ui.button></div>
+                    <div class="flex flex-wrap gap-3">
+                        <x-ui.button :href="route('register.postulante')">Registrarme como postulante</x-ui.button>
+                        <x-ui.button variant="ghost" :href="route('empleos.index')">Ver empleos</x-ui.button>
+                    </div>
                 </x-ui.card>
             </div>
         </section>

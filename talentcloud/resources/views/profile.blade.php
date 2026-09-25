@@ -10,6 +10,14 @@
             <livewire:profile.update-password-form />
 
             @if (auth()->user()->tieneRol(\App\Enums\Rol::Postulante))
+                <x-ui.card class="!p-6">
+                    <h2 class="mb-2 text-16">Mis datos</h2>
+                    <p class="mb-4 text-14 text-neutral-700">Descarga en un archivo JSON tu cuenta, tu ficha, tus CV, las competencias que la IA identificó y el estado de tus postulaciones.</p>
+                    <div>
+                        <x-ui.button :href="route('postulante.mis-datos')" download>Descargar mis datos</x-ui.button>
+                    </div>
+                </x-ui.card>
+
                 <livewire:profile.delete-user-form />
             @endif
         </div>

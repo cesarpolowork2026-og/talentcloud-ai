@@ -16,7 +16,8 @@ use Illuminate\Support\Collection;
  *
  * Una postulación "alcanzó" una etapa si llegó a ella o a una posterior según
  * su historial (postulacion_etapas); un descarte no borra lo alcanzado. Las
- * postulaciones anteriores al historial solo tienen su etapa actual.
+ * postulaciones anteriores al historial solo tienen su etapa actual. Las que
+ * retiró el propio postulante se cuentan aparte de los descartes.
  */
 class EmbudoDeSeleccion
 {
@@ -50,7 +51,8 @@ class EmbudoDeSeleccion
             dias: self::DIAS,
             total: $total,
             etapas: $filas,
-            descartadas: (clone $postulaciones)->where('etapa', EtapaPostulacion::Descartado)->count(),
+            descartadas: (clone $postulaciones)->where('etapa', EtapaPostulacion::Descartado)->whereNull('retirada_at')->count(),
+            retiradas: (clone $postulaciones)->whereNotNull('retirada_at')->count(),
             diasHastaContratar: $diasHastaContratar,
             contrataciones: $contrataciones,
             porOrigen: (clone $postulaciones)->toBase()

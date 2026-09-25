@@ -13,6 +13,7 @@ use App\Events\EvaluacionAprobada;
 use App\Events\NotaAgregada;
 use App\Events\PlanEmpresaCambiado;
 use App\Events\PostulacionCambioDeEtapa;
+use App\Events\PostulacionRetirada;
 use App\Events\VacanteCreada;
 use App\Models\Postulacion;
 use App\Models\User;
@@ -28,6 +29,12 @@ class AnotarActividad
     public function handleEtapa(PostulacionCambioDeEtapa $evento): void
     {
         $postulacion = $evento->postulacion->loadMissing(['candidato', 'vacante']);
+
+        // La retirada tiene su propia línea (handleRetirada): no es un descarte de la empresa.
+        if ($postulacion->estaRetirada()) {
+            return;
+        }
+
         $nombre = $postulacion->candidato?->nombre;
 
         $descripcion = match (true) {
@@ -50,6 +57,19 @@ class AnotarActividad
             $postulacion,
             TipoActividad::CandidatoSePostulo,
             "{$postulacion->candidato?->nombre} postuló a {$titulo}.",
+            $evento->postulante,
+        );
+    }
+
+    public function handleRetirada(PostulacionRetirada $evento): void
+    {
+        $postulacion = $evento->postulacion->loadMissing('candidato');
+        $titulo = Vacante::sinFiltroDeEmpresa()->whereKey($postulacion->vacante_id)->value('titulo');
+
+        $this->anotar(
+            $postulacion,
+            TipoActividad::PostulacionRetirada,
+            "{$postulacion->candidato?->nombre} retiró su postulación a {$titulo}.",
             $evento->postulante,
         );
     }

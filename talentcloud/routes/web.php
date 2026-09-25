@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\DescargarCvController;
+use App\Http\Controllers\DescargarMisDatosController;
+use App\Http\Controllers\PostularDesdeEmpleosController;
 use App\Livewire\Candidatos;
 use App\Livewire\Dashboard;
+use App\Livewire\Empleos;
 use App\Livewire\Empresas;
 use App\Livewire\Entrevistas;
 use App\Livewire\Evaluaciones;
@@ -25,6 +28,12 @@ use Livewire\Volt\Volt;
 // Presentación con el login en el hero (layouts.presentacion). Con sesión iniciada,
 // el middleware guest lleva a la pantalla de inicio del rol (bootstrap/app.php).
 Volt::route('/', 'pages.auth.login')->middleware('guest')->name('inicio');
+
+// Bolsa pública de empleos (ampliación): vacantes abiertas, sin iniciar sesión y sin model
+// binding (no hay contexto de empresa). Solo VacanteRepository::publicadas().
+Route::get('empleos', Empleos\Listado::class)->name('empleos.index');
+Route::get('empleos/{id}', Empleos\Detalle::class)->whereNumber('id')->name('empleos.show');
+Route::get('empleos/{id}/postular', PostularDesdeEmpleosController::class)->whereNumber('id')->name('empleos.postular');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Personal de selección: admin SaaS, empresa y reclutador.
@@ -66,6 +75,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // binding: el postulante no tiene contexto de empresa y la vacante se lee por su id.
         Route::get('vacantes', Postulante\Vacantes::class)->name('vacantes');
         Route::get('vacantes/{id}', Postulante\DetalleVacante::class)->whereNumber('id')->name('vacantes.show');
+        // Derecho de acceso: JSON con sus propios datos, nunca los internos de las empresas.
+        Route::get('mis-datos', DescargarMisDatosController::class)->middleware('throttle:10,1')->name('mis-datos');
     });
 });
 

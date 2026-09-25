@@ -1,5 +1,6 @@
 <?php
 
+use App\DTO\FichaDelPostulante;
 use App\Models\User;
 use App\Services\Cuenta\ActualizarPerfil;
 use App\Support\Navegacion;
@@ -14,6 +15,11 @@ new class extends Component
     public string $email = '';
     public bool $notificaciones_email = true;
 
+    // Ficha de candidato (solo postulantes): lo que ven las empresas junto a su nombre.
+    public bool $esPostulante = false;
+    public string $titular = '';
+    public string $telefono = '';
+
     /**
      * Mount the component.
      */
@@ -22,6 +28,11 @@ new class extends Component
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
         $this->notificaciones_email = Auth::user()->notificaciones_email;
+
+        $candidato = Auth::user()->candidato;
+        $this->esPostulante = $candidato !== null;
+        $this->titular = (string) $candidato?->titular;
+        $this->telefono = (string) $candidato?->telefono;
     }
 
     /**
@@ -36,9 +47,15 @@ new class extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
             'notificaciones_email' => ['boolean'],
-        ]);
+            'titular' => ['nullable', 'string', 'max:120'],
+            'telefono' => ['nullable', 'string', 'max:40', 'regex:/^[0-9+()\s.-]*$/'],
+        ], ['telefono.regex' => 'El teléfono solo puede tener números, espacios y los signos + ( ) . -'], ['titular' => 'titular', 'telefono' => 'teléfono']);
 
-        $actualizar->ejecutar($user, $validated['name'], $validated['email'], $validated['notificaciones_email']);
+        $ficha = $user->candidato !== null
+            ? new FichaDelPostulante(trim($validated['titular'] ?? '') ?: null, trim($validated['telefono'] ?? '') ?: null)
+            : null;
+
+        $actualizar->ejecutar($user, $validated['name'], $validated['email'], $validated['notificaciones_email'], $ficha);
 
         $this->dispatch('profile-updated', name: $user->name);
     }
@@ -62,7 +79,7 @@ new class extends Component
     }
 }; ?>
 
-{{-- Tarjeta de Mi perfil del prototipo: nombre, correo y notificaciones por correo. --}}
+{{-- Tarjeta de Mi perfil del prototipo: nombre, correo y notificaciones por correo (y, para el postulante, titular y teléfono). --}}
 <x-ui.card class="!p-6">
     <form wire:submit="updateProfileInformation" class="contents">
         <div class="grid gap-4">
@@ -83,6 +100,16 @@ new class extends Component
                     @endif
                 @endif
             </x-ui.field>
+
+            @if ($esPostulante)
+                <x-ui.field label="Titular" for="titular" error="titular" hint="Una línea sobre ti que las empresas ven junto a tu nombre.">
+                    <x-ui.input wire:model="titular" id="titular" error="titular" placeholder="Desarrollador backend con 5 años en Java" maxlength="120" />
+                </x-ui.field>
+
+                <x-ui.field label="Teléfono (opcional)" for="telefono" error="telefono">
+                    <x-ui.input wire:model="telefono" id="telefono" type="tel" error="telefono" autocomplete="tel" placeholder="+51 999 999 999" maxlength="40" />
+                </x-ui.field>
+            @endif
 
             <x-ui.checkbox wire:model="notificaciones_email" id="notificaciones_email">Recibir notificaciones por correo</x-ui.checkbox>
         </div>

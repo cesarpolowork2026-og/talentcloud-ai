@@ -12,6 +12,7 @@ use App\Events\EntrevistaProgramada;
 use App\Events\EntrevistaReprogramada;
 use App\Events\PlanEmpresaCambiado;
 use App\Events\PostulacionCambioDeEtapa;
+use App\Events\PostulacionRetirada;
 use App\Events\VacanteCerrada;
 use App\Jobs\AvisarEstadoDePostulacion;
 use App\Models\Candidato;
@@ -24,8 +25,10 @@ use App\Notifications\AvisoCvAnalizado;
 use App\Notifications\AvisoDeEntrevista;
 use App\Notifications\AvisoEntrevistaReprogramada;
 use App\Notifications\AvisoNuevaPostulacion;
+use App\Notifications\AvisoPostulacionRetirada;
 use App\Services\Avisos\AvisoAlCandidato;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Collection;
 
 /**
  * Notificaciones (campana + correo según preferencia): entrevista programada o
@@ -107,14 +110,43 @@ class EnviarAvisos
             route('matching.show', $postulacion),
         );
 
-        User::query()
+        $this->responsablesDe($vacante)->each(fn (User $u) => $u->notify($aviso));
+    }
+
+    /** El postulante retiró su postulación: aviso a quien creó la vacante y a la cuenta de empresa. */
+    public function handleRetirada(PostulacionRetirada $evento): void
+    {
+        $postulacion = $evento->postulacion->loadMissing('candidato');
+        $vacante = Vacante::sinFiltroDeEmpresa()->with('creador')->find($postulacion->vacante_id);
+
+        if ($vacante === null) {
+            return;
+        }
+
+        $aviso = AvisoPostulacionRetirada::de(
+            (string) $postulacion->candidato?->nombre,
+            $vacante->titulo,
+            route('kanban.show', $vacante),
+        );
+
+        $this->responsablesDe($vacante)->each(fn (User $u) => $u->notify($aviso));
+    }
+
+    /**
+     * Quien creó la vacante y la cuenta de empresa, activos y de esa empresa.
+     *
+     * @return Collection<int, User>
+     */
+    private function responsablesDe(Vacante $vacante): Collection
+    {
+        return User::query()
             ->deEmpresa($vacante->empresa_id)
             ->role(Rol::Empresa->value)
             ->get()
             ->push($vacante->creador)
             ->filter(fn (?User $u) => $u !== null && $u->estaActivo() && $u->empresa_id === $vacante->empresa_id)
             ->unique('id')
-            ->each(fn (User $u) => $u->notify($aviso));
+            ->values();
     }
 
     /** Cambio de plan por el admin SaaS: aviso a la cuenta de empresa. */
@@ -169,6 +201,11 @@ class EnviarAvisos
 
     private function alCandidato(?Candidato $candidato, Notification $aviso): void
     {
+        // Nadie recibe aviso de lo que hizo él mismo (p. ej. entrevistas canceladas al retirarse).
+        if ($candidato?->user_id !== null && $candidato->user_id === $this->usuarioActual()?->id) {
+            return;
+        }
+
         $this->avisoAlCandidato->enviar($candidato, $aviso);
     }
 

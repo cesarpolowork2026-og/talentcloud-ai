@@ -20,6 +20,7 @@ final readonly class EmbudoDeSeleccionData
         public int $total,
         public array $etapas,
         public int $descartadas,
+        public int $retiradas,
         public ?float $diasHastaContratar,
         public int $contrataciones,
         public array $porOrigen,

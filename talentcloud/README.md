@@ -48,7 +48,9 @@ servicio). Todas las cuentas usan la contraseña `password`:
 | admin@orbita.dev | Empresa | Orbita Labs (suspendida: no puede ingresar) |
 | marco@correo.com | Postulante | — |
 
-El postulante ve las vacantes abiertas de las empresas activas en «Vacantes» y postula con su CV; la empresa recibe el aviso y la postulación entra en su Kanban con el matching de la IA.
+El postulante ve las vacantes abiertas de las empresas activas en «Vacantes» y postula con su CV; la empresa recibe el aviso y la postulación entra en su Kanban con el matching de la IA. También puede retirar una postulación en curso, editar su titular y teléfono en «Mi perfil» y descargar sus datos en JSON. Sin iniciar sesión, cualquiera ve las vacantes abiertas en `/empleos` (y las más recientes en la presentación); «Postular» lleva a iniciar sesión o registrarse y vuelve a la vacante.
+
+La empresa ve en el dashboard el embudo de selección de los últimos 90 días, y en «Mi empresa» el uso de su plan (Starter: 3 vacantes activas y 3 usuarios; Pro: 15 y 10; Enterprise: sin límite). El admin SaaS cambia el plan desde «Empresas».
 
 `docker compose` toma `DB_PASSWORD` del `.env`. Crea las bases `talentcloud` y `talentcloud_testing`, ambas con la extensión `vector`.
 

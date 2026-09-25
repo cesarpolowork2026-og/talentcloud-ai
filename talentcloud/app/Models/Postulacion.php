@@ -32,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @property MotorMatching|null $match_motor
  * @property Carbon|null $etapa_cambiada_at
  * @property OrigenPostulacion $origen
+ * @property Carbon|null $retirada_at La retiró el propio postulante (no asignable en masa).
  * @property Carbon $created_at
  * @property EstadoDeMiPostulacion|null $estado_avisado Último estado comunicado al postulante (no asignable en masa).
  */
@@ -71,6 +72,7 @@ class Postulacion extends Model
             'orden' => 'integer',
             'etapa_cambiada_at' => 'datetime',
             'origen' => OrigenPostulacion::class,
+            'retirada_at' => 'datetime',
             'estado_avisado' => EstadoDeMiPostulacion::class,
             'match_score' => 'decimal:2',
             'match_detalle' => 'array',
@@ -137,6 +139,12 @@ class Postulacion extends Model
     public function evaluaciones(): HasMany
     {
         return $this->hasMany(Evaluacion::class);
+    }
+
+    /** La retiró el propio postulante (está en Descartado, pero no la descartó la empresa). */
+    public function estaRetirada(): bool
+    {
+        return $this->retirada_at !== null;
     }
 
     /** Porcentaje de coincidencia redondeado ("88% match"), o null si no se calculó. */

@@ -41,7 +41,8 @@ new #[Layout('layouts.guest')] #[Title('Registro de postulante')] class extends 
 
         Auth::login($user);
 
-        $this->redirect(Navegacion::rutaInicio($user), navigate: true);
+        // Si llegó desde "Postular" en la bolsa pública, vuelve a esa vacante (empleos.postular).
+        $this->redirectIntended(default: Navegacion::rutaInicio($user), navigate: true);
     }
 }; ?>
 

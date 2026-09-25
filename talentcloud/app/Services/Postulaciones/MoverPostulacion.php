@@ -27,6 +27,11 @@ class MoverPostulacion
             throw new OperacionNoPermitida('La vacante está cerrada: su Kanban es de solo lectura.');
         }
 
+        // Retirarse es decisión del candidato: la empresa no puede devolverla al proceso.
+        if ($postulacion->estaRetirada() && $destino !== EtapaPostulacion::Descartado) {
+            throw new OperacionNoPermitida($postulacion->candidato?->nombre.' retiró su postulación: no se puede volver a mover.');
+        }
+
         DB::transaction(function () use ($postulacion, $origen, $destino, $posicion): void {
             // Bloquea las postulaciones de la vacante para que dos movimientos simultáneos no mezclen el orden.
             $columnas = Postulacion::query()

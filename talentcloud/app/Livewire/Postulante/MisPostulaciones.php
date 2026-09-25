@@ -8,6 +8,8 @@ use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Repositories\Contracts\EntrevistaRepository;
+use App\Services\Postulaciones\RetirarPostulacion;
+use App\Services\Vacantes\OperacionNoPermitida;
 use App\Tenancy\EmpresaScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -25,6 +27,8 @@ class MisPostulaciones extends Component
 {
     public bool $mostrarDetalle = false;
 
+    public bool $mostrarRetiro = false;
+
     #[Locked]
     public ?int $postulacionSeleccionada = null;
 
@@ -34,6 +38,38 @@ class MisPostulaciones extends Component
 
         $this->postulacionSeleccionada = $id;
         $this->mostrarDetalle = true;
+    }
+
+    public function confirmarRetiro(): void
+    {
+        $this->authorize('retirar', $this->seleccionada());
+
+        $this->resetErrorBag();
+        // Un diálogo a la vez: el del detalle atraparía el foco del de confirmación.
+        $this->mostrarDetalle = false;
+        $this->mostrarRetiro = true;
+    }
+
+    public function retirar(RetirarPostulacion $retirar): void
+    {
+        $postulacion = $this->seleccionada();
+        $this->authorize('retirar', $postulacion);
+
+        $this->mostrarRetiro = false;
+        // Vuelve al detalle, que muestra el resultado (estado "Retirada" o el motivo).
+        $this->mostrarDetalle = true;
+
+        try {
+            /** @var User $usuario */
+            $usuario = auth()->user();
+            $retirar->ejecutar($postulacion, $usuario);
+        } catch (OperacionNoPermitida $e) {
+            $this->addError('retiro', $e->getMessage());
+
+            return;
+        }
+
+        $this->dispatch('postulacion-retirada');
     }
 
     public function render(EntrevistaRepository $entrevistasRepo): View
@@ -70,6 +106,16 @@ class MisPostulaciones extends Component
         $coinciden = count(array_filter($requisitos, fn ($r) => is_array($r) && ($r['nivel'] ?? null) === NivelCoincidencia::Coincide->value));
 
         return [$coinciden, count($requisitos)];
+    }
+
+    /** La postulación abierta en el detalle; siempre una del propio postulante. */
+    private function seleccionada(): Postulacion
+    {
+        $postulacion = $this->postulaciones()->firstWhere('id', $this->postulacionSeleccionada);
+
+        abort_if($postulacion === null, 404);
+
+        return $postulacion;
     }
 
     /** @return Collection<int, Postulacion> */

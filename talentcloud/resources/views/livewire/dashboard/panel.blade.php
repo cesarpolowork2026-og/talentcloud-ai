@@ -79,7 +79,7 @@
                         @endforeach
                     </ol>
                     <p class="m-0 text-13 text-neutral-700">
-                        {{ $embudo->descartadas }} {{ $embudo->descartadas === 1 ? 'postulación descartada' : 'postulaciones descartadas' }}: cuentan en las etapas a las que llegaron antes del descarte.
+                        {{ $embudo->descartadas }} {{ $embudo->descartadas === 1 ? 'descartada' : 'descartadas' }} por la empresa y {{ $embudo->retiradas }} {{ $embudo->retiradas === 1 ? 'retirada' : 'retiradas' }} por el candidato: cuentan en las etapas a las que llegaron antes.
                     </p>
                 </x-ui.card>
 

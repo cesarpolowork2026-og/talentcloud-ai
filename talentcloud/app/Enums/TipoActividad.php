@@ -15,4 +15,5 @@ enum TipoActividad: string
     case VacanteCreada = 'vacante.creada';
     case CandidatoSePostulo = 'postulacion.propia';
     case PlanCambiado = 'empresa.plan';
+    case PostulacionRetirada = 'postulacion.retirada';
 }
