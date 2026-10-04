@@ -30,7 +30,7 @@
                     <p class="m-0 text-13 text-neutral-700">Usan el 80 % o más de sus vacantes activas o de sus usuarios (con invitaciones pendientes). Buen momento para ofrecerles otro plan.</p>
                     <x-ui.table>
                         <x-slot:head>
-                            <th>Empresa</th><th>Plan</th><th>Vacantes activas</th><th>Usuarios</th>
+                            <th>Empresa</th><th>Plan</th><th>Vacantes activas</th><th>Usuarios e invitaciones</th>
                         </x-slot:head>
                         @foreach ($plataforma->cercaDelLimite as $fila)
                             @php($uso = $fila['uso'])

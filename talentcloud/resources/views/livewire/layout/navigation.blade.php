@@ -108,12 +108,21 @@ new class extends Component
     <div class="hidden items-center gap-4 lg:flex">
         @foreach ($enlaces as $enlace)
             @if (isset($enlace['hijos']))
-                {{-- Grupo (admin SaaS: "Procesos de selección"): desplegable con un encabezado que explica qué agrupa. --}}
-                <div class="relative" x-data="{ abierto: false }" x-on:click.outside="abierto = false" x-on:keydown.escape.window="abierto = false">
+                {{-- Grupo (admin SaaS: "Procesos de selección"). Patrón "disclosure" de navegación (W3C APG):
+                     un botón con aria-expanded/aria-controls y una lista de enlaces; no es un role="menu".
+                     Se cierra al hacer clic fuera, al salir con Tab y con Esc (el foco vuelve al botón). --}}
+                <div
+                    class="relative"
+                    x-data="{ abierto: false }"
+                    x-on:click.outside="abierto = false"
+                    x-on:focusout="if (! $el.contains($event.relatedTarget)) abierto = false"
+                    x-on:keydown.escape.window="if (abierto) { abierto = false; $refs.boton.focus() }"
+                >
                     <button
                         type="button"
+                        x-ref="boton"
                         class="barra-enlace flex items-center gap-1"
-                        aria-haspopup="true"
+                        aria-controls="grupo-escritorio-{{ $loop->index }}"
                         x-bind:aria-expanded="abierto"
                         x-on:click="abierto = ! abierto"
                         @if ($enlace['activo']) aria-current="true" @endif
@@ -121,15 +130,19 @@ new class extends Component
                         {{ $enlace['etiqueta'] }}
                         <x-ui.icon name="caret-down" :size="14" />
                     </button>
-                    <div x-show="abierto" x-cloak x-transition.opacity.duration.100ms class="card elev-lg absolute left-0 top-[36px] z-20 w-[250px] !gap-0 p-2">
+                    <div id="grupo-escritorio-{{ $loop->index }}" x-show="abierto" x-cloak x-transition.opacity.duration.100ms class="card elev-lg absolute left-0 top-[36px] z-20 w-[250px] !gap-0 p-2">
                         <div class="card-kicker px-2 pb-2">{{ $enlace['descripcion'] }}</div>
                         @foreach ($enlace['hijos'] as $hijo)
-                            <a
-                                href="{{ $hijo['href'] }}"
-                                wire:navigate
-                                @class(['block rounded px-2 py-1.5 text-14 hover:bg-neutral-100', 'font-semibold text-accent-700' => $hijo['activo'], 'text-ink' => ! $hijo['activo']])
-                                @if ($hijo['activo']) aria-current="page" @endif
-                            >{{ $hijo['etiqueta'] }}</a>
+                            @if ($hijo['href'])
+                                <a
+                                    href="{{ $hijo['href'] }}"
+                                    wire:navigate
+                                    @class(['block rounded px-2 py-1.5 text-14 hover:bg-neutral-100', 'font-semibold text-accent-700' => $hijo['activo'], 'text-ink' => ! $hijo['activo']])
+                                    @if ($hijo['activo']) aria-current="page" @endif
+                                >{{ $hijo['etiqueta'] }}</a>
+                            @else
+                                <span class="block px-2 py-1.5 text-14 opacity-[0.45]" aria-disabled="true">{{ $hijo['etiqueta'] }}</span>
+                            @endif
                         @endforeach
                     </div>
                 </div>
@@ -228,7 +241,11 @@ new class extends Component
                 <div class="mt-2 border-t border-accent-700 pt-2" role="group" aria-labelledby="grupo-{{ $loop->index }}">
                     <div id="grupo-{{ $loop->index }}" class="text-12 uppercase tracking-[0.08em] text-accent-200">{{ $enlace['etiqueta'] }} · {{ $enlace['descripcion'] }}</div>
                     @foreach ($enlace['hijos'] as $hijo)
-                        <a href="{{ $hijo['href'] }}" wire:navigate class="barra-enlace block py-2 pl-3" @if ($hijo['activo']) aria-current="page" @endif>{{ $hijo['etiqueta'] }}</a>
+                        @if ($hijo['href'])
+                            <a href="{{ $hijo['href'] }}" wire:navigate class="barra-enlace block py-2 pl-3" @if ($hijo['activo']) aria-current="page" @endif>{{ $hijo['etiqueta'] }}</a>
+                        @else
+                            <span class="block py-2 pl-3 opacity-[0.45]" aria-disabled="true">{{ $hijo['etiqueta'] }}</span>
+                        @endif
                     @endforeach
                 </div>
             @elseif ($enlace['href'])

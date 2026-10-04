@@ -51,7 +51,7 @@ class PanelDePlataforma
                 )])
                 ->filter(fn (array $fila) => $fila['uso']->cercaDelLimite())
                 ->values(),
-            ia: $this->calidad->resumen(),
+            ia: $this->calidad->indicadores(),
         );
     }
 }

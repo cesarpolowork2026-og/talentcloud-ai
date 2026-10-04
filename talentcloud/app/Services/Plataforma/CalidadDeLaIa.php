@@ -31,6 +31,21 @@ class CalidadDeLaIa
 
     public function resumen(): ResumenCalidadIa
     {
+        return $this->construir(conListas: true);
+    }
+
+    /**
+     * Solo los contadores, sin las listas de marcas y trabajos fallidos: es lo
+     * que muestra el Panel de la plataforma, que se recalcula en cada
+     * interacción.
+     */
+    public function indicadores(): ResumenCalidadIa
+    {
+        return $this->construir(conListas: false);
+    }
+
+    private function construir(bool $conListas): ResumenCalidadIa
+    {
         $desde = now()->subDays(self::DIAS);
 
         $calculadas = Postulacion::sinFiltroDeEmpresa()->whereNotNull('match_motor')->where('match_calculado_at', '>=', $desde);
@@ -42,9 +57,9 @@ class CalidadDeLaIa
             basicasPendientes: Postulacion::sinFiltroDeEmpresa()->where('match_motor', MotorMatching::Fake)->count(),
             cvsConError: Cv::query()->where('estado_procesamiento', EstadoProcesamientoCv::Error)->count(),
             trabajosFallidos: DB::table('failed_jobs')->count(),
-            ultimosTrabajosFallidos: $this->ultimosTrabajosFallidos(),
+            ultimosTrabajosFallidos: $conListas ? $this->ultimosTrabajosFallidos() : collect(),
             marcasDelPeriodo: MatchFeedback::sinFiltroDeEmpresa()->where('created_at', '>=', $desde)->count(),
-            marcas: $this->ultimasMarcas(),
+            marcas: $conListas ? $this->ultimasMarcas() : collect(),
         );
     }
 

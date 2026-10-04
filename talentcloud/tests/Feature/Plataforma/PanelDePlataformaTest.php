@@ -9,6 +9,7 @@ use App\Models\Empresa;
 use App\Models\Invitacion;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Services\Plataforma\CalidadDeLaIa;
 use App\Services\Plataforma\PanelDePlataforma;
 use App\Tenancy\TenantContext;
 use Livewire\Livewire;
@@ -99,4 +100,15 @@ it('no muestra las secciones de la plataforma al personal de una empresa', funct
         ->assertDontSee('Empresas cliente')
         ->assertDontSee('Salud de la IA')
         ->assertDontSee('Orbita Labs');
+});
+
+it('usa solo los indicadores de la IA, sin cargar listas que el panel no muestra', function () {
+    $calidad = app(CalidadDeLaIa::class);
+    $completo = $calidad->resumen();
+    $indicadores = $calidad->indicadores();
+
+    expect($indicadores->marcas)->toBeEmpty()
+        ->and($indicadores->ultimosTrabajosFallidos)->toBeEmpty()
+        ->and([$indicadores->calculadas, $indicadores->conIa, $indicadores->basicasPendientes, $indicadores->cvsConError, $indicadores->marcasDelPeriodo])
+        ->toBe([$completo->calculadas, $completo->conIa, $completo->basicasPendientes, $completo->cvsConError, $completo->marcasDelPeriodo]);
 });

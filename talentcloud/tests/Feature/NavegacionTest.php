@@ -77,7 +77,11 @@ it('pinta el desplegable "Procesos de selección" del admin y lo marca activo de
         ->get('/dashboard')
         ->assertOk()
         ->assertSeeInOrder(['Panel', 'Empresas', 'Calidad de la IA', 'Procesos de selección', 'Supervisión de las empresas', 'Vacantes', 'Evaluaciones'])
-        ->assertDontSee('aria-current="true"', false);
+        ->assertDontSee('aria-current="true"', false)
+        // Disclosure de navegación, no un menú de aplicación (W3C APG).
+        ->assertSee('aria-controls="grupo-escritorio-3"', false)
+        ->assertSee('id="grupo-escritorio-3"', false)
+        ->assertDontSee('aria-haspopup', false);
 
     $this->actingAs($admin)
         ->get('/vacantes')
