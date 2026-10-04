@@ -105,12 +105,16 @@ it('abre la vista previa de una vacante reciente', function () {
     Livewire::test(Panel::class)->call('verVistaPrevia', $ajena)->assertNotFound();
 });
 
-it('muestra al admin SaaS toda la plataforma', function () {
+it('muestra al admin SaaS el panel de la plataforma, de lo general a lo particular', function () {
     actuarComo(User::factory()->admin()->create());
 
-    Livewire::test(Panel::class)
-        ->assertSee('Resumen de la actividad de selección en toda la plataforma.')
-        ->assertSee('Vela Studio creó la vacante Product Designer.');
+    $html = Livewire::test(Panel::class)
+        ->assertSee('Panel de la plataforma')
+        ->assertSee('Vela Studio creó la vacante Product Designer.')
+        ->html();
+
+    $orden = array_map(fn (string $texto) => mb_strpos($html, $texto), ['1 · Empresas cliente', '2 · Salud de la IA', '3 · Actividad de selección', 'Embudo de selección']);
+    expect($orden)->not->toContain(false)->and($orden)->toBe(collect($orden)->sort()->values()->all());
     expect(app(DashboardService::class)->resumen()->vacantesActivas)->toBe(3);
 });
 

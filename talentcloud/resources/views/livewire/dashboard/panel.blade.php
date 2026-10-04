@@ -1,6 +1,77 @@
-{{-- "Dashboard" del prototipo (TalentCloud App.dc.html, isDashboard). --}}
+{{-- "Dashboard" del prototipo (TalentCloud App.dc.html, isDashboard). Para el admin SaaS, "Panel de la plataforma". --}}
+@use('App\Enums\PlanEmpresa')
 <div>
-    <x-ui.page-header title="Dashboard" :subtitle="$subtitulo" />
+    <x-ui.page-header :title="$titulo" :subtitle="$subtitulo" />
+
+    @if ($plataforma)
+        {{-- 1 · Empresas cliente (solo admin SaaS) --}}
+        <section class="mb-10" aria-labelledby="panel-empresas">
+            <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                    <h2 id="panel-empresas" class="m-0 text-16">1 · Empresas cliente</h2>
+                    <p class="m-0 mt-1 text-13 text-neutral-700">Quién usa TalentCloud, con qué plan (se cuentan las empresas activas) y qué empresas están por quedarse sin lugar en el suyo.</p>
+                </div>
+                <x-ui.button size="sm" :href="route('empresas.index')" wire:navigate>Gestionar empresas</x-ui.button>
+            </div>
+
+            <div class="mb-4 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+                <x-ui.stat label="Empresas activas" :value="$plataforma->empresasActivas" highlight />
+                <x-ui.stat label="Suspendidas" :value="$plataforma->empresasSuspendidas" />
+                @foreach (PlanEmpresa::cases() as $plan)
+                    <x-ui.stat :label="'Plan '.$plan->etiqueta()" :value="$plataforma->empresasConPlan($plan)" wire:key="plan-{{ $plan->value }}" />
+                @endforeach
+            </div>
+
+            <x-ui.card>
+                <div class="card-kicker">Cerca del límite de su plan</div>
+                @if ($plataforma->cercaDelLimite->isEmpty())
+                    <p class="m-0 text-14 text-neutral-800">Ninguna empresa activa usa el 80 % o más de su plan.</p>
+                @else
+                    <p class="m-0 text-13 text-neutral-700">Usan el 80 % o más de sus vacantes activas o de sus usuarios (con invitaciones pendientes). Buen momento para ofrecerles otro plan.</p>
+                    <x-ui.table>
+                        <x-slot:head>
+                            <th>Empresa</th><th>Plan</th><th>Vacantes activas</th><th>Usuarios</th>
+                        </x-slot:head>
+                        @foreach ($plataforma->cercaDelLimite as $fila)
+                            @php($uso = $fila['uso'])
+                            <tr wire:key="limite-{{ $fila['empresa']->id }}">
+                                <td>{{ $fila['empresa']->nombre }}</td>
+                                <td>{{ $uso->plan->etiqueta() }}</td>
+                                <td>{{ $uso->vacantesActivas }} {{ $uso->limiteVacantes() === null ? '· sin límite' : 'de '.$uso->limiteVacantes() }}</td>
+                                <td>{{ $uso->usuariosActivos + $uso->invitacionesPendientes }} {{ $uso->limiteUsuarios() === null ? '· sin límite' : 'de '.$uso->limiteUsuarios() }}</td>
+                            </tr>
+                        @endforeach
+                    </x-ui.table>
+                @endif
+            </x-ui.card>
+        </section>
+
+        {{-- 2 · Salud de la IA (solo admin SaaS) --}}
+        <section class="mb-10" aria-labelledby="panel-ia">
+            <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                    <h2 id="panel-ia" class="m-0 text-16">2 · Salud de la IA</h2>
+                    <p class="m-0 mt-1 text-13 text-neutral-700">Cómo está funcionando el análisis de CV y el matching en los últimos {{ App\Services\Plataforma\CalidadDeLaIa::DIAS }} días.</p>
+                </div>
+                <x-ui.button size="sm" :href="route('calidad-ia')" wire:navigate>Ver calidad de la IA</x-ui.button>
+            </div>
+
+            @php($ia = $plataforma->ia)
+            <div class="grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+                <x-ui.stat label="Analizadas con IA" :value="$ia->porcentajeConIa() === null ? '—' : $ia->porcentajeConIa().'%'" highlight />
+                <x-ui.stat label="Análisis básico pendiente" :value="$ia->basicasPendientes" />
+                <x-ui.stat label="Marcadas como incorrectas" :value="$ia->marcasDelPeriodo" />
+                <x-ui.stat label="CV con error de lectura" :value="$ia->cvsConError" />
+                <x-ui.stat label="Trabajos fallidos" :value="$ia->trabajosFallidos" />
+            </div>
+        </section>
+
+        {{-- 3 · Actividad de selección en todas las empresas --}}
+        <div class="mb-3">
+            <h2 class="m-0 text-16">3 · Actividad de selección</h2>
+            <p class="m-0 mt-1 text-13 text-neutral-700">Lo que pasa en los procesos de todas las empresas. Para entrar en ellos, usa «Procesos de selección» en el menú.</p>
+        </div>
+    @endif
 
     <div class="mb-6 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <x-ui.stat label="Vacantes activas" :value="$resumen->vacantesActivas" />

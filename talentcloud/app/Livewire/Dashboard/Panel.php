@@ -8,6 +8,7 @@ use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
 use App\Services\Dashboard\DashboardService;
 use App\Services\Dashboard\EmbudoDeSeleccion;
+use App\Services\Plataforma\PanelDePlataforma;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -16,6 +17,10 @@ use Livewire\Component;
 /**
  * "Dashboard" del prototipo (isDashboard): indicadores, vacantes recientes y
  * actividad reciente, más el embudo de selección (ampliación).
+ *
+ * Para el admin SaaS es el "Panel de la plataforma" (cambio sobre el
+ * prototipo): primero sus empresas cliente y la salud de la IA, y después la
+ * actividad de selección de toda la plataforma.
  */
 #[Title('Dashboard')]
 class Panel extends Component
@@ -45,7 +50,7 @@ class Panel extends Component
         $this->mostrarVistaPrevia = true;
     }
 
-    public function render(DashboardService $dashboard, EmbudoDeSeleccion $embudo, VacanteRepository $vacantes): View
+    public function render(DashboardService $dashboard, EmbudoDeSeleccion $embudo, VacanteRepository $vacantes, PanelDePlataforma $panel): View
     {
         /** @var User $usuario */
         $usuario = auth()->user();
@@ -55,6 +60,7 @@ class Panel extends Component
         $vacanteDelEmbudo = ctype_digit($this->vacanteDelEmbudo) ? $vacantes->buscar((int) $this->vacanteDelEmbudo) : null;
 
         return view('livewire.dashboard.panel', [
+            'plataforma' => $esAdmin ? $panel->resumen() : null,
             'resumen' => $dashboard->resumen(),
             'embudo' => $embudo->calcular($vacanteDelEmbudo?->id),
             'vacantesDelEmbudo' => Vacante::query()
@@ -64,12 +70,13 @@ class Panel extends Component
                 ->mapWithKeys(fn (Vacante $v) => [$v->id => $esAdmin ? $v->titulo.' · '.$v->empresa?->nombre : $v->titulo])
                 ->all(),
             'diasDelMatch' => DashboardService::DIAS_DEL_MATCH_PROMEDIO,
+            'titulo' => $esAdmin ? 'Panel de la plataforma' : 'Dashboard',
             'subtitulo' => $esAdmin
-                ? 'Resumen de la actividad de selección en toda la plataforma.'
+                ? 'Tus empresas cliente, la salud de la IA y la actividad de selección de toda la plataforma.'
                 : 'Resumen de la actividad de selección de '.$usuario->empresa?->nombre.'.',
             'seleccionada' => $this->vacanteSeleccionada
                 ? $vacantes->buscar($this->vacanteSeleccionada)?->load('empresa')->loadCount('postulaciones')
                 : null,
-        ]);
+        ])->title($esAdmin ? 'Panel' : 'Dashboard');
     }
 }

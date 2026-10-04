@@ -47,6 +47,27 @@ new class extends Component
         }
     }
 
+    /**
+     * Añade la URL y si está activo a un enlace; un grupo está activo si lo está alguno de sus enlaces.
+     *
+     * @param  array<string, mixed>  $enlace
+     * @return array<string, mixed>
+     */
+    private function resolver(array $enlace): array
+    {
+        if (isset($enlace['hijos'])) {
+            $hijos = array_map(fn (array $hijo) => $this->resolver($hijo), $enlace['hijos']);
+
+            return [...$enlace, 'hijos' => $hijos, 'href' => null, 'activo' => in_array(true, array_column($hijos, 'activo'), true)];
+        }
+
+        return [
+            ...$enlace,
+            'href' => Route::has($enlace['ruta']) ? route($enlace['ruta']) : null,
+            'activo' => Str::is($enlace['patron'], $this->rutaActual),
+        ];
+    }
+
     private function usuario(): User
     {
         /** @var User $user */
@@ -63,14 +84,8 @@ new class extends Component
         /** @var User $user */
         $user = auth()->user();
 
-        $enlaces = array_map(fn (array $enlace) => [
-            ...$enlace,
-            'href' => Route::has($enlace['ruta']) ? route($enlace['ruta']) : null,
-            'activo' => Str::is($enlace['patron'], $this->rutaActual),
-        ], Navegacion::enlaces($user));
-
         return [
-            'enlaces' => $enlaces,
+            'enlaces' => array_map(fn (array $enlace) => $this->resolver($enlace), Navegacion::enlaces($user)),
             'inicial' => Navegacion::inicial($user),
             'etiquetaPerfil' => Navegacion::etiquetaPerfil($user),
             'notificaciones' => $user->notifications()->latest()->limit(5)->get(),
@@ -92,7 +107,33 @@ new class extends Component
     {{-- Enlaces (escritorio) --}}
     <div class="hidden items-center gap-4 lg:flex">
         @foreach ($enlaces as $enlace)
-            @if ($enlace['href'])
+            @if (isset($enlace['hijos']))
+                {{-- Grupo (admin SaaS: "Procesos de selección"): desplegable con un encabezado que explica qué agrupa. --}}
+                <div class="relative" x-data="{ abierto: false }" x-on:click.outside="abierto = false" x-on:keydown.escape.window="abierto = false">
+                    <button
+                        type="button"
+                        class="barra-enlace flex items-center gap-1"
+                        aria-haspopup="true"
+                        x-bind:aria-expanded="abierto"
+                        x-on:click="abierto = ! abierto"
+                        @if ($enlace['activo']) aria-current="true" @endif
+                    >
+                        {{ $enlace['etiqueta'] }}
+                        <x-ui.icon name="caret-down" :size="14" />
+                    </button>
+                    <div x-show="abierto" x-cloak x-transition.opacity.duration.100ms class="card elev-lg absolute left-0 top-[36px] z-20 w-[250px] !gap-0 p-2">
+                        <div class="card-kicker px-2 pb-2">{{ $enlace['descripcion'] }}</div>
+                        @foreach ($enlace['hijos'] as $hijo)
+                            <a
+                                href="{{ $hijo['href'] }}"
+                                wire:navigate
+                                @class(['block rounded px-2 py-1.5 text-14 hover:bg-neutral-100', 'font-semibold text-accent-700' => $hijo['activo'], 'text-ink' => ! $hijo['activo']])
+                                @if ($hijo['activo']) aria-current="page" @endif
+                            >{{ $hijo['etiqueta'] }}</a>
+                        @endforeach
+                    </div>
+                </div>
+            @elseif ($enlace['href'])
                 <a href="{{ $enlace['href'] }}" wire:navigate class="barra-enlace" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
             @else
                 <a aria-disabled="true" tabindex="-1" title="Disponible próximamente" class="cursor-default opacity-[0.45]">{{ $enlace['etiqueta'] }}</a>
@@ -183,7 +224,14 @@ new class extends Component
 
     <div x-show="menu" x-cloak class="flex w-full flex-col gap-1 pt-2 lg:hidden">
         @foreach ($enlaces as $enlace)
-            @if ($enlace['href'])
+            @if (isset($enlace['hijos']))
+                <div class="mt-2 border-t border-accent-700 pt-2" role="group" aria-labelledby="grupo-{{ $loop->index }}">
+                    <div id="grupo-{{ $loop->index }}" class="text-12 uppercase tracking-[0.08em] text-accent-200">{{ $enlace['etiqueta'] }} · {{ $enlace['descripcion'] }}</div>
+                    @foreach ($enlace['hijos'] as $hijo)
+                        <a href="{{ $hijo['href'] }}" wire:navigate class="barra-enlace block py-2 pl-3" @if ($hijo['activo']) aria-current="page" @endif>{{ $hijo['etiqueta'] }}</a>
+                    @endforeach
+                </div>
+            @elseif ($enlace['href'])
                 <a href="{{ $enlace['href'] }}" wire:navigate class="barra-enlace py-2" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
             @else
                 <a aria-disabled="true" tabindex="-1" class="cursor-default py-2 opacity-[0.45]">{{ $enlace['etiqueta'] }}</a>

@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Services\Plataforma;
+
+use App\DTO\ResumenDePlataforma;
+use App\DTO\UsoDelPlan;
+use App\Enums\EstadoEmpresa;
+use App\Enums\EstadoVacante;
+use App\Models\Empresa;
+use App\Tenancy\EmpresaScope;
+use Illuminate\Database\Eloquent\Builder;
+
+/**
+ * Panel del admin SaaS: el estado de las empresas cliente (planes y uso) y un
+ * resumen de la calidad de la IA. Solo lo usa el admin; lee sin filtro de
+ * empresa, igual que la pantalla "Empresas".
+ */
+class PanelDePlataforma
+{
+    public function __construct(private readonly CalidadDeLaIa $calidad) {}
+
+    public function resumen(): ResumenDePlataforma
+    {
+        // Un solo viaje a la base: los conteos del uso del plan van en la misma consulta.
+        $empresas = Empresa::query()
+            ->withCount([
+                'usuarios as usuarios_activos_count' => fn (Builder $q) => $q->whereNull('desactivado_at'),
+                'vacantes as vacantes_activas_count' => fn (Builder $q) => $q
+                    ->withoutGlobalScope(EmpresaScope::class)
+                    ->whereIn('estado', EstadoVacante::activos()),
+                'invitaciones as invitaciones_pendientes_count' => fn (Builder $q) => $q
+                    ->withoutGlobalScope(EmpresaScope::class)
+                    ->whereNull('aceptada_at')
+                    ->where('expira_at', '>', now()),
+            ])
+            ->orderBy('nombre')
+            ->get();
+
+        $activas = $empresas->filter(fn (Empresa $e) => $e->estado === EstadoEmpresa::Activa);
+
+        return new ResumenDePlataforma(
+            empresasActivas: $activas->count(),
+            empresasSuspendidas: $empresas->count() - $activas->count(),
+            porPlan: $activas->countBy(fn (Empresa $e) => $e->plan->value)->all(),
+            cercaDelLimite: $activas
+                ->map(fn (Empresa $e) => ['empresa' => $e, 'uso' => new UsoDelPlan(
+                    plan: $e->plan,
+                    vacantesActivas: (int) $e->getAttribute('vacantes_activas_count'),
+                    usuariosActivos: (int) $e->getAttribute('usuarios_activos_count'),
+                    invitacionesPendientes: (int) $e->getAttribute('invitaciones_pendientes_count'),
+                )])
+                ->filter(fn (array $fila) => $fila['uso']->cercaDelLimite())
+                ->values(),
+            ia: $this->calidad->resumen(),
+        );
+    }
+}

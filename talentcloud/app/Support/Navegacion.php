@@ -7,16 +7,22 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 /**
- * Barra de navegación por rol, tal como la define el prototipo
+ * Barra de navegación por rol, a partir de la del prototipo
  * (TalentCloud App.dc.html): el postulante ve "Mis postulaciones" (y "Vacantes",
- * ampliación sobre el prototipo); el personal
- * de selección ve Dashboard…Evaluaciones; el admin añade "Empresas" y la
- * empresa "Mi empresa".
+ * ampliación sobre el prototipo); el reclutador y la empresa ven
+ * Dashboard…Evaluaciones, y la empresa añade "Mi empresa".
+ *
+ * El admin SaaS (cambio sobre el prototipo) ve primero lo suyo —Panel,
+ * Empresas, Calidad de la IA— y las seis pantallas de selección agrupadas en
+ * "Procesos de selección", porque para él son supervisión, no su trabajo diario.
  */
 class Navegacion
 {
     /**
-     * @return list<array{etiqueta: string, ruta: string, patron: string}>
+     * Un enlace lleva su ruta; un grupo, además, sus enlaces en "hijos" y una
+     * descripción para el encabezado del desplegable.
+     *
+     * @return list<array{etiqueta: string, ruta: string, patron: string, hijos?: list<array{etiqueta: string, ruta: string, patron: string}>, descripcion?: string}>
      */
     public static function enlaces(?User $user): array
     {
@@ -33,19 +39,18 @@ class Navegacion
             $enlaces[] = self::enlace('Vacantes', 'postulante.vacantes', 'postulante.vacantes*');
         }
 
-        if ($rol->esPersonalDeSeleccion()) {
-            $enlaces[] = self::enlace('Dashboard', 'dashboard', 'dashboard');
-            $enlaces[] = self::enlace('Vacantes', 'vacantes.index', 'vacantes.*');
-            $enlaces[] = self::enlace('Kanban', 'kanban.index', 'kanban.*');
-            $enlaces[] = self::enlace('Candidatos', 'candidatos.index', 'candidatos.*');
-            $enlaces[] = self::enlace('Matching', 'matching.index', 'matching.*');
-            $enlaces[] = self::enlace('Entrevistas', 'entrevistas.index', 'entrevistas.*');
-            $enlaces[] = self::enlace('Evaluaciones', 'evaluaciones.index', 'evaluaciones.*');
+        if ($rol === Rol::Admin) {
+            return [
+                self::enlace('Panel', 'dashboard', 'dashboard'),
+                self::enlace('Empresas', 'empresas.index', 'empresas.*'),
+                self::enlace('Calidad de la IA', 'calidad-ia', 'calidad-ia'),
+                self::grupo('Procesos de selección', 'Supervisión de las empresas', self::pantallasDeSeleccion()),
+            ];
         }
 
-        if ($rol === Rol::Admin) {
-            $enlaces[] = self::enlace('Empresas', 'empresas.index', 'empresas.*');
-            $enlaces[] = self::enlace('Calidad de la IA', 'calidad-ia', 'calidad-ia');
+        if ($rol->esPersonalDeSeleccion()) {
+            $enlaces[] = self::enlace('Dashboard', 'dashboard', 'dashboard');
+            array_push($enlaces, ...self::pantallasDeSeleccion());
         }
 
         if ($rol === Rol::Empresa) {
@@ -95,10 +100,45 @@ class Navegacion
     }
 
     /**
+     * Las pantallas del proceso de selección, en el orden del prototipo.
+     *
+     * @return list<array{etiqueta: string, ruta: string, patron: string}>
+     */
+    private static function pantallasDeSeleccion(): array
+    {
+        return [
+            self::enlace('Vacantes', 'vacantes.index', 'vacantes.*'),
+            self::enlace('Kanban', 'kanban.index', 'kanban.*'),
+            self::enlace('Candidatos', 'candidatos.index', 'candidatos.*'),
+            self::enlace('Matching', 'matching.index', 'matching.*'),
+            self::enlace('Entrevistas', 'entrevistas.index', 'entrevistas.*'),
+            self::enlace('Evaluaciones', 'evaluaciones.index', 'evaluaciones.*'),
+        ];
+    }
+
+    /**
      * @return array{etiqueta: string, ruta: string, patron: string}
      */
     private static function enlace(string $etiqueta, string $ruta, string $patron): array
     {
         return ['etiqueta' => $etiqueta, 'ruta' => $ruta, 'patron' => $patron];
+    }
+
+    /**
+     * Grupo de enlaces (desplegable en escritorio, bloque con título en móvil).
+     * Está activo si lo está cualquiera de sus enlaces.
+     *
+     * @param  list<array{etiqueta: string, ruta: string, patron: string}>  $hijos
+     * @return array{etiqueta: string, ruta: string, patron: string, hijos: list<array{etiqueta: string, ruta: string, patron: string}>, descripcion: string}
+     */
+    private static function grupo(string $etiqueta, string $descripcion, array $hijos): array
+    {
+        return [
+            'etiqueta' => $etiqueta,
+            'ruta' => '',
+            'patron' => '',
+            'hijos' => $hijos,
+            'descripcion' => $descripcion,
+        ];
     }
 }

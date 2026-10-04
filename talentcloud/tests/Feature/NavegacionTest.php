@@ -20,8 +20,14 @@ it('muestra al reclutador los módulos de selección', function () use ($persona
     expect(etiquetasDe(User::factory()->reclutador()->create()))->toBe($personal);
 });
 
-it('añade Empresas y Calidad de la IA al admin', function () use ($personal) {
-    expect(etiquetasDe(User::factory()->admin()->create()))->toBe([...$personal, 'Empresas', 'Calidad de la IA']);
+it('ordena el menú del admin: primero lo suyo y la selección agrupada', function () use ($personal) {
+    $enlaces = Navegacion::enlaces(User::factory()->admin()->create());
+
+    expect(array_column($enlaces, 'etiqueta'))->toBe(['Panel', 'Empresas', 'Calidad de la IA', 'Procesos de selección'])
+        ->and($enlaces[0]['ruta'])->toBe('dashboard')
+        ->and($enlaces[3]['descripcion'])->toBe('Supervisión de las empresas')
+        // Las mismas pantallas que el reclutador, sin su Dashboard (para el admin es "Panel").
+        ->and(array_column($enlaces[3]['hijos'], 'etiqueta'))->toBe(array_slice($personal, 1));
 });
 
 it('añade Mi empresa a la empresa', function () use ($personal) {
@@ -54,10 +60,35 @@ it('muestra la empresa en la etiqueta de perfil de empresa y reclutador', functi
 });
 
 it('renderiza la barra con la marca, los enlaces y el menú de perfil', function () {
+    $this->actingAs(User::factory()->reclutador()->create())
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertSeeInOrder(['TalentCloud', 'AI', 'Dashboard', 'Vacantes', 'Evaluaciones'])
+        ->assertSee('Reclutador')
+        ->assertSee('Mi perfil')
+        ->assertSee('Cerrar sesión')
+        ->assertSee('aria-current="page"', false);
+});
+
+it('pinta el desplegable "Procesos de selección" del admin y lo marca activo dentro de él', function () {
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin)
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertSeeInOrder(['Panel', 'Empresas', 'Calidad de la IA', 'Procesos de selección', 'Supervisión de las empresas', 'Vacantes', 'Evaluaciones'])
+        ->assertDontSee('aria-current="true"', false);
+
+    $this->actingAs($admin)
+        ->get('/vacantes')
+        ->assertOk()
+        ->assertSee('aria-current="true"', false);
+});
+
+it('mantiene el menú de perfil del admin', function () {
     $this->actingAs(User::factory()->admin()->create())
         ->get('/dashboard')
         ->assertOk()
-        ->assertSeeInOrder(['TalentCloud', 'AI', 'Dashboard', 'Evaluaciones', 'Empresas'])
         ->assertSee('Administrador SaaS')
         ->assertSee('Mi perfil')
         ->assertSee('Cerrar sesión')
