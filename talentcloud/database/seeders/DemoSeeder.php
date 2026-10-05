@@ -162,7 +162,7 @@ class DemoSeeder extends Seeder
             ]);
 
         $this->a(39, '18:00');
-        $marcoUsuario = $this->registrarPostulante('Marco Díaz', 'marco@correo.com', 'Desarrollador Backend', ['Java', 'MySQL']);
+        $marcoUsuario = $this->registrarPostulante('Marco Díaz', 'marco@correo.com', 'Desarrollador Backend');
         $this->a(39, '18:05', $marcoUsuario);
         app(SubirCv::class)->ejecutar($marcoUsuario->candidato, $this->archivoCv('marco@correo.com'), $marcoUsuario);
 
@@ -263,6 +263,9 @@ class DemoSeeder extends Seeder
         // Marco postula por su cuenta a Desarrollador Backend.
         $this->a(12, '10:00', $marcoUsuario);
         app(PostularmeAVacante::class)->ejecutar($marcoUsuario, $backend->id);
+        // Al revisar su CV, Marta le anota las competencias que le interesan a Nimbus Corp.
+        $this->a(11, '09:30', $marta);
+        $this->competenciasManuales($marcoUsuario->candidato()->firstOrFail(), ['Java', 'MySQL'], $marta->empresa);
 
         $this->a(10, '09:00', $diego);
         app(CambiarEstadoVacante::class)->ejecutar($dataAnalyst->fresh(), EstadoVacante::EnRevision);
@@ -413,19 +416,13 @@ class DemoSeeder extends Seeder
         return $postulacion;
     }
 
-    /**
-     * Registro de postulante (con su titular, que completa en "Mi perfil").
-     *
-     * @param  list<string>  $competencias  competencias que Nimbus Corp le anota más adelante
-     */
-    private function registrarPostulante(string $nombre, string $email, string $titular, array $competencias): User
+    /** Registro de postulante (con su titular, que completa en "Mi perfil"). */
+    private function registrarPostulante(string $nombre, string $email, string $titular): User
     {
         $usuario = app(RegistrarPostulante::class)->ejecutar(new RegistroPostulanteData($nombre, $email, self::PASSWORD, true));
         $usuario->forceFill(['email_verified_at' => now()])->save();
 
-        $candidato = $usuario->candidato()->firstOrFail();
-        $candidato->update(['titular' => $titular]);
-        $this->competenciasManuales($candidato, $competencias, Empresa::where('nombre', 'Nimbus Corp')->firstOrFail());
+        $usuario->candidato()->firstOrFail()->update(['titular' => $titular]);
 
         return $usuario->fresh() ?? $usuario;
     }
