@@ -56,7 +56,9 @@ class EloquentCandidatoRepository implements CandidatoRepository
         return $this->visibles()
             ->select('candidatos.*')
             ->selectRaw('coalesce(('.$ultimoMatch->toSql().'), -1) as ultimo_match', $ultimoMatch->getBindings())
-            ->with(['ultimaPostulacion.vacante', 'cvActual', 'competencias']);
+            ->with(['ultimaPostulacion.vacante.empresa:id,nombre', 'cvActual', 'competencias'])
+            // Vista global (admin SaaS): todas sus postulaciones, para decir en qué otras empresas está.
+            ->when($this->contexto->esGlobal(), fn (Builder $q) => $q->with('postulaciones.vacante.empresa:id,nombre'));
     }
 
     public function buscarVisible(int $id): ?Candidato

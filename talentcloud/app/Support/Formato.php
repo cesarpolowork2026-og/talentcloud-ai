@@ -2,12 +2,36 @@
 
 namespace App\Support;
 
+use App\Models\Vacante;
+use App\Tenancy\TenantContext;
 use DateTimeInterface;
 use Illuminate\Support\Carbon;
 
-/** Formatos de fecha del prototipo ("2 sep", "23 sep · 10:00") y duraciones en días. */
+/**
+ * Formatos de fecha del prototipo ("2 sep", "23 sep · 10:00"), duraciones en
+ * días y el nombre de una vacante en pantalla.
+ */
 class Formato
 {
+    /**
+     * "Desarrollador Backend", o "Desarrollador Backend · Nimbus Corp" cuando la
+     * vista abarca varias empresas (contexto global: el admin SaaS), para que
+     * siempre se sepa de qué empresa es cada vacante o postulante. Cargar
+     * vacante.empresa con with() en los listados.
+     */
+    public static function vacante(?Vacante $vacante): string
+    {
+        if ($vacante === null) {
+            return '';
+        }
+
+        if (! app(TenantContext::class)->esGlobal() || $vacante->empresa === null) {
+            return $vacante->titulo;
+        }
+
+        return $vacante->titulo.' · '.$vacante->empresa->nombre;
+    }
+
     private const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
     /** "2 sep" (con el año si no es el actual: "2 sep 2025"). */

@@ -17,7 +17,7 @@ class EloquentEntrevistaRepository implements EntrevistaRepository
 {
     public function consultaListado(): Builder
     {
-        return Entrevista::query()->with(['postulacion.candidato', 'postulacion.vacante', 'entrevistador']);
+        return Entrevista::query()->with(['postulacion.candidato', 'postulacion.vacante.empresa:id,nombre', 'entrevistador']);
     }
 
     public function buscar(int $id): ?Entrevista

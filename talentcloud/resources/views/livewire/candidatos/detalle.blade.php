@@ -23,7 +23,7 @@
                         </x-slot:head>
                         @foreach ($candidato->postulaciones as $postulacion)
                             <tr wire:key="postulacion-{{ $postulacion->id }}">
-                                <td><a href="{{ route('vacantes.show', $postulacion->vacante_id) }}" wire:navigate>{{ $postulacion->vacante?->titulo }}</a></td>
+                                <td><a href="{{ route('vacantes.show', $postulacion->vacante_id) }}" wire:navigate>{{ Formato::vacante($postulacion->vacante) }}</a></td>
                                 <td><x-ui.estado :valor="$postulacion->etapa" /></td>
                                 <td>
                                     @if ($postulacion->matchPorcentaje() !== null)
@@ -56,7 +56,7 @@
                     <div class="grid gap-6">
                         @foreach ($conNotas as $postulacion)
                             <div>
-                                <h3 class="mb-2 text-15">{{ $postulacion->vacante?->titulo }}</h3>
+                                <h3 class="mb-2 text-15">{{ Formato::vacante($postulacion->vacante) }}</h3>
                                 <livewire:postulaciones.notas :postulacion-id="$postulacion->id" :key="'notas-'.$postulacion->id" />
                             </div>
                         @endforeach

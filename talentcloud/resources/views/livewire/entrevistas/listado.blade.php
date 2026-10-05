@@ -27,7 +27,7 @@
             @foreach ($filas as $entrevista)
                 <tr wire:key="entrevista-{{ $entrevista->id }}">
                     <td class="tc-row" wire:click="verDetalle({{ $entrevista->id }})">{{ $entrevista->postulacion?->candidato?->nombre }}</td>
-                    <td>{{ $entrevista->postulacion?->vacante?->titulo }}</td>
+                    <td>{{ Formato::vacante($entrevista->postulacion?->vacante) }}</td>
                     <td>{{ $entrevista->entrevistador?->name }}</td>
                     <td class="text-neutral-600">{{ Formato::fechaHora($entrevista->inicia_at) }}</td>
                     <td><x-ui.estado :valor="$entrevista->estado" /></td>
@@ -49,7 +49,7 @@
     {{-- Detalle (prototipo: "Entrevista · {candidato}") + confirmar y completar --}}
     <x-ui.dialog wire:model="mostrarDetalle" :title="'Entrevista · '.$seleccionada?->postulacion?->candidato?->nombre" max-width="480px">
         @if ($seleccionada)
-            <p class="m-0 whitespace-pre-line">Vacante: {{ $seleccionada->postulacion?->vacante?->titulo }}
+            <p class="m-0 whitespace-pre-line">Vacante: {{ Formato::vacante($seleccionada->postulacion?->vacante) }}
 Entrevistador: {{ $seleccionada->entrevistador?->name }}
 Fecha: {{ Formato::fechaHora($seleccionada->inicia_at) }} ({{ $seleccionada->duracion_min }} min · {{ $seleccionada->modalidad->etiqueta() }})
 Estado: {{ $seleccionada->estado->etiqueta() }}@if ($seleccionada->notas)

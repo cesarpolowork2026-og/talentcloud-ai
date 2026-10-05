@@ -13,7 +13,7 @@ class EloquentEvaluacionRepository implements EvaluacionRepository
 {
     public function consultaListado(): Builder
     {
-        return Evaluacion::query()->with(['postulacion.candidato', 'postulacion.vacante', 'evaluador']);
+        return Evaluacion::query()->with(['postulacion.candidato', 'postulacion.vacante.empresa:id,nombre', 'evaluador']);
     }
 
     public function buscar(int $id): ?Evaluacion

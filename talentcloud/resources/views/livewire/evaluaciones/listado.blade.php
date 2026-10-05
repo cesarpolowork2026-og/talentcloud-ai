@@ -21,7 +21,7 @@
             @foreach ($filas as $evaluacion)
                 <tr class="tc-row" wire:key="evaluacion-{{ $evaluacion->id }}" wire:click="verDetalle({{ $evaluacion->id }})">
                     <td>{{ $evaluacion->postulacion?->candidato?->nombre }}</td>
-                    <td>{{ $evaluacion->postulacion?->vacante?->titulo }}</td>
+                    <td>{{ App\Support\Formato::vacante($evaluacion->postulacion?->vacante) }}</td>
                     <td>{{ $evaluacion->evaluador?->name }}</td>
                     <td>{{ $evaluacion->puntaje ?? '—' }}/10</td>
                     <td><x-ui.estado :valor="$evaluacion->estado" /></td>
@@ -35,7 +35,7 @@
     {{-- Detalle (prototipo: "Evaluación · {candidato}") + criterios y comentario --}}
     <x-ui.dialog wire:model="mostrarDetalle" :title="'Evaluación · '.$seleccionada?->postulacion?->candidato?->nombre" max-width="480px">
         @if ($seleccionada)
-            <p class="m-0 whitespace-pre-line">Vacante: {{ $seleccionada->postulacion?->vacante?->titulo }}
+            <p class="m-0 whitespace-pre-line">Vacante: {{ App\Support\Formato::vacante($seleccionada->postulacion?->vacante) }}
 Evaluador: {{ $seleccionada->evaluador?->name }}
 Puntaje: {{ $seleccionada->puntaje ?? '—' }}/10
 Estado: {{ $seleccionada->estado->etiqueta() }}</p>

@@ -121,7 +121,7 @@ class Detalle extends Component
             'cvActual',
             'competencias' => fn ($q) => $q->orderBy('nombre'),
             // Solo las postulaciones de la empresa del contexto (admin: todas).
-            'postulaciones' => fn ($q) => $q->with('vacante')->latest(),
+            'postulaciones' => fn ($q) => $q->with('vacante.empresa:id,nombre')->latest(),
         ]);
 
         $postuladas = $candidato->postulaciones->pluck('vacante_id')->all();

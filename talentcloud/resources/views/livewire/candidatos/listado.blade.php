@@ -26,12 +26,20 @@
                     $postulacion = $candidato->ultimaPostulacion;
                     $cv = $candidato->cvActual;
                     $conError = $cv?->estado_procesamiento === EstadoProcesamientoCv::Error;
+                    // Vista global (admin SaaS): otras empresas en cuyos procesos también está.
+                    $otrasEmpresas = $candidato->relationLoaded('postulaciones')
+                        ? $candidato->postulaciones->map(fn ($p) => $p->vacante?->empresa?->nombre)->filter()->unique()
+                            ->reject(fn ($nombre) => $nombre === $postulacion?->vacante?->empresa?->nombre)->values()
+                        : collect();
                 @endphp
                 <x-ui.card class="cursor-pointer" wire:key="candidato-{{ $candidato->id }}" wire:click="verDetalle({{ $candidato->id }})">
                     <div class="card-kicker">{{ $candidato->titular ?? 'Candidato' }}</div>
                     <div class="card-title">{{ $candidato->nombre }}</div>
                     <p class="card-body">
-                        {{ $postulacion?->vacante ? 'Postuló a '.$postulacion->vacante->titulo : 'Sin postulaciones' }}
+                        {{ $postulacion?->vacante ? 'Postuló a '.App\Support\Formato::vacante($postulacion->vacante) : 'Sin postulaciones' }}
+                        @if ($otrasEmpresas->isNotEmpty())
+                            <span class="block text-13 text-neutral-700">También en: {{ $otrasEmpresas->join(', ') }}</span>
+                        @endif
                     </p>
 
                     @if ($conError)
@@ -69,7 +77,7 @@
                 $texto = $seleccionado->cvActual?->texto_extraido;
             @endphp
             <p class="m-0 whitespace-pre-line">{{ $seleccionado->titular ?? 'Candidato' }}
-{{ $p?->vacante ? 'Postuló a '.$p->vacante->titulo : 'Sin postulaciones' }}
+{{ $p?->vacante ? 'Postuló a '.App\Support\Formato::vacante($p->vacante) : 'Sin postulaciones' }}
 @if ($p?->matchPorcentaje() !== null)Coincidencia: {{ $p->matchPorcentaje() }}%
 @endif
 {{ $extraidas->isNotEmpty() ? 'Competencias extraídas por IA' : 'Competencias' }}: {{ $lista !== '' ? $lista : 'sin registrar' }}

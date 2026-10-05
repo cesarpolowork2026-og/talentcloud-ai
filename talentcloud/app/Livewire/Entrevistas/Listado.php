@@ -16,6 +16,7 @@ use App\Services\Entrevistas\CambiarEstadoEntrevista;
 use App\Services\Entrevistas\ProgramarEntrevista;
 use App\Services\Entrevistas\ReprogramarEntrevista;
 use App\Services\Vacantes\OperacionNoPermitida;
+use App\Support\Formato;
 use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Contracts\View\View;
@@ -228,8 +229,8 @@ class Listado extends Component
     private function opcionesDePostulacion(Collection $postulaciones): array
     {
         return $postulaciones
-            // El admin SaaS elige entre postulantes de todas las empresas: se indica la de cada uno.
-            ->mapWithKeys(fn (Postulacion $p) => [$p->id => $p->candidato?->nombre.' — '.$p->vacante?->titulo.($this->esAdmin() ? ' · '.$p->vacante?->empresa?->nombre : '')])
+            // En la vista global (admin SaaS) se indica la empresa de cada postulante.
+            ->mapWithKeys(fn (Postulacion $p) => [$p->id => $p->candidato?->nombre.' — '.Formato::vacante($p->vacante)])
             ->all();
     }
 
