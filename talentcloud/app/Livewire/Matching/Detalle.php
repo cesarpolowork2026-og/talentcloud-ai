@@ -13,6 +13,7 @@ use App\Models\Requisito;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Services\Postulaciones\MarcarResultadoIncorrecto;
+use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -96,6 +97,15 @@ class Detalle extends Component
                 ->get()
                 ->mapWithKeys(fn (Postulacion $p) => [$p->id => $p->candidato?->nombre.' · '.$p->matchPorcentaje().'%'])
                 ->all(),
+            // Vista global (admin SaaS): los procesos del mismo candidato en otras vacantes, de cualquier empresa.
+            'otrosProcesos' => app(TenantContext::class)->esGlobal()
+                ? Postulacion::query()
+                    ->where('candidato_id', $postulacion->candidato_id)
+                    ->whereKeyNot($postulacion->id)
+                    ->with('vacante.empresa:id,nombre')
+                    ->latest()
+                    ->get()
+                : collect(),
         ])->title('Matching · '.$postulacion->candidato?->nombre);
     }
 

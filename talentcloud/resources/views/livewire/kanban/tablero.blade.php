@@ -11,7 +11,7 @@
             <x-slot:breadcrumbs>
                 <x-ui.breadcrumb :items="[['label' => 'Vacantes', 'href' => route('vacantes.index')], ['label' => $vacante->titulo, 'href' => route('vacantes.show', $vacante)], ['label' => 'Kanban']]" />
             </x-slot:breadcrumbs>
-            @if (count($otrasVacantes) > 1)
+            @if ($hayOtrasVacantes)
                 <x-slot:actions>
                     <label for="kanban-vacante" class="sr-only">Cambiar de vacante</label>
                     <x-ui.select

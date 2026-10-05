@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Models\Vacante;
 use App\Services\Postulaciones\MoverPostulacion;
 use App\Services\Vacantes\OperacionNoPermitida;
-use App\Support\Formato;
+use App\Support\OpcionesPorEmpresa;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
@@ -149,6 +149,12 @@ class Tablero extends Component
 
         $seleccionada = $this->postulacionSeleccionada ? $postulaciones->firstWhere('id', $this->postulacionSeleccionada) : null;
 
+        $vacantesActivas = Vacante::query()
+            ->with('empresa:id,nombre')
+            ->whereIn('estado', [EstadoVacante::Abierta, EstadoVacante::EnRevision])
+            ->orderBy('titulo')
+            ->get(['id', 'titulo', 'empresa_id']);
+
         return view('livewire.kanban.tablero', [
             'vacante' => $vacante,
             'columnas' => $columnas,
@@ -157,14 +163,9 @@ class Tablero extends Component
             'editable' => $vacante->estado !== EstadoVacante::Cerrada && $this->usuario()->can('update', $vacante),
             'seleccionada' => $seleccionada,
             'etapas' => EtapaPostulacion::opciones(),
-            // En la vista global (admin SaaS) cada vacante lleva el nombre de su empresa.
-            'otrasVacantes' => Vacante::query()
-                ->with('empresa:id,nombre')
-                ->whereIn('estado', [EstadoVacante::Abierta, EstadoVacante::EnRevision])
-                ->orderBy('titulo')
-                ->get(['id', 'titulo', 'empresa_id'])
-                ->mapWithKeys(fn (Vacante $v) => [$v->id => Formato::vacante($v)])
-                ->all(),
+            // El selector solo aparece si hay a qué otra vacante cambiar; en la vista global, agrupado por empresa.
+            'hayOtrasVacantes' => $vacantesActivas->count() > 1,
+            'otrasVacantes' => OpcionesPorEmpresa::de($vacantesActivas, fn (Vacante $v) => $v, fn (Vacante $v) => $v->titulo),
         ])->title('Kanban · '.$vacante->titulo);
     }
 

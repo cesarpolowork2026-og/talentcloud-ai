@@ -31,7 +31,9 @@ interface CandidatoRepository
     /**
      * Consulta base de la pantalla "Candidatos": visibles, con su última
      * postulación (en la empresa del contexto), CV actual y competencias, y
-     * el alias ultimo_match para ordenar por "Match %".
+     * el alias match_de_orden para ordenar por "Match %" (el de la última
+     * postulación; en la vista global, el mejor de todos sus procesos, que
+     * además se cargan para agruparlos por empresa).
      *
      * @return Builder<Candidato>
      */

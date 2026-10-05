@@ -43,22 +43,30 @@ class EloquentCandidatoRepository implements CandidatoRepository
 
     public function consultaListado(): Builder
     {
-        // La subconsulta de Postulacion ya va filtrada por la empresa del contexto.
-        $ultimoMatch = Postulacion::query()
-            ->select('match_score')
-            ->whereColumn('postulaciones.candidato_id', 'candidatos.id')
-            ->latest('postulaciones.created_at')
-            ->latest('postulaciones.id')
-            ->limit(1);
+        $global = $this->contexto->esGlobal();
+
+        // La subconsulta de Postulacion ya va filtrada por la empresa del contexto. En la
+        // vista global un candidato puede tener procesos en varias empresas: se ordena por
+        // el mejor match; en una empresa, por el de su última postulación.
+        $matchDeOrden = $global
+            ? Postulacion::query()
+                ->selectRaw('max(match_score)')
+                ->whereColumn('postulaciones.candidato_id', 'candidatos.id')
+            : Postulacion::query()
+                ->select('match_score')
+                ->whereColumn('postulaciones.candidato_id', 'candidatos.id')
+                ->latest('postulaciones.created_at')
+                ->latest('postulaciones.id')
+                ->limit(1);
 
         // coalesce por fuera: sin postulaciones la subconsulta no devuelve filas (NULL)
         // y quedaría primera al ordenar de mayor a menor.
         return $this->visibles()
             ->select('candidatos.*')
-            ->selectRaw('coalesce(('.$ultimoMatch->toSql().'), -1) as ultimo_match', $ultimoMatch->getBindings())
+            ->selectRaw('coalesce(('.$matchDeOrden->toSql().'), -1) as match_de_orden', $matchDeOrden->getBindings())
             ->with(['ultimaPostulacion.vacante.empresa:id,nombre', 'cvActual', 'competencias'])
-            // Vista global (admin SaaS): todas sus postulaciones, para decir en qué otras empresas está.
-            ->when($this->contexto->esGlobal(), fn (Builder $q) => $q->with('postulaciones.vacante.empresa:id,nombre'));
+            // Vista global (admin SaaS): todos sus procesos, agrupados por empresa en la tarjeta.
+            ->when($global, fn (Builder $q) => $q->with(['postulaciones' => fn ($p) => $p->with('vacante.empresa:id,nombre')->latest()]));
     }
 
     public function buscarVisible(int $id): ?Candidato

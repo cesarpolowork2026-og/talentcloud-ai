@@ -37,6 +37,16 @@
             @endif
         </x-ui.page-header>
 
+        @if ($otrosProcesos->isNotEmpty())
+            {{-- Admin SaaS: el candidato también está en otros procesos (de esta u otras empresas). --}}
+            <aside class="-mt-2 mb-6 max-w-[760px] text-13 text-neutral-800" aria-label="Otros procesos de este candidato">
+                <span class="font-semibold">Otros procesos de {{ $candidato?->nombre }}:</span>
+                @foreach ($otrosProcesos as $otro)
+                    <a href="{{ $otro->match_detalle ? route('matching.show', $otro) : route('candidatos.show', $otro->candidato_id) }}" wire:navigate wire:key="otro-{{ $otro->id }}">{{ App\Support\Formato::vacante($otro->vacante) }}{{ $otro->matchPorcentaje() !== null ? ' ('.$otro->matchPorcentaje().' %)' : '' }}</a>@if (! $loop->last) · @endif
+                @endforeach
+            </aside>
+        @endif
+
         @if ($resultado === null)
             <x-ui.empty-state icon="sparkle" :message="$procesando ? 'Estamos analizando el CV y calculando la coincidencia…' : 'Todavía no hay coincidencia calculada: falta un CV con texto o la vacante no tiene requisitos.'">
                 @if ($puedeEditar && ! $procesando)

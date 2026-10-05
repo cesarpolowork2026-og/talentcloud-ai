@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Repositories\Contracts\EvaluacionRepository;
 use App\Services\Evaluaciones\GuardarEvaluacion;
 use App\Services\Vacantes\OperacionNoPermitida;
+use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
@@ -166,6 +167,8 @@ class Listado extends Component
 
         return view('livewire.evaluaciones.listado', [
             'filas' => $this->listar($evaluaciones->consultaListado()->latest()),
+            // Admin SaaS: columna "Empresa" (ve las evaluaciones de todas).
+            'vistaGlobal' => app(TenantContext::class)->esGlobal(),
             'seleccionada' => $seleccionada,
             'postulaciones' => $porEvaluar->mapWithKeys(fn (Postulacion $p) => [$p->id => $p->candidato?->nombre.' — '.$p->vacante?->titulo])->all(),
             'enEdicion' => $this->editando ? $evaluaciones->buscar($this->editando) : null,

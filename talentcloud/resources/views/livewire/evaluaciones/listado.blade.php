@@ -16,12 +16,15 @@
     @else
         <x-ui.table>
             <x-slot:head>
-                <th>Candidato</th><th>Vacante</th><th>Evaluador</th><th>Puntaje</th><th>Estado</th>
+                <th>Candidato</th><th>Vacante</th>@if ($vistaGlobal)<th>Empresa</th>@endif<th>Evaluador</th><th>Puntaje</th><th>Estado</th>
             </x-slot:head>
             @foreach ($filas as $evaluacion)
                 <tr class="tc-row" wire:key="evaluacion-{{ $evaluacion->id }}" wire:click="verDetalle({{ $evaluacion->id }})">
                     <td>{{ $evaluacion->postulacion?->candidato?->nombre }}</td>
-                    <td>{{ App\Support\Formato::vacante($evaluacion->postulacion?->vacante) }}</td>
+                    <td>{{ $evaluacion->postulacion?->vacante?->titulo }}</td>
+                    @if ($vistaGlobal)
+                        <td>{{ $evaluacion->postulacion?->vacante?->empresa?->nombre }}</td>
+                    @endif
                     <td>{{ $evaluacion->evaluador?->name }}</td>
                     <td>{{ $evaluacion->puntaje ?? '—' }}/10</td>
                     <td><x-ui.estado :valor="$evaluacion->estado" /></td>

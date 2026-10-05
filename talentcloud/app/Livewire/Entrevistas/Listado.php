@@ -16,7 +16,8 @@ use App\Services\Entrevistas\CambiarEstadoEntrevista;
 use App\Services\Entrevistas\ProgramarEntrevista;
 use App\Services\Entrevistas\ReprogramarEntrevista;
 use App\Services\Vacantes\OperacionNoPermitida;
-use App\Support\Formato;
+use App\Support\OpcionesPorEmpresa;
+use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Contracts\View\View;
@@ -214,6 +215,8 @@ class Listado extends Component
 
         return view('livewire.entrevistas.listado', [
             'filas' => $this->listar($entrevistas->consultaListado()->orderBy('inicia_at')),
+            // Admin SaaS: columna "Empresa" (ve las entrevistas de todas).
+            'vistaGlobal' => app(TenantContext::class)->esGlobal(),
             'seleccionada' => $seleccionada,
             'postulaciones' => $this->mostrarFormulario ? $this->opcionesDePostulacion($entrevistas->postulacionesAgendables()) : [],
             'entrevistadores' => $this->mostrarFormulario ? $this->opcionesDeEntrevistador() : [],
@@ -228,10 +231,12 @@ class Listado extends Component
      */
     private function opcionesDePostulacion(Collection $postulaciones): array
     {
-        return $postulaciones
-            // En la vista global (admin SaaS) se indica la empresa de cada postulante.
-            ->mapWithKeys(fn (Postulacion $p) => [$p->id => $p->candidato?->nombre.' — '.Formato::vacante($p->vacante)])
-            ->all();
+        // En la vista global (admin SaaS), agrupados por empresa: un candidato puede estar en varias.
+        return OpcionesPorEmpresa::de(
+            $postulaciones,
+            fn (Postulacion $p) => $p->vacante,
+            fn (Postulacion $p) => $p->candidato?->nombre.' — '.$p->vacante?->titulo,
+        );
     }
 
     /**

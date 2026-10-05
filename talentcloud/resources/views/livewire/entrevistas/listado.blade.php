@@ -22,12 +22,15 @@
     @else
         <x-ui.table>
             <x-slot:head>
-                <th>Candidato</th><th>Vacante</th><th>Entrevistador</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
+                <th>Candidato</th><th>Vacante</th>@if ($vistaGlobal)<th>Empresa</th>@endif<th>Entrevistador</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
             </x-slot:head>
             @foreach ($filas as $entrevista)
                 <tr wire:key="entrevista-{{ $entrevista->id }}">
                     <td class="tc-row" wire:click="verDetalle({{ $entrevista->id }})">{{ $entrevista->postulacion?->candidato?->nombre }}</td>
-                    <td>{{ Formato::vacante($entrevista->postulacion?->vacante) }}</td>
+                    <td>{{ $entrevista->postulacion?->vacante?->titulo }}</td>
+                    @if ($vistaGlobal)
+                        <td>{{ $entrevista->postulacion?->vacante?->empresa?->nombre }}</td>
+                    @endif
                     <td>{{ $entrevista->entrevistador?->name }}</td>
                     <td class="text-neutral-600">{{ Formato::fechaHora($entrevista->inicia_at) }}</td>
                     <td><x-ui.estado :valor="$entrevista->estado" /></td>

@@ -11,8 +11,35 @@
 
     <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div class="grid gap-8">
-            {{-- Postulaciones --}}
+            {{-- Postulaciones (admin SaaS: procesos agrupados por empresa) --}}
             <section>
+                @if ($vistaGlobal)
+                    <h2 class="mb-1 text-16">Procesos por empresa</h2>
+                    @if ($candidato->postulaciones->isEmpty())
+                        <p class="text-14 text-neutral-600">Todavía no postuló a ninguna vacante.</p>
+                    @else
+                        @php
+                            $nProcesos = $candidato->postulaciones->count();
+                            $nEmpresas = $procesosPorEmpresa->count();
+                        @endphp
+                        <p class="mb-4 text-13 text-neutral-700">{{ $nProcesos }} {{ $nProcesos === 1 ? 'proceso' : 'procesos' }} en {{ $nEmpresas }} {{ $nEmpresas === 1 ? 'empresa' : 'empresas' }}. Cada empresa solo ve sus propios procesos.</p>
+                        <div class="grid gap-5">
+                            @foreach ($procesosPorEmpresa as $empresa => $procesos)
+                                <div wire:key="empresa-{{ \Illuminate\Support\Str::slug($empresa) }}">
+                                    <h3 class="mb-2 text-15">{{ $empresa }}</h3>
+                                    <x-ui.table>
+                                        <x-slot:head>
+                                            <th>Vacante</th><th>Etapa</th><th>Match</th><th>Fecha</th>
+                                        </x-slot:head>
+                                        @foreach ($procesos as $postulacion)
+                                            <x-candidatos.fila-postulacion :postulacion="$postulacion" wire:key="postulacion-{{ $postulacion->id }}" />
+                                        @endforeach
+                                    </x-ui.table>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                @else
                 <h2 class="mb-3 text-16">Postulaciones</h2>
                 @if ($candidato->postulaciones->isEmpty())
                     <p class="text-14 text-neutral-600">Todavía no postuló a vacantes de tu empresa.</p>
@@ -22,20 +49,10 @@
                             <th>Vacante</th><th>Etapa</th><th>Match</th><th>Fecha</th>
                         </x-slot:head>
                         @foreach ($candidato->postulaciones as $postulacion)
-                            <tr wire:key="postulacion-{{ $postulacion->id }}">
-                                <td><a href="{{ route('vacantes.show', $postulacion->vacante_id) }}" wire:navigate>{{ Formato::vacante($postulacion->vacante) }}</a></td>
-                                <td><x-ui.estado :valor="$postulacion->etapa" /></td>
-                                <td>
-                                    @if ($postulacion->matchPorcentaje() !== null)
-                                        <a href="{{ route('matching.show', $postulacion) }}" wire:navigate>{{ $postulacion->matchPorcentaje() }}%</a>
-                                    @else
-                                        —
-                                    @endif
-                                </td>
-                                <td class="text-neutral-600">{{ Formato::fechaCorta($postulacion->created_at) }}</td>
-                            </tr>
+                            <x-candidatos.fila-postulacion :postulacion="$postulacion" wire:key="postulacion-{{ $postulacion->id }}" />
                         @endforeach
                     </x-ui.table>
+                @endif
                 @endif
 
                 @if ($puedeEditar && $vacantesDisponibles)
@@ -52,7 +69,7 @@
             @if ($conNotas->isNotEmpty())
                 <section>
                     <h2 class="mb-1 text-16">Notas del equipo</h2>
-                    <p class="mb-3 text-13 text-neutral-700">Solo las ve tu equipo: nunca el candidato ni otras empresas.</p>
+                    <p class="mb-3 text-13 text-neutral-700">{{ $vistaGlobal ? 'Notas internas de cada empresa sobre su proceso: nunca las ve el candidato ni las demás empresas.' : 'Solo las ve tu equipo: nunca el candidato ni otras empresas.' }}</p>
                     <div class="grid gap-6">
                         @foreach ($conNotas as $postulacion)
                             <div>
@@ -67,6 +84,42 @@
             {{-- Competencias --}}
             <section>
                 <h2 class="mb-1 text-16">Competencias</h2>
+                @if ($vistaGlobal)
+                    {{-- Admin SaaS: las de la IA (comunes) y las que anotó cada empresa, que solo ve esa empresa. --}}
+                    <p class="mb-3 text-13 text-neutral-700">Las extraídas por la IA son comunes a todas las empresas; las anotadas a mano son de cada empresa y solo ella las ve.</p>
+                    @php
+                        $extraidas = $candidato->competencias->where('pivot.fuente', FuenteCompetencia::Extraccion->value);
+                    @endphp
+                    <div class="grid gap-3">
+                        <div>
+                            <p class="mb-1 text-12 uppercase tracking-[0.06em] text-accent-700">Extraídas del CV por la IA</p>
+                            @if ($extraidas->isEmpty())
+                                <p class="m-0 text-14 text-neutral-700">Ninguna todavía.</p>
+                            @else
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach ($extraidas as $competencia)
+                                        <x-ui.tag tone="accent" title="{{ $competencia->pivot->evidencia }}" wire:key="ia-{{ $competencia->id }}">{{ $competencia->nombre }} · IA</x-ui.tag>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                        @foreach ($manualesPorEmpresa as $grupo)
+                            <div wire:key="manuales-{{ $grupo['empresaId'] ?? 'plataforma' }}">
+                                <p class="mb-1 text-12 uppercase tracking-[0.06em] text-accent-700">Anotadas por {{ $grupo['empresa'] }}</p>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach ($grupo['competencias'] as $competencia)
+                                        <span class="tag tag-outline gap-1" wire:key="manual-{{ $grupo['empresaId'] ?? 'p' }}-{{ $competencia->id }}">
+                                            {{ $competencia->nombre }}
+                                            @if ($puedeEditar)
+                                                <button type="button" wire:click="quitarCompetencia({{ $competencia->id }}, {{ $grupo['empresaId'] ?? 'null' }})" class="leading-none" aria-label="Quitar {{ $competencia->nombre }} de {{ $grupo['empresa'] }}">×</button>
+                                            @endif
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
                 <p class="mb-3 text-13 text-neutral-600">Las competencias extraídas del CV por la IA se actualizan con cada análisis; las manuales las registra tu equipo.</p>
 
                 @if ($candidato->competencias->isEmpty())
@@ -92,12 +145,19 @@
                         @endforeach
                     </div>
                 @endif
+                @endif
 
-                @if ($puedeEditar)
+                @if ($puedeEditar && (! $vistaGlobal || $empresasDelCandidato))
                     <form wire:submit="agregarCompetencia" class="mt-3 flex flex-wrap items-start gap-2">
                         <x-ui.field error="nuevaCompetencia" class="min-w-[200px] flex-1">
                             <x-ui.input wire:model="nuevaCompetencia" list="catalogo-competencias" placeholder="Agregar competencia" aria-label="Agregar competencia" error="nuevaCompetencia" autocomplete="off" />
                         </x-ui.field>
+                        @if ($vistaGlobal)
+                            {{-- El admin anota para una empresa concreta: solo las que tienen un proceso del candidato. --}}
+                            <x-ui.field error="empresaCompetencia" class="min-w-[180px]">
+                                <x-ui.select wire:model="empresaCompetencia" :options="$empresasDelCandidato" placeholder="¿Para qué empresa?" aria-label="Empresa para la que se anota" error="empresaCompetencia" class="w-full" />
+                            </x-ui.field>
+                        @endif
                         <x-ui.button type="submit">Agregar</x-ui.button>
                     </form>
                     <datalist id="catalogo-competencias">

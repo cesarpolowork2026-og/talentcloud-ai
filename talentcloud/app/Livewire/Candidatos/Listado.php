@@ -15,6 +15,7 @@ use App\Services\Candidatos\RegistrarCandidato;
 use App\Services\Cvs\SubirCv;
 use App\Services\Postulaciones\PostularCandidato;
 use App\Services\Vacantes\OperacionNoPermitida;
+use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
@@ -74,12 +75,13 @@ class Listado extends Component
     /** @return array<string, string> */
     protected function opcionesOrden(): array
     {
-        return ['nombre' => 'Nombre', 'match' => 'Match %'];
+        // En la vista global (admin SaaS) un candidato puede tener varios procesos: se ordena por el mejor.
+        return ['nombre' => 'Nombre', 'match' => app(TenantContext::class)->esGlobal() ? 'Mejor match %' : 'Match %'];
     }
 
     protected function columnaDeOrden(string $clave): string
     {
-        return $clave === 'match' ? 'ultimo_match' : 'candidatos.nombre';
+        return $clave === 'match' ? 'match_de_orden' : 'candidatos.nombre';
     }
 
     protected function porPagina(): int
@@ -189,6 +191,8 @@ class Listado extends Component
         return view('livewire.candidatos.listado', [
             'filas' => $this->listar($candidatos->consultaListado()),
             'seleccionado' => $seleccionado,
+            // Admin SaaS: cada candidato con sus procesos agrupados por empresa.
+            'vistaGlobal' => app(TenantContext::class)->esGlobal(),
             'vacantesAbiertas' => Vacante::where('estado', EstadoVacante::Abierta)->orderBy('titulo')->pluck('titulo', 'id')->all(),
             'puedeRegistrar' => auth()->user()?->can('create', Candidato::class) ?? false,
         ]);

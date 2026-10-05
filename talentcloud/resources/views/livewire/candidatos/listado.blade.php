@@ -26,21 +26,18 @@
                     $postulacion = $candidato->ultimaPostulacion;
                     $cv = $candidato->cvActual;
                     $conError = $cv?->estado_procesamiento === EstadoProcesamientoCv::Error;
-                    // Vista global (admin SaaS): otras empresas en cuyos procesos también está.
-                    $otrasEmpresas = $candidato->relationLoaded('postulaciones')
-                        ? $candidato->postulaciones->map(fn ($p) => $p->vacante?->empresa?->nombre)->filter()->unique()
-                            ->reject(fn ($nombre) => $nombre === $postulacion?->vacante?->empresa?->nombre)->values()
-                        : collect();
                 @endphp
                 <x-ui.card class="cursor-pointer" wire:key="candidato-{{ $candidato->id }}" wire:click="verDetalle({{ $candidato->id }})">
                     <div class="card-kicker">{{ $candidato->titular ?? 'Candidato' }}</div>
                     <div class="card-title">{{ $candidato->nombre }}</div>
-                    <p class="card-body">
-                        {{ $postulacion?->vacante ? 'Postuló a '.App\Support\Formato::vacante($postulacion->vacante) : 'Sin postulaciones' }}
-                        @if ($otrasEmpresas->isNotEmpty())
-                            <span class="block text-13 text-neutral-700">También en: {{ $otrasEmpresas->join(', ') }}</span>
-                        @endif
-                    </p>
+                    @if ($vistaGlobal && $candidato->postulaciones->isNotEmpty())
+                        {{-- Admin SaaS: todos sus procesos, agrupados por empresa (puede estar en varias). --}}
+                        <x-candidatos.procesos :postulaciones="$candidato->postulaciones" />
+                    @else
+                        <p class="card-body">
+                            {{ $postulacion?->vacante ? 'Postuló a '.$postulacion->vacante->titulo : 'Sin postulaciones' }}
+                        </p>
+                    @endif
 
                     @if ($conError)
                         <div class="card-meta text-accent-2-700">
@@ -50,7 +47,8 @@
                         <x-ui.button variant="ghost" size="sm" class="mt-2 self-start" wire:click.stop="reintentar({{ $cv->id }})">Reintentar análisis</x-ui.button>
                     @else
                         <div class="card-meta flex-wrap">
-                            @if ($postulacion?->matchPorcentaje() !== null)
+                            {{-- En la vista global cada proceso ya muestra su match: un único porcentaje confundiría. --}}
+                            @if (! $vistaGlobal && $postulacion?->matchPorcentaje() !== null)
                                 <x-ui.tag tone="accent">{{ $postulacion->matchPorcentaje() }}% match</x-ui.tag>
                             @elseif (in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true))
                                 <span>Analizando CV…</span>
@@ -77,14 +75,18 @@
                 $texto = $seleccionado->cvActual?->texto_extraido;
             @endphp
             <p class="m-0 whitespace-pre-line">{{ $seleccionado->titular ?? 'Candidato' }}
-{{ $p?->vacante ? 'Postuló a '.App\Support\Formato::vacante($p->vacante) : 'Sin postulaciones' }}
+@unless ($vistaGlobal){{ $p?->vacante ? 'Postuló a '.$p->vacante->titulo : 'Sin postulaciones' }}
 @if ($p?->matchPorcentaje() !== null)Coincidencia: {{ $p->matchPorcentaje() }}%
 @endif
+@endunless
 {{ $extraidas->isNotEmpty() ? 'Competencias extraídas por IA' : 'Competencias' }}: {{ $lista !== '' ? $lista : 'sin registrar' }}
 @if ($texto)
 
 Extracto del CV: "{{ \Illuminate\Support\Str::limit(\Illuminate\Support\Str::squish($texto), 180) }}"
 @endif</p>
+            @if ($vistaGlobal && $seleccionado->postulaciones->isNotEmpty())
+                <x-candidatos.procesos :postulaciones="$seleccionado->postulaciones" class="mt-3 border-t border-divider pt-3" />
+            @endif
         @endif
         <x-slot:actions>
             <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
