@@ -37,7 +37,7 @@ class EloquentEntrevistaRepository implements EntrevistaRepository
     public function postulacionesAgendables(): Collection
     {
         return Postulacion::query()
-            ->with(['candidato', 'vacante'])
+            ->with(['candidato', 'vacante.empresa:id,nombre'])
             ->where('etapa', '!=', EtapaPostulacion::Descartado)
             ->whereHas('vacante', fn (Builder $q) => $q->whereIn('estado', [EstadoVacante::Abierta, EstadoVacante::EnRevision]))
             ->get()

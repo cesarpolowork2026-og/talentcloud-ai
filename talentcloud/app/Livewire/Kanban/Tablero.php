@@ -4,6 +4,7 @@ namespace App\Livewire\Kanban;
 
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Enums\Rol;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
@@ -156,10 +157,13 @@ class Tablero extends Component
             'editable' => $vacante->estado !== EstadoVacante::Cerrada && $this->usuario()->can('update', $vacante),
             'seleccionada' => $seleccionada,
             'etapas' => EtapaPostulacion::opciones(),
+            // El admin SaaS ve las vacantes de todas las empresas: cada una lleva el nombre de la suya.
             'otrasVacantes' => Vacante::query()
+                ->with('empresa:id,nombre')
                 ->whereIn('estado', [EstadoVacante::Abierta, EstadoVacante::EnRevision])
                 ->orderBy('titulo')
-                ->pluck('titulo', 'id')
+                ->get(['id', 'titulo', 'empresa_id'])
+                ->mapWithKeys(fn (Vacante $v) => [$v->id => $this->usuario()->tieneRol(Rol::Admin) ? $v->titulo.' · '.$v->empresa?->nombre : $v->titulo])
                 ->all(),
         ])->title('Kanban · '.$vacante->titulo);
     }

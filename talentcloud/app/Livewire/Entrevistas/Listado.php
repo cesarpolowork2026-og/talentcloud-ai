@@ -228,7 +228,8 @@ class Listado extends Component
     private function opcionesDePostulacion(Collection $postulaciones): array
     {
         return $postulaciones
-            ->mapWithKeys(fn (Postulacion $p) => [$p->id => $p->candidato?->nombre.' — '.$p->vacante?->titulo])
+            // El admin SaaS elige entre postulantes de todas las empresas: se indica la de cada uno.
+            ->mapWithKeys(fn (Postulacion $p) => [$p->id => $p->candidato?->nombre.' — '.$p->vacante?->titulo.($this->esAdmin() ? ' · '.$p->vacante?->empresa?->nombre : '')])
             ->all();
     }
 
