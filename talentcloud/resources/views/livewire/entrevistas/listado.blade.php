@@ -146,6 +146,10 @@ Notas: {{ $seleccionada->notas }}@endif</p>
             <x-ui.field label="Notas para el entrevistador (opcional)" for="entrevista-notas" error="notas">
                 <x-ui.textarea wire:model="notas" id="entrevista-notas" rows="2" error="notas" />
             </x-ui.field>
+            @if ($puedeMoverAEntrevista)
+                {{-- Para que el Kanban refleje la entrevista; el reclutador puede desmarcarlo. --}}
+                <x-ui.checkbox wire:model="moverAEntrevista" id="entrevista-mover">Mover al candidato a la etapa «Entrevista» del Kanban</x-ui.checkbox>
+            @endif
         </form>
         <x-slot:actions>
             <x-ui.button x-on:click="open = false">Cancelar</x-ui.button>

@@ -11,8 +11,10 @@ use App\Enums\EtapaPostulacion;
 use App\Enums\FuenteCompetencia;
 use App\Enums\Modalidad;
 use App\Enums\ModalidadEntrevista;
+use App\Enums\OrigenPostulacion;
 use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
+use App\Enums\TipoActividad;
 use App\Enums\TipoRequisito;
 use App\Jobs\CalcularMatch;
 use App\Jobs\ExtraerTextoCv;
@@ -28,25 +30,32 @@ use App\Models\Postulacion;
 use App\Models\Requisito;
 use App\Models\User;
 use App\Models\Vacante;
-use App\Notifications\AvisoGeneral;
+use App\Notifications\AvisoCvAnalizado;
+use App\Notifications\AvisoNuevaPostulacion;
 use App\Services\Cvs\SubirCv;
+use App\Support\Formato;
 use App\Tenancy\TenantContext;
 use Database\Seeders\Demo\CvsDeDemostracion;
 use Database\Seeders\Demo\DocumentosDePrueba;
 use Illuminate\Database\Seeder;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
- * Datos de demostración tomados del prototipo (TalentCloud App.dc.html), para
- * comparar cada pantalla con el diseño. Todas las cuentas usan la contraseña
- * "password".
+ * Datos de demostración con las personas y vacantes del prototipo
+ * (TalentCloud App.dc.html). Todas las cuentas usan la contraseña "password".
  *
- * Ajuste respecto al prototipo: su vista mezcla empresas. Aquí el equipo de
- * Nimbus Corp (Marta Solís, Diego Ferro) solo trabaja con vacantes de Nimbus,
- * así que las entrevistas y evaluaciones de Iván Torres y Pablo Vega son de
- * "Desarrollador Backend" (donde también están en el Kanban del prototipo).
+ * Coherentes con un proceso real (a diferencia de los datos ilustrativos del
+ * prototipo): nadie está en una etapa anterior a lo que ya le pasó (quien tuvo
+ * entrevista está en "Entrevista" o más allá; no hay oferta sin entrevista ni
+ * evaluación sin entrevista realizada), nadie postula a un borrador ni antes
+ * de que exista la vacante, y cada empresa solo recibe avisos de lo suyo.
+ *
+ * Las fechas son relativas al día en que se siembra: lo pasado está
+ * completado y lo futuro, pendiente o confirmado, sea cual sea el día de la
+ * demostración.
  *
  * Los CV son archivos reales generados al sembrar y el matching se calcula
  * con el motor configurado (MATCHING_ENGINE): los porcentajes salen de la
@@ -79,7 +88,7 @@ class DemoSeeder extends Seeder
         $marta = $this->usuario('Marta Solís', 'marta@nimbus.com', Rol::Reclutador, $nimbus);
         $diego = $this->usuario('Diego Ferro', 'diego@nimbus.com', Rol::Reclutador, $nimbus);
         $this->usuario('Vela Studio — Admin', 'admin@vela.studio', Rol::Empresa, $vela);
-        $this->usuario('Clara Vidal', 'clara@vela.studio', Rol::Reclutador, $vela);
+        $clara = $this->usuario('Clara Vidal', 'clara@vela.studio', Rol::Reclutador, $vela);
         $this->usuario('Orbita Labs — Admin', 'admin@orbita.dev', Rol::Empresa, $orbita);
         $marcoUsuario = $this->usuario('Marco Díaz', 'marco@correo.com', Rol::Postulante);
 
@@ -89,8 +98,10 @@ class DemoSeeder extends Seeder
         $invitacion->empresa_id = $nimbus->id;
         $invitacion->save();
 
-        // — Vacantes (pantalla "Vacantes") —
-        $backend = $this->vacante($nimbus, 'Desarrollador Backend', 'Remoto', Modalidad::Remoto, EstadoVacante::Abierta, '2026-09-02', $marta,
+        $hoy = Carbon::today();
+
+        // — Vacantes (pantalla "Vacantes"), creadas hace N días —
+        $backend = $this->vacante($nimbus, 'Desarrollador Backend', 'Remoto', Modalidad::Remoto, EstadoVacante::Abierta, 32, $marta,
             'Buscamos una persona para diseñar y mantener APIs REST de alto tráfico con Java y Spring Boot.', [
                 ['Java', TipoRequisito::Obligatorio, 5, 3],
                 ['Spring Boot', TipoRequisito::Obligatorio, 4, 2],
@@ -99,25 +110,27 @@ class DemoSeeder extends Seeder
                 ['Kubernetes', TipoRequisito::Deseable, 2, null],
                 ['Certificación AWS', TipoRequisito::Deseable, 2, null],
             ]);
-        $designer = $this->vacante($vela, 'Product Designer', 'Madrid', Modalidad::Presencial, EstadoVacante::Abierta, '2026-09-05', null,
+        $designer = $this->vacante($vela, 'Product Designer', 'Madrid', Modalidad::Presencial, EstadoVacante::Abierta, 29, $clara,
             'Diseño de producto de punta a punta: investigación, prototipado y sistema de diseño.', [
                 ['Figma', TipoRequisito::Obligatorio, 5, 2],
                 ['Research', TipoRequisito::Obligatorio, 4, null],
                 ['Prototipado', TipoRequisito::Deseable, 3, null],
             ]);
-        $dataAnalyst = $this->vacante($nimbus, 'Data Analyst', 'Remoto', Modalidad::Remoto, EstadoVacante::EnRevision, '2026-09-10', $diego,
+        $dataAnalyst = $this->vacante($nimbus, 'Data Analyst', 'Remoto', Modalidad::Remoto, EstadoVacante::EnRevision, 24, $diego,
             'Análisis de datos de negocio y construcción de tableros para las áreas comerciales.', [
                 ['SQL', TipoRequisito::Obligatorio, 5, 2],
                 ['Python', TipoRequisito::Obligatorio, 4, null],
                 ['Power BI', TipoRequisito::Deseable, 3, null],
             ]);
-        $qa = $this->vacante($orbita, 'QA Engineer', 'Bogotá', Modalidad::Hibrido, EstadoVacante::Borrador, '2026-09-14', null,
+        // Borrador de una empresa suspendida: sin publicar, nadie puede postular.
+        $this->vacante($orbita, 'QA Engineer', 'Bogotá', Modalidad::Hibrido, EstadoVacante::Borrador, 20, null,
             'Automatización de pruebas web y de APIs.', [
                 ['Selenium', TipoRequisito::Obligatorio, 4, null],
                 ['Cypress', TipoRequisito::Deseable, 3, null],
                 ['Testing de APIs', TipoRequisito::Obligatorio, 4, null],
             ]);
-        $devops = $this->vacante($vela, 'DevOps Engineer', 'Remoto', Modalidad::Remoto, EstadoVacante::Cerrada, '2026-09-01', null,
+        // Cerrada 15 días después de publicarse (hace 25 días).
+        $devops = $this->vacante($vela, 'DevOps Engineer', 'Remoto', Modalidad::Remoto, EstadoVacante::Cerrada, 40, null,
             'Infraestructura como código y despliegues continuos en la nube.', [
                 ['Docker', TipoRequisito::Obligatorio, 4, null],
                 ['Kubernetes', TipoRequisito::Obligatorio, 4, null],
@@ -131,33 +144,33 @@ class DemoSeeder extends Seeder
         $marco = $this->candidato('Marco Díaz', 'marco@correo.com', 'Desarrollador Backend', null, ['Java', 'MySQL'], $marcoUsuario, anotadasPor: $nimbus);
         $ivan = $this->candidato('Iván Torres', 'ivan.torres@correo.com', 'Diseñador de Producto', $vela, ['Figma', 'Research']);
         $lucia = $this->candidato('Lucía Prat', 'lucia.prat@correo.com', 'Analista de Datos', $nimbus, ['SQL', 'Python']);
-        $pablo = $this->candidato('Pablo Vega', 'pablo.vega@correo.com', 'QA Engineer', $orbita, ['Selenium']);
+        $pablo = $this->candidato('Pablo Vega', 'pablo.vega@correo.com', 'QA Engineer', $nimbus, ['Selenium']);
 
-        // — Postulaciones: Kanban "Desarrollador Backend" del prototipo —
-        $pElena = $this->postulacion($backend, $elena, EtapaPostulacion::Postulado, 0);
-        $pMarco = $this->postulacion($backend, $marco, EtapaPostulacion::Postulado, 1, '2026-09-02');
-        $pSofia = $this->postulacion($backend, $sofia, EtapaPostulacion::EnRevision, 0);
-        $pIvan = $this->postulacion($backend, $ivan, EtapaPostulacion::Entrevista, 0);
-        $this->postulacion($backend, $lucia, EtapaPostulacion::Oferta, 0);
-        $pPablo = $this->postulacion($backend, $pablo, EtapaPostulacion::Descartado, 0);
+        // — Postulaciones (hace N días) y etapa actual (desde hace M días) —
+        // Desarrollador Backend: Marco recién llegado; Elena entre la 1.ª y la 2.ª entrevista;
+        // Sofía con oferta; Pablo descartado en la revisión del CV (no se pudo leer).
+        $pMarco = $this->postulacion($backend, $marco, EtapaPostulacion::Postulado, 0, 12, 12, OrigenPostulacion::Postulante);
+        $pElena = $this->postulacion($backend, $elena, EtapaPostulacion::Entrevista, 0, 31, 9);
+        $pSofia = $this->postulacion($backend, $sofia, EtapaPostulacion::Oferta, 0, 30, 3);
+        $this->postulacion($backend, $pablo, EtapaPostulacion::Descartado, 0, 29, 27);
 
-        // Postulaciones a la vacante de su perfil (lista de Candidatos y "Mis postulaciones").
-        $this->postulacion($designer, $ivan, EtapaPostulacion::EnRevision, 0);
-        $pLuciaData = $this->postulacion($dataAnalyst, $lucia, EtapaPostulacion::Oferta, 0);
-        $this->postulacion($qa, $pablo, EtapaPostulacion::Postulado, 0);
-        $this->postulacion($devops, $marco, EtapaPostulacion::Descartado, 0, '2026-08-20');
+        $pIvan = $this->postulacion($designer, $ivan, EtapaPostulacion::Entrevista, 0, 27, 2);
+        $pLucia = $this->postulacion($dataAnalyst, $lucia, EtapaPostulacion::Oferta, 0, 23, 4);
+        // Postuló dos días después de publicarse y quedó fuera antes del cierre.
+        $this->postulacion($devops, $marco, EtapaPostulacion::Descartado, 0, 38, 30, OrigenPostulacion::Postulante);
 
-        // — Entrevistas (pantalla "Entrevistas") —
-        $this->entrevista($pElena, $marta, '2026-09-23 10:00', EstadoEntrevista::Confirmada);
-        $this->entrevista($pSofia, $marta, '2026-09-23 15:00', EstadoEntrevista::Confirmada);
-        $this->entrevista($pIvan, $diego, '2026-09-24 09:30', EstadoEntrevista::Pendiente);
-        $this->entrevista($pLuciaData, $marta, '2026-09-25 11:00', EstadoEntrevista::Cancelada);
+        // — Entrevistas (pantalla "Entrevistas"): las pasadas, realizadas; las próximas, por confirmar o confirmadas —
+        $this->entrevista($pElena, $marta, $hoy->copy()->subDays(6)->setTime(10, 0), EstadoEntrevista::Completada);
+        $entrevistaElena = $this->entrevista($pElena, $diego, $hoy->copy()->addDays(2)->setTime(15, 0), EstadoEntrevista::Pendiente);
+        $this->entrevista($pSofia, $marta, $hoy->copy()->subDays(10)->setTime(11, 0), EstadoEntrevista::Completada);
+        $this->entrevista($pLucia, $marta, $hoy->copy()->subDays(15)->setTime(11, 0), EstadoEntrevista::Cancelada);
+        $this->entrevista($pLucia, $diego, $hoy->copy()->subDays(13)->setTime(9, 30), EstadoEntrevista::Completada);
+        $this->entrevista($pIvan, $clara, $hoy->copy()->addDays(3)->setTime(10, 0), EstadoEntrevista::Confirmada);
 
-        // — Evaluaciones (pantalla "Evaluaciones") —
+        // — Evaluaciones (pantalla "Evaluaciones"): solo tras una entrevista realizada —
         $this->evaluacion($pElena, $marta, [9, 8, 9, 8.4], EstadoEvaluacion::Aprobado);
-        $this->evaluacion($pMarco, $marta, [5, 6, 5, 5.6], EstadoEvaluacion::EnRevision);
-        $this->evaluacion($pIvan, $diego, [8, 8, 7.6, 8], EstadoEvaluacion::Aprobado);
-        $this->evaluacion($pPablo, $diego, [3, 3.4, 3, 3], EstadoEvaluacion::Pendiente);
+        $this->evaluacion($pSofia, $marta, [9, 8.5, 9, 9], EstadoEvaluacion::Aprobado);
+        $this->evaluacion($pLucia, $diego, [8, 8, 7.6, 8], EstadoEvaluacion::Aprobado);
 
         // — CVs (archivos reales en el disco privado, procesados al sembrar) —
         $this->sembrarCvs([$elena, $sofia, $marco, $ivan, $lucia, $pablo], $marta);
@@ -166,18 +179,20 @@ class DemoSeeder extends Seeder
         Postulacion::sinFiltroDeEmpresa()->get(['id', 'empresa_id'])
             ->each(fn (Postulacion $p) => CalcularMatch::dispatchSync($p->empresa_id, $p->id));
 
-        // — Actividad reciente y notificaciones —
-        // Minutos atrás: el dashboard muestra lo más reciente primero, en el orden del prototipo.
-        $this->actividad($nimbus, null, 'cv.analizado', 'La IA analizó 6 CVs nuevos para Desarrollador Backend.', 10);
-        $this->actividad($nimbus, $marta, 'postulacion.etapa', 'Sofía Nieto avanzó a la etapa de entrevista.', 20);
-        $this->actividad($orbita, null, 'vacante.creada', 'Orbita Labs publicó una nueva vacante en borrador.', 30);
-        $this->actividad($nimbus, $marta, 'evaluacion.aprobada', 'Marta Solís aprobó la evaluación de Elena Ruiz.', 40);
+        // — Actividad reciente y notificaciones: los mismos textos que genera la aplicación —
+        // Minutos atrás: el dashboard muestra lo más reciente primero.
+        $this->actividad($nimbus, $marta, TipoActividad::EtapaCambiada, 'Sofía Nieto avanzó a la etapa de oferta.', 10);
+        $this->actividad($nimbus, $diego, TipoActividad::EntrevistaProgramada, 'Diego Ferro programó una entrevista con Elena Ruiz para el '.Formato::fechaHora($entrevistaElena->inicia_at).'.', 20);
+        $this->actividad($nimbus, $marta, TipoActividad::EvaluacionAprobada, 'Marta Solís aprobó la evaluación de Elena Ruiz.', 30);
+        $this->actividad($nimbus, null, TipoActividad::CandidatoSePostulo, 'Marco Díaz postuló a Desarrollador Backend.', 40, $pMarco);
+        $this->actividad($orbita, null, TipoActividad::VacanteCreada, 'Orbita Labs creó la vacante QA Engineer.', 50);
 
-        // Notificaciones de la campana, de la más reciente a la más antigua (orden del prototipo).
+        // Campana de Marta: solo lo que la aplicación le avisaría a ella. Marco postuló por su
+        // cuenta a una vacante que ella creó; los CV de Elena y Sofía los subió ella.
         if ($marta->notifications()->doesntExist()) {
-            $this->aviso($marta, 'Nuevo CV analizado para Desarrollador Backend (Elena Ruiz).', 5);
-            $this->aviso($marta, 'Entrevista de Iván Torres pendiente de confirmar.', 15);
-            $this->aviso($marta, 'Orbita Labs actualizó su plan a Starter.', 25);
+            $this->aviso($marta, AvisoNuevaPostulacion::de('Marco Díaz', 'Desarrollador Backend', route('matching.show', $pMarco), $marco->id), 5);
+            $this->aviso($marta, AvisoCvAnalizado::paraReclutador('Elena Ruiz', $this->extraidas($elena), route('candidatos.show', $elena), $elena->id), 15);
+            $this->aviso($marta, AvisoCvAnalizado::paraReclutador('Sofía Nieto', $this->extraidas($sofia), route('candidatos.show', $sofia), $sofia->id), 25);
         }
     }
 
@@ -210,9 +225,9 @@ class DemoSeeder extends Seeder
     /**
      * @param  list<array{0: string, 1: TipoRequisito, 2: int, 3: int|null}>  $requisitos
      */
-    private function vacante(Empresa $empresa, string $titulo, string $ubicacion, Modalidad $modalidad, EstadoVacante $estado, string $creada, ?User $creador, string $descripcion, array $requisitos): Vacante
+    private function vacante(Empresa $empresa, string $titulo, string $ubicacion, Modalidad $modalidad, EstadoVacante $estado, int $haceDias, ?User $creador, string $descripcion, array $requisitos): Vacante
     {
-        $fecha = Carbon::parse($creada.' 09:00');
+        $fecha = Carbon::today()->subDays($haceDias)->setTime(9, 0);
 
         $vacante = Vacante::firstOrNew(['empresa_id' => $empresa->id, 'titulo' => $titulo]);
         $vacante->fill([
@@ -262,26 +277,30 @@ class DemoSeeder extends Seeder
         return $candidato;
     }
 
-    private function postulacion(Vacante $vacante, Candidato $candidato, EtapaPostulacion $etapa, int $orden, ?string $fecha = null): Postulacion
+    /**
+     * Postulación de hace $haceDias, en su etapa actual desde hace $etapaHaceDias.
+     */
+    private function postulacion(Vacante $vacante, Candidato $candidato, EtapaPostulacion $etapa, int $orden, int $haceDias, int $etapaHaceDias, OrigenPostulacion $origen = OrigenPostulacion::Equipo): Postulacion
     {
         $postulacion = Postulacion::firstOrNew(['vacante_id' => $vacante->id, 'candidato_id' => $candidato->id]);
         $postulacion->fill([
             'etapa' => $etapa,
             'orden' => $orden,
-            'etapa_cambiada_at' => now(),
+            'etapa_cambiada_at' => Carbon::today()->subDays($etapaHaceDias)->setTime(12, 0),
+            'origen' => $origen,
         ]);
         $postulacion->empresa_id = $vacante->empresa_id;
-        $postulacion->created_at = $fecha ? Carbon::parse($fecha.' 12:00') : $vacante->created_at->copy()->addDay();
+        $postulacion->created_at = Carbon::today()->subDays($haceDias)->setTime(12, 0);
         $postulacion->save();
 
         return $postulacion;
     }
 
-    private function entrevista(Postulacion $postulacion, User $entrevistador, string $inicio, EstadoEntrevista $estado): void
+    private function entrevista(Postulacion $postulacion, User $entrevistador, Carbon $inicio, EstadoEntrevista $estado): Entrevista
     {
         $entrevista = Entrevista::firstOrNew(['postulacion_id' => $postulacion->id, 'entrevistador_id' => $entrevistador->id]);
         $entrevista->fill([
-            'inicia_at' => Carbon::parse($inicio),
+            'inicia_at' => $inicio,
             'duracion_min' => 45,
             'modalidad' => ModalidadEntrevista::Videollamada,
             'enlace' => 'https://meet.google.com/demo-'.$postulacion->id,
@@ -289,6 +308,8 @@ class DemoSeeder extends Seeder
         ]);
         $entrevista->empresa_id = $postulacion->empresa_id;
         $entrevista->save();
+
+        return $entrevista;
     }
 
     /**
@@ -312,21 +333,28 @@ class DemoSeeder extends Seeder
         $evaluacion->save();
     }
 
-    /** Una notificación de la campana con su propia hora (creadas en el mismo segundo, su orden sería arbitrario). */
-    private function aviso(User $usuario, string $texto, int $minutosAtras): void
+    /**
+     * Una notificación de la campana con su propia hora (creadas en el mismo
+     * segundo, su orden sería arbitrario). Se guarda con los datos del propio
+     * aviso: el mismo texto que la aplicación enviaría.
+     */
+    private function aviso(User $usuario, Notification $aviso, int $minutosAtras): void
     {
         $usuario->notifications()->create([
             'id' => (string) Str::uuid(),
-            'type' => AvisoGeneral::class,
-            'data' => ['texto' => $texto],
+            'type' => $aviso::class,
+            'data' => method_exists($aviso, 'toArray') ? $aviso->toArray($usuario) : [],
             'created_at' => now()->subMinutes($minutosAtras),
         ]);
     }
 
-    private function actividad(Empresa $empresa, ?User $actor, string $tipo, string $descripcion, int $minutosAtras): void
+    private function actividad(Empresa $empresa, ?User $actor, TipoActividad $tipo, string $descripcion, int $minutosAtras, ?Postulacion $sujeto = null): void
     {
         $actividad = Actividad::firstOrNew(['empresa_id' => $empresa->id, 'descripcion' => $descripcion]);
-        $actividad->fill(['actor_id' => $actor?->id, 'tipo' => $tipo]);
+        $actividad->fill(['actor_id' => $actor?->id, 'tipo' => $tipo->value]);
+        if ($sujeto !== null) {
+            $actividad->sujeto()->associate($sujeto);
+        }
         $actividad->empresa_id = $empresa->id;
         $actividad->created_at = now()->subMinutes($minutosAtras);
         $actividad->save();
@@ -366,6 +394,12 @@ class DemoSeeder extends Seeder
 
             Postulacion::sinFiltroDeEmpresa()->where('candidato_id', $candidato->id)->update(['cv_id' => $cv->id]);
         }
+    }
+
+    /** Competencias que la IA extrajo de su CV (para que el aviso diga el número real). */
+    private function extraidas(Candidato $candidato): int
+    {
+        return $candidato->todasLasCompetencias()->wherePivot('fuente', FuenteCompetencia::Extraccion->value)->count();
     }
 
     private function competencia(string $nombre): Competencia

@@ -16,6 +16,8 @@ final readonly class NuevaEntrevistaData
         public ModalidadEntrevista $modalidad,
         public ?string $enlace,
         public ?string $notas,
+        /** Mover la postulación a "Entrevista" si aún está en Postulado o En revisión. */
+        public bool $moverAEntrevista = false,
     ) {}
 
     public function terminaAt(): CarbonImmutable

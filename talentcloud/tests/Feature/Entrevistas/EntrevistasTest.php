@@ -104,7 +104,7 @@ it('muestra el detalle con los textos del prototipo', function () {
 
 // — Programar —
 
-it('programa una entrevista sin mover la postulación en el Kanban', function () {
+it('programa una entrevista y, por defecto, mueve al candidato a la etapa Entrevista', function () {
     Event::fake([EntrevistaProgramada::class]);
 
     programarEntrevista()->assertHasNoErrors()->assertSet('mostrarFormulario', false);
@@ -114,8 +114,32 @@ it('programa una entrevista sin mover la postulación en el Kanban', function ()
         ->and($entrevista->inicia_at->format('Y-m-d H:i'))->toBe('2026-09-25 15:00')
         ->and($entrevista->estado)->toBe(EstadoEntrevista::Pendiente)
         ->and($entrevista->enlace)->toBe('https://meet.example.com/abc')
-        ->and($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::Postulado);
+        // El Kanban refleja la entrevista, con su historial, como cualquier movimiento.
+        ->and($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::Entrevista)
+        ->and($this->sofia->etapas()->get()->last()->etapa)->toBe(EtapaPostulacion::Entrevista);
     Event::assertDispatched(EntrevistaProgramada::class, fn (EntrevistaProgramada $e) => $e->entrevista->is($entrevista));
+});
+
+it('no mueve al candidato si el reclutador desmarca la casilla', function () {
+    programarEntrevista(['moverAEntrevista' => false])->assertHasNoErrors();
+
+    expect($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::Postulado);
+});
+
+it('ofrece mover a Entrevista solo si el candidato aún no llegó a esa etapa', function () {
+    Livewire::test(Listado::class)->call('abrirFormulario')
+        ->set('postulacionId', (string) $this->sofia->id)
+        ->assertSee('Mover al candidato a la etapa «Entrevista» del Kanban');
+
+    $this->sofia->update(['etapa' => EtapaPostulacion::Oferta]);
+
+    Livewire::test(Listado::class)->call('abrirFormulario')
+        ->set('postulacionId', (string) $this->sofia->id)
+        ->assertDontSee('Mover al candidato a la etapa');
+
+    // Aunque llegara marcada, el servicio nunca hace retroceder a quien ya pasó de la entrevista.
+    programarEntrevista()->assertHasNoErrors();
+    expect($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::Oferta);
 });
 
 it('no guarda enlace si la entrevista no es por videollamada', function () {

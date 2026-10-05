@@ -3,27 +3,32 @@
 namespace App\Services\Entrevistas;
 
 use App\DTO\NuevaEntrevistaData;
+use App\Enums\EtapaPostulacion;
 use App\Enums\ModalidadEntrevista;
 use App\Events\EntrevistaProgramada;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Repositories\Contracts\EntrevistaRepository;
+use App\Services\Postulaciones\MoverPostulacion;
 use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Programa una entrevista. No mueve la postulación en el Kanban: eso lo decide
- * el reclutador.
+ * Programa una entrevista. La postulación solo se mueve en el Kanban si el
+ * reclutador lo pide ($moverAEntrevista, marcado por defecto en el formulario)
+ * y aún estaba antes de la entrevista: así el Kanban refleja lo que pasa en la
+ * realidad sin que el sistema decida por la persona.
  */
 class ProgramarEntrevista
 {
     public function __construct(
         private readonly EntrevistaRepository $entrevistas,
         private readonly ReglasDeAgenda $reglas,
+        private readonly MoverPostulacion $mover,
     ) {}
 
-    public function ejecutar(NuevaEntrevistaData $datos): Entrevista
+    public function ejecutar(NuevaEntrevistaData $datos, ?User $actor = null): Entrevista
     {
         $postulacion = $this->postulacion($datos->postulacionId);
 
@@ -52,6 +57,15 @@ class ProgramarEntrevista
         });
 
         EntrevistaProgramada::dispatch($entrevista);
+
+        if ($datos->moverAEntrevista && $postulacion->etapa->antesDeEntrevista()) {
+            $alFinal = Postulacion::query()
+                ->where('vacante_id', $postulacion->vacante_id)
+                ->where('etapa', EtapaPostulacion::Entrevista)
+                ->count();
+
+            $this->mover->ejecutar($postulacion, EtapaPostulacion::Entrevista, $alFinal, $actor);
+        }
 
         return $entrevista;
     }

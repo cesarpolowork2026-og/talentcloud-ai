@@ -26,6 +26,15 @@ enum EtapaPostulacion: string
         };
     }
 
+    /**
+     * Todavía no llegó a la entrevista: al programarle una, lo coherente es
+     * moverla a "Entrevista" (lo decide el reclutador al programar).
+     */
+    public function antesDeEntrevista(): bool
+    {
+        return in_array($this, [self::Postulado, self::EnRevision], true);
+    }
+
     /** Tono de <x-ui.tag>, según tagFor() del prototipo. */
     public function tono(): string
     {

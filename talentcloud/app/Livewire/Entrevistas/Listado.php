@@ -60,6 +60,9 @@ class Listado extends Component
 
     public string $notas = '';
 
+    /** "Mover a la etapa Entrevista": marcado por defecto (el Kanban debe reflejar la entrevista). */
+    public bool $moverAEntrevista = true;
+
     // "Reprogramar" (sobre la entrevista seleccionada).
     public bool $mostrarReprogramacion = false;
 
@@ -123,7 +126,7 @@ class Listado extends Component
         $this->authorize('create', Entrevista::class);
 
         $this->resetValidation();
-        $this->reset('postulacionId', 'entrevistadorId', 'iniciaAt', 'duracionMin', 'modalidad', 'enlace', 'notas');
+        $this->reset('postulacionId', 'entrevistadorId', 'iniciaAt', 'duracionMin', 'modalidad', 'enlace', 'notas', 'moverAEntrevista');
         $this->postulacionId = $postulacionId ? (string) $postulacionId : '';
         // Por defecto, quien programa es el entrevistador (si es de la empresa).
         $this->entrevistadorId = $this->usuario()->empresa_id !== null ? (string) $this->usuario()->id : '';
@@ -167,7 +170,8 @@ class Listado extends Component
                 modalidad: ModalidadEntrevista::from($datos['modalidad']),
                 enlace: $datos['enlace'] ?: null,
                 notas: $datos['notas'] ?: null,
-            ));
+                moverAEntrevista: $this->moverAEntrevista,
+            ), $this->usuario());
         } catch (OperacionNoPermitida $e) {
             $this->addError($e->campo ?? 'postulacionId', $e->getMessage());
 
@@ -219,6 +223,9 @@ class Listado extends Component
             'vistaGlobal' => app(TenantContext::class)->esGlobal(),
             'seleccionada' => $seleccionada,
             'postulaciones' => $this->mostrarFormulario ? $this->opcionesDePostulacion($entrevistas->postulacionesAgendables()) : [],
+            // La casilla "Mover a Entrevista" solo aparece si el candidato elegido aún no llegó a esa etapa.
+            'puedeMoverAEntrevista' => $this->mostrarFormulario && ctype_digit($this->postulacionId)
+                && (Postulacion::query()->find((int) $this->postulacionId)?->etapa->antesDeEntrevista() ?? false),
             'entrevistadores' => $this->mostrarFormulario ? $this->opcionesDeEntrevistador() : [],
             'modalidades' => ModalidadEntrevista::opciones(),
             'duraciones' => self::DURACIONES,
