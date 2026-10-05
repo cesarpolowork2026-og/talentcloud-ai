@@ -49,10 +49,10 @@ class ReindexarEmbeddings extends Command
 
         if ($todo || $this->option('cvs')) {
             $cvs = Cv::where('estado_procesamiento', EstadoProcesamientoCv::Procesado)->orderBy('id')->pluck('id');
-            // Mantenimiento: reanaliza sin avisar ni anotar actividad (ya se hizo al subir cada CV).
+            // Un CV ya analizado no vuelve a avisar; uno que nunca se analizó (IA caída) sí, por primera vez.
             $fallos += $this->procesar('CV', $cvs, fn (int $id) => $this->option('sync')
-                ? $analizarCv->ejecutar(Cv::findOrFail($id), avisar: false)
-                : AnalizarCvConIa::dispatch($id, avisar: false));
+                ? $analizarCv->ejecutar(Cv::findOrFail($id))
+                : AnalizarCvConIa::dispatch($id));
         }
 
         if ($todo || $this->option('requisitos')) {

@@ -25,12 +25,11 @@ class AnalizarCv
     ) {}
 
     /**
-     * false si el CV no tiene texto que analizar.
-     *
-     * @param  bool  $avisar  false en un reanálisis de mantenimiento (talentcloud:reindexar-embeddings):
-     *                        no genera avisos ni actividad, que ya se dieron al subir el CV.
+     * false si el CV no tiene texto que analizar. Solo el primer análisis del CV
+     * avisa y anota actividad (también si llega tarde, p. ej. por un reindexado
+     * tras una caída de la IA); reanalizarlo no repite los avisos.
      */
-    public function ejecutar(Cv $cv, bool $avisar = true): bool
+    public function ejecutar(Cv $cv): bool
     {
         if ($cv->estado_procesamiento !== EstadoProcesamientoCv::Procesado || blank($cv->texto_extraido)) {
             return false;
@@ -38,10 +37,10 @@ class AnalizarCv
 
         $analisis = $this->ia->analizarCv($cv->id, $cv->texto_extraido, $this->catalogo());
 
-        $primeraVez = DB::transaction(function () use ($cv, $analisis, $avisar): bool {
+        $primeraVez = DB::transaction(function () use ($cv, $analisis): bool {
             // Se decide con la fila bloqueada: si dos análisis del mismo CV coinciden
             // (la cola y un reindexado), solo el primero que guarda avisa.
-            $primeraVez = $avisar && Cv::whereKey($cv->id)->lockForUpdate()->value('datos_estructurados') === null;
+            $primeraVez = Cv::whereKey($cv->id)->lockForUpdate()->value('datos_estructurados') === null;
 
             $this->guardarFragmentos($cv, $analisis);
 

@@ -256,13 +256,14 @@ it('avisa una sola vez aunque dos análisis del mismo CV coincidan', function ()
     expect(Event::dispatched(CvAnalizado::class)->filter(fn (array $e) => $e[0]->primeraVez))->toHaveCount(1);
 });
 
-it('un reanálisis de mantenimiento no avisa aunque el CV no se hubiera analizado', function () {
+it('avisa del primer análisis aunque llegue tarde, y no al reanalizar', function () {
     Event::fake([CvAnalizado::class]);
+    // Procesado sin analizar: la IA estaba caída al subirlo y se recupera con un reindexado.
     $cv = Cv::factory()->procesado('Java y Docker.')->create(['candidato_id' => $this->candidato->id]);
     Http::fake(['ia.test/cv/analizar' => Http::response(respuestaDeAnalisis([[$this->java, 2.0]]))]);
 
-    app(AnalizarCv::class)->ejecutar($cv, avisar: false);
+    app(AnalizarCv::class)->ejecutar(Cv::findOrFail($cv->id));
+    app(AnalizarCv::class)->ejecutar(Cv::findOrFail($cv->id));
 
-    Event::assertDispatched(CvAnalizado::class, fn (CvAnalizado $e) => ! $e->primeraVez);
-    expect($cv->fresh()->datos_estructurados)->not->toBeNull();
+    expect(Event::dispatched(CvAnalizado::class)->map(fn (array $e) => $e[0]->primeraVez)->all())->toBe([true, false]);
 });

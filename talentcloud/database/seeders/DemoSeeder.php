@@ -48,6 +48,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Datos de demostración con las personas y vacantes del prototipo
@@ -133,7 +134,15 @@ class DemoSeeder extends Seeder
         $adminOrbita = $this->usuario('Orbita Labs — Admin', 'admin@orbita.dev', Rol::Empresa, $orbita);
 
         if (! Vacante::where('empresa_id', $nimbus->id)->where('titulo', 'Desarrollador Backend')->exists()) {
-            $this->historia($admin, $marta, $diego, $clara, $adminOrbita, $orbita);
+            try {
+                $this->historia($admin, $marta, $diego, $clara, $adminOrbita, $orbita);
+            } catch (Throwable $e) {
+                // No hay transacción (los trabajos deben correr en su fecha): lo sembrado se queda.
+                // Repetir el seeder saltaría la historia; hay que empezar de cero.
+                $this->command->error('La historia de la demo quedó a medias. Vuelve a sembrar desde cero: php artisan migrate:fresh --seed');
+
+                throw $e;
+            }
         }
 
         // "Ana López — Administradora — Invitado" de Mi empresa: invitada ayer.
@@ -244,11 +253,11 @@ class DemoSeeder extends Seeder
         app(CambiarEstadoEntrevista::class)->cancelar($canceladaLucia);
         $this->a(16, '09:30', $diego);
         $entrevistaLucia = $this->programar($diego, $lucia, $diego, $this->dia(-13, '09:30'));
-        $this->a(15, '18:00', $diego);
-        app(CambiarEstadoEntrevista::class)->confirmar($entrevistaLucia);
-
         $this->a(15, '10:00', $admin);
         app(CambiarEstadoEmpresa::class)->ejecutar($orbita->fresh());
+
+        $this->a(15, '18:00', $diego);
+        app(CambiarEstadoEntrevista::class)->confirmar($entrevistaLucia);
 
         // Sofía: entrevista con Marta, evaluación aprobada y oferta.
         $this->a(14, '10:00', $marta);

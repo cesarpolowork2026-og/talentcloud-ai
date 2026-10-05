@@ -38,8 +38,6 @@ it('encola el análisis de los CV procesados y los embeddings de las vacantes co
 
     Queue::assertPushed(AnalizarCvConIa::class, 2);
     Queue::assertPushed(GenerarEmbeddingsDeRequisitos::class, 2);
-    // Es mantenimiento: reanaliza sin repetir avisos ni actividad.
-    Queue::assertNotPushed(AnalizarCvConIa::class, fn (AnalizarCvConIa $job) => $job->avisar);
 });
 
 it('puede limitarse a los CV', function () {

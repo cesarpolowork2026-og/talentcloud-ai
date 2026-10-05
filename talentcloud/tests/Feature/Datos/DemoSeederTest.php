@@ -157,6 +157,18 @@ it('deja la trazabilidad completa de cada postulación, en orden y con sus fecha
     });
 });
 
+it('anota la historia en orden cronológico (el reloj de la demo nunca retrocede)', function () {
+    app(TenantContext::class)->ejecutarGlobal(function () {
+        foreach ([Actividad::orderBy('id')->pluck('created_at'), PostulacionEtapa::orderBy('id')->pluck('desde')] as $fechas) {
+            $marcas = $fechas->map->timestamp->all();
+            $ordenadas = $marcas;
+            sort($ordenadas);
+
+            expect($marcas)->toBe($ordenadas);
+        }
+    });
+});
+
 it('avisa y anota solo lo que la aplicación generaría, de la propia empresa', function () {
     // Campana de Marta: Marco postuló a su vacante; Diego le asignó la primera entrevista de Lucía.
     $campana = $this->marta->notifications()->latest()->get()->pluck('data.texto')->all();

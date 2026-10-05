@@ -29,10 +29,7 @@ class AnalizarCvConIa implements ShouldBeUnique, ShouldQueue
 
     public int $uniqueFor = 300;
 
-    /**
-     * @param  bool  $avisar  false en un reanálisis de mantenimiento: sin avisos ni actividad.
-     */
-    public function __construct(public int $cvId, public bool $avisar = true)
+    public function __construct(public int $cvId)
     {
         $this->onQueue('ia');
         $this->afterCommit();
@@ -52,7 +49,7 @@ class AnalizarCvConIa implements ShouldBeUnique, ShouldQueue
         }
 
         try {
-            $analizar->ejecutar($cv, $this->avisar);
+            $analizar->ejecutar($cv);
         } catch (RespuestaIaNoValida $e) {
             // Un error de contrato o de clave no se arregla reintentando.
             $this->fail($e);
