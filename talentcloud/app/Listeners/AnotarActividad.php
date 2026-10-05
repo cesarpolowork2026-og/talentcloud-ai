@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Enums\EtapaPostulacion;
+use App\Enums\OrigenPostulacion;
 use App\Enums\TipoActividad;
 use App\Events\CandidatoSePostulo;
 use App\Events\CvAnalizado;
@@ -13,6 +14,7 @@ use App\Events\EvaluacionAprobada;
 use App\Events\NotaAgregada;
 use App\Events\PlanEmpresaCambiado;
 use App\Events\PostulacionCambioDeEtapa;
+use App\Events\PostulacionCreada;
 use App\Events\PostulacionRetirada;
 use App\Events\VacanteCreada;
 use App\Models\Postulacion;
@@ -45,6 +47,30 @@ class AnotarActividad
         };
 
         $this->anotar($postulacion, TipoActividad::EtapaCambiada, $descripcion, $evento->actor);
+    }
+
+    /**
+     * Postulación registrada por el equipo: primera línea de su trazabilidad
+     * (quién la registró y cuándo). La que hace el propio postulante tiene la
+     * suya (handleCandidatoSePostulo).
+     */
+    public function handlePostulacionCreada(PostulacionCreada $evento): void
+    {
+        $postulacion = $evento->postulacion->loadMissing(['candidato', 'vacante']);
+
+        if ($postulacion->origen !== OrigenPostulacion::Equipo) {
+            return;
+        }
+
+        $quien = $this->usuarioActual();
+        $sujeto = "{$postulacion->candidato?->nombre} en {$postulacion->vacante?->titulo}";
+
+        $this->anotar(
+            $postulacion,
+            TipoActividad::PostulacionRegistrada,
+            $quien !== null ? "{$quien->name} registró a {$sujeto}." : "Se registró a {$sujeto}.",
+            $quien,
+        );
     }
 
     public function handleCandidatoSePostulo(CandidatoSePostulo $evento): void

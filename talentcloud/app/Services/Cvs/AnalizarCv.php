@@ -24,17 +24,25 @@ class AnalizarCv
         private readonly CompetenciasDelCandidato $competencias,
     ) {}
 
-    /** false si el CV no tiene texto que analizar. */
-    public function ejecutar(Cv $cv): bool
+    /**
+     * false si el CV no tiene texto que analizar.
+     *
+     * @param  bool  $avisar  false en un reanálisis de mantenimiento (talentcloud:reindexar-embeddings):
+     *                        no genera avisos ni actividad, que ya se dieron al subir el CV.
+     */
+    public function ejecutar(Cv $cv, bool $avisar = true): bool
     {
         if ($cv->estado_procesamiento !== EstadoProcesamientoCv::Procesado || blank($cv->texto_extraido)) {
             return false;
         }
 
-        $primeraVez = $cv->datos_estructurados === null;
         $analisis = $this->ia->analizarCv($cv->id, $cv->texto_extraido, $this->catalogo());
 
-        DB::transaction(function () use ($cv, $analisis) {
+        $primeraVez = DB::transaction(function () use ($cv, $analisis, $avisar): bool {
+            // Se decide con la fila bloqueada: si dos análisis del mismo CV coinciden
+            // (la cola y un reindexado), solo el primero que guarda avisa.
+            $primeraVez = $avisar && Cv::whereKey($cv->id)->lockForUpdate()->value('datos_estructurados') === null;
+
             $this->guardarFragmentos($cv, $analisis);
 
             $cv->update(['datos_estructurados' => [...$analisis->datosEstructurados(), 'analizado_at' => now()->toIso8601String()]]);
@@ -43,6 +51,8 @@ class AnalizarCv
             if ($this->esElCvActual($cv)) {
                 $this->competencias->reemplazarExtraidas($cv->candidato_id, $this->delCatalogo($analisis->competenciasAcreditadas()));
             }
+
+            return $primeraVez;
         });
 
         CvAnalizado::dispatch($cv, $primeraVez);

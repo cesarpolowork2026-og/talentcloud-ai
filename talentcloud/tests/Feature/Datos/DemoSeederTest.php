@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\EstadoDeMiPostulacion;
 use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
@@ -13,6 +14,7 @@ use App\Models\Postulacion;
 use App\Models\PostulacionEtapa;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Support\Formato;
 use App\Tenancy\TenantContext;
 use Database\Seeders\DatabaseSeeder;
 
@@ -105,6 +107,8 @@ it('muestra al admin SaaS las cinco vacantes de la plataforma', function () {
 });
 
 it('se puede ejecutar dos veces sin duplicar datos', function () {
+    $antes = [PostulacionEtapa::count(), $this->marta->notifications()->count(), app(TenantContext::class)->ejecutarGlobal(fn () => Actividad::count())];
+
     $this->seed(DatabaseSeeder::class);
 
     app(TenantContext::class)->ejecutarGlobal(function () {
@@ -112,30 +116,69 @@ it('se puede ejecutar dos veces sin duplicar datos', function () {
             ->and(Vacante::count())->toBe(5)
             ->and(Postulacion::count())->toBe(7);
     });
-    expect($this->marta->notifications()->count())->toBe(3);
+    expect([PostulacionEtapa::count(), $this->marta->notifications()->count(), app(TenantContext::class)->ejecutarGlobal(fn () => Actividad::count())])->toBe($antes);
 });
 
-it('deja historial de etapas en cada postulación de la demo, sin duplicarlo al repetirse', function () {
-    $this->seed(DatabaseSeeder::class);
-
+it('deja la trazabilidad completa de cada postulación, en orden y con sus fechas', function () {
     app(TenantContext::class)->ejecutarGlobal(function () {
-        $postulaciones = Postulacion::with('etapas')->get();
+        foreach (Postulacion::with(['etapas', 'candidato.cvs', 'vacante', 'entrevistas', 'evaluaciones'])->get() as $p) {
+            $quien = $p->candidato->nombre.' en '.$p->vacante->titulo;
+            $etapas = $p->etapas;
 
-        expect(PostulacionEtapa::count())->toBe($postulaciones->count());
-        $postulaciones->each(fn (Postulacion $p) => expect($p->etapas->last()?->etapa)->toBe($p->etapa));
+            // El historial empieza al postular, en Postulado, avanza en el tiempo y termina en la etapa actual.
+            expect($etapas->first()->etapa)->toBe(EtapaPostulacion::Postulado, "Historial sin inicio: {$quien}")
+                ->and($etapas->first()->desde->equalTo($p->created_at))->toBeTrue("Inicio del historial distinto de la postulación: {$quien}")
+                ->and($etapas->last()->etapa)->toBe($p->etapa)
+                ->and($etapas->last()->desde->equalTo($p->etapa_cambiada_at))->toBeTrue("Fecha de etapa distinta del historial: {$quien}")
+                ->and($etapas->pluck('desde')->map->timestamp->all())->toBe($etapas->pluck('desde')->map->timestamp->sort()->values()->all());
+
+            // Consentimiento, CV y vacante publicada antes de postular.
+            expect($p->candidato->consentimiento_at->lessThanOrEqualTo($p->created_at))->toBeTrue("Consentimiento posterior: {$quien}")
+                ->and($p->cv_id)->not->toBeNull()
+                ->and($p->candidato->cvs->firstWhere('id', $p->cv_id)->created_at->lessThanOrEqualTo($p->created_at))->toBeTrue("CV posterior a la postulación: {$quien}")
+                ->and($p->vacante->publicada_at->lessThanOrEqualTo($p->created_at))->toBeTrue("Postuló antes de la publicación: {$quien}");
+
+            // Cada entrevista se programó antes de celebrarse y cada evaluación, después de una entrevista realizada.
+            $p->entrevistas->each(fn ($e) => expect($e->created_at->lessThan($e->inicia_at))->toBeTrue("Entrevista programada después de celebrarse: {$quien}"));
+            $p->evaluaciones->each(fn ($e) => expect($p->entrevistas->contains(fn ($x) => $x->estado === EstadoEntrevista::Completada && $x->inicia_at->lessThan($e->created_at)))->toBeTrue("Evaluación sin entrevista previa: {$quien}"));
+
+            // Lo que se le comunicó al candidato coincide con lo que la aplicación le avisaría hoy.
+            $aAvisar = EstadoDeMiPostulacion::aAvisar($p);
+            if ($aAvisar !== null) {
+                expect($p->estado_avisado)->toBe($aAvisar, "Aviso pendiente o distinto: {$quien}");
+            }
+
+            // La actividad de la postulación está ordenada en el tiempo y empieza al postular.
+            $actividad = Actividad::where('sujeto_type', $p->getMorphClass())->where('sujeto_id', $p->id)->orderBy('created_at')->orderBy('id')->get();
+            expect($actividad)->not->toBeEmpty("Postulación sin actividad: {$quien}")
+                ->and($actividad->first()->created_at->equalTo($p->created_at))->toBeTrue("La actividad no empieza al postular: {$quien}")
+                ->and($actividad->every(fn (Actividad $a) => $a->created_at->lessThanOrEqualTo(now())))->toBeTrue();
+        }
     });
 });
 
 it('avisa y anota solo lo que la aplicación generaría, de la propia empresa', function () {
+    // Campana de Marta: Marco postuló a su vacante; Diego le asignó la primera entrevista de Lucía.
     $campana = $this->marta->notifications()->latest()->get()->pluck('data.texto')->all();
-    expect($campana[0])->toBe('Marco Díaz postuló a Desarrollador Backend.')
-        ->and($campana[1])->toStartWith('Nuevo CV analizado de Elena Ruiz:')
-        ->and($campana[2])->toStartWith('Nuevo CV analizado de Sofía Nieto:')
-        ->and(implode(' ', $campana))->not->toContain('Orbita');
+    expect($campana)->toHaveCount(2)
+        ->and($campana[0])->toBe('Marco Díaz postuló a Desarrollador Backend.')
+        ->and($campana[1])->toStartWith('Entrevista con Lucía Prat para Data Analyst')
+        ->and(implode(' ', $campana))->not->toContain('Iván')->not->toContain('Orbita');
 
-    $actividad = app(TenantContext::class)->ejecutarPara($this->marta->empresa_id, fn () => Actividad::latest()->pluck('descripcion')->all());
-    expect($actividad[0])->toBe('Sofía Nieto avanzó a la etapa de oferta.')
-        ->and($actividad[1])->toStartWith('Diego Ferro programó una entrevista con Elena Ruiz para el ')
-        ->and($actividad[2])->toBe('Marta Solís aprobó la evaluación de Elena Ruiz.')
-        ->and($actividad[3])->toBe('Marco Díaz postuló a Desarrollador Backend.');
+    $actividad = app(TenantContext::class)->ejecutarPara($this->marta->empresa_id, fn () => Actividad::latest()->latest('id')->pluck('descripcion')->all());
+    expect(array_slice($actividad, 0, 4))->toBe([
+        'Diego Ferro programó una entrevista con Elena Ruiz para el '.Formato::fechaHora(today()->addDays(2)->setTime(15, 0)).'.',
+        'Sofía Nieto avanzó a la etapa de oferta.',
+        'Lucía Prat avanzó a la etapa de oferta.',
+        'Marta Solís aprobó la evaluación de Elena Ruiz.',
+    ])->and($actividad)->toContain('Marta Solís registró a Elena Ruiz en Desarrollador Backend.')
+        ->and($actividad)->toContain('Marco Díaz postuló a Desarrollador Backend.')
+        ->and(implode(' ', $actividad))->not->toContain('Orbita');
+
+    // Marco (sin IA en los tests, sin el aviso del CV): en revisión en DevOps y, después, el cierre de esa vacante.
+    $marco = User::where('email', 'marco@correo.com')->firstOrFail();
+    expect($marco->notifications()->reorder('created_at')->get()->pluck('data.texto')->all())->sequence(
+        fn ($t) => $t->toContain('DevOps Engineer')->toContain('revisando'),
+        fn ($t) => $t->toContain('DevOps Engineer')->toContain('se cerró'),
+    );
 });

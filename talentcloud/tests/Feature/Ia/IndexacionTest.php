@@ -241,3 +241,28 @@ it('distingue el primer análisis de un CV de un reanálisis', function () {
     Event::assertDispatched(CvAnalizado::class, fn (CvAnalizado $e) => $e->primeraVez);
     Event::assertDispatched(CvAnalizado::class, fn (CvAnalizado $e) => ! $e->primeraVez);
 });
+
+it('avisa una sola vez aunque dos análisis del mismo CV coincidan', function () {
+    Event::fake([CvAnalizado::class]);
+    $cv = Cv::factory()->procesado('Java y Docker.')->create(['candidato_id' => $this->candidato->id]);
+    Http::fake(['ia.test/cv/analizar' => Http::response(respuestaDeAnalisis([[$this->java, 2.0]]))]);
+
+    // Dos procesos leyeron el CV antes de que ninguno guardara (la cola y un reindexado a la vez).
+    [$enLaCola, $enElReindexado] = [Cv::find($cv->id), Cv::find($cv->id)];
+    app(AnalizarCv::class)->ejecutar($enLaCola);
+    app(AnalizarCv::class)->ejecutar($enElReindexado);
+
+    Event::assertDispatchedTimes(CvAnalizado::class, 2);
+    expect(Event::dispatched(CvAnalizado::class)->filter(fn (array $e) => $e[0]->primeraVez))->toHaveCount(1);
+});
+
+it('un reanálisis de mantenimiento no avisa aunque el CV no se hubiera analizado', function () {
+    Event::fake([CvAnalizado::class]);
+    $cv = Cv::factory()->procesado('Java y Docker.')->create(['candidato_id' => $this->candidato->id]);
+    Http::fake(['ia.test/cv/analizar' => Http::response(respuestaDeAnalisis([[$this->java, 2.0]]))]);
+
+    app(AnalizarCv::class)->ejecutar($cv, avisar: false);
+
+    Event::assertDispatched(CvAnalizado::class, fn (CvAnalizado $e) => ! $e->primeraVez);
+    expect($cv->fresh()->datos_estructurados)->not->toBeNull();
+});

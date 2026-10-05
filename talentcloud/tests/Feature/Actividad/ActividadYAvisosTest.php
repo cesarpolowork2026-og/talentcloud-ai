@@ -9,6 +9,8 @@ use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
 use App\Enums\Modalidad;
 use App\Enums\ModalidadEntrevista;
+use App\Enums\OrigenPostulacion;
+use App\Enums\TipoActividad;
 use App\Events\CvAnalizado;
 use App\Models\Actividad;
 use App\Models\Candidato;
@@ -24,6 +26,7 @@ use App\Services\Entrevistas\CambiarEstadoEntrevista;
 use App\Services\Entrevistas\ProgramarEntrevista;
 use App\Services\Evaluaciones\GuardarEvaluacion;
 use App\Services\Postulaciones\MoverPostulacion;
+use App\Services\Postulaciones\PostularCandidato;
 use App\Services\Vacantes\CrearVacante;
 use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
@@ -73,6 +76,24 @@ function programarCon(Postulacion $postulacion, User $entrevistador): Entrevista
 }
 
 // — Actividad reciente —
+
+it('anota quién registró una postulación del equipo, con la postulación como sujeto', function () {
+    $lucia = Candidato::factory()->create(['nombre' => 'Lucía Prat']);
+
+    $postulacion = app(PostularCandidato::class)->ejecutar($this->backend, $lucia);
+
+    $actividad = Actividad::query()->latest('id')->firstOrFail();
+    expect($actividad->descripcion)->toBe('Marta Solís registró a Lucía Prat en Desarrollador Backend.')
+        ->and($actividad->tipo)->toBe(TipoActividad::PostulacionRegistrada->value)
+        ->and($actividad->actor_id)->toBe($this->marta->id)
+        ->and($actividad->sujeto_id)->toBe($postulacion->id);
+});
+
+it('no anota como registro del equipo la postulación que hace el propio postulante', function () {
+    app(PostularCandidato::class)->ejecutar($this->backend, Candidato::factory()->create(), OrigenPostulacion::Postulante);
+
+    expect(Actividad::where('tipo', TipoActividad::PostulacionRegistrada->value)->exists())->toBeFalse();
+});
 
 it('anota los cambios de etapa en la actividad', function () {
     $mover = app(MoverPostulacion::class);

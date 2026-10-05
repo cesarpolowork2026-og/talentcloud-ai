@@ -14,6 +14,7 @@ enum TipoActividad: string
     case NotaAgregada = 'postulacion.nota';
     case VacanteCreada = 'vacante.creada';
     case CandidatoSePostulo = 'postulacion.propia';
+    case PostulacionRegistrada = 'postulacion.registrada';
     case PlanCambiado = 'empresa.plan';
     case PostulacionRetirada = 'postulacion.retirada';
 }
