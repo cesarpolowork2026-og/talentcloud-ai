@@ -52,6 +52,21 @@ it('muestra Mi empresa como en el prototipo', function () {
         ->assertSee('Activo');
 });
 
+it('muestra el correo de cada usuario interno', function () {
+    $this->actingAs($this->cuenta)->get('/mi-empresa')->assertOk()->assertSee($this->marta->email);
+});
+
+it('invita con un ejemplo de correo real y explica cada rol', function () {
+    Livewire::test(Panel::class)
+        ->call('abrirInvitacion')
+        ->assertSeeHtml('placeholder="nombre@nimbuscorp.com"')
+        ->assertDontSee('Illuminate')
+        ->assertSeeHtml('placeholder="Nombre y apellido"')
+        ->assertSeeHtml('aria-describedby="invitado-rol-ayuda"')
+        ->assertSee('Gestiona vacantes, candidatos, entrevistas y evaluaciones.')
+        ->assertSee('administra el equipo y los datos de la empresa');
+});
+
 it('niega Mi empresa a los demás roles', function (string $rol) {
     $this->actingAs(User::factory()->{$rol}()->create())->get('/mi-empresa')->assertForbidden();
 })->with(['admin', 'reclutador', 'postulante']);

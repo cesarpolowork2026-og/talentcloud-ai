@@ -58,6 +58,7 @@ class Checklist extends Component
             'empresa' => $empresa,
             'pasos' => $pasos,
             'completados' => $progreso->completados($empresa),
+            'terminado' => $progreso->terminado($empresa),
         ]);
     }
 

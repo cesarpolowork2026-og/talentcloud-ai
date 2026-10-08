@@ -33,6 +33,17 @@ it('muestra el checklist del prototipo', function () {
         ->assertSee('Saltar por ahora →');
 });
 
+it('cierra el checklist completado con un aviso y la salida al dashboard', function () {
+    $this->empresa->update(['onboarding' => ['perfil' => true, 'vacante' => true, 'invitar' => true]]);
+
+    $this->get('/bienvenida')
+        ->assertOk()
+        ->assertSee('3 de 3 completadas')
+        ->assertSee('¡Listo! Acme S.A. ya está configurada.')
+        ->assertSee('Ir al dashboard →')
+        ->assertDontSee('Saltar por ahora');
+});
+
 it('lleva a la empresa recién registrada al checklist', function () {
     auth()->logout();
 

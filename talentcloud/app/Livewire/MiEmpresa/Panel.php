@@ -199,6 +199,10 @@ class Panel extends Component
             'usuarios' => $equipo->usuariosDe($empresa),
             'invitaciones' => $equipo->invitacionesPendientesDe($empresa),
             'seleccionado' => $this->usuarioSeleccionado ? User::find($this->usuarioSeleccionado) : null,
+            'descripcionesDeRol' => array_combine(
+                array_map(fn (Rol $r) => $r->etiquetaEnEmpresa(), Rol::internosDeEmpresa()),
+                array_map(fn (Rol $r) => $r->descripcionEnEmpresa(), Rol::internosDeEmpresa()),
+            ),
             'roles' => array_combine(
                 array_map(fn (Rol $r) => $r->value, Rol::internosDeEmpresa()),
                 array_map(fn (Rol $r) => $r->etiquetaEnEmpresa(), Rol::internosDeEmpresa()),

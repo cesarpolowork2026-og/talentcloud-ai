@@ -27,6 +27,7 @@
                             @if ($usuario->id === auth()->id())
                                 <span class="text-13 text-neutral-600">(tú)</span>
                             @endif
+                            <span class="block text-13 text-neutral-600">{{ $usuario->email }}</span>
                         </td>
                         <td>{{ $usuario->rol()?->etiquetaEnEmpresa() }}</td>
                         <td>
@@ -93,18 +94,24 @@
                 <p class="m-0 text-14 text-accent-2-700">Tu plan {{ $uso->plan->etiqueta() }} ya tiene sus {{ $uso->limiteUsuarios() }} lugares ocupados, contando las invitaciones pendientes. Para invitar a alguien nuevo, revoca una invitación, desactiva un usuario o solicita un cambio de plan.</p>
             @endif
             <x-ui.field label="Nombre" for="invitado-nombre" error="invitadoNombre">
-                <x-ui.input wire:model="invitadoNombre" id="invitado-nombre" placeholder="Nombre del reclutador" error="invitadoNombre" />
+                <x-ui.input wire:model="invitadoNombre" id="invitado-nombre" placeholder="Nombre y apellido" error="invitadoNombre" />
             </x-ui.field>
             <x-ui.field label="Correo" for="invitado-email" error="invitadoEmail">
-                <x-ui.input wire:model="invitadoEmail" id="invitado-email" type="email" placeholder="nombre@{{ \Illuminate\Support\Str::slug($empresa->nombre, '') }}.com" error="invitadoEmail" />
+                {{-- Atributo enlazado: dentro de un atributo de componente, "@{{" se escribiría tal cual. --}}
+                <x-ui.input wire:model="invitadoEmail" id="invitado-email" type="email" :placeholder="'nombre@'.\Illuminate\Support\Str::slug($empresa->nombre, '').'.com'" error="invitadoEmail" />
             </x-ui.field>
             <x-ui.field error="invitadoRol">
                 <label id="invitado-rol">Rol</label>
-                <x-ui.seg labelledby="invitado-rol">
+                <x-ui.seg labelledby="invitado-rol" aria-describedby="invitado-rol-ayuda">
                     @foreach ($roles as $valor => $etiqueta)
                         <x-ui.seg-option wire:model="invitadoRol" name="invitadoRol" value="{{ $valor }}">{{ $etiqueta }}</x-ui.seg-option>
                     @endforeach
                 </x-ui.seg>
+                <dl id="invitado-rol-ayuda" class="field-hint m-0 grid gap-1">
+                    @foreach ($descripcionesDeRol as $etiqueta => $descripcion)
+                        <div><dt class="inline font-semibold">{{ $etiqueta }}:</dt> <dd class="inline m-0">{{ $descripcion }}</dd></div>
+                    @endforeach
+                </dl>
             </x-ui.field>
         </form>
         <x-slot:actions>

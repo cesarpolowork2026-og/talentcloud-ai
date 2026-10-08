@@ -1,8 +1,8 @@
 {{-- Onboarding del prototipo (TalentCloud App.dc.html, isOnboarding). --}}
 <div class="max-w-[640px]">
     <h1 class="mb-1 text-30">Bienvenido a TalentCloud</h1>
-    <p class="mb-3 text-15 text-neutral-700">Configuremos {{ $empresa->nombre }} en 3 pasos.</p>
-    <p class="mb-4 text-13 text-neutral-600">{{ $completados }} de 3 completadas</p>
+    <p class="mb-3 text-15 text-neutral-700">Configuremos {{ $empresa->nombre }} en {{ count($pasos) }} pasos.</p>
+    <p class="mb-4 text-13 text-neutral-600">{{ $completados }} de {{ count($pasos) }} completadas</p>
 
     <div class="grid gap-3">
         @foreach ($pasos as $paso)
@@ -26,5 +26,11 @@
         @endforeach
     </div>
 
-    <a href="{{ route('dashboard') }}" wire:navigate class="mt-4 inline-block text-14">Saltar por ahora →</a>
+    @if ($terminado)
+        {{-- Ya no hay nada que saltar: cierre y salida al trabajo diario. --}}
+        <p class="mb-0 mt-4 text-15" role="status">¡Listo! {{ $empresa->nombre }} ya está configurada.</p>
+        <a href="{{ route('dashboard') }}" wire:navigate class="mt-2 inline-block text-14">Ir al dashboard →</a>
+    @else
+        <a href="{{ route('dashboard') }}" wire:navigate class="mt-4 inline-block text-14">Saltar por ahora →</a>
+    @endif
 </div>

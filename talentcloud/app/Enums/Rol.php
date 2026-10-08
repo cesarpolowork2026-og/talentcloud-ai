@@ -41,6 +41,16 @@ enum Rol: string
         };
     }
 
+    /** Qué puede hacer cada rol interno, para elegirlo con criterio al invitar. */
+    public function descripcionEnEmpresa(): string
+    {
+        return match ($this) {
+            self::Reclutador => 'Gestiona vacantes, candidatos, entrevistas y evaluaciones.',
+            self::Empresa => 'Lo mismo que un reclutador y, además, administra el equipo y los datos de la empresa.',
+            default => '',
+        };
+    }
+
     /**
      * Roles que una empresa puede asignar al invitar a su equipo.
      *
