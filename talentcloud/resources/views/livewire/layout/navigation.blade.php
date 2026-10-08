@@ -86,6 +86,11 @@ new class extends Component
 
         return [
             'enlaces' => array_map(fn (array $enlace) => $this->resolver($enlace), Navegacion::enlaces($user)),
+            // Solo enlaces con ruta: en la zona de administración no se pintan enlaces deshabilitados.
+            'administracion' => array_values(array_filter(
+                array_map(fn (array $enlace) => $this->resolver($enlace), Navegacion::administracion($user)),
+                fn (array $enlace) => $enlace['href'] !== null,
+            )),
             'inicial' => Navegacion::inicial($user),
             'etiquetaPerfil' => Navegacion::etiquetaPerfil($user),
             'notificaciones' => $user->notifications()->latest()->limit(5)->get(),
@@ -155,6 +160,15 @@ new class extends Component
     </div>
 
     <div class="relative ml-auto flex items-center gap-3">
+        {{-- Administración de la cuenta ("Mi empresa"): aparte del flujo de selección --}}
+        @if ($administracion !== [])
+            <div class="hidden items-center gap-4 border-r border-accent-700 pr-4 lg:flex">
+                @foreach ($administracion as $enlace)
+                    <a href="{{ $enlace['href'] }}" wire:navigate class="barra-enlace" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
+                @endforeach
+            </div>
+        @endif
+
         {{-- Fondo que cierra los menús al hacer clic fuera --}}
         <div x-show="notificaciones || perfil" x-cloak x-on:click="notificaciones = false; perfil = false" class="fixed inset-0 z-[15]"></div>
 
@@ -254,5 +268,14 @@ new class extends Component
                 <a aria-disabled="true" tabindex="-1" class="cursor-default py-2 opacity-[0.45]">{{ $enlace['etiqueta'] }}</a>
             @endif
         @endforeach
+
+        @if ($administracion !== [])
+            <div class="mt-2 border-t border-accent-700 pt-2" role="group" aria-labelledby="grupo-administracion">
+                <div id="grupo-administracion" class="text-12 uppercase tracking-[0.08em] text-accent-200">Administración</div>
+                @foreach ($administracion as $enlace)
+                    <a href="{{ $enlace['href'] }}" wire:navigate class="barra-enlace block py-2" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
+                @endforeach
+            </div>
+        @endif
     </div>
 </nav>

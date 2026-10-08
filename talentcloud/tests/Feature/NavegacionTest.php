@@ -6,7 +6,9 @@ use App\Support\Navegacion;
 use Illuminate\Support\Facades\Route;
 
 /*
- * La barra de navegación reproduce la del prototipo para cada rol.
+ * La barra de navegación por rol: la del prototipo, con dos cambios
+ * deliberados (menú del admin agrupado; selección en el orden del flujo y
+ * "Mi empresa" aparte, a la derecha).
  */
 
 function etiquetasDe(User $user): array
@@ -14,7 +16,8 @@ function etiquetasDe(User $user): array
     return array_column(Navegacion::enlaces($user), 'etiqueta');
 }
 
-$personal = ['Dashboard', 'Vacantes', 'Kanban', 'Candidatos', 'Matching', 'Entrevistas', 'Evaluaciones'];
+// En el orden del flujo: lo que entra al proceso y lo que se hace con cada candidato.
+$personal = ['Dashboard', 'Vacantes', 'Candidatos', 'Kanban', 'Matching', 'Entrevistas', 'Evaluaciones'];
 
 it('muestra al reclutador los módulos de selección', function () use ($personal) {
     expect(etiquetasDe(User::factory()->reclutador()->create()))->toBe($personal);
@@ -30,8 +33,21 @@ it('ordena el menú del admin: primero lo suyo y la selección agrupada', functi
         ->and(array_column($enlaces[3]['hijos'], 'etiqueta'))->toBe(array_slice($personal, 1));
 });
 
-it('añade Mi empresa a la empresa', function () use ($personal) {
-    expect(etiquetasDe(User::factory()->empresa()->create()))->toBe([...$personal, 'Mi empresa']);
+it('separa Mi empresa del flujo de selección en la cuenta de empresa', function () use ($personal) {
+    $empresa = User::factory()->empresa()->create();
+
+    expect(etiquetasDe($empresa))->toBe($personal)
+        ->and(array_column(Navegacion::administracion($empresa), 'etiqueta'))->toBe(['Mi empresa'])
+        ->and(Navegacion::administracion(User::factory()->reclutador()->create()))->toBe([])
+        ->and(Navegacion::administracion(User::factory()->admin()->create()))->toBe([]);
+});
+
+it('pinta Mi empresa a la derecha, después de la selección y antes de la campana', function () {
+    $this->actingAs(User::factory()->empresa()->create())
+        ->get('/mi-empresa')
+        ->assertOk()
+        ->assertSeeInOrder(['Vacantes', 'Candidatos', 'Kanban', 'Evaluaciones', 'Mi empresa', 'Notificaciones'])
+        ->assertSee('Administración');
 });
 
 it('muestra al postulante sus postulaciones y las vacantes abiertas', function () {

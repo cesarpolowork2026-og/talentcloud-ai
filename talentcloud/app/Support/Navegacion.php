@@ -53,11 +53,21 @@ class Navegacion
             array_push($enlaces, ...self::pantallasDeSeleccion());
         }
 
-        if ($rol === Rol::Empresa) {
-            $enlaces[] = self::enlace('Mi empresa', 'mi-empresa', 'mi-empresa*');
-        }
-
         return $enlaces;
+    }
+
+    /**
+     * Administración de la cuenta, separada del proceso de selección: va a la
+     * derecha de la barra, junto a la campana y el perfil (no es un paso más
+     * del flujo de selección).
+     *
+     * @return list<array{etiqueta: string, ruta: string, patron: string}>
+     */
+    public static function administracion(?User $user): array
+    {
+        return $user?->rol() === Rol::Empresa
+            ? [self::enlace('Mi empresa', 'mi-empresa', 'mi-empresa*')]
+            : [];
     }
 
     /** Pantalla de inicio de cada rol ("Volver a mi panel"). */
@@ -100,7 +110,9 @@ class Navegacion
     }
 
     /**
-     * Las pantallas del proceso de selección, en el orden del prototipo.
+     * Las pantallas del proceso de selección, en el orden del flujo: lo que
+     * entra al proceso (vacantes y candidatos) y lo que se hace con cada
+     * candidato (Kanban, matching, entrevistas y evaluaciones).
      *
      * @return list<array{etiqueta: string, ruta: string, patron: string}>
      */
@@ -108,8 +120,8 @@ class Navegacion
     {
         return [
             self::enlace('Vacantes', 'vacantes.index', 'vacantes.*'),
-            self::enlace('Kanban', 'kanban.index', 'kanban.*'),
             self::enlace('Candidatos', 'candidatos.index', 'candidatos.*'),
+            self::enlace('Kanban', 'kanban.index', 'kanban.*'),
             self::enlace('Matching', 'matching.index', 'matching.*'),
             self::enlace('Entrevistas', 'entrevistas.index', 'entrevistas.*'),
             self::enlace('Evaluaciones', 'evaluaciones.index', 'evaluaciones.*'),
