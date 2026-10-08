@@ -15,7 +15,7 @@
     {{ $attributes->class('min-w-0') }}
     aria-roledescription="carrusel"
     aria-label="Pantallas de TalentCloud AI"
-    x-data="carruselPresentacion({{ $total }}, 4000)"
+    x-data="carruselPresentacion({{ $total }}, 3000)"
 >
     {{-- Maquetas: dibujadas a 880×520 (con margen para la sombra) y escaladas al ancho disponible. --}}
     <div class="relative -m-[14px] overflow-hidden" style="aspect-ratio: 880 / 520" aria-hidden="true" x-data="maquetaEscalada(880, 520)">
