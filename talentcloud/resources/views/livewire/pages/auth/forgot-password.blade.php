@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Volt\Component;
@@ -18,22 +19,24 @@ new #[Layout('layouts.guest')] #[Title('Recuperar contraseña')] class extends C
             'email' => ['required', 'string', 'email'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
-        $status = Password::sendResetLink(
-            $this->only('email')
-        );
+        // Límite por IP: nadie envía correos de recuperación en masa a direcciones ajenas.
+        $clave = 'recuperar-contrasena|'.request()->ip();
 
-        if ($status != Password::RESET_LINK_SENT) {
-            $this->addError('email', __($status));
+        if (RateLimiter::tooManyAttempts($clave, 5)) {
+            $this->addError('email', 'Demasiadas solicitudes. Inténtalo de nuevo en '.ceil(RateLimiter::availableIn($clave) / 60).' minutos.');
 
             return;
         }
 
+        RateLimiter::hit($clave, 600);
+
+        // Se envía si la cuenta existe, pero la respuesta es siempre la misma: no revela qué
+        // correos están registrados (tampoco la espera entre envíos, que solo tienen las cuentas reales).
+        Password::sendResetLink($this->only('email'));
+
         $this->reset('email');
 
-        session()->flash('status', __($status));
+        session()->flash('status', 'Si el correo está registrado, te enviamos un enlace para restablecer tu contraseña. Revisa también la carpeta de spam.');
     }
 }; ?>
 

@@ -24,8 +24,8 @@ test('crear empresa registra la empresa y su cuenta con rol empresa', function (
         ->set('empresa', 'Nimbus Corp')
         ->set('name', 'Ana Rojas')
         ->set('email', 'ana@nimbus.com')
-        ->set('password', 'password')
-        ->set('password_confirmation', 'password');
+        ->set('password', 'clave-segura-1')
+        ->set('password_confirmation', 'clave-segura-1');
 
     $component->call('register');
 
@@ -46,8 +46,8 @@ test('crear empresa exige el nombre de la empresa', function () {
     Volt::test('pages.auth.register')
         ->set('name', 'Ana Rojas')
         ->set('email', 'ana@nimbus.com')
-        ->set('password', 'password')
-        ->set('password_confirmation', 'password')
+        ->set('password', 'clave-segura-1')
+        ->set('password_confirmation', 'clave-segura-1')
         ->call('register')
         ->assertHasErrors(['empresa' => 'required']);
 
@@ -65,8 +65,8 @@ test('el postulante se registra con su consentimiento y perfil de candidato', fu
     Volt::test('pages.auth.register-postulante')
         ->set('name', 'Marco Díaz')
         ->set('email', 'marco@correo.com')
-        ->set('password', 'password')
-        ->set('password_confirmation', 'password')
+        ->set('password', 'clave-segura-1')
+        ->set('password_confirmation', 'clave-segura-1')
         ->set('consentimiento', true)
         ->call('register')
         ->assertHasNoErrors()
@@ -86,8 +86,8 @@ test('el postulante no puede registrarse sin aceptar el tratamiento de datos', f
     Volt::test('pages.auth.register-postulante')
         ->set('name', 'Marco Díaz')
         ->set('email', 'marco@correo.com')
-        ->set('password', 'password')
-        ->set('password_confirmation', 'password')
+        ->set('password', 'clave-segura-1')
+        ->set('password_confirmation', 'clave-segura-1')
         ->call('register')
         ->assertHasErrors(['consentimiento' => 'accepted']);
 
@@ -101,8 +101,8 @@ test('limita las cuentas nuevas por conexión aunque el envío llegue por Livewi
         $componente = Volt::test('pages.auth.register-postulante')
             ->set('name', 'Persona '.$i)
             ->set('email', "persona{$i}@correo.com")
-            ->set('password', 'password')
-            ->set('password_confirmation', 'password')
+            ->set('password', 'clave-segura-1')
+            ->set('password_confirmation', 'clave-segura-1')
             ->set('consentimiento', true)
             ->call('register');
     }

@@ -47,6 +47,10 @@ return Application::configure(basePath: dirname(__DIR__))
             $middleware->trustProxies(at: $proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
         }
 
+        // Cambiar o recuperar la contraseña cierra las demás sesiones abiertas de la cuenta (la actual se
+        // conserva): quien la tuviera robada pierde el acceso.
+        $middleware->authenticateSessions();
+
         // Con sesión iniciada, /, /login y el registro llevan a la pantalla de inicio del rol
         // (el postulante no tiene dashboard: por defecto recibiría un 403).
         $middleware->redirectUsersTo(fn (Request $request) => Navegacion::rutaInicio($request->user()));

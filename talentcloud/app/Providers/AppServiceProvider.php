@@ -14,6 +14,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -49,6 +50,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Contraseñas: 8+ caracteres con letras y números. En producción, además, que no figuren en
+        // filtraciones conocidas (consulta anónima a Have I Been Pwned; en local y tests no hay red).
+        Password::defaults(function (): Password {
+            $regla = Password::min(8)->letters()->numbers();
+
+            return $this->app->isProduction() ? $regla->uncompromised() : $regla;
+        });
+
         // Detecta consultas N+1 fuera de producción.
         Model::preventLazyLoading(! $this->app->isProduction());
 

@@ -15,6 +15,9 @@ use Livewire\Form;
 
 class LoginForm extends Form
 {
+    /** Intentos fallidos por minuto desde una misma IP, sea cual sea el correo. */
+    public const INTENTOS_POR_IP = 20;
+
     public string $email = '';
 
     public string $password = '';
@@ -60,6 +63,7 @@ class LoginForm extends Form
 
         if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
             RateLimiter::hit($this->throttleKey());
+            RateLimiter::hit($this->claveDeIp());
 
             throw ValidationException::withMessages([
                 'form.email' => trans('auth.failed'),
@@ -97,13 +101,20 @@ class LoginForm extends Form
      */
     protected function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        // 5 intentos por correo e IP, y 20 por IP: sin el segundo, desde una IP se podrían probar muchos correos.
+        $clave = match (true) {
+            RateLimiter::tooManyAttempts($this->throttleKey(), 5) => $this->throttleKey(),
+            RateLimiter::tooManyAttempts($this->claveDeIp(), self::INTENTOS_POR_IP) => $this->claveDeIp(),
+            default => null,
+        };
+
+        if ($clave === null) {
             return;
         }
 
         event(new Lockout(request()));
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+        $seconds = RateLimiter::availableIn($clave);
 
         throw ValidationException::withMessages([
             'form.email' => trans('auth.throttle', [
@@ -116,6 +127,11 @@ class LoginForm extends Form
     /**
      * Get the authentication rate limiting throttle key.
      */
+    protected function claveDeIp(): string
+    {
+        return 'login-ip|'.request()->ip();
+    }
+
     protected function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->email).'|'.request()->ip());

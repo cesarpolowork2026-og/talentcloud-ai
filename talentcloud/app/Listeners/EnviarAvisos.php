@@ -6,6 +6,7 @@ use App\DTO\DatosDeEntrevista;
 use App\Enums\EtapaPostulacion;
 use App\Enums\Rol;
 use App\Events\CandidatoSePostulo;
+use App\Events\ContrasenaCambiada;
 use App\Events\CvAnalizado;
 use App\Events\EntrevistaCancelada;
 use App\Events\EntrevistaProgramada;
@@ -21,12 +22,14 @@ use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Notifications\AvisoCambioDePlan;
+use App\Notifications\AvisoContrasenaCambiada;
 use App\Notifications\AvisoCvAnalizado;
 use App\Notifications\AvisoDeEntrevista;
 use App\Notifications\AvisoEntrevistaReprogramada;
 use App\Notifications\AvisoNuevaPostulacion;
 use App\Notifications\AvisoPostulacionRetirada;
 use App\Services\Avisos\AvisoAlCandidato;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 
@@ -149,6 +152,18 @@ class EnviarAvisos
             ->filter(fn (?User $u) => $u !== null && $u->estaActivo() && $u->empresa_id === $vacante->empresa_id)
             ->unique('id')
             ->values();
+    }
+
+    /** La contraseña cambió desde "Mi perfil": aviso de seguridad a la propia cuenta. */
+    public function handleContrasenaCambiada(ContrasenaCambiada $evento): void
+    {
+        $evento->usuario->notify(AvisoContrasenaCambiada::ahora());
+    }
+
+    /** La contraseña se restableció con el enlace de recuperación: el mismo aviso. */
+    public function handleContrasenaRestablecida(PasswordReset $evento): void
+    {
+        $evento->user->notify(AvisoContrasenaCambiada::ahora());
     }
 
     /** Cambio de plan por el admin SaaS: aviso a la cuenta de empresa. */

@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\ContrasenaCambiada;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -31,6 +32,9 @@ new class extends Component
         Auth::user()->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+        // Aviso de seguridad por correo; las demás sesiones se cierran solas (authenticateSessions).
+        ContrasenaCambiada::dispatch(Auth::user());
 
         $this->reset('current_password', 'password', 'password_confirmation');
 
