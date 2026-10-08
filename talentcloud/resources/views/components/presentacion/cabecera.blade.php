@@ -2,7 +2,7 @@
     Barra superior de las páginas públicas (presentación, registro, contraseña,
     invitación y errores sin sesión).
     enPresentacion: en / y /login, las anclas marcan la sección visible (necesita
-    `seccion` en un x-data superior) e "Iniciar sesión" lleva a la tarjeta de acceso.
+    `seccion` en un x-data superior) e "Iniciar sesión" abre el diálogo de acceso.
 --}}
 @props(['enPresentacion' => false])
 
@@ -51,12 +51,12 @@
                 @unless (request()->routeIs('register'))
                     <x-ui.button variant="ghost" :href="route('register')" class="hidden whitespace-nowrap sm:inline-flex lg:hidden xl:inline-flex">Crear empresa</x-ui.button>
                 @endunless
-                {{-- En la presentación lleva a la tarjeta de acceso; en el resto, al login. La flecha va en un
+                {{-- En la presentación abre el diálogo de acceso; en el resto, lleva al login. La flecha va en un
                      span: .btn svg { display: block } ganaría a .hidden sobre el propio svg. --}}
                 <x-ui.button
-                    :href="$enPresentacion ? '#acceso' : route('login')"
+                    :href="route('login')"
                     class="whitespace-nowrap"
-                    :x-on:click="$enPresentacion ? '$nextTick(() => document.getElementById(\'email\')?.focus({ preventScroll: true }))' : false"
+                    :x-on:click.prevent="$enPresentacion ? '$dispatch(\'open-dialog\', \'acceso\')' : false"
                 >
                     <span class="sm:hidden">Ingresar</span><span class="hidden sm:inline">Iniciar sesión</span>
                     <span class="hidden sm:inline"><x-ui.icon name="arrow-right" :size="14" /></span>

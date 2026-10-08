@@ -21,8 +21,10 @@ document.addEventListener('alpine:init', () => {
             document.addEventListener('visibilitychange', () => (document.hidden ? this.detener() : this.programar()));
         },
 
+        // Solo lo llaman las flechas y los puntos: quien navega a mano detiene el avance automático para siempre.
         ir(indice) {
             this.actual = (indice + this.total) % this.total;
+            this.reproduciendo = false;
             this.programar();
         },
 
@@ -32,11 +34,6 @@ document.addEventListener('alpine:init', () => {
 
         anterior() {
             this.ir(this.actual - 1);
-        },
-
-        alternar() {
-            this.reproduciendo = ! this.reproduciendo;
-            this.programar();
         },
 
         suspender(valor) {

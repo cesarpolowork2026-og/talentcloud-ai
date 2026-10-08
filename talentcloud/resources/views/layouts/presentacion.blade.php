@@ -1,6 +1,8 @@
 {{--
-    Página de presentación (/ y /login): qué es TalentCloud AI, sus pantallas y
-    el inicio de sesión fijo en el hero. $slot es el formulario de login.
+    Página de presentación (/ y /login): qué es TalentCloud AI y sus pantallas.
+    $slot es el formulario de login, en un diálogo con el fondo desenfocado que
+    abre "Iniciar sesión" de la cabecera; en /login se abre al cargar (allí llevan
+    el middleware auth, el cierre de sesión y "Postular" de la bolsa de empleos).
 --}}
 @php
     $diapositivas = [
@@ -29,12 +31,12 @@
 </head>
 <body class="antialiased">
 <div class="presentacion min-h-screen bg-bg" x-data="{ seccion: 'inicio' }">
-    <a href="#acceso" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:shadow-md">Ir al inicio de sesión</a>
+    <a href="{{ route('login') }}" x-on:click.prevent="$dispatch('open-dialog', 'acceso')" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:shadow-md">Ir al inicio de sesión</a>
 
     <x-presentacion.cabecera en-presentacion />
 
     <main>
-        {{-- Hero: mensaje, pantallas de la app y acceso. --}}
+        {{-- Hero: mensaje y pantallas de la app. --}}
         <section id="inicio" class="mx-auto max-w-[1480px] px-4 pb-16 pt-10 sm:px-8 xl:pt-14" x-intersect.margin.-45%.0px.-45%.0px="seccion = 'inicio'">
             <div class="presentacion-hero">
                 <div class="presentacion-texto">
@@ -58,12 +60,6 @@
                 </ul>
 
                 <x-presentacion.carrusel class="presentacion-pantallas" :diapositivas="$diapositivas" />
-
-                <div id="acceso" class="presentacion-acceso">
-                    <x-ui.card elev="lg" class="!bg-white !p-6">
-                        {{ $slot }}
-                    </x-ui.card>
-                </div>
             </div>
         </section>
 
@@ -175,6 +171,17 @@
     </main>
 
     <x-presentacion.pie />
+
+    {{-- Iniciar sesión: ventana superpuesta; foco atrapado dentro, Esc o clic fuera para cerrar. --}}
+    <x-ui.dialog
+        name="acceso"
+        title="Iniciar sesión"
+        max-width="440px"
+        class="dialog-backdrop-desenfocado"
+        :x-init="request()->routeIs('login') ? '$nextTick(() => open = true)' : false"
+    >
+        {{ $slot }}
+    </x-ui.dialog>
 </div>
 @livewireScripts
 </body>

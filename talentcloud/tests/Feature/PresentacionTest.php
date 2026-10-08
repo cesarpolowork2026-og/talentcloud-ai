@@ -52,3 +52,26 @@ it('dirige el mensaje del registro de postulante al candidato', function () {
     $this->get('/registro/postulante')->assertSee('Postula con tu CV y sigue cada proceso.');
     $this->get('/register')->assertSee('Encuentra el talento que necesitas.');
 });
+
+it('abre el inicio de sesión en una ventana con el fondo desenfocado, cerrada en la raíz', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->toContain('dialog-backdrop dialog-backdrop-desenfocado')
+        ->toContain('role="dialog"')
+        // "Iniciar sesión" de la cabecera abre la ventana en lugar de desplazar la página.
+        ->toContain("x-on:click.prevent=\"\$dispatch('open-dialog', 'acceso')\"")
+        // En la raíz no se abre sola.
+        ->not->toContain('open = true)');
+});
+
+it('abre la ventana de inicio de sesión al cargar /login', function () {
+    // Ahí llevan el middleware auth, el cierre de sesión y "Postular" de la bolsa de empleos.
+    expect($this->get('/login')->assertOk()->getContent())->toContain('open = true)');
+});
+
+it('no tiene botón de pausa: el carrusel se detiene al usarlo', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertDontSee('Pausar el carrusel')
+        ->assertSee('aria-label="Pantalla siguiente"', escape: false);
+});

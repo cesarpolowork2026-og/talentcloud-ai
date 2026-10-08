@@ -164,6 +164,9 @@
   .table tbody tr:hover { background: color-mix(in srgb, var(--color-text) 4%, transparent); }
 
   /* — dialog — */
+  /* TalentCloud: el diálogo de acceso desenfoca la página de presentación que queda detrás. */
+  .dialog-backdrop-desenfocado { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+
   .dialog-backdrop {
     position: fixed; inset: 0; display: grid; place-items: center;
     padding: var(--space-4);

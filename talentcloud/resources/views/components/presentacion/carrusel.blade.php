@@ -1,7 +1,10 @@
 {{--
     Carrusel de pantallas de la presentación. Las maquetas son ilustrativas
     (aria-hidden); lo que se anuncia es el texto de cada pantalla, en vivo solo
-    cuando el carrusel está en pausa (patrón WAI de carrusel).
+    cuando el carrusel ya no avanza solo (patrón WAI de carrusel).
+    Avance automático (WCAG 2.2.2) sin botón de pausa: se suspende con el puntero o el foco encima,
+    se detiene para siempre en cuanto se usa una flecha o un punto, y no arranca si el sistema pide
+    reducir el movimiento.
     diapositivas: list<array{maqueta: string, etiqueta: string, titulo: string, descripcion: string}>
 --}}
 @props(['diapositivas'])
@@ -37,7 +40,7 @@
         </div>
     </div>
 
-    {{-- Controles: anterior, una marca por pantalla, siguiente, pausa y posición. --}}
+    {{-- Controles: anterior, una marca por pantalla, siguiente y posición. --}}
     <div class="mt-4 flex flex-wrap items-center gap-1">
         <x-ui.button variant="ghost" icon x-on:click="anterior()" aria-label="Pantalla anterior">
             <x-ui.icon name="caret-left" />
@@ -59,10 +62,6 @@
         @endforeach
         <x-ui.button variant="ghost" icon x-on:click="siguiente()" aria-label="Pantalla siguiente">
             <x-ui.icon name="caret-right" />
-        </x-ui.button>
-        <x-ui.button variant="ghost" icon x-on:click="alternar()" x-bind:aria-label="reproduciendo ? 'Pausar el carrusel' : 'Reproducir el carrusel'" aria-label="Pausar el carrusel">
-            <span x-show="reproduciendo"><x-ui.icon name="pause" /></span>
-            <span x-show="! reproduciendo" style="display: none"><x-ui.icon name="play" /></span>
         </x-ui.button>
         <span class="ml-auto text-13 tabular-nums text-neutral-700" x-text="`${actual + 1} / ${total}`">1 / {{ $total }}</span>
     </div>

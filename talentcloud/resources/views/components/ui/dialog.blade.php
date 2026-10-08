@@ -28,8 +28,7 @@
     x-cloak
     x-transition.opacity.duration.150ms
     x-on:click.self="open = false"
-    class="dialog-backdrop"
-    {{ $attributes->whereDoesntStartWith('wire:model') }}
+    {{ $attributes->whereDoesntStartWith('wire:model')->class('dialog-backdrop') }}
 >
     <div
         class="dialog"
