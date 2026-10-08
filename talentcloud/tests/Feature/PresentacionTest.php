@@ -69,9 +69,11 @@ it('abre la ventana de inicio de sesión al cargar /login', function () {
     expect($this->get('/login')->assertOk()->getContent())->toContain('open = true)');
 });
 
-it('no tiene botón de pausa: el carrusel se detiene al usarlo', function () {
+it('no tiene botón de pausa: el carrusel solo se detiene al pulsar sus flechas o puntos', function () {
     $this->get('/')
         ->assertOk()
         ->assertDontSee('Pausar el carrusel')
+        // Ni el puntero ni el foco lo pausan: solo las flechas y los puntos.
+        ->assertDontSee('suspender(', escape: false)
         ->assertSee('aria-label="Pantalla siguiente"', escape: false);
 });

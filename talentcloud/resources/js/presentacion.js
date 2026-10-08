@@ -13,7 +13,6 @@ document.addEventListener('alpine:init', () => {
         actual: 0,
         total,
         reproduciendo: ! reducirMovimiento(),
-        suspendido: false,
         temporizador: null,
 
         init() {
@@ -36,15 +35,10 @@ document.addEventListener('alpine:init', () => {
             this.ir(this.actual - 1);
         },
 
-        suspender(valor) {
-            this.suspendido = valor;
-            this.programar();
-        },
-
         programar() {
             this.detener();
 
-            if (this.reproduciendo && ! this.suspendido) {
+            if (this.reproduciendo) {
                 this.temporizador = setInterval(() => {
                     this.actual = (this.actual + 1) % this.total;
                 }, intervalo);

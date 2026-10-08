@@ -2,9 +2,9 @@
     Carrusel de pantallas de la presentación. Las maquetas son ilustrativas
     (aria-hidden); lo que se anuncia es el texto de cada pantalla, en vivo solo
     cuando el carrusel ya no avanza solo (patrón WAI de carrusel).
-    Avance automático (WCAG 2.2.2) sin botón de pausa: se suspende con el puntero o el foco encima,
-    se detiene para siempre en cuanto se usa una flecha o un punto, y no arranca si el sistema pide
-    reducir el movimiento.
+    Avance automático sin botón de pausa: solo se detiene, para siempre, al pulsar una flecha o un
+    punto (decisión del usuario). No arranca si el sistema pide reducir el movimiento y no avanza
+    mientras la pestaña está oculta.
     diapositivas: list<array{maqueta: string, etiqueta: string, titulo: string, descripcion: string}>
 --}}
 @props(['diapositivas'])
@@ -16,10 +16,6 @@
     aria-roledescription="carrusel"
     aria-label="Pantallas de TalentCloud AI"
     x-data="carruselPresentacion({{ $total }}, 4000)"
-    x-on:mouseenter="suspender(true)"
-    x-on:mouseleave="suspender(false)"
-    x-on:focusin="suspender(true)"
-    x-on:focusout="suspender(false)"
 >
     {{-- Maquetas: dibujadas a 880×520 (con margen para la sombra) y escaladas al ancho disponible. --}}
     <div class="relative -m-[14px] overflow-hidden" style="aspect-ratio: 880 / 520" aria-hidden="true" x-data="maquetaEscalada(880, 520)">
