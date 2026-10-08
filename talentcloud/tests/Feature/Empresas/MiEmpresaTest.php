@@ -1,13 +1,18 @@
 <?php
 
+use App\Enums\EstadoEntrevista;
 use App\Enums\Rol;
 use App\Livewire\Auth\AceptarInvitacion;
 use App\Livewire\MiEmpresa\Panel;
 use App\Models\Empresa;
+use App\Models\Entrevista;
 use App\Models\Invitacion;
+use App\Models\Postulacion;
 use App\Models\User;
+use App\Models\Vacante;
 use App\Notifications\InvitacionRecibida;
 use App\Tenancy\EmpresaScope;
+use App\Tenancy\TenantContext;
 use App\Tenancy\VerificarAcceso;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -180,6 +185,41 @@ it('desactiva a un reclutador: pierde la sesión y no puede volver a ingresar', 
         ->assertHasErrors(['form.email']);
 
     $this->assertGuest();
+});
+
+function entrevistasDeMarta(Empresa $empresa, User $entrevistador, array $estados): void
+{
+    $postulacion = app(TenantContext::class)->ejecutarGlobal(
+        fn () => Postulacion::factory()->paraVacante(Vacante::factory()->deEmpresa($empresa)->create())->create()
+    );
+
+    foreach ($estados as $estado) {
+        Entrevista::factory()->create(['postulacion_id' => $postulacion->id, 'entrevistador_id' => $entrevistador->id, 'estado' => $estado]);
+    }
+}
+
+it('no desactiva a quien tiene entrevistas por realizar y explica qué hacer', function () {
+    entrevistasDeMarta($this->nimbus, $this->marta, [EstadoEntrevista::Pendiente, EstadoEntrevista::Confirmada]);
+
+    Livewire::test(Panel::class)
+        ->call('confirmarCambioUsuario', $this->marta->id)
+        ->call('cambiarEstadoUsuario')
+        ->assertHasErrors('usuario')
+        ->assertSee('Marta Solís tiene 2 entrevistas por realizar.')
+        ->assertSee('cancélalas o prográmalas con otra persona');
+
+    expect($this->marta->fresh()->estaActivo())->toBeTrue();
+});
+
+it('desactiva a quien solo tiene entrevistas realizadas o canceladas', function () {
+    entrevistasDeMarta($this->nimbus, $this->marta, [EstadoEntrevista::Completada, EstadoEntrevista::Cancelada]);
+
+    Livewire::test(Panel::class)
+        ->call('confirmarCambioUsuario', $this->marta->id)
+        ->call('cambiarEstadoUsuario')
+        ->assertHasNoErrors();
+
+    expect($this->marta->fresh()->estaActivo())->toBeFalse();
 });
 
 it('no permite a la cuenta de empresa desactivarse a sí misma', function () {
