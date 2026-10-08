@@ -96,7 +96,8 @@ Estado: {{ $seleccionada->estado->etiqueta() }}</p>
     </x-ui.dialog>
 
     {{-- Confirmación de Suspender / Activar con los textos del prototipo --}}
-    @php($activa = $seleccionada?->estaActiva() ?? true)
+    {{-- El texto sigue a lo que se confirmó al abrir, no al estado que se relee en cada render. --}}
+    @php($activa = $suspenderSeleccionada)
     <x-ui.confirm
         wire:model="mostrarConfirmacion"
         :title="($activa ? 'Suspender ' : 'Activar ').($seleccionada?->nombre ?? '')"

@@ -65,7 +65,7 @@ it('muestra el detalle con las competencias que identificó la IA', function () 
         ->assertSet('mostrarDetalle', true)
         ->assertSee('Estado: En revisión')
         ->assertSee('Postulación enviada el 2 sep.')
-        ->assertSee('La IA identificó en tu CV 2 de las 3 competencias que pide la vacante.');
+        ->assertSee('La IA identificó en tu CV 2 de 3 competencias que pide la vacante.');
 });
 
 it('muestra un descarte en un proceso abierto como "No seleccionado"', function () {
@@ -97,7 +97,7 @@ it('elimina la cuenta con todos sus datos y archivos', function () {
     Cv::factory()->procesado()->create(['candidato_id' => $this->candidato->id, 'disco' => 'cvs', 'ruta' => 'candidatos/marco.pdf']);
     $this->marco->notify(new AvisoGeneral('Tu CV fue analizado.'));
     app(TenantContext::class)->ejecutarGlobal(function () {
-        Entrevista::factory()->create(['postulacion_id' => $this->backend->id]);
+        $this->entrevista = Entrevista::factory()->create(['postulacion_id' => $this->backend->id, 'inicia_at' => '2026-12-01 10:00']);
         $actividad = new Actividad(['tipo' => 'postulacion.etapa', 'descripcion' => 'Marco Díaz avanzó a la etapa de entrevista.']);
         $actividad->empresa_id = $this->backend->empresa_id;
         $actividad->sujeto()->associate($this->backend);
@@ -112,7 +112,10 @@ it('elimina la cuenta con todos sus datos y archivos', function () {
         ->and(Postulacion::sinFiltroDeEmpresa()->where('candidato_id', $this->candidato->id)->exists())->toBeFalse()
         ->and(Entrevista::sinFiltroDeEmpresa()->count())->toBe(0)
         ->and(Actividad::sinFiltroDeEmpresa()->where('descripcion', 'like', '%Marco Díaz%')->exists())->toBeFalse()
-        ->and(DatabaseNotification::count())->toBe(0)
+        // Solo queda el aviso al entrevistador de que su entrevista se canceló, sin datos de la persona.
+        ->and(DatabaseNotification::pluck('data')->map(fn ($d) => is_array($d) ? $d['texto'] : json_decode($d, true)['texto'])->all())
+        ->toBe(['Se canceló tu entrevista del 1 dic · 10:00 para Desarrollador Backend: la persona candidata eliminó su cuenta.'])
+        ->and(DatabaseNotification::first()->notifiable_id)->toBe($this->entrevista->entrevistador_id)
         ->and(Candidato::find($otro->id))->not->toBeNull();
     Storage::disk('cvs')->assertMissing('candidatos/marco.pdf');
     $this->assertGuest();

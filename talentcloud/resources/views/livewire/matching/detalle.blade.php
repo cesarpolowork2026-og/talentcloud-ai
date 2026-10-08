@@ -85,7 +85,7 @@
                                 <p class="m-0 mt-2 text-13 text-neutral-600">{{ $requisito->motivo }}</p>
                             @endif
                             @if ($puedeEditar)
-                                <x-ui.button variant="ghost" size="sm" class="mt-2 self-start" wire:click="marcarIncorrecto({{ $requisito->requisitoId }})">
+                                <x-ui.button variant="ghost" size="sm" class="mt-2 self-start" wire:click="marcarIncorrecto({{ $requisito->requisitoId }}, {{ $marcado ? 'false' : 'true' }})">
                                     {{ $marcado ? 'Quitar marca de incorrecto' : 'Marcar como incorrecto' }}
                                 </x-ui.button>
                             @endif

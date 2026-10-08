@@ -87,6 +87,14 @@ it('muestra el dashboard del prototipo', function () {
         ->assertDontSee('Vela Studio creó la vacante');
 });
 
+it('abre el detalle del match promedio también con el teclado', function () {
+    $html = Livewire::test(Panel::class)->html();
+
+    // Solo el indicador con acción es un botón; los demás siguen siendo tarjetas.
+    expect($html)->toMatch('/<button\s[^>]*type="button"[^>]*>\s*<span class="card-kicker block">Match promedio<\/span>/')
+        ->and(substr_count($html, '<span class="card-kicker block">'))->toBe(4);
+});
+
 it('explica el match promedio como en el prototipo', function () {
     Livewire::test(Panel::class)
         ->set('mostrarDetalleDelMatch', true)

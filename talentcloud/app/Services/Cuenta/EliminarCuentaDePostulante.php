@@ -3,9 +3,13 @@
 namespace App\Services\Cuenta;
 
 use App\Models\Actividad;
+use App\Models\Candidato;
 use App\Models\Cv;
 use App\Models\Postulacion;
 use App\Models\User;
+use App\Notifications\AvisoGeneral;
+use App\Services\Entrevistas\EntrevistasPorRealizar;
+use App\Support\Formato;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -23,6 +27,7 @@ class EliminarCuentaDePostulante
     {
         $candidato = $usuario->candidato;
         $archivos = $candidato?->cvs()->get(['disco', 'ruta']) ?? collect();
+        $avisos = $candidato !== null ? $this->avisosDeEntrevistasCanceladas($candidato) : [];
 
         DB::transaction(function () use ($usuario, $candidato) {
             if ($candidato !== null) {
@@ -44,8 +49,39 @@ class EliminarCuentaDePostulante
             $usuario->delete();
         });
 
-        // Los archivos, después de confirmar: si algo falló antes, no se pierde nada.
+        // Los archivos y los avisos, después de confirmar: si algo falló antes, no se pierde nada.
         $archivos->each(fn (Cv $cv) => $this->borrarArchivo($cv));
+        foreach ($avisos as [$entrevistador, $texto]) {
+            $entrevistador->notify(new AvisoGeneral($texto));
+        }
+    }
+
+    /**
+     * Sus entrevistas por realizar desaparecen con la cuenta: se avisa a cada
+     * entrevistador para que no la espere. Sin el nombre ni ningún otro dato de
+     * la persona, que pidió borrarlos.
+     *
+     * @return list<array{0: User, 1: string}>
+     */
+    private function avisosDeEntrevistasCanceladas(Candidato $candidato): array
+    {
+        $entrevistas = EntrevistasPorRealizar::consulta()
+            ->whereHas('postulacion', fn ($q) => $q->withoutGlobalScopes()->where('candidato_id', $candidato->id))
+            ->with(['entrevistador', 'postulacion' => fn ($q) => $q->withoutGlobalScopes()->with(['vacante' => fn ($v) => $v->withoutGlobalScopes()])])
+            ->get();
+
+        $avisos = [];
+
+        foreach ($entrevistas as $entrevista) {
+            $entrevistador = $entrevista->entrevistador;
+
+            if ($entrevistador !== null && $entrevistador->estaActivo()) {
+                $avisos[] = [$entrevistador, 'Se canceló tu entrevista del '.Formato::fechaHora($entrevista->inicia_at)
+                    .' para '.$entrevista->postulacion?->vacante?->titulo.': la persona candidata eliminó su cuenta.'];
+            }
+        }
+
+        return $avisos;
     }
 
     private function borrarArchivo(Cv $cv): void

@@ -30,7 +30,7 @@ class MoverPostulacion
 
         // Retirarse es decisión del candidato: la empresa no puede devolverla al proceso.
         if ($postulacion->estaRetirada() && $destino !== EtapaPostulacion::Descartado) {
-            throw new OperacionNoPermitida($postulacion->candidato?->nombre.' retiró su postulación: no se puede volver a mover.');
+            throw new OperacionNoPermitida($postulacion->loadMissing('candidato')->candidato?->nombre.' retiró su postulación: no se puede volver a mover.');
         }
 
         DB::transaction(function () use ($postulacion, $origen, $destino, $posicion): void {

@@ -58,7 +58,7 @@
 Estado: {{ EstadoDeMiPostulacion::de($seleccionada)->etiqueta() }} — {{ EstadoDeMiPostulacion::de($seleccionada)->explicacion() }}
 Postulación enviada el {{ Formato::fechaCorta($seleccionada->created_at) }}.@if ($competencias)
 
-La IA identificó en tu CV {{ $competencias[0] }} de las {{ $competencias[1] }} competencias que pide la vacante.@endif</p>
+La IA identificó en tu CV {{ $competencias[0] }} de {{ $competencias[1] }} {{ $competencias[1] === 1 ? 'competencia' : 'competencias' }} que pide la vacante.@endif</p>
             @php($susEntrevistas = $entrevistasPorPostulacion->get($seleccionada->id, collect()))
             @if ($susEntrevistas->isNotEmpty())
                 <h3 class="mb-0 mt-4 text-15">Entrevistas</h3>

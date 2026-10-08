@@ -88,7 +88,9 @@ it('marca y desmarca un resultado como incorrecto sin cambiar el matching', func
     $antes = $this->postulacion->fresh()->match_score;
 
     Livewire::test(Detalle::class, ['postulacion' => $this->postulacion])
-        ->call('marcarIncorrecto', $this->kubernetes->id)
+        ->call('marcarIncorrecto', $this->kubernetes->id, true)
+        // Doble envío: la marca queda puesta, no se quita.
+        ->call('marcarIncorrecto', $this->kubernetes->id, true)
         ->assertSee('Marcaste este resultado como incorrecto.')
         ->assertSee('Quitar marca de incorrecto');
 
@@ -97,7 +99,7 @@ it('marca y desmarca un resultado como incorrecto sin cambiar el matching', func
         ->and($this->postulacion->fresh()->match_score)->toBe($antes);
 
     Livewire::test(Detalle::class, ['postulacion' => $this->postulacion])
-        ->call('marcarIncorrecto', $this->kubernetes->id)
+        ->call('marcarIncorrecto', $this->kubernetes->id, false)
         ->assertDontSee('Marcaste este resultado como incorrecto.');
 
     expect(MatchFeedback::count())->toBe(0);
@@ -107,7 +109,7 @@ it('no marca requisitos de otra vacante', function () {
     $otro = Requisito::factory()->create(['vacante_id' => Vacante::factory()->deEmpresa($this->nimbus)->create()->id]);
 
     Livewire::test(Detalle::class, ['postulacion' => $this->postulacion])
-        ->call('marcarIncorrecto', $otro->id)
+        ->call('marcarIncorrecto', $otro->id, true)
         ->assertNotFound();
 });
 

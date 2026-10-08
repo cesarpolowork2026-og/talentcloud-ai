@@ -254,7 +254,7 @@ class DemoSeeder extends Seeder
         $this->a(16, '09:30', $diego);
         $entrevistaLucia = $this->programar($diego, $lucia, $diego, $this->dia(-13, '09:30'));
         $this->a(15, '10:00', $admin);
-        app(CambiarEstadoEmpresa::class)->ejecutar($orbita->fresh());
+        app(CambiarEstadoEmpresa::class)->suspender($orbita);
 
         $this->a(15, '18:00', $diego);
         app(CambiarEstadoEntrevista::class)->confirmar($entrevistaLucia);

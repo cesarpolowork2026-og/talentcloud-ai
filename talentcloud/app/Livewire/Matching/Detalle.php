@@ -45,7 +45,8 @@ class Detalle extends Component
         }
     }
 
-    public function marcarIncorrecto(int $requisitoId, MarcarResultadoIncorrecto $marcar): void
+    /** $marcar: lo que dice el botón pulsado (marcar o quitar la marca), no un "alternar". */
+    public function marcarIncorrecto(int $requisitoId, bool $marcar, MarcarResultadoIncorrecto $marcas): void
     {
         $postulacion = $this->postulacion();
         $this->authorize('update', $postulacion);
@@ -56,7 +57,7 @@ class Detalle extends Component
         /** @var User $user */
         $user = auth()->user();
 
-        $marcar->alternar($postulacion, $requisito->id, $user);
+        $marcar ? $marcas->marcar($postulacion, $requisito->id, $user) : $marcas->quitar($postulacion, $requisito->id, $user);
     }
 
     public function recalcular(): void

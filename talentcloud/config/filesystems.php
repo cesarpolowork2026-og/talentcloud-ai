@@ -33,7 +33,9 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Sin ruta /storage/{path}: nadie la usa y su carpeta contiene la de los CV
+            // (que solo se descargan por DescargarCvController tras autorizar).
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

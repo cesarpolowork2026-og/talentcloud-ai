@@ -50,6 +50,10 @@ class Listado extends Component
     #[Locked]
     public ?int $empresaSeleccionada = null;
 
+    /** Lo que se confirmó al abrir el diálogo: suspender (true) o activar (false). */
+    #[Locked]
+    public bool $suspenderSeleccionada = true;
+
     public function mount(): void
     {
         $this->authorize('viewAny', Empresa::class);
@@ -99,6 +103,7 @@ class Listado extends Component
         $this->authorize('cambiarEstado', $empresa = $this->empresa($id));
 
         $this->empresaSeleccionada = $empresa->id;
+        $this->suspenderSeleccionada = $empresa->estaActiva();
         $this->mostrarConfirmacion = true;
     }
 
@@ -107,7 +112,7 @@ class Listado extends Component
         $empresa = $this->empresa((int) $this->empresaSeleccionada);
         $this->authorize('cambiarEstado', $empresa);
 
-        $cambiar->ejecutar($empresa);
+        $this->suspenderSeleccionada ? $cambiar->suspender($empresa) : $cambiar->activar($empresa);
 
         $this->mostrarConfirmacion = false;
     }

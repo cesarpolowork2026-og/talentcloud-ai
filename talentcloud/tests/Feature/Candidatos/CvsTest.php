@@ -13,6 +13,7 @@ use App\Services\Cvs\SubirCv;
 use Database\Seeders\Demo\DocumentosDePrueba;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 const TEXTO_CV = "Elena Ruiz\nDesarrolladora backend con 5 años de experiencia con Java y Spring Boot.\nDiseñé esquemas en PostgreSQL.";
@@ -119,4 +120,11 @@ it('permite al postulante descargar su propio CV', function () {
     $cv = app(SubirCv::class)->ejecutar($candidato, UploadedFile::fake()->createWithContent('Yo.docx', DocumentosDePrueba::docx(TEXTO_CV)), $user);
 
     $this->actingAs($user)->get(route('cvs.descargar', $cv))->assertOk();
+});
+
+it('no expone la carpeta privada (ni los CV) por la ruta /storage', function () {
+    // Los discos privados no registran rutas: los CV solo se descargan tras autorizar.
+    expect(collect(Route::getRoutes()->getRoutes())->map->uri()->filter(fn (string $uri) => str_starts_with($uri, 'storage/')))->toBeEmpty();
+
+    $this->get('/storage/cvs/cualquier.pdf')->assertNotFound();
 });
