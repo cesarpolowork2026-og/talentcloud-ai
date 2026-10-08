@@ -9,7 +9,7 @@
         <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
             @foreach ($vacantes as $vacante)
                 <x-vacantes.tarjeta-publica :vacante="$vacante" :href="route('empleos.show', $vacante->id)" titulo="h3" class="!bg-white">
-                    <x-ui.button size="sm" :href="route('empleos.show', $vacante->id)" aria-label="Ver la vacante {{ $vacante->titulo }}">Ver vacante</x-ui.button>
+                    <x-ui.button size="sm" :href="route('empleos.show', $vacante->id)" aria-label="Ver vacante: {{ $vacante->titulo }}">Ver vacante</x-ui.button>
                 </x-vacantes.tarjeta-publica>
             @endforeach
         </div>

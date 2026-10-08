@@ -15,7 +15,7 @@
         <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
             @foreach ($filas as $vacante)
                 <x-vacantes.tarjeta-publica :vacante="$vacante" :href="route('empleos.show', $vacante->id)" wire:key="empleo-{{ $vacante->id }}">
-                    <x-ui.button size="sm" :href="route('empleos.show', $vacante->id)" wire:navigate aria-label="Ver la vacante {{ $vacante->titulo }}">Ver vacante</x-ui.button>
+                    <x-ui.button size="sm" :href="route('empleos.show', $vacante->id)" wire:navigate aria-label="Ver vacante: {{ $vacante->titulo }}">Ver vacante</x-ui.button>
                 </x-vacantes.tarjeta-publica>
             @endforeach
         </div>

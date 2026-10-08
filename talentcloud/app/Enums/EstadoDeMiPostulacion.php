@@ -53,6 +53,21 @@ enum EstadoDeMiPostulacion: string
         };
     }
 
+    /** Qué significa para el postulante, en una frase (detalle de "Mis postulaciones"). */
+    public function explicacion(): string
+    {
+        return match ($this) {
+            self::Postulado => 'La empresa recibió tu postulación.',
+            self::EnRevision => 'La empresa está revisando tu perfil.',
+            self::Entrevista => 'Estás en la etapa de entrevistas.',
+            self::Oferta => 'Estás en la etapa final del proceso.',
+            self::Contratado => '¡Felicidades! La empresa te eligió para este puesto.',
+            self::NoSeleccionado => 'La empresa siguió con otros perfiles. Puedes postular a otras vacantes.',
+            self::Cerrada => 'La vacante cerró y el proceso terminó.',
+            self::Retirada => 'Retiraste tu postulación: ya no participas en este proceso.',
+        };
+    }
+
     /** El postulante puede retirarse mientras su proceso sigue abierto. */
     public function puedeRetirarse(): bool
     {

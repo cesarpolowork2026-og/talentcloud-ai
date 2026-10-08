@@ -7,6 +7,7 @@ use App\Enums\Modalidad;
 use App\Enums\TipoRequisito;
 use App\Jobs\CalcularMatch;
 use App\Livewire\Postulante\DetalleVacante;
+use App\Livewire\Postulante\MiCurriculo;
 use App\Livewire\Postulante\MisPostulaciones;
 use App\Livewire\Postulante\Vacantes;
 use App\Models\Actividad;
@@ -23,9 +24,12 @@ use App\Repositories\Contracts\CandidatoRepository;
 use App\Services\Postulaciones\PostularCandidato;
 use App\Services\Postulaciones\PostularmeAVacante;
 use App\Tenancy\TenantContext;
+use Database\Seeders\Demo\DocumentosDePrueba;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 /*
@@ -274,3 +278,40 @@ it('no repite la ubicación cuando coincide con la modalidad', function (?string
     'repetida' => ['remoto', 'Remoto'],
     'sin ubicación' => [null, 'Remoto'],
 ]);
+
+// — Experiencia del postulante —
+
+it('marca los requisitos de la tarjeta como un grupo con nombre accesible', function () {
+    Livewire::test(Vacantes::class)->assertSeeHtml('role="group" aria-label="Requisitos obligatorios"');
+});
+
+it('sube el CV desde la propia vacante y la página espera su análisis para postular', function () {
+    Storage::fake('cvs');
+    $this->cv->delete();
+
+    Livewire::test(DetalleVacante::class, ['id' => $this->backend->id])
+        ->assertSee('Para postular necesitas subir tu CV.')
+        ->assertSeeLivewire(MiCurriculo::class)
+        ->assertDontSee('Postular con mi CV');
+
+    Livewire::test(MiCurriculo::class, ['soloSubida' => true])
+        ->assertSee('Subir mi CV')
+        ->set('archivoCv', UploadedFile::fake()->createWithContent('CV_MarcoDiaz.pdf', DocumentosDePrueba::pdf('Java y Spring Boot.')))
+        ->call('subir')
+        ->assertHasNoErrors()
+        ->assertDispatched('cv-subido');
+
+    // Con la cola simulada, el CV queda pendiente de análisis: la vacante lo indica y espera.
+    Livewire::test(DetalleVacante::class, ['id' => $this->backend->id])
+        ->assertSee('Tu CV se está analizando. Podrás postular en unos segundos.');
+});
+
+it('si la vacante a la que postuló cierra mientras la mira, lleva a sus postulaciones', function () {
+    $pantalla = Livewire::test(DetalleVacante::class, ['id' => $this->backend->id])->call('confirmar')->call('postular');
+    app(TenantContext::class)->ejecutarGlobal(fn () => $this->backend->update(['estado' => EstadoVacante::Cerrada]));
+
+    $pantalla->call('$refresh')
+        ->assertSee('Esta vacante ya no recibe postulaciones.')
+        ->assertSee('Tu postulación sigue en «Mis postulaciones», con su estado.')
+        ->assertSee('Ver mis postulaciones');
+});

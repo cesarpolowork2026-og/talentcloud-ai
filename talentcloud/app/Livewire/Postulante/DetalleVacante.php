@@ -9,6 +9,7 @@ use App\Services\Postulaciones\PostularmeAVacante;
 use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
@@ -59,6 +60,10 @@ class DetalleVacante extends Component
 
         $this->postulado = true;
     }
+
+    /** El CV se subió desde esta misma página: se vuelve a pintar (y a esperar su análisis). */
+    #[On('cv-subido')]
+    public function cvSubido(): void {}
 
     public function render(VacanteRepository $vacantes): View
     {

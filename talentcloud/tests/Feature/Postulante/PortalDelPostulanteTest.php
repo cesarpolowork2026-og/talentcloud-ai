@@ -65,7 +65,7 @@ it('muestra el detalle con las competencias que identificó la IA', function () 
         ->assertSet('mostrarDetalle', true)
         ->assertSee('Estado: En revisión')
         ->assertSee('Postulación enviada el 2 sep.')
-        ->assertSee('La IA identificó 2 de 3 competencias requeridas en tu CV.');
+        ->assertSee('La IA identificó en tu CV 2 de las 3 competencias que pide la vacante.');
 });
 
 it('muestra un descarte en un proceso abierto como "No seleccionado"', function () {
@@ -122,4 +122,25 @@ it('pide la contraseña para eliminar la cuenta', function () {
     Volt::test('profile.delete-user-form')->set('password', 'incorrecta')->call('deleteUser')->assertHasErrors(['password']);
 
     expect(User::find($this->marco->id))->not->toBeNull();
+});
+
+// — Experiencia del postulante —
+
+it('explica en el detalle qué significa el estado de la postulación', function () {
+    actuarComo($this->marco);
+
+    Livewire::test(MisPostulaciones::class)
+        ->call('verDetalle', $this->backend->id)
+        ->assertSee('Estado: En revisión — La empresa está revisando tu perfil.')
+        ->call('verDetalle', $this->devops->id)
+        ->assertSee('Estado: Cerrada — La vacante cerró y el proceso terminó.');
+});
+
+it('deja descargar su propio CV desde Mi currículo', function () {
+    $cv = Cv::factory()->procesado()->create(['candidato_id' => $this->candidato->id, 'nombre_original' => 'CV_MarcoDiaz.pdf']);
+
+    $this->get('/postulante/postulaciones')
+        ->assertOk()
+        ->assertSee('Descargar mi CV')
+        ->assertSee(route('cvs.descargar', $cv), false);
 });

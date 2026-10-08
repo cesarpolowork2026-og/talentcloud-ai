@@ -21,7 +21,7 @@
     </p>
 
     @if ($obligatorios->isNotEmpty())
-        <div class="card-meta flex-wrap" aria-label="Requisitos obligatorios">
+        <div class="card-meta flex-wrap" role="group" aria-label="Requisitos obligatorios">
             @foreach ($obligatorios->take(4) as $requisito)
                 <x-ui.tag tone="outline">{{ $requisito->competencia?->nombre }}</x-ui.tag>
             @endforeach

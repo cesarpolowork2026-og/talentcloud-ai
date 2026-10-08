@@ -6,7 +6,12 @@
     @if ($vacante === null)
         {{-- Se cerró (o su empresa se suspendió) mientras el postulante la miraba. --}}
         <x-ui.empty-state icon="briefcase" message="Esta vacante ya no recibe postulaciones.">
-            <x-ui.button class="mt-4" :href="route('postulante.vacantes')" wire:navigate>Ver otras vacantes</x-ui.button>
+            @if ($yaPostulo)
+                <p class="m-0 mt-2 text-14 text-neutral-800">Tu postulación sigue en «Mis postulaciones», con su estado.</p>
+                <x-ui.button class="mt-4" :href="route('postulante.postulaciones')" wire:navigate>Ver mis postulaciones</x-ui.button>
+            @else
+                <x-ui.button class="mt-4" :href="route('postulante.vacantes')" wire:navigate>Ver otras vacantes</x-ui.button>
+            @endif
         </x-ui.empty-state>
     @else
         <x-ui.page-header
@@ -57,7 +62,8 @@
                     @if ($cvListo)
                         <x-ui.button variant="primary" block wire:click="confirmar">Postular con mi CV</x-ui.button>
                     @elseif (! $cvAnalizandose)
-                        <x-ui.button :href="route('postulante.postulaciones')" wire:navigate>Ir a Mi currículo</x-ui.button>
+                        {{-- Sube el CV aquí mismo: al terminar el análisis aparece "Postular con mi CV". --}}
+                        <livewire:postulante.mi-curriculo solo-subida />
                     @endif
                 @endif
             </x-ui.card>

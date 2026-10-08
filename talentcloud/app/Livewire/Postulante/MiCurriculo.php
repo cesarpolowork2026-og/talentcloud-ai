@@ -7,6 +7,7 @@ use App\Models\Candidato;
 use App\Models\User;
 use App\Services\Cvs\SubirCv;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -17,6 +18,10 @@ class MiCurriculo extends Component
     use WithFileUploads;
 
     public bool $mostrarSubida = false;
+
+    /** Solo el botón y el diálogo de subida (en el detalle de una vacante, para postular sin salir). */
+    #[Locked]
+    public bool $soloSubida = false;
 
     /** @var TemporaryUploadedFile|null */
     public $archivoCv = null;
@@ -39,6 +44,9 @@ class MiCurriculo extends Component
 
         $this->reset('archivoCv');
         $this->mostrarSubida = false;
+
+        // Quien espera un CV listo (el detalle de una vacante) vuelve a mirarlo.
+        $this->dispatch('cv-subido');
     }
 
     public function reintentar(SubirCv $cvs): void

@@ -55,10 +55,10 @@
         @if ($seleccionada)
             @php($competencias = MisPostulaciones::competenciasIdentificadas($seleccionada))
             <p class="m-0 whitespace-pre-line">{{ $seleccionada->vacante?->empresa?->nombre }}
-Estado: {{ EstadoDeMiPostulacion::de($seleccionada)->etiqueta() }}
+Estado: {{ EstadoDeMiPostulacion::de($seleccionada)->etiqueta() }} — {{ EstadoDeMiPostulacion::de($seleccionada)->explicacion() }}
 Postulación enviada el {{ Formato::fechaCorta($seleccionada->created_at) }}.@if ($competencias)
 
-La IA identificó {{ $competencias[0] }} de {{ $competencias[1] }} competencias requeridas en tu CV.@endif</p>
+La IA identificó en tu CV {{ $competencias[0] }} de las {{ $competencias[1] }} competencias que pide la vacante.@endif</p>
             @php($susEntrevistas = $entrevistasPorPostulacion->get($seleccionada->id, collect()))
             @if ($susEntrevistas->isNotEmpty())
                 <h3 class="mb-0 mt-4 text-15">Entrevistas</h3>
