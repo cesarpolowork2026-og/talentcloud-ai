@@ -15,3 +15,6 @@ __pycache__/
 coverage.xml
 talentcloud-ai/.env
 .playwright-mcp/
+
+# Manual de usuario: se mantiene solo en local (capturas, HTML y PDF)
+/docs/manual/

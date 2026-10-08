@@ -94,6 +94,7 @@ it('suspende y reactiva una empresa con confirmación', function () {
         ->assertSet('mostrarConfirmacion', true)
         ->assertSee('Suspender Nimbus Corp')
         ->assertSee('La empresa y sus usuarios perderán acceso a la plataforma de inmediato.')
+        ->assertSee('Sus vacantes dejan de verse y sus procesos quedan en pausa; los candidatos no reciben aviso.')
         ->call('cambiarEstado')
         // Doble confirmación: sigue suspendida, no se reactiva.
         ->call('cambiarEstado');

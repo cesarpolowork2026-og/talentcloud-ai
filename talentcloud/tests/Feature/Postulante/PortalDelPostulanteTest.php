@@ -74,10 +74,26 @@ it('muestra un descarte en un proceso abierto como "No seleccionado"', function 
     Livewire::test(MisPostulaciones::class)->assertSee('No seleccionado')->assertDontSee('Descartado');
 });
 
-it('muestra "Cerrada" cuando la vacante cerró, aunque haya sido descartado', function () {
+it('muestra "No seleccionado" a quien se descartó, aunque después cierre la vacante', function () {
+    // Es lo que se le avisó: la pantalla no puede decir otra cosa después.
     $this->devops->update(['etapa' => EtapaPostulacion::Descartado]);
 
-    Livewire::test(MisPostulaciones::class)->assertSeeHtml('>Cerrada<')->assertDontSee('No seleccionado');
+    Livewire::test(MisPostulaciones::class)->assertSee('No seleccionado')->assertDontSeeHtml('>Cerrada<');
+});
+
+it('muestra "Cerrada" a quien seguía en el proceso cuando cerró la vacante', function () {
+    $this->devops->update(['etapa' => EtapaPostulacion::EnRevision]);
+
+    Livewire::test(MisPostulaciones::class)->assertSeeHtml('>Cerrada<');
+});
+
+it('no muestra la Oferta antes de que la empresa la comunique: sigue en "Entrevista"', function () {
+    $this->backend->update(['etapa' => EtapaPostulacion::Oferta]);
+
+    Livewire::test(MisPostulaciones::class)
+        ->assertDontSee('Oferta')
+        ->call('verDetalle', $this->backend->id)
+        ->assertSee('Estado: Entrevista — Estás en la etapa de entrevistas.');
 });
 
 it('no abre postulaciones de otra persona', function () {

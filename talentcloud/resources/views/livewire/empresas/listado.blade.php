@@ -105,7 +105,7 @@ Estado: {{ $seleccionada->estado->etiqueta() }}</p>
         action="cambiarEstado"
     >
         {{ $activa
-            ? 'La empresa y sus usuarios perderán acceso a la plataforma de inmediato.'
+            ? 'La empresa y sus usuarios perderán acceso a la plataforma de inmediato. Sus vacantes dejan de verse y sus procesos quedan en pausa; los candidatos no reciben aviso.'
             : 'La empresa recuperará acceso a la plataforma.' }}
     </x-ui.confirm>
 

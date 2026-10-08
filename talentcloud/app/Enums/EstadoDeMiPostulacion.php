@@ -6,10 +6,12 @@ use App\Models\Postulacion;
 
 /**
  * Estado de una postulación tal como lo ve el postulante ("Mis postulaciones").
- * Traduce la etapa interna: con la vacante cerrada, el proceso se ve "Cerrada"
- * (como en el prototipo) salvo que haya sido contratado; un descarte en un
- * proceso abierto, con el término amable "No seleccionado". Si la retiró el
- * propio postulante, "Retirada" manda sobre todo lo demás.
+ * Traduce la etapa interna y coincide siempre con lo que se le avisó
+ * (aAvisar): un descarte es "No seleccionado" también si después cierra la
+ * vacante; "Cerrada", para quien seguía en el proceso al cerrarse. La Oferta
+ * es interna (la empresa la comunica en persona y puede cambiar): hasta que lo
+ * contraten o lo descarten, el postulante sigue viendo "Entrevista", la etapa
+ * en la que estuvo de verdad. Si la retiró él mismo, "Retirada" manda sobre todo.
  */
 enum EstadoDeMiPostulacion: string
 {
@@ -18,7 +20,6 @@ enum EstadoDeMiPostulacion: string
     case Postulado = 'postulado';
     case EnRevision = 'en_revision';
     case Entrevista = 'entrevista';
-    case Oferta = 'oferta';
     case Contratado = 'contratado';
     case NoSeleccionado = 'no_seleccionado';
     case Cerrada = 'cerrada';
@@ -29,8 +30,9 @@ enum EstadoDeMiPostulacion: string
         return match (true) {
             $postulacion->estaRetirada() => self::Retirada,
             $postulacion->etapa === EtapaPostulacion::Contratado => self::Contratado,
-            $postulacion->vacante?->estado === EstadoVacante::Cerrada => self::Cerrada,
             $postulacion->etapa === EtapaPostulacion::Descartado => self::NoSeleccionado,
+            $postulacion->vacante?->estado === EstadoVacante::Cerrada => self::Cerrada,
+            $postulacion->etapa === EtapaPostulacion::Oferta => self::Entrevista,
             default => self::from($postulacion->etapa->value),
         };
     }
@@ -60,7 +62,6 @@ enum EstadoDeMiPostulacion: string
             self::Postulado => 'La empresa recibió tu postulación.',
             self::EnRevision => 'La empresa está revisando tu perfil.',
             self::Entrevista => 'Estás en la etapa de entrevistas.',
-            self::Oferta => 'Estás en la etapa final del proceso.',
             self::Contratado => '¡Felicidades! La empresa te eligió para este puesto.',
             self::NoSeleccionado => 'La empresa siguió con otros perfiles. Puedes postular a otras vacantes.',
             self::Cerrada => 'La vacante cerró y el proceso terminó.',
@@ -71,7 +72,7 @@ enum EstadoDeMiPostulacion: string
     /** El postulante puede retirarse mientras su proceso sigue abierto. */
     public function puedeRetirarse(): bool
     {
-        return in_array($this, [self::Postulado, self::EnRevision, self::Entrevista, self::Oferta], true);
+        return in_array($this, [self::Postulado, self::EnRevision, self::Entrevista], true);
     }
 
     public function etiqueta(): string
@@ -80,7 +81,6 @@ enum EstadoDeMiPostulacion: string
             self::Postulado => 'Postulado',
             self::EnRevision => 'En revisión',
             self::Entrevista => 'Entrevista',
-            self::Oferta => 'Oferta',
             self::Contratado => 'Contratado',
             self::NoSeleccionado => 'No seleccionado',
             self::Cerrada => 'Cerrada',
@@ -92,7 +92,7 @@ enum EstadoDeMiPostulacion: string
     public function tono(): string
     {
         return match ($this) {
-            self::Oferta, self::Contratado => 'accent',
+            self::Contratado => 'accent',
             self::NoSeleccionado, self::Cerrada, self::Retirada => 'outline',
             default => 'neutral',
         };
