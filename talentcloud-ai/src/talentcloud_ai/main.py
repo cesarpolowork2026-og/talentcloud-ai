@@ -18,6 +18,9 @@ logger = logging.getLogger("talentcloud_ai")
 
 def crear_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or obtener_settings()
+    if settings.es_produccion and settings.api_key is None:
+        # Sin clave, cualquiera que alcance el servicio podría enviarle CV: en producción no se arranca.
+        raise RuntimeError("TALENTCLOUD_AI_API_KEY es obligatoria en producción.")
     logging.basicConfig(level=settings.log_level, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
     @asynccontextmanager

@@ -1,6 +1,7 @@
 import math
 from collections.abc import Callable
 
+import pytest
 from fastapi.testclient import TestClient
 
 from talentcloud_ai.api.dependencias import hoy
@@ -92,7 +93,7 @@ def test_el_embedder_determinista_es_estable_y_distingue_textos() -> None:
 
 
 def test_oculta_la_documentacion_en_produccion() -> None:
-    with TestClient(crear_app(configuracion(entorno="production"))) as cliente:
+    with TestClient(crear_app(configuracion(entorno="production", api_key="clave-de-prueba"))) as cliente:
         assert cliente.get("/docs").status_code == 404
         assert cliente.get("/openapi.json").status_code == 404
 
@@ -110,3 +111,9 @@ def test_no_filtra_detalles_de_errores_inesperados(
 
     assert respuesta.status_code == 500
     assert respuesta.json() == {"detail": "Error interno del servicio de IA."}
+
+
+def test_no_arranca_en_produccion_sin_clave_de_api() -> None:
+    with pytest.raises(RuntimeError, match="TALENTCLOUD_AI_API_KEY es obligatoria"):
+        # api_key=None explícito: el .env local podría traer una clave.
+        crear_app(configuracion(entorno="production", api_key=None))

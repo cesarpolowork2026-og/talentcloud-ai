@@ -106,3 +106,5 @@ tests/datos/       CV de demostración y copia del catálogo de competencias de 
   referencias, y cualquier línea con correo, teléfono, URL de perfil o rasgos personales (`extraccion/privacidad.py`):
   el matching no usa nombre, género, edad, foto ni lugar de nacimiento.
 - La documentación interactiva (`/docs`) se desactiva con `TALENTCLOUD_AI_ENTORNO=production`.
+- En producción el servicio no arranca sin `TALENTCLOUD_AI_API_KEY`: sin clave aceptaría peticiones de
+  cualquiera que lo alcance (fuera de producción, sin clave no la exige).
