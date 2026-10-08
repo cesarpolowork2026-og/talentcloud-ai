@@ -2,14 +2,12 @@
 
 namespace App\Livewire\Forms;
 
-use App\Enums\Rol;
 use App\Models\User;
 use App\Tenancy\VerificarAcceso;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Form;
 
@@ -22,9 +20,6 @@ class LoginForm extends Form
 
     public string $password = '';
 
-    /** "Ingresar como" del prototipo; por defecto Reclutador, como en el diseño. */
-    public string $rol = 'reclutador';
-
     public bool $remember = false;
 
     /**
@@ -35,7 +30,6 @@ class LoginForm extends Form
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            'rol' => ['required', Rule::enum(Rol::class)],
             'remember' => ['boolean'],
         ];
     }
@@ -48,12 +42,13 @@ class LoginForm extends Form
         return [
             'email' => 'correo electrónico',
             'password' => 'contraseña',
-            'rol' => 'rol',
         ];
     }
 
     /**
-     * Autentica las credenciales y comprueba que la cuenta tenga el rol elegido.
+     * Autentica las credenciales. No se elige rol (cambio sobre el "Ingresar como" del prototipo):
+     * cada cuenta tiene uno solo y entra a su pantalla de inicio (Navegacion::rutaInicio).
+     * Así un error tampoco confirma que la contraseña era correcta.
      *
      * @throws ValidationException
      */
@@ -70,19 +65,8 @@ class LoginForm extends Form
             ]);
         }
 
-        $rol = Rol::from($this->rol);
-
         /** @var User $user */
         $user = Auth::user();
-
-        if (! $user->tieneRol($rol)) {
-            Auth::guard('web')->logout();
-            RateLimiter::hit($this->throttleKey());
-
-            throw ValidationException::withMessages([
-                'form.rol' => 'Esta cuenta no tiene acceso como '.$rol->etiqueta().'.',
-            ]);
-        }
 
         // Usuario desactivado o empresa suspendida: no se abre la sesión.
         if (($motivo = VerificarAcceso::motivoDeBloqueo($user)) !== null) {

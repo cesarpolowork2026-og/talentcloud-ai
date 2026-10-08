@@ -76,7 +76,6 @@ it('bloquea una IP que prueba muchos correos distintos, aunque cada correo falle
     Volt::test('pages.auth.login')
         ->set('form.email', $usuario->email)
         ->set('form.password', 'password')
-        ->set('form.rol', 'reclutador')
         ->call('login')
         ->assertHasErrors('form.email');
 

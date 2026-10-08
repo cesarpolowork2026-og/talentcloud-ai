@@ -12,7 +12,7 @@ enum Rol: string
     case Reclutador = 'reclutador';
     case Postulante = 'postulante';
 
-    /** Etiqueta corta del selector "Ingresar como" del login. */
+    /** Etiqueta corta del rol. */
     public function etiqueta(): string
     {
         return match ($this) {
@@ -65,16 +65,5 @@ enum Rol: string
     public function esPersonalDeSeleccion(): bool
     {
         return $this !== self::Postulante;
-    }
-
-    /** @return array<string, string> valor => etiqueta, en el orden del login. */
-    public static function opciones(): array
-    {
-        $opciones = [];
-        foreach (self::cases() as $rol) {
-            $opciones[$rol->value] = $rol->etiqueta();
-        }
-
-        return $opciones;
     }
 }

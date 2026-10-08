@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Support\Navegacion;
 use Livewire\Volt\Volt;
 
 test('login screen can be rendered', function () {
@@ -9,8 +10,7 @@ test('login screen can be rendered', function () {
     $response
         ->assertOk()
         ->assertSeeVolt('pages.auth.login')
-        ->assertSee('Bienvenido a TalentCloud')
-        ->assertSee('Ingresar como');
+        ->assertSee('Bienvenido a TalentCloud');
 });
 
 test('users can authenticate using the login screen', function () {
@@ -29,35 +29,24 @@ test('users can authenticate using the login screen', function () {
     $this->assertAuthenticated();
 });
 
-test('el rol por defecto del login es Reclutador, como en el prototipo', function () {
-    Volt::test('pages.auth.login')->assertSet('form.rol', 'reclutador');
-});
-
-test('cada rol puede ingresar eligiendo su propio rol', function (string $rol) {
+test('cada rol ingresa sin elegirlo y llega a su pantalla de inicio', function (string $rol) {
     $user = User::factory()->{$rol}()->create();
 
     Volt::test('pages.auth.login')
         ->set('form.email', $user->email)
         ->set('form.password', 'password')
-        ->set('form.rol', $rol)
         ->call('login')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertRedirect(Navegacion::rutaInicio($user));
 
     $this->assertAuthenticatedAs($user);
 })->with(['admin', 'empresa', 'reclutador', 'postulante']);
 
-test('no se puede ingresar con un rol que la cuenta no tiene', function () {
-    $user = User::factory()->postulante()->create();
-
-    Volt::test('pages.auth.login')
-        ->set('form.email', $user->email)
-        ->set('form.password', 'password')
-        ->set('form.rol', 'reclutador')
-        ->call('login')
-        ->assertHasErrors(['form.rol'])
-        ->assertNoRedirect();
-
-    $this->assertGuest();
+test('el login no pide elegir el rol', function () {
+    $this->get('/login')
+        ->assertOk()
+        ->assertDontSee('Ingresar como')
+        ->assertDontSee('Admin SaaS');
 });
 
 test('users can not authenticate with invalid password', function () {
