@@ -40,6 +40,13 @@ return Application::configure(basePath: dirname(__DIR__))
             prepend: RoleMiddleware::class,
         );
 
+        // Detrás del balanceador o proxy de GCP (HTTPS terminado antes de llegar aquí): sin esto,
+        // Laravel creería que la petición es http y generaría enlaces y firmas http.
+        // TRUSTED_PROXIES: IP o rangos separados por comas, o "*" si solo el proxy alcanza la app.
+        if (filled($proxies = env('TRUSTED_PROXIES'))) {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
+
         // Con sesión iniciada, /, /login y el registro llevan a la pantalla de inicio del rol
         // (el postulante no tiene dashboard: por defecto recibiría un 403).
         $middleware->redirectUsersTo(fn (Request $request) => Navegacion::rutaInicio($request->user()));

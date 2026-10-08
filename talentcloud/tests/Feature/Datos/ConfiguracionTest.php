@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 /*
  * Configuración que no puede depender de que el entorno (local o GCP) la
@@ -28,5 +30,50 @@ it('está en español aunque el entorno no declare APP_LOCALE', function () {
                 $GLOBALS[$global]['APP_LOCALE'] = $valor;
             }
         }
+    }
+});
+
+/** Ejecuta $prueba con variables de entorno temporales y las restaura al terminar. */
+function conEntornoTemporal(array $variables, Closure $prueba): mixed
+{
+    $antes = [];
+
+    foreach ($variables as $nombre => $valor) {
+        $antes[$nombre] = [getenv($nombre), $_ENV[$nombre] ?? null, $_SERVER[$nombre] ?? null];
+        putenv("{$nombre}={$valor}");
+        $_ENV[$nombre] = $_SERVER[$nombre] = $valor;
+    }
+
+    try {
+        return $prueba();
+    } finally {
+        foreach ($antes as $nombre => [$env, $global, $servidor]) {
+            $env === false ? putenv($nombre) : putenv("{$nombre}={$env}");
+            $global === null ? $_ENV = array_diff_key($_ENV, [$nombre => 1]) : $_ENV[$nombre] = $global;
+            $servidor === null ? $_SERVER = array_diff_key($_SERVER, [$nombre => 1]) : $_SERVER[$nombre] = $servidor;
+        }
+    }
+}
+
+it('marca la cookie de sesión como segura en producción aunque no se declare', function () {
+    expect(conEntornoTemporal(['APP_ENV' => 'production'], fn () => (require base_path('config/session.php'))['secure']))->toBeTrue()
+        ->and(conEntornoTemporal(['APP_ENV' => 'local'], fn () => (require base_path('config/session.php'))['secure']))->toBeFalse();
+});
+
+it('reconoce el HTTPS del balanceador cuando se declara TRUSTED_PROXIES', function () {
+    $esquema = function () {
+        $this->refreshApplication();
+        Route::get('/_prueba-esquema', fn () => request()->isSecure() ? 'https' : 'http');
+
+        return $this->get('/_prueba-esquema', ['X-Forwarded-Proto' => 'https'])->getContent();
+    };
+
+    try {
+        // Sin TRUSTED_PROXIES primero: trustProxies() guarda los proxies en una propiedad estática
+        // del proceso (en producción, cada proceso arranca una sola vez).
+        expect(conEntornoTemporal(['TRUSTED_PROXIES' => ''], $esquema))->toBe('http')
+            ->and(conEntornoTemporal(['TRUSTED_PROXIES' => '*'], $esquema))->toBe('https');
+    } finally {
+        TrustProxies::flushState();
     }
 });
