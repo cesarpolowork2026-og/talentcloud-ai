@@ -166,6 +166,8 @@
   /* — dialog — */
   /* TalentCloud: el diálogo de acceso desenfoca la página de presentación que queda detrás. */
   .dialog-backdrop-desenfocado { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  /* TalentCloud: en el diálogo de acceso, el título «Iniciar sesión» va centrado y 1 px mayor (21 px). */
+  .dialog-backdrop-desenfocado .dialog-title { text-align: center; font-size: 21px; }
 
   .dialog-backdrop {
     position: fixed; inset: 0; display: grid; place-items: center;
