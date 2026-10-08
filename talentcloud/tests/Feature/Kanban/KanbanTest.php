@@ -1,11 +1,13 @@
 <?php
 
+use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
 use App\Events\PostulacionCambioDeEtapa;
 use App\Livewire\Kanban\Tablero;
 use App\Models\Candidato;
 use App\Models\Empresa;
+use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
@@ -162,3 +164,27 @@ it('bloquea movimientos en una vacante cerrada también desde el servicio', func
 
     app(MoverPostulacion::class)->ejecutar($this->elena->fresh(), EtapaPostulacion::Oferta, 0, $this->marta);
 })->throws(OperacionNoPermitida::class);
+
+// — Descartar con entrevistas por realizar —
+
+it('no descarta a quien tiene entrevistas por realizar y explica qué hacer', function () {
+    Entrevista::factory()->create(['postulacion_id' => $this->sofia->id, 'estado' => EstadoEntrevista::Confirmada]);
+
+    Livewire::test(Tablero::class, ['vacante' => $this->backend])
+        ->call('confirmarDescarte', $this->sofia->id)
+        ->call('descartar')
+        ->assertHasErrors('tablero')
+        ->assertSee('Sofía Nieto tiene 1 entrevista por realizar. Cancélala en «Entrevistas» y vuelve a descartar.');
+
+    expect($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::EnRevision);
+});
+
+it('descarta cuando sus entrevistas ya están realizadas o canceladas', function () {
+    foreach ([EstadoEntrevista::Completada, EstadoEntrevista::Cancelada] as $estado) {
+        Entrevista::factory()->create(['postulacion_id' => $this->sofia->id, 'inicia_at' => now()->subDay(), 'estado' => $estado]);
+    }
+
+    app(MoverPostulacion::class)->descartar($this->sofia, $this->marta);
+
+    expect($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::Descartado);
+});

@@ -7,6 +7,7 @@ use App\Enums\EtapaPostulacion;
 use App\Events\PostulacionCambioDeEtapa;
 use App\Models\Postulacion;
 use App\Models\User;
+use App\Services\Entrevistas\EntrevistasPorRealizar;
 use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Support\Facades\DB;
 
@@ -42,6 +43,8 @@ class MoverPostulacion
                 ->lockForUpdate()
                 ->get();
 
+            $this->verificarDescarte($postulacion, $origen, $destino);
+
             $restoOrigen = $columnas->where('etapa', $origen)->reject(fn (Postulacion $p) => $p->id === $postulacion->id)->values();
             $restoDestino = $columnas->where('etapa', $destino)->reject(fn (Postulacion $p) => $p->id === $postulacion->id)->values();
 
@@ -74,6 +77,28 @@ class MoverPostulacion
             ->count();
 
         return $this->ejecutar($postulacion, EtapaPostulacion::Descartado, $alFinal, $actor);
+    }
+
+    /**
+     * Descartar a quien tiene entrevistas por realizar lo dejaría esperando una
+     * entrevista que no va a ocurrir: primero se cancelan (con su aviso). La
+     * retirada no pasa por aquí: la decide el candidato y RetirarPostulacion
+     * cancela sus entrevistas.
+     */
+    private function verificarDescarte(Postulacion $postulacion, EtapaPostulacion $origen, EtapaPostulacion $destino): void
+    {
+        if ($destino !== EtapaPostulacion::Descartado || $origen === EtapaPostulacion::Descartado || $postulacion->estaRetirada()) {
+            return;
+        }
+
+        $porRealizar = EntrevistasPorRealizar::consulta()->where('postulacion_id', $postulacion->id)->count();
+
+        if ($porRealizar > 0) {
+            throw new OperacionNoPermitida(
+                $postulacion->loadMissing('candidato')->candidato?->nombre.' tiene '.EntrevistasPorRealizar::texto($porRealizar).' por realizar. '
+                .EntrevistasPorRealizar::segun($porRealizar, 'Cancélala', 'Cancélalas').' en «Entrevistas» y vuelve a descartar.'
+            );
+        }
     }
 
     /**

@@ -1,11 +1,14 @@
 <?php
 
+use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\TipoRequisito;
 use App\Livewire\Vacantes\Detalle;
 use App\Livewire\Vacantes\Listado;
+use App\Models\Candidato;
 use App\Models\Competencia;
 use App\Models\Empresa;
+use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\Requisito;
 use App\Models\User;
@@ -200,4 +203,18 @@ it('guarda los datos de la vacante', function () {
         ->assertDispatched('vacante-guardada');
 
     expect($this->backend->fresh()->descripcion)->toBe('APIs REST con Java.');
+});
+
+it('no cierra una vacante con entrevistas por realizar y nombra a quién', function () {
+    $elena = Postulacion::factory()->paraVacante($this->backend)
+        ->create(['candidato_id' => Candidato::factory()->create(['nombre' => 'Elena Ruiz'])->id]);
+    Entrevista::factory()->count(2)->sequence(['inicia_at' => now()->addDay()], ['inicia_at' => now()->addDays(2)])
+        ->create(['postulacion_id' => $elena->id, 'estado' => EstadoEntrevista::Pendiente]);
+
+    Livewire::test(Detalle::class, ['vacante' => $this->backend])
+        ->call('cambiarEstado', 'cerrada')
+        ->assertHasErrors('estado')
+        ->assertSee('La vacante tiene 2 entrevistas por realizar (Elena Ruiz). Cancélalas en «Entrevistas» antes de cerrarla.');
+
+    expect($this->backend->fresh()->estado)->not->toBe(EstadoVacante::Cerrada);
 });

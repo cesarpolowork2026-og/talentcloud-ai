@@ -8,6 +8,7 @@ use App\Models\Requisito;
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
 use App\Services\Empresas\LimitesDelPlan;
+use App\Services\Entrevistas\EntrevistasPorRealizar;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -35,6 +36,10 @@ class CambiarEstadoVacante
             throw new OperacionNoPermitida('Agrega al menos un requisito antes de publicar la vacante.');
         }
 
+        if ($destino === EstadoVacante::Cerrada) {
+            $this->verificarSinEntrevistasPorRealizar($vacante);
+        }
+
         $datos = ['estado' => $destino];
 
         if ($destino === EstadoVacante::Abierta && $vacante->publicada_at === null) {
@@ -60,5 +65,25 @@ class CambiarEstadoVacante
         }
 
         return $vacante;
+    }
+
+    /**
+     * Al cerrar, a quienes siguen en el proceso se les avisa del cierre: no
+     * pueden tener a la vez una entrevista programada. Primero se cancelan.
+     */
+    private function verificarSinEntrevistasPorRealizar(Vacante $vacante): void
+    {
+        $nombres = EntrevistasPorRealizar::consulta()
+            ->whereHas('postulacion', fn ($q) => $q->withoutGlobalScopes()->where('vacante_id', $vacante->id))
+            ->with(['postulacion' => fn ($q) => $q->withoutGlobalScopes()->with('candidato')])
+            ->get()
+            ->map(fn ($e) => $e->postulacion?->candidato?->nombre);
+
+        if ($nombres->isNotEmpty()) {
+            throw new OperacionNoPermitida(
+                'La vacante tiene '.EntrevistasPorRealizar::texto($nombres->count()).' por realizar ('.$nombres->unique()->join(', ', ' y ').'). '
+                .EntrevistasPorRealizar::segun($nombres->count(), 'Cancélala', 'Cancélalas').' en «Entrevistas» antes de cerrarla.'
+            );
+        }
     }
 }

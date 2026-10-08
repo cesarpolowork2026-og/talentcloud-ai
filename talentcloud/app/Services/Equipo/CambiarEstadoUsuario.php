@@ -2,10 +2,9 @@
 
 namespace App\Services\Equipo;
 
-use App\Enums\EstadoEntrevista;
-use App\Models\Entrevista;
 use App\Models\User;
 use App\Services\Empresas\LimitesDelPlan;
+use App\Services\Entrevistas\EntrevistasPorRealizar;
 use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Support\Facades\DB;
 
@@ -73,16 +72,13 @@ class CambiarEstadoUsuario
 
     private function verificarSinEntrevistasPorRealizar(User $usuario): void
     {
-        $porRealizar = Entrevista::sinFiltroDeEmpresa()
-            ->where('entrevistador_id', $usuario->id)
-            ->whereIn('estado', [EstadoEntrevista::Pendiente, EstadoEntrevista::Confirmada])
-            ->count();
+        $porRealizar = EntrevistasPorRealizar::consulta()->where('entrevistador_id', $usuario->id)->count();
 
         if ($porRealizar > 0) {
             // Sin género gramatical: no se conoce ni se deduce el de la persona.
             throw new OperacionNoPermitida(
-                $usuario->name.' tiene '.($porRealizar === 1 ? '1 entrevista' : "{$porRealizar} entrevistas").' por realizar. '
-                .'Cancélalas o prográmalas con otra persona en «Entrevistas» y vuelve a intentarlo.',
+                $usuario->name.' tiene '.EntrevistasPorRealizar::texto($porRealizar).' por realizar. '
+                .EntrevistasPorRealizar::segun($porRealizar, 'Cancélala o prográmala', 'Cancélalas o prográmalas').' con otra persona en «Entrevistas» y vuelve a intentarlo.',
                 'usuario',
             );
         }
