@@ -10,15 +10,14 @@ trazados.
 | Archivo | Uso |
 |---|---|
 | `talentcloud-ai-oscuro.svg` | Barra azul petróleo (`#004961`): app, cabecera pública y maquetas. Colores aclarados para que se lea sobre ella. |
-| `talentcloud-ai-lema-oscuro.svg` | Cabecera de la página de inicio, con «Inteligencia que conecta talento». |
 | `talentcloud-ai.svg` | Fondos claros (pie). Colores originales. |
-| `talentcloud-ai-lema.svg` | Maestro con lema y colores originales. |
+| `talentcloud-ai-lema.svg`, `talentcloud-ai-lema-oscuro.svg` | Maestros con «Inteligencia que conecta talento» (documentos, presentaciones). En la web el lema va como texto junto al logo: dentro de la imagen, a la altura de la barra, no se leería. |
 | `simbolo.svg` | Solo el símbolo; también es `public/favicon.svg`. |
 | `talentcloud-ai-correo.png` | Cabecera de los correos (los clientes de correo no muestran bien los SVG). |
 
 Además: `public/favicon.ico` (16, 32 y 48 px) y `public/apple-touch-icon.png` (180 px), generados desde `simbolo.svg`.
 
-En las vistas, siempre `<x-marca>` (props `fondo`, `tamano`, `lema`): nunca un `<img>` suelto al archivo.
+En las vistas, siempre `<x-marca>` (props `fondo`, `tamano`): nunca un `<img>` suelto al archivo.
 
 ## Regenerar
 

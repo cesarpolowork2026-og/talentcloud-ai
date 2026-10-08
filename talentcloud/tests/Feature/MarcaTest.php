@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Notifications\Messages\MailMessage;
 
 /*
  * Logo de TalentCloud AI (<x-marca>): la variante según el fondo, su texto
@@ -16,8 +17,8 @@ it('usa la versión clara del logo en la barra y la de colores en el pie', funct
 });
 
 it('muestra el lema solo en la página de inicio', function () {
-    $this->get('/')->assertOk()->assertSee('marca/talentcloud-ai-lema-oscuro.svg', false);
-    $this->get('/empleos')->assertOk()->assertDontSee('-lema', false);
+    $this->get('/')->assertOk()->assertSee('Inteligencia que conecta talento');
+    $this->get('/empleos')->assertOk()->assertDontSee('Inteligencia que conecta talento');
 });
 
 it('pinta el logo en la barra de la app y declara los iconos de la marca', function () {
@@ -31,4 +32,12 @@ it('pinta el logo en la barra de la app y declara los iconos de la marca', funct
     foreach (['favicon.svg', 'favicon.ico', 'apple-touch-icon.png', 'marca/talentcloud-ai-correo.png'] as $archivo) {
         expect(public_path($archivo))->toBeFile();
     }
+});
+
+it('pone el logo en PNG en la cabecera de los correos', function () {
+    $correo = (string) (new MailMessage)->subject('Prueba')->line('Hola')->render();
+
+    expect($correo)->toContain(asset('marca/talentcloud-ai-correo.png'))
+        ->toContain('alt="TalentCloud AI"')
+        ->not->toContain('laravel.com');
 });
