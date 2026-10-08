@@ -70,7 +70,7 @@ Estado: {{ $seleccionada->estado->etiqueta() }}</p>
     <x-ui.dialog wire:model="mostrarFormulario" :title="$editando ? 'Editar evaluación · '.$enEdicion?->postulacion?->candidato?->nombre : 'Nueva evaluación'" max-width="480px">
         <form wire:submit="guardar" id="form-evaluacion" class="grid gap-3">
             @if (! $editando)
-                <x-ui.field label="Candidato y vacante" for="evaluacion-postulacion" error="postulacionId">
+                <x-ui.field label="Candidato y vacante" for="evaluacion-postulacion" error="postulacionId" hint="Aparecen los candidatos con una entrevista realizada que aún no evaluaste.">
                     <x-ui.select wire:model="postulacionId" id="evaluacion-postulacion" :options="$postulaciones" placeholder="Elige un candidato" class="w-full" error="postulacionId" />
                 </x-ui.field>
             @endif

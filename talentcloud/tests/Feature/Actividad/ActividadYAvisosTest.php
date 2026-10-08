@@ -4,6 +4,7 @@ use App\DTO\DatosDeEntrevista;
 use App\DTO\EvaluacionData;
 use App\DTO\NuevaEntrevistaData;
 use App\DTO\NuevaVacanteData;
+use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoEvaluacion;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
@@ -123,6 +124,8 @@ it('anota entrevistas programadas y canceladas', function () {
 });
 
 it('anota la evaluación aprobada', function () {
+    Entrevista::factory()->create(['postulacion_id' => $this->sofia->id, 'inicia_at' => now()->subDay(), 'estado' => EstadoEntrevista::Completada]);
+
     app(GuardarEvaluacion::class)->registrar($this->sofia->id, $this->marta, new EvaluacionData(
         ['conocimiento_tecnico' => 9, 'comunicacion' => 8, 'resolucion_de_problemas' => 9, 'ajuste_cultural' => 8],
         null,

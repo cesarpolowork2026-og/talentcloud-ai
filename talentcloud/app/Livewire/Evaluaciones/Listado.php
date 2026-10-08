@@ -83,6 +83,18 @@ class Listado extends Component
         $this->prepararFormulario();
         $this->postulacionId = $postulacionId ? (string) $postulacionId : '';
         $this->mostrarFormulario = true;
+
+        // Acceso directo desde el Kanban: si aún no se puede evaluar, se dice por qué.
+        $postulacion = $postulacionId ? Postulacion::with(['candidato', 'vacante'])->find($postulacionId) : null;
+
+        if ($postulacion !== null) {
+            try {
+                app(GuardarEvaluacion::class)->verificarEvaluable($postulacion, $this->usuario());
+            } catch (OperacionNoPermitida $e) {
+                $this->postulacionId = '';
+                $this->addError('postulacionId', $e->getMessage());
+            }
+        }
     }
 
     public function editar(int $id): void

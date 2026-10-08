@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\EstadoEntrevista;
 use App\Models\Evaluacion;
 use App\Models\Postulacion;
 use App\Models\User;
@@ -25,6 +26,9 @@ class EloquentEvaluacionRepository implements EvaluacionRepository
     {
         return Postulacion::query()
             ->with(['candidato', 'vacante'])
+            // La misma regla que GuardarEvaluacion::verificarEvaluable().
+            ->whereNull('retirada_at')
+            ->whereHas('entrevistas', fn (Builder $q) => $q->where('estado', EstadoEntrevista::Completada))
             ->whereDoesntHave('evaluaciones', fn (Builder $q) => $q->where('evaluador_id', $evaluador->id))
             ->get()
             ->sortBy(fn (Postulacion $p) => $p->candidato?->nombre)

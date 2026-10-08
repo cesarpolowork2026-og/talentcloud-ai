@@ -3,6 +3,7 @@
 namespace App\Services\Evaluaciones;
 
 use App\DTO\EvaluacionData;
+use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoEvaluacion;
 use App\Events\EvaluacionAprobada;
 use App\Models\Evaluacion;
@@ -26,10 +27,7 @@ class GuardarEvaluacion
         $postulacion = Postulacion::with(['candidato', 'vacante'])->find($postulacionId)
             ?? throw new OperacionNoPermitida('Elige una postulación de la lista.', 'postulacionId');
 
-        if ($this->evaluaciones->existe($postulacion->id, $evaluador->id)) {
-            throw $this->yaEvaluada($postulacion);
-        }
-
+        $this->verificarEvaluable($postulacion, $evaluador);
         $this->validar($datos);
 
         try {
@@ -43,6 +41,30 @@ class GuardarEvaluacion
         }
 
         return $evaluacion;
+    }
+
+    /**
+     * Se evalúa a quien ya se entrevistó: los criterios (comunicación, ajuste
+     * cultural…) salen de una entrevista realizada. No se evalúa una postulación
+     * que el candidato retiró, ni dos veces por el mismo evaluador.
+     *
+     * @throws OperacionNoPermitida con el motivo, para mostrarlo en el formulario
+     */
+    public function verificarEvaluable(Postulacion $postulacion, User $evaluador): void
+    {
+        $nombre = (string) $postulacion->candidato?->nombre;
+
+        if ($postulacion->estaRetirada()) {
+            throw new OperacionNoPermitida($nombre.' retiró su postulación a '.$postulacion->vacante?->titulo.': ya no se puede evaluar.', 'postulacionId');
+        }
+
+        if (! $postulacion->entrevistas()->where('estado', EstadoEntrevista::Completada)->exists()) {
+            throw new OperacionNoPermitida($nombre.' todavía no tiene una entrevista realizada para '.$postulacion->vacante?->titulo.'. Se evalúa después de entrevistar.', 'postulacionId');
+        }
+
+        if ($this->evaluaciones->existe($postulacion->id, $evaluador->id)) {
+            throw $this->yaEvaluada($postulacion);
+        }
     }
 
     public function actualizar(Evaluacion $evaluacion, EvaluacionData $datos): Evaluacion
