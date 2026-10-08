@@ -33,9 +33,11 @@ básico. La primera vez, el servicio descarga el modelo (unos 470 MB).
 
 ## Datos de demostración
 
-`php artisan migrate:fresh --seed` carga los datos del prototipo; después, con el servicio de IA en marcha,
-`php artisan talentcloud:reindexar-embeddings --sync` analiza sus CV y requisitos (el seeder no depende del
-servicio). Todas las cuentas usan la contraseña `password`:
+`php artisan migrate:fresh --seed` carga los datos del prototipo reproduciendo la historia de cada postulación
+con fechas relativas al día de la carga. Con el servicio de IA en marcha (`composer dev`), analiza los CV y
+calcula el matching durante la carga; si la IA no responde, avisa y siembra con el análisis básico, y después
+basta con `php artisan talentcloud:reindexar-embeddings --sync` y `php artisan talentcloud:recalcular-matching`.
+Todas las cuentas usan la contraseña `password`:
 
 | Cuenta | Rol | Empresa |
 | --- | --- | --- |
