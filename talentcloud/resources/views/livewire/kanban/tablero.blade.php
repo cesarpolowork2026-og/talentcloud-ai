@@ -37,7 +37,7 @@
         <div class="flex gap-4 overflow-x-auto pb-2">
             @foreach ($columnas as $columna)
                 @php($etapa = $columna['etapa'])
-                <section class="flex min-w-[180px] flex-1 basis-0 flex-col gap-3" aria-label="{{ $etapa->etiqueta() }}" wire:key="columna-{{ $etapa->value }}">
+                <section class="flex min-w-[170px] flex-1 basis-0 flex-col gap-3" aria-label="{{ $etapa->etiqueta() }}" wire:key="columna-{{ $etapa->value }}">
                     <div class="flex justify-between text-12 uppercase tracking-[0.06em] text-neutral-600">
                         <span>{{ $etapa->etiqueta() }}</span><span>{{ $columna['postulaciones']->count() }}</span>
                     </div>
