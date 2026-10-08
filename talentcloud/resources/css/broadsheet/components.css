@@ -215,16 +215,11 @@
 
   /* TalentCloud: en pantallas estrechas el selector "Ingresar como" (4 opciones) pasa a dos filas. */
   .seg { flex-wrap: wrap; max-width: 100%; }
-  /* TalentCloud: marca (<x-marca>): nube en acento y nombre en tinta; en blanco sobre la barra. */
-  .marca-icono { color: var(--color-accent-700); }
-  .marca-nombre { color: var(--color-text); }
-
   /* TalentCloud: barra superior en azul teal profundo (accent-800), igual en las páginas públicas
      y en la app. Texto blanco (10:1), enlace activo en accent-300 (6,8:1) y foco en blanco. Los
      menús que se abren desde la barra (.card) vuelven al color de texto normal. */
   .barra { background: var(--color-accent-800); color: #fff; }
   .barra :focus-visible { outline-color: #fff; }
-  .barra .marca-icono, .barra .marca-nombre { color: #fff; }
   .barra .tag-outline { color: #fff; border-color: color-mix(in srgb, #fff 70%, transparent); }
   .barra .barra-enlace { color: #fff; text-decoration: none; }
   .barra .barra-enlace:hover { color: var(--color-accent-200); }

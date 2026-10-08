@@ -13,7 +13,7 @@
 <header class="barra sticky top-0 z-40">
     <div class="mx-auto flex max-w-[1480px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-8">
         <a href="{{ route('inicio') }}#inicio" class="hover:no-underline" aria-label="TalentCloud AI, inicio">
-            <x-marca tamano="grande" />
+            <x-marca tamano="grande" :lema="$enPresentacion && request()->routeIs('inicio')" />
         </a>
 
         <nav aria-label="Secciones" class="mx-auto hidden gap-6 lg:flex xl:gap-8">

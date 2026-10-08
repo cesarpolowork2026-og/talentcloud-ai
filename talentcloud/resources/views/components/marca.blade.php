@@ -1,23 +1,26 @@
 {{--
-    Marca de TalentCloud AI (nube + nombre + etiqueta "AI"), igual en la
-    presentación, las pantallas de acceso, la barra de la app y los errores.
-    Los colores salen de .marca-icono y .marca-nombre (en blanco dentro de .barra).
+    Logo de TalentCloud AI, igual en la presentación, las pantallas de acceso, la barra de la
+    app, las maquetas y los errores. Archivos SVG en public/marca (origen y cómo se generan:
+    resources/brand/README.md); se sirven como <img> para que el navegador los guarde en caché
+    y no viajen en cada respuesta de Livewire.
+
+    fondo:  oscuro (barra azul petróleo, por defecto) | claro (pie y fondos claros).
     tamano: grande (cabecera pública) | mediano (barra de la app) | pequeno (maquetas, pie).
+    lema:   añade "Inteligencia que conecta talento" (solo la página de inicio).
 --}}
-@props(['tamano' => 'mediano'])
+@props(['fondo' => 'oscuro', 'tamano' => 'mediano', 'lema' => false])
 
 @php
-    [$icono, $texto] = match ($tamano) {
-        'grande' => [30, 'text-18 sm:text-22'],
-        'pequeno' => [16, 'text-14'],
-        default => [24, 'text-18'],
+    $archivo = 'talentcloud-ai'.($lema ? '-lema' : '').($fondo === 'claro' ? '' : '-oscuro').'.svg';
+    $ruta = public_path('marca/'.$archivo);
+    // La versión en la URL hace que un logo nuevo no quede oculto tras la caché del navegador.
+    $src = asset('marca/'.$archivo).(is_file($ruta) ? '?v='.filemtime($ruta) : '');
+
+    $alto = match ($tamano) {
+        'grande' => $lema ? 'h-[38px] sm:h-[48px]' : 'h-[34px] sm:h-[40px]',
+        'pequeno' => 'h-[20px]',
+        default => 'h-[32px]',
     };
 @endphp
 
-<span {{ $attributes->class('inline-flex items-center gap-2') }}>
-    <x-ui.icon name="cloud" :size="$icono" class="marca-icono" />
-    <span class="flex items-baseline gap-1.5">
-        <span @class(['marca-nombre font-heading font-semibold tracking-[-0.01em]', $texto])>TalentCloud</span>
-        <x-ui.tag tone="outline" @class(['max-[359px]:hidden' => $tamano === 'grande', '!px-1.5 !py-0 !text-10' => $tamano === 'pequeno'])>AI</x-ui.tag>
-    </span>
-</span>
+<img src="{{ $src }}" alt="TalentCloud AI" {{ $attributes->class(['block w-auto max-w-full', $alto]) }}>
