@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use App\Models\Entrevista;
+use App\Support\EnlaceExterno;
 use App\Support\Formato;
 
 /**
@@ -34,7 +35,8 @@ final readonly class DatosDeEntrevista
             fecha: Formato::fechaHora($entrevista->inicia_at),
             duracionMin: $entrevista->duracion_min,
             modalidad: $entrevista->modalidad->etiqueta(),
-            enlace: $entrevista->enlace,
+            // Solo http/https, aunque el formulario ya lo valide: el aviso lo pone como botón de un correo.
+            enlace: EnlaceExterno::seguro($entrevista->enlace),
             candidatoId: $entrevista->postulacion?->candidato_id,
         );
     }

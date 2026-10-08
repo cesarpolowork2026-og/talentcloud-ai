@@ -234,3 +234,13 @@ it('no repite avisos ni actividad al reanalizar un CV', function () {
     Notification::assertNothingSent();
     expect(Actividad::count())->toBe(0);
 });
+
+it('nunca pone en un aviso un enlace de videollamada que no sea http o https', function () {
+    $entrevista = Entrevista::factory()->create(['postulacion_id' => $this->sofia->id, 'enlace' => 'javascript:alert(1)']);
+
+    expect(DatosDeEntrevista::de($entrevista)->enlace)->toBeNull();
+
+    $entrevista->update(['enlace' => 'https://meet.example.com/abc']);
+
+    expect(DatosDeEntrevista::de($entrevista->fresh())->enlace)->toBe('https://meet.example.com/abc');
+});

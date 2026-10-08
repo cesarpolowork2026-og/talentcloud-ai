@@ -97,6 +97,9 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // La misma zona que la aplicación: las fechas se guardan sin zona, en hora de APP_TIMEZONE,
+            // y un now() calculado en SQL (Cloud SQL usa UTC) no debe desfasarse.
+            'timezone' => env('APP_TIMEZONE', 'America/Lima'),
         ],
 
         'sqlsrv' => [
