@@ -114,7 +114,8 @@
     </x-ui.dialog>
 
     {{-- Desactivar / reactivar --}}
-    @php($activo = $seleccionado?->estaActivo() ?? true)
+    {{-- El texto sigue a lo que se confirmó al abrir, no al estado que se relee en cada render. --}}
+    @php($activo = $desactivarSeleccionado)
     <x-ui.confirm
         wire:model="mostrarConfirmacionUsuario"
         :title="($activo ? 'Desactivar a ' : 'Reactivar a ').($seleccionado?->name ?? '')"

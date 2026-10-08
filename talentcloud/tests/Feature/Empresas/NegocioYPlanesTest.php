@@ -374,8 +374,8 @@ it('no deja reactivar a un usuario por encima del límite, pero sí desactivar',
         ->assertSee('permite 3 usuarios activos y ya están en uso');
     expect($desactivado->fresh()->estaActivo())->toBeFalse();
 
-    app(CambiarEstadoUsuario::class)->ejecutar($this->clara);
-    app(CambiarEstadoUsuario::class)->ejecutar($desactivado->fresh());
+    app(CambiarEstadoUsuario::class)->desactivar($this->clara);
+    app(CambiarEstadoUsuario::class)->reactivar($desactivado);
     expect($desactivado->fresh()->estaActivo())->toBeTrue();
 });
 

@@ -18,28 +18,57 @@ use Illuminate\Support\Facades\DB;
  * No se desactiva a quien tiene entrevistas por realizar: quedarían a nombre de
  * alguien sin acceso y el candidato esperaría a un entrevistador que no va a
  * llegar. Primero se cancelan o se programan con otra persona.
+ *
+ * La intención es explícita (no un "alternar") y se decide con la fila
+ * releída y bloqueada: una doble confirmación o una pantalla desactualizada
+ * no deshacen lo que se pidió. Si ya está en el estado pedido, no hace nada.
  */
 class CambiarEstadoUsuario
 {
     public function __construct(private readonly LimitesDelPlan $limites) {}
 
-    public function ejecutar(User $usuario): User
+    public function desactivar(User $usuario): User
     {
         return DB::transaction(function () use ($usuario): User {
-            // Bloquea al usuario: ProgramarEntrevista también lo bloquea, así nadie le asigna una entrevista mientras tanto.
-            User::whereKey($usuario->id)->lockForUpdate()->first();
+            $actual = $this->releer($usuario);
 
-            if ($usuario->estaActivo()) {
-                $this->verificarSinEntrevistasPorRealizar($usuario);
-            } elseif ($usuario->empresa_id !== null) {
-                $this->limites->verificarUsuarioActivo($usuario->empresa_id);
+            if (! $actual->estaActivo()) {
+                return $actual;
             }
 
-            $usuario->desactivado_at = $usuario->estaActivo() ? now() : null;
-            $usuario->save();
+            $this->verificarSinEntrevistasPorRealizar($actual);
 
-            return $usuario;
+            $actual->desactivado_at = now();
+            $actual->save();
+
+            return $actual;
         });
+    }
+
+    public function reactivar(User $usuario): User
+    {
+        return DB::transaction(function () use ($usuario): User {
+            $actual = $this->releer($usuario);
+
+            if ($actual->estaActivo()) {
+                return $actual;
+            }
+
+            if ($actual->empresa_id !== null) {
+                $this->limites->verificarUsuarioActivo($actual->empresa_id);
+            }
+
+            $actual->desactivado_at = null;
+            $actual->save();
+
+            return $actual;
+        });
+    }
+
+    /** La fila bloqueada: ProgramarEntrevista bloquea la misma, así nadie le asigna una entrevista mientras tanto. */
+    private function releer(User $usuario): User
+    {
+        return User::whereKey($usuario->id)->lockForUpdate()->firstOrFail();
     }
 
     private function verificarSinEntrevistasPorRealizar(User $usuario): void
@@ -50,9 +79,10 @@ class CambiarEstadoUsuario
             ->count();
 
         if ($porRealizar > 0) {
+            // Sin género gramatical: no se conoce ni se deduce el de la persona.
             throw new OperacionNoPermitida(
                 $usuario->name.' tiene '.($porRealizar === 1 ? '1 entrevista' : "{$porRealizar} entrevistas").' por realizar. '
-                .'En «Entrevistas», cancélalas o prográmalas con otra persona antes de desactivarlo.',
+                .'Cancélalas o prográmalas con otra persona en «Entrevistas» y vuelve a intentarlo.',
                 'usuario',
             );
         }

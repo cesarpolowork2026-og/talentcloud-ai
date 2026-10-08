@@ -11,6 +11,7 @@ use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Notifications\InvitacionRecibida;
+use App\Services\Equipo\CambiarEstadoUsuario;
 use App\Tenancy\EmpresaScope;
 use App\Tenancy\TenantContext;
 use App\Tenancy\VerificarAcceso;
@@ -187,7 +188,7 @@ it('desactiva a un reclutador: pierde la sesión y no puede volver a ingresar', 
     $this->assertGuest();
 });
 
-function entrevistasDeMarta(Empresa $empresa, User $entrevistador, array $estados): void
+function crearEntrevistasDe(Empresa $empresa, User $entrevistador, array $estados): void
 {
     $postulacion = app(TenantContext::class)->ejecutarGlobal(
         fn () => Postulacion::factory()->paraVacante(Vacante::factory()->deEmpresa($empresa)->create())->create()
@@ -199,20 +200,20 @@ function entrevistasDeMarta(Empresa $empresa, User $entrevistador, array $estado
 }
 
 it('no desactiva a quien tiene entrevistas por realizar y explica qué hacer', function () {
-    entrevistasDeMarta($this->nimbus, $this->marta, [EstadoEntrevista::Pendiente, EstadoEntrevista::Confirmada]);
+    crearEntrevistasDe($this->nimbus, $this->marta, [EstadoEntrevista::Pendiente, EstadoEntrevista::Confirmada]);
 
     Livewire::test(Panel::class)
         ->call('confirmarCambioUsuario', $this->marta->id)
         ->call('cambiarEstadoUsuario')
         ->assertHasErrors('usuario')
         ->assertSee('Marta Solís tiene 2 entrevistas por realizar.')
-        ->assertSee('cancélalas o prográmalas con otra persona');
+        ->assertSee('Cancélalas o prográmalas con otra persona');
 
     expect($this->marta->fresh()->estaActivo())->toBeTrue();
 });
 
 it('desactiva a quien solo tiene entrevistas realizadas o canceladas', function () {
-    entrevistasDeMarta($this->nimbus, $this->marta, [EstadoEntrevista::Completada, EstadoEntrevista::Cancelada]);
+    crearEntrevistasDe($this->nimbus, $this->marta, [EstadoEntrevista::Completada, EstadoEntrevista::Cancelada]);
 
     Livewire::test(Panel::class)
         ->call('confirmarCambioUsuario', $this->marta->id)
@@ -220,6 +221,23 @@ it('desactiva a quien solo tiene entrevistas realizadas o canceladas', function 
         ->assertHasNoErrors();
 
     expect($this->marta->fresh()->estaActivo())->toBeFalse();
+});
+
+it('no reactiva por una doble confirmación de desactivar', function () {
+    $panel = Livewire::test(Panel::class)->call('confirmarCambioUsuario', $this->marta->id);
+
+    $panel->call('cambiarEstadoUsuario')->call('cambiarEstadoUsuario')->assertHasNoErrors();
+
+    expect($this->marta->fresh()->estaActivo())->toBeFalse();
+});
+
+it('desactivar y reactivar no hacen nada si ya está en ese estado', function () {
+    $servicio = app(CambiarEstadoUsuario::class);
+
+    expect($servicio->reactivar($this->marta)->estaActivo())->toBeTrue()
+        ->and($servicio->desactivar($this->marta)->estaActivo())->toBeFalse()
+        // Con el objeto desactualizado en memoria (aún "activo"), sigue desactivada.
+        ->and($servicio->desactivar($this->marta)->estaActivo())->toBeFalse();
 });
 
 it('no permite a la cuenta de empresa desactivarse a sí misma', function () {

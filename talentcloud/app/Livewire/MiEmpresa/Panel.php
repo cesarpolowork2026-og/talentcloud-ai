@@ -52,6 +52,10 @@ class Panel extends Component
     #[Locked]
     public ?int $usuarioSeleccionado = null;
 
+    /** Lo que se confirmó al abrir el diálogo: desactivar (true) o reactivar (false). */
+    #[Locked]
+    public bool $desactivarSeleccionado = true;
+
     // Revocar invitación.
     public bool $mostrarConfirmacionInvitacion = false;
 
@@ -132,6 +136,7 @@ class Panel extends Component
 
         $this->resetValidation();
         $this->usuarioSeleccionado = $usuario->id;
+        $this->desactivarSeleccionado = $usuario->estaActivo();
         $this->mostrarConfirmacionUsuario = true;
     }
 
@@ -143,7 +148,7 @@ class Panel extends Component
         $this->mostrarConfirmacionUsuario = false;
 
         try {
-            $cambiar->ejecutar($usuario);
+            $this->desactivarSeleccionado ? $cambiar->desactivar($usuario) : $cambiar->reactivar($usuario);
         } catch (OperacionNoPermitida $e) {
             $this->addError('usuario', $e->getMessage());
         }
