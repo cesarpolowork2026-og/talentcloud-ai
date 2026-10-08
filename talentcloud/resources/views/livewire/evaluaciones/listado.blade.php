@@ -20,7 +20,7 @@
             </x-slot:head>
             @foreach ($filas as $evaluacion)
                 <tr class="tc-row" wire:key="evaluacion-{{ $evaluacion->id }}" wire:click="verDetalle({{ $evaluacion->id }})">
-                    <td>{{ $evaluacion->postulacion?->candidato?->nombre }}</td>
+                    <td><x-ui.boton-fila wire:click.stop="verDetalle({{ $evaluacion->id }})">{{ $evaluacion->postulacion?->candidato?->nombre }}</x-ui.boton-fila></td>
                     <td>{{ $evaluacion->postulacion?->vacante?->titulo }}</td>
                     @if ($vistaGlobal)
                         <td>{{ $evaluacion->postulacion?->vacante?->empresa?->nombre }}</td>

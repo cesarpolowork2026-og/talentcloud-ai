@@ -29,13 +29,14 @@
                 @endphp
                 <x-ui.card class="cursor-pointer" wire:key="candidato-{{ $candidato->id }}" wire:click="verDetalle({{ $candidato->id }})">
                     <div class="card-kicker">{{ $candidato->titular ?? 'Candidato' }}</div>
-                    <div class="card-title">{{ $candidato->nombre }}</div>
+                    <div class="card-title"><x-ui.boton-fila wire:click.stop="verDetalle({{ $candidato->id }})">{{ $candidato->nombre }}</x-ui.boton-fila></div>
                     @if ($vistaGlobal && $candidato->postulaciones->isNotEmpty())
                         {{-- Admin SaaS: todos sus procesos, agrupados por empresa (puede estar en varias). --}}
                         <x-candidatos.procesos :postulaciones="$candidato->postulaciones" />
                     @else
+                        {{-- Vacante y etapa: no todos postularon por su cuenta (a muchos los registró el equipo). --}}
                         <p class="card-body">
-                            {{ $postulacion?->vacante ? 'Postuló a '.$postulacion->vacante->titulo : 'Sin postulaciones' }}
+                            {{ $postulacion?->vacante ? $postulacion->vacante->titulo.' · '.$postulacion->etapaVisible() : 'Sin postulaciones' }}
                         </p>
                     @endif
 
@@ -75,7 +76,7 @@
                 $texto = $seleccionado->cvActual?->texto_extraido;
             @endphp
             <p class="m-0 whitespace-pre-line">{{ $seleccionado->titular ?? 'Candidato' }}
-@unless ($vistaGlobal){{ $p?->vacante ? 'Postuló a '.$p->vacante->titulo : 'Sin postulaciones' }}
+@unless ($vistaGlobal){{ $p?->vacante ? $p->vacante->titulo.' · '.$p->etapaVisible() : 'Sin postulaciones' }}
 @if ($p?->matchPorcentaje() !== null)Coincidencia: {{ $p->matchPorcentaje() }}%
 @endif
 @endunless

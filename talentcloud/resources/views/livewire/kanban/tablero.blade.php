@@ -37,7 +37,7 @@
         <div class="flex gap-4 overflow-x-auto pb-2">
             @foreach ($columnas as $columna)
                 @php($etapa = $columna['etapa'])
-                <section class="flex flex-[0_0_220px] flex-col gap-3" aria-label="{{ $etapa->etiqueta() }}" wire:key="columna-{{ $etapa->value }}">
+                <section class="flex min-w-[180px] flex-1 basis-0 flex-col gap-3" aria-label="{{ $etapa->etiqueta() }}" wire:key="columna-{{ $etapa->value }}">
                     <div class="flex justify-between text-12 uppercase tracking-[0.06em] text-neutral-600">
                         <span>{{ $etapa->etiqueta() }}</span><span>{{ $columna['postulaciones']->count() }}</span>
                     </div>
@@ -116,9 +116,9 @@ Retiró su postulación el {{ App\Support\Formato::fechaCorta($seleccionada->ret
                             <x-ui.button :href="route('entrevistas.index', ['programar' => $seleccionada->id])" wire:navigate>Programar entrevista</x-ui.button>
                         @endcan
                     @endif
-                    @can('create', App\Models\Evaluacion::class)
+                    @if ($puedeEvaluar)
                         <x-ui.button :href="route('evaluaciones.index', ['evaluar' => $seleccionada->id])" wire:navigate>Evaluar</x-ui.button>
-                    @endcan
+                    @endif
                     @if ($editable && ! $seleccionada->estaRetirada())
                         <x-ui.button type="submit" form="form-mover" variant="primary">Mover</x-ui.button>
                     @endif

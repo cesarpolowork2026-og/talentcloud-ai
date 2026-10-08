@@ -17,7 +17,7 @@
                 </x-slot:head>
                 @foreach ($postulaciones as $postulacion)
                     <tr class="tc-row" wire:key="mi-postulacion-{{ $postulacion->id }}" wire:click="verDetalle({{ $postulacion->id }})">
-                        <td>{{ $postulacion->vacante?->titulo }}</td>
+                        <td><x-ui.boton-fila wire:click.stop="verDetalle({{ $postulacion->id }})">{{ $postulacion->vacante?->titulo }}</x-ui.boton-fila></td>
                         <td>{{ $postulacion->vacante?->empresa?->nombre }}</td>
                         <td><x-ui.estado :valor="EstadoDeMiPostulacion::de($postulacion)" /></td>
                         <td class="text-neutral-600">{{ Formato::fechaCorta($postulacion->created_at) }}</td>

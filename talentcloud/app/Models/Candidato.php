@@ -129,7 +129,7 @@ class Candidato extends Model
     }
 
     /**
-     * Postulación más reciente visible en el contexto actual ("Postuló a …").
+     * Postulación más reciente visible en el contexto actual ("Vacante · Etapa").
      *
      * @return HasOne<Postulacion, $this>
      */

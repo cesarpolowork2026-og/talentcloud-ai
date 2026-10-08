@@ -97,7 +97,7 @@
                     </x-slot:head>
                     @foreach ($resumen->vacantesRecientes as $vacante)
                         <tr class="tc-row" wire:key="reciente-{{ $vacante->id }}" wire:click="verVistaPrevia({{ $vacante->id }})">
-                            <td>{{ $vacante->titulo }}</td>
+                            <td><x-ui.boton-fila wire:click.stop="verVistaPrevia({{ $vacante->id }})">{{ $vacante->titulo }}</x-ui.boton-fila></td>
                             <td>{{ $vacante->empresa?->nombre }}</td>
                             <td>{{ $vacante->postulaciones_count }}</td>
                             <td><x-ui.estado :valor="$vacante->estado" /></td>

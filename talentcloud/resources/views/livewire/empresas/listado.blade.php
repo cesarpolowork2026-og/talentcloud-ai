@@ -23,7 +23,7 @@
             </x-slot:head>
             @foreach ($filas as $empresa)
                 <tr wire:key="empresa-{{ $empresa->id }}">
-                    <td class="tc-row" wire:click="verDetalle({{ $empresa->id }})">{{ $empresa->nombre }}</td>
+                    <td class="tc-row" wire:click="verDetalle({{ $empresa->id }})"><x-ui.boton-fila wire:click.stop="verDetalle({{ $empresa->id }})">{{ $empresa->nombre }}</x-ui.boton-fila></td>
                     <td>{{ $empresa->plan->etiqueta() }}</td>
                     <td>{{ $empresa->usuarios_count }}</td>
                     <td>{{ $empresa->vacantes_activas_count }}</td>

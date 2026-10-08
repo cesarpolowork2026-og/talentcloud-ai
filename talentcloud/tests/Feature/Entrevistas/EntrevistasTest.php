@@ -82,12 +82,12 @@ it('busca por candidato o por vacante', function () {
     ]);
 
     Livewire::test(Listado::class)->set('busqueda', 'lucía')
-        ->assertSee('Lucía Prat')->assertDontSeeHtml('>Elena Ruiz</td>');
+        ->assertSee('Lucía Prat')->assertDontSeeHtml('>Elena Ruiz</button>');
     // Sin distinguir tildes ni mayúsculas: se escribe como se escribe.
     Livewire::test(Listado::class)->set('busqueda', 'LUCIA')
-        ->assertSee('Lucía Prat')->assertDontSeeHtml('>Elena Ruiz</td>');
+        ->assertSee('Lucía Prat')->assertDontSeeHtml('>Elena Ruiz</button>');
     Livewire::test(Listado::class)->set('busqueda', 'backend')
-        ->assertSeeHtml('>Elena Ruiz</td>')->assertDontSee('Lucía Prat');
+        ->assertSeeHtml('>Elena Ruiz</button>')->assertDontSee('Lucía Prat');
 });
 
 it('muestra el detalle con los textos del prototipo', function () {
@@ -230,11 +230,32 @@ it('cancela con la confirmación del prototipo y avisa una sola vez', function (
     Event::assertDispatchedTimes(EntrevistaCancelada::class, 1);
 });
 
-it('desactiva "Cancelar" en las entrevistas canceladas o completadas', function (EstadoEntrevista $estado) {
+it('no muestra acciones en las entrevistas canceladas o completadas', function (EstadoEntrevista $estado) {
     $this->entrevista->update(['estado' => $estado]);
 
-    expect(Livewire::test(Listado::class)->html())->toMatch('/<button[^>]*disabled[^>]*>\s*Cancelar\s*<\/button>/');
+    expect(Livewire::test(Listado::class)->html())
+        ->not->toContain('confirmarCancelacion(')
+        ->not->toContain('wire:click="confirmar(')
+        ->not->toContain('wire:click="completar(');
 })->with([EstadoEntrevista::Cancelada, EstadoEntrevista::Completada]);
+
+it('muestra en cada fila solo las acciones posibles según el estado y la hora', function () {
+    $id = $this->entrevista->id;
+
+    // Pendiente y futura: confirmar o cancelar; aún no se puede completar.
+    $this->entrevista->update(['estado' => EstadoEntrevista::Pendiente, 'inicia_at' => now()->addDay()]);
+    expect(Livewire::test(Listado::class)->html())
+        ->toContain("wire:click=\"confirmar({$id})\"")
+        ->toContain("confirmarCancelacion({$id})")
+        ->not->toContain("wire:click=\"completar({$id})\"");
+
+    // Confirmada y ya empezada: completar o cancelar.
+    $this->entrevista->update(['estado' => EstadoEntrevista::Confirmada, 'inicia_at' => now()->subHour()]);
+    expect(Livewire::test(Listado::class)->html())
+        ->toContain("wire:click=\"completar({$id})\"")
+        ->toContain("confirmarCancelacion({$id})")
+        ->not->toContain("wire:click=\"confirmar({$id})\"");
+});
 
 // — Aislamiento y permisos —
 

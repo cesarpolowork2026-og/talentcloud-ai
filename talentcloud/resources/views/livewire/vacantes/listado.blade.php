@@ -27,7 +27,7 @@
             </x-slot:head>
             @foreach ($filas as $vacante)
                 <tr class="tc-row" wire:key="vacante-{{ $vacante->id }}" wire:click="verVistaPrevia({{ $vacante->id }})">
-                    <td>{{ $vacante->titulo }}</td>
+                    <td><x-ui.boton-fila wire:click.stop="verVistaPrevia({{ $vacante->id }})">{{ $vacante->titulo }}</x-ui.boton-fila></td>
                     <td>{{ $vacante->empresa?->nombre }}</td>
                     <td>{{ $vacante->ubicacion ?? $vacante->modalidad->etiqueta() }}</td>
                     <td>{{ $vacante->postulaciones_count }}</td>

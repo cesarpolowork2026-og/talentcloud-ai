@@ -4,9 +4,11 @@ namespace App\Livewire\Kanban;
 
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Models\Evaluacion;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Services\Evaluaciones\GuardarEvaluacion;
 use App\Services\Postulaciones\MoverPostulacion;
 use App\Services\Vacantes\OperacionNoPermitida;
 use App\Support\OpcionesPorEmpresa;
@@ -162,6 +164,8 @@ class Tablero extends Component
             // Mismo criterio que PostulacionPolicy@update: personal de la empresa de la vacante.
             'editable' => $vacante->estado !== EstadoVacante::Cerrada && $this->usuario()->can('update', $vacante),
             'seleccionada' => $seleccionada,
+            // "Evaluar" solo cuando se puede (entrevista realizada, no retirada, aún sin evaluar por mí).
+            'puedeEvaluar' => $seleccionada !== null && $this->puedeEvaluar($seleccionada),
             'etapas' => EtapaPostulacion::opciones(),
             // El selector solo aparece si hay a qué otra vacante cambiar; en la vista global, agrupado por empresa.
             'hayOtrasVacantes' => $vacantesActivas->count() > 1,
@@ -187,5 +191,20 @@ class Tablero extends Component
         $user = auth()->user();
 
         return $user;
+    }
+
+    private function puedeEvaluar(Postulacion $postulacion): bool
+    {
+        if (! $this->usuario()->can('create', Evaluacion::class)) {
+            return false;
+        }
+
+        try {
+            app(GuardarEvaluacion::class)->verificarEvaluable($postulacion, $this->usuario());
+
+            return true;
+        } catch (OperacionNoPermitida) {
+            return false;
+        }
     }
 }

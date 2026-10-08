@@ -188,3 +188,18 @@ it('descarta cuando sus entrevistas ya están realizadas o canceladas', function
 
     expect($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::Descartado);
 });
+
+it('ofrece "Evaluar" solo a quien ya tuvo una entrevista realizada', function () {
+    $tablero = Livewire::test(Tablero::class, ['vacante' => $this->backend]);
+
+    $tablero->call('abrir', $this->sofia->id)->assertDontSee('Evaluar');
+
+    Entrevista::factory()->create(['postulacion_id' => $this->sofia->id, 'inicia_at' => now()->subDay(), 'estado' => EstadoEntrevista::Completada]);
+
+    $tablero->call('abrir', $this->sofia->id)->assertSee('Evaluar');
+});
+
+it('abre la tarjeta con el teclado: el nombre es un botón', function () {
+    Livewire::test(Tablero::class, ['vacante' => $this->backend])
+        ->assertSeeHtml('wire:click.stop="abrir('.$this->sofia->id.')"');
+});

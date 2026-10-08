@@ -46,9 +46,9 @@ it('muestra la pantalla Vacantes del prototipo', function () {
 
 it('muestra solo las vacantes de la propia empresa', function () {
     Livewire::test(Listado::class)
-        ->assertSeeHtml('<td>Desarrollador Backend</td>')
-        ->assertSeeHtml('<td>Data Analyst</td>')
-        ->assertDontSeeHtml('<td>Product Designer</td>');
+        ->assertSeeHtml('>Desarrollador Backend</button>')
+        ->assertSeeHtml('>Data Analyst</button>')
+        ->assertDontSeeHtml('>Product Designer</button>');
 });
 
 it('muestra al admin SaaS las vacantes de todas las empresas', function () {
@@ -67,12 +67,12 @@ it('niega Vacantes al postulante', function () {
 it('filtra, busca y ordena por candidatos', function () {
     Livewire::test(Listado::class)
         ->call('filtrarEstado', 'en_revision')
-        ->assertSeeHtml('<td>Data Analyst</td>')
-        ->assertDontSeeHtml('<td>Desarrollador Backend</td>')
+        ->assertSeeHtml('>Data Analyst</button>')
+        ->assertDontSeeHtml('>Desarrollador Backend</button>')
         ->call('filtrarEstado', '')
         ->set('busqueda', 'backend')
-        ->assertSeeHtml('<td>Desarrollador Backend</td>')
-        ->assertDontSeeHtml('<td>Data Analyst</td>')
+        ->assertSeeHtml('>Desarrollador Backend</button>')
+        ->assertDontSeeHtml('>Data Analyst</button>')
         ->set('busqueda', '')
         ->set('orden', 'candidatos')
         ->call('alternarDireccion')

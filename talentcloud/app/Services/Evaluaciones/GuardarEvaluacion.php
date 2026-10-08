@@ -52,6 +52,7 @@ class GuardarEvaluacion
      */
     public function verificarEvaluable(Postulacion $postulacion, User $evaluador): void
     {
+        $postulacion->loadMissing(['candidato', 'vacante']);
         $nombre = (string) $postulacion->candidato?->nombre;
 
         if ($postulacion->estaRetirada()) {

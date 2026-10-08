@@ -50,7 +50,8 @@ it('muestra la pantalla Candidatos del prototipo', function () {
         ->assertSee('Buscar candidato…')
         ->assertSeeInOrder(['Nombre', 'Match %'])
         ->assertSee('Desarrolladora Backend')
-        ->assertSee('Postuló a Desarrollador Backend')
+        ->assertSee('Desarrollador Backend · Postulado')
+        ->assertSeeHtml('wire:click.stop="verDetalle(')
         ->assertSee('88% match');
 });
 
@@ -67,9 +68,9 @@ it('muestra a cada empresa solo su propia postulación de un candidato compartid
 
     Livewire::test(Listado::class)
         ->assertSee('Marco Díaz')
-        ->assertSee('Postuló a Product Designer')
-        ->assertDontSee('Postuló a Desarrollador Backend')
-        ->assertDontSeeHtml('<div class="card-title">Elena Ruiz</div>')
+        ->assertSee('Product Designer · Postulado')
+        ->assertDontSee('Desarrollador Backend · ')
+        ->assertDontSeeHtml('>Elena Ruiz</button>')
         ->assertDontSee('Rosa Paredes');
 });
 
@@ -86,8 +87,8 @@ it('ordena por match, con los candidatos sin postulación al final', function ()
         ->call('alternarDireccion')
         ->html();
 
-    expect(strpos($html, 'Elena Ruiz</div>'))->toBeLessThan(strpos($html, 'Marco Díaz</div>'))
-        ->and(strpos($html, 'Marco Díaz</div>'))->toBeLessThan(strpos($html, 'Rosa Paredes</div>'));
+    expect(strpos($html, 'Elena Ruiz</button>'))->toBeLessThan(strpos($html, 'Marco Díaz</button>'))
+        ->and(strpos($html, 'Marco Díaz</button>'))->toBeLessThan(strpos($html, 'Rosa Paredes</button>'));
 });
 
 it('muestra el estado de error del CV con "Reintentar análisis"', function () {

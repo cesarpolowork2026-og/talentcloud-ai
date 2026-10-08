@@ -147,6 +147,12 @@ class Postulacion extends Model
         return $this->retirada_at !== null;
     }
 
+    /** Etapa para el personal de selección: "Retirada" si la retiró el candidato (está en Descartado). */
+    public function etapaVisible(): string
+    {
+        return $this->estaRetirada() ? 'Retirada' : $this->etapa->etiqueta();
+    }
+
     /** Porcentaje de coincidencia redondeado ("88% match"), o null si no se calculó. */
     public function matchPorcentaje(): ?int
     {

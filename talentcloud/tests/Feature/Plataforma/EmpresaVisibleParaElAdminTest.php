@@ -161,7 +161,7 @@ it('muestra al reclutador en Candidatos solo lo de su empresa, como siempre', fu
     actuarComo($this->marta);
 
     Livewire::test(Candidatos::class)
-        ->assertSee('Postuló a Desarrollador Backend')
+        ->assertSee('Desarrollador Backend · ')
         ->assertSee('% match')
         ->assertSee('Match %')
         ->assertDontSee('procesos en')

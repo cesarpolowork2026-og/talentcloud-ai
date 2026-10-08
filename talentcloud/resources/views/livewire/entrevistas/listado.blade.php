@@ -26,7 +26,7 @@
             </x-slot:head>
             @foreach ($filas as $entrevista)
                 <tr wire:key="entrevista-{{ $entrevista->id }}">
-                    <td class="tc-row" wire:click="verDetalle({{ $entrevista->id }})">{{ $entrevista->postulacion?->candidato?->nombre }}</td>
+                    <td class="tc-row" wire:click="verDetalle({{ $entrevista->id }})"><x-ui.boton-fila wire:click.stop="verDetalle({{ $entrevista->id }})">{{ $entrevista->postulacion?->candidato?->nombre }}</x-ui.boton-fila></td>
                     <td>{{ $entrevista->postulacion?->vacante?->titulo }}</td>
                     @if ($vistaGlobal)
                         <td>{{ $entrevista->postulacion?->vacante?->empresa?->nombre }}</td>
@@ -35,12 +35,20 @@
                     <td class="text-neutral-600">{{ Formato::fechaHora($entrevista->inicia_at) }}</td>
                     <td><x-ui.estado :valor="$entrevista->estado" /></td>
                     <td>
-                        <x-ui.button
-                            variant="ghost"
-                            size="sm"
-                            wire:click="confirmarCancelacion({{ $entrevista->id }})"
-                            :disabled="! $entrevista->estado->puedeCancelarse()"
-                        >Cancelar</x-ui.button>
+                        {{-- Solo las acciones posibles: una realizada o cancelada no muestra botones apagados. --}}
+                        @can('update', $entrevista)
+                            <div class="flex flex-wrap gap-1">
+                                @if ($entrevista->estado->puedeConfirmarse())
+                                    <x-ui.button variant="ghost" size="sm" wire:click="confirmar({{ $entrevista->id }})">Confirmar</x-ui.button>
+                                @endif
+                                @if ($entrevista->estado->puedeCompletarse() && ! $entrevista->inicia_at->isFuture())
+                                    <x-ui.button variant="ghost" size="sm" wire:click="completar({{ $entrevista->id }})">Completar</x-ui.button>
+                                @endif
+                                @if ($entrevista->estado->puedeCancelarse())
+                                    <x-ui.button variant="ghost" size="sm" wire:click="confirmarCancelacion({{ $entrevista->id }})">Cancelar</x-ui.button>
+                                @endif
+                            </div>
+                        @endcan
                     </td>
                 </tr>
             @endforeach
