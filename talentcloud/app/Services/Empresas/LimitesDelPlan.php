@@ -45,7 +45,7 @@ class LimitesDelPlan
 
         if ($limite !== null && $this->vacantesActivas($empresa->id) >= $limite) {
             throw new OperacionNoPermitida(
-                'El plan '.$empresa->etiquetaDelPlan().' permite '.$limite.' vacantes activas a la vez. Cierra una vacante o solicita un cambio de plan.',
+                'El plan '.$empresa->etiquetaDelPlan().' permite '.($limite === 1 ? '1 vacante activa' : $limite.' vacantes activas').' a la vez. Cierra una vacante o solicita un cambio de plan.',
                 'estado',
             );
         }

@@ -18,8 +18,11 @@ use App\Models\Requisito;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Notifications\AvisoSolicitudDePlan;
+use App\Services\Empresas\CambiarPlanEmpresa;
 use App\Services\Empresas\CupoDeIa;
 use App\Services\Empresas\LimitesDelPlan;
+use App\Services\Plataforma\CalidadDeLaIa;
+use App\Services\Postulaciones\RecalculoDeMatching;
 use App\Services\Vacantes\OperacionNoPermitida;
 use App\Tenancy\TenantContext;
 use Illuminate\Http\Client\Request;
@@ -121,7 +124,7 @@ it('rige el plan Pro durante la prueba y el Gratis al vencer, sin tocar lo exist
         ->and(app(LimitesDelPlan::class)->uso($empresa)->excedeVacantes())->toBeTrue();
 
     expect(fn () => DB::transaction(fn () => app(LimitesDelPlan::class)->verificarVacanteActiva($empresa->id)))
-        ->toThrow(OperacionNoPermitida::class, 'El plan Gratis permite 1 vacantes activas a la vez.');
+        ->toThrow(OperacionNoPermitida::class, 'El plan Gratis permite 1 vacante activa a la vez.');
 });
 
 // — Cupo de IA —
@@ -202,6 +205,35 @@ it('Enterprise no tiene tope de IA', function () {
     CalcularMatch::dispatchSync($this->empresa->id, $postulacion->id);
 
     expect($postulacion->fresh()->match_motor)->toBe(MotorMatching::Http);
+});
+
+it('no cuenta el básico por cupo agotado como una falla del servicio de IA', function () {
+    iaRespondeParaCupo();
+    ocuparCupo($this->vacante, 30, now());
+    $postulacion = postulacionParaCupo($this->vacante);
+    CalcularMatch::dispatchSync($this->empresa->id, $postulacion->id);
+
+    $resumen = app(TenantContext::class)->ejecutarGlobal(fn () => app(CalidadDeLaIa::class)->indicadores());
+
+    expect($resumen->sinCupo)->toBe(1)
+        ->and($resumen->basicas)->toBe(0)
+        ->and($resumen->basicasPendientes)->toBe(0)
+        ->and(app(RecalculoDeMatching::class)->postulaciones(soloBasicos: true)->pluck('id'))->not->toContain($postulacion->id);
+});
+
+it('al cambiar de plan rehace con IA las postulaciones en curso que quedaron sin cupo', function () {
+    iaRespondeParaCupo();
+    ocuparCupo($this->vacante, 30, now());
+    $postulacion = postulacionParaCupo($this->vacante);
+    CalcularMatch::dispatchSync($this->empresa->id, $postulacion->id);
+    expect($postulacion->fresh()->ia_sin_cupo)->toBeTrue();
+
+    app(TenantContext::class)->ejecutarGlobal(fn () => app(CambiarPlanEmpresa::class)->ejecutar($this->empresa, PlanEmpresa::Starter, $this->admin));
+
+    $postulacion->refresh();
+    expect($postulacion->match_motor)->toBe(MotorMatching::Http)
+        ->and($postulacion->ia_sin_cupo)->toBeFalse()
+        ->and($postulacion->ia_cupo_at)->not->toBeNull();
 });
 
 // — Solicitud de cambio de plan —

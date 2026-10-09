@@ -7,6 +7,7 @@
     <div class="mb-8 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <x-ui.stat label="Analizadas con IA" :value="$resumen->porcentajeConIa() === null ? '—' : $resumen->porcentajeConIa().'%'" highlight />
         <x-ui.stat label="Con análisis básico" :value="$resumen->basicas" />
+        <x-ui.stat label="Básico por cupo del plan" :value="$resumen->sinCupo" />
         <x-ui.stat label="Marcadas como incorrectas" :value="$resumen->marcasDelPeriodo" />
         <x-ui.stat label="CVs con error de lectura" :value="$resumen->cvsConError" />
     </div>

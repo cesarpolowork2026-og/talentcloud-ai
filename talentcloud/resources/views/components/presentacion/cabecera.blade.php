@@ -15,12 +15,13 @@
 
 <header class="barra sticky top-0 z-40">
     <div class="mx-auto flex max-w-[1480px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-8">
-        <a href="{{ route('inicio') }}#inicio" class="hover:no-underline" aria-label="TalentCloud AI, inicio">
+        <a href="{{ route('inicio') }}#inicio" class="shrink-0 hover:no-underline" aria-label="TalentCloud AI, inicio">
             @if ($lema)
                 {{-- El lema como texto: dentro de la imagen, a la altura de la barra, mediría ~6 px. --}}
                 <span class="flex flex-col items-start gap-1">
                     <x-marca tamano="grande" />
-                    <span class="hidden text-11 uppercase tracking-[0.18em] text-accent-200 lg:block">Inteligencia que conecta talento</span>
+                    {{-- En una línea; por debajo de 1280 px no cabe junto a los enlaces y se oculta. --}}
+                    <span class="hidden whitespace-nowrap text-11 uppercase tracking-[0.18em] text-accent-200 xl:block">Inteligencia que conecta talento</span>
                 </span>
             @else
                 <x-marca tamano="grande" />

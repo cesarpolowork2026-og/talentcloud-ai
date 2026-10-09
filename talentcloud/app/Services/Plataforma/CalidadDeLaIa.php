@@ -50,16 +50,20 @@ class CalidadDeLaIa
 
         $calculadas = Postulacion::sinFiltroDeEmpresa()->whereNotNull('match_motor')->where('match_calculado_at', '>=', $desde);
 
+        // Un análisis básico por cupo de IA agotado (plan de la empresa) no es una falla del servicio.
+        $sinCupo = (clone $calculadas)->where('ia_sin_cupo', true)->count();
+
         return new ResumenCalidadIa(
-            calculadas: (clone $calculadas)->count(),
+            calculadas: (clone $calculadas)->count() - $sinCupo,
             conIa: (clone $calculadas)->where('match_motor', MotorMatching::Http)->count(),
-            basicas: (clone $calculadas)->where('match_motor', MotorMatching::Fake)->count(),
-            basicasPendientes: Postulacion::sinFiltroDeEmpresa()->where('match_motor', MotorMatching::Fake)->count(),
+            basicas: (clone $calculadas)->where('match_motor', MotorMatching::Fake)->where('ia_sin_cupo', false)->count(),
+            basicasPendientes: Postulacion::sinFiltroDeEmpresa()->where('match_motor', MotorMatching::Fake)->where('ia_sin_cupo', false)->count(),
             cvsConError: Cv::query()->where('estado_procesamiento', EstadoProcesamientoCv::Error)->count(),
             trabajosFallidos: DB::table('failed_jobs')->count(),
             ultimosTrabajosFallidos: $conListas ? $this->ultimosTrabajosFallidos() : collect(),
             marcasDelPeriodo: MatchFeedback::sinFiltroDeEmpresa()->where('created_at', '>=', $desde)->count(),
             marcas: $conListas ? $this->ultimasMarcas() : collect(),
+            sinCupo: $sinCupo,
         );
     }
 

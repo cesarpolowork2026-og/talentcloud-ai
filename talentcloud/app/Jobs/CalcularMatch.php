@@ -55,7 +55,7 @@ class CalcularMatch implements ShouldBeUnique, ShouldQueue
 
         if ($entrada === null) {
             // Sin CV procesado o sin requisitos: no hay nada que comparar todavía.
-            $postulacion->update(['match_score' => null, 'match_detalle' => null, 'match_motor' => null, 'match_calculado_at' => null]);
+            $postulacion->forceFill(['ia_sin_cupo' => false])->update(['match_score' => null, 'match_detalle' => null, 'match_motor' => null, 'match_calculado_at' => null]);
 
             return;
         }

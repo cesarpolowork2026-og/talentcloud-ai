@@ -32,7 +32,8 @@ class RecalculoDeMatching
     public function postulaciones(bool $soloBasicos): Collection
     {
         return Postulacion::sinFiltroDeEmpresa()
-            ->when($soloBasicos, fn ($q) => $q->where('match_motor', MotorMatching::Fake))
+            // Los básicos por cupo agotado no mejoran reintentando: los rehace un cambio de plan (ProgramarMatching).
+            ->when($soloBasicos, fn ($q) => $q->where('match_motor', MotorMatching::Fake)->where('ia_sin_cupo', false))
             ->orderBy('id')
             ->get(['id', 'empresa_id']);
     }

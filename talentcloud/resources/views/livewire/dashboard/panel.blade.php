@@ -9,7 +9,7 @@
             <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
                 <div>
                     <h2 id="panel-empresas" class="m-0 text-16">1 · Empresas cliente</h2>
-                    <p class="m-0 mt-1 text-13 text-neutral-700">Quién usa TalentCloud, con qué plan (se cuentan las empresas activas) y qué empresas están por quedarse sin lugar en el suyo.</p>
+                    <p class="m-0 mt-1 text-13 text-neutral-700">Quién usa TalentCloud, con qué plan contratado (se cuentan las empresas activas; las que están en prueba, como Gratis) y qué empresas están por quedarse sin lugar en el suyo.</p>
                 </div>
                 <x-ui.button size="sm" :href="route('empresas.index')" wire:navigate>Gestionar empresas</x-ui.button>
             </div>
