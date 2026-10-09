@@ -3,8 +3,11 @@
     invitación y errores sin sesión).
     enPresentacion: en / y /login, las anclas marcan la sección visible (necesita
     `seccion` en un x-data superior) e "Iniciar sesión" abre el diálogo de acceso.
+    lema: muestra «Inteligencia que conecta talento» bajo el logo. Lo llevan las páginas del
+    menú (presentación y bolsa de empleos), para que la barra sea la misma al pasar de una a
+    otra; los formularios (registro, contraseña…) usan la barra compacta.
 --}}
-@props(['enPresentacion' => false])
+@props(['enPresentacion' => false, 'lema' => false])
 
 @php
     $secciones = ['inicio' => 'Inicio', 'caracteristicas' => 'Características', 'beneficios' => 'Beneficios', 'seguridad' => 'Seguridad'];
@@ -13,7 +16,7 @@
 <header class="barra sticky top-0 z-40">
     <div class="mx-auto flex max-w-[1480px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-8">
         <a href="{{ route('inicio') }}#inicio" class="hover:no-underline" aria-label="TalentCloud AI, inicio">
-            @if ($enPresentacion && request()->routeIs('inicio'))
+            @if ($lema)
                 {{-- El lema como texto: dentro de la imagen, a la altura de la barra, mediría ~6 px. --}}
                 <span class="flex flex-col items-start gap-1">
                     <x-marca tamano="grande" />

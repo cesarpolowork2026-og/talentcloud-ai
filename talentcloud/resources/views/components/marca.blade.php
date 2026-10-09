@@ -6,7 +6,7 @@
 
     fondo:  oscuro (barra azul petróleo, por defecto) | claro (pie y fondos claros).
     tamano: grande (cabecera pública) | mediano (barra de la app) | pequeno (maquetas, pie).
-    El lema de la página de inicio va como texto junto al logo (x-presentacion.cabecera): dentro de
+    El lema de la presentación y la bolsa de empleos va como texto junto al logo (x-presentacion.cabecera): dentro de
     la imagen, a la altura de la barra, no se leería.
 --}}
 @props(['fondo' => 'oscuro', 'tamano' => 'mediano'])

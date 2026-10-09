@@ -50,4 +50,8 @@
   /* TalentCloud: los hijos de una rejilla no la ensanchan más allá de la pantalla (una tabla o un
      formulario anchos se adaptan o desplazan dentro de su propio contenedor). */
   .grid > * { min-width: 0; }
+
+  /* TalentCloud: el hueco de la barra de desplazamiento se reserva siempre; si no, la barra superior y
+     su menú se mueven unos píxeles al pasar de una página larga a una corta (o al abrir un diálogo). */
+  html { scrollbar-gutter: stable; }
 }

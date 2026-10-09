@@ -13,7 +13,7 @@
 </head>
 <body class="antialiased">
 <div class="flex min-h-screen flex-col bg-bg">
-    <x-presentacion.cabecera />
+    <x-presentacion.cabecera lema />
 
     <main class="mx-auto w-full max-w-[1240px] flex-1 px-4 py-10 sm:px-8">
         {{ $slot }}

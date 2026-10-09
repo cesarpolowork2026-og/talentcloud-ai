@@ -16,9 +16,10 @@ it('usa la versión clara del logo en la barra y la de colores en el pie', funct
         ->assertSee('alt="TalentCloud AI"', false);
 });
 
-it('muestra el lema solo en la página de inicio', function () {
+it('muestra el lema en las páginas del menú público y no en los formularios', function () {
     $this->get('/')->assertOk()->assertSee('Inteligencia que conecta talento');
-    $this->get('/empleos')->assertOk()->assertDontSee('Inteligencia que conecta talento');
+    $this->get('/empleos')->assertOk()->assertSee('Inteligencia que conecta talento');
+    $this->get('/register')->assertOk()->assertDontSee('Inteligencia que conecta talento');
 });
 
 it('pinta el logo en la barra de la app y declara los iconos de la marca', function () {

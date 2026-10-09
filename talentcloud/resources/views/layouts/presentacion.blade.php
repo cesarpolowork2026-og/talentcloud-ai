@@ -33,7 +33,7 @@
 <div class="presentacion min-h-screen bg-bg" x-data="{ seccion: 'inicio' }">
     <a href="{{ route('login') }}" x-on:click.prevent="$dispatch('open-dialog', 'acceso')" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:shadow-md">Ir al inicio de sesión</a>
 
-    <x-presentacion.cabecera en-presentacion />
+    <x-presentacion.cabecera en-presentacion lema />
 
     <main>
         {{-- Hero: mensaje y pantallas de la app. --}}
