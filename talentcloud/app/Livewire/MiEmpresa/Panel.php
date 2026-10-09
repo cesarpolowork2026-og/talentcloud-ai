@@ -4,6 +4,7 @@ namespace App\Livewire\MiEmpresa;
 
 use App\DTO\DatosEmpresaData;
 use App\DTO\InvitacionData;
+use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
 use App\Models\Empresa;
 use App\Models\Invitacion;
@@ -12,6 +13,7 @@ use App\Repositories\Contracts\EmpresaRepository;
 use App\Repositories\Contracts\EquipoRepository;
 use App\Services\Empresas\ActualizarEmpresa;
 use App\Services\Empresas\LimitesDelPlan;
+use App\Services\Empresas\SolicitarCambioDePlan;
 use App\Services\Equipo\CambiarEstadoUsuario;
 use App\Services\Equipo\InvitacionNoValida;
 use App\Services\Equipo\InvitarUsuario;
@@ -56,6 +58,9 @@ class Panel extends Component
     #[Locked]
     public bool $desactivarSeleccionado = true;
 
+    // Planes y solicitud de cambio de plan.
+    public bool $mostrarPlanes = false;
+
     // Revocar invitación.
     public bool $mostrarConfirmacionInvitacion = false;
 
@@ -70,6 +75,7 @@ class Panel extends Component
         match (request()->query('abrir')) {
             'datos' => $this->abrirDatos(),
             'invitar' => $this->abrirInvitacion(),
+            'planes' => $this->abrirPlanes(),
             default => null,
         };
     }
@@ -152,6 +158,38 @@ class Panel extends Component
         } catch (OperacionNoPermitida $e) {
             $this->addError('usuario', $e->getMessage());
         }
+    }
+
+    public function abrirPlanes(): void
+    {
+        $this->authorize('solicitarPlan', $this->empresa());
+
+        $this->resetValidation('plan');
+        $this->mostrarPlanes = true;
+    }
+
+    public function solicitarPlan(string $plan, SolicitarCambioDePlan $solicitar): void
+    {
+        $empresa = $this->empresa();
+        $this->authorize('solicitarPlan', $empresa);
+
+        $elegido = PlanEmpresa::tryFrom($plan);
+        abort_if($elegido === null, 404);
+
+        /** @var User $actor */
+        $actor = auth()->user();
+
+        try {
+            $solicitar->ejecutar($empresa, $elegido, $actor);
+        } catch (OperacionNoPermitida $e) {
+            $this->addError('plan', $e->getMessage());
+
+            return;
+        }
+
+        $this->resetValidation('plan');
+        $this->mostrarPlanes = false;
+        $this->dispatch('plan-solicitado');
     }
 
     public function abrirDatos(): void

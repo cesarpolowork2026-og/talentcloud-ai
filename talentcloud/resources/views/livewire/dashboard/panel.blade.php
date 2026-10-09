@@ -20,25 +20,47 @@
                 @foreach (PlanEmpresa::cases() as $plan)
                     <x-ui.stat :label="'Plan '.$plan->etiqueta()" :value="$plataforma->empresasConPlan($plan)" wire:key="plan-{{ $plan->value }}" />
                 @endforeach
+                <x-ui.stat :label="'En prueba '.PlanEmpresa::PLAN_DE_PRUEBA->etiqueta()" :value="$plataforma->enPrueba" />
             </div>
+
+            @if ($plataforma->solicitudesDePlan->isNotEmpty())
+                <x-ui.card class="mb-4">
+                    <div class="card-kicker">Solicitudes de cambio de plan</div>
+                    <p class="m-0 text-13 text-neutral-700">Coordina el pago con la empresa y aplica el plan con «Cambiar plan» en Empresas; eso atiende la solicitud.</p>
+                    <x-ui.table>
+                        <x-slot:head>
+                            <th>Empresa</th><th>Plan actual</th><th>Solicita</th><th>Fecha</th>
+                        </x-slot:head>
+                        @foreach ($plataforma->solicitudesDePlan as $empresa)
+                            <tr wire:key="solicitud-{{ $empresa->id }}">
+                                <td>{{ $empresa->nombre }}</td>
+                                <td>{{ $empresa->etiquetaDelPlan() }}</td>
+                                <td>{{ $empresa->plan_solicitado?->etiqueta() }}</td>
+                                <td>{{ \App\Support\Formato::fechaCorta($empresa->plan_solicitado_at) }}</td>
+                            </tr>
+                        @endforeach
+                    </x-ui.table>
+                </x-ui.card>
+            @endif
 
             <x-ui.card>
                 <div class="card-kicker">Cerca del límite de su plan</div>
                 @if ($plataforma->cercaDelLimite->isEmpty())
                     <p class="m-0 text-14 text-neutral-800">Ninguna empresa activa usa el 80 % o más de su plan.</p>
                 @else
-                    <p class="m-0 text-13 text-neutral-700">Usan el 80 % o más de sus vacantes activas o de sus usuarios (con invitaciones pendientes). Buen momento para ofrecerles otro plan.</p>
+                    <p class="m-0 text-13 text-neutral-700">Usan el 80 % o más de sus vacantes activas, de sus usuarios (con invitaciones pendientes) o del cupo de IA del mes. Buen momento para ofrecerles otro plan.</p>
                     <x-ui.table>
                         <x-slot:head>
-                            <th>Empresa</th><th>Plan</th><th>Vacantes activas</th><th>Usuarios e invitaciones</th>
+                            <th>Empresa</th><th>Plan</th><th>Vacantes activas</th><th>Usuarios e invitaciones</th><th>IA este mes</th>
                         </x-slot:head>
                         @foreach ($plataforma->cercaDelLimite as $fila)
                             @php($uso = $fila['uso'])
                             <tr wire:key="limite-{{ $fila['empresa']->id }}">
                                 <td>{{ $fila['empresa']->nombre }}</td>
-                                <td>{{ $uso->plan->etiqueta() }}</td>
+                                <td>{{ $uso->etiquetaDelPlan() }}</td>
                                 <td>{{ $uso->vacantesActivas }} {{ $uso->limiteVacantes() === null ? '· sin límite' : 'de '.$uso->limiteVacantes() }}</td>
                                 <td>{{ $uso->usuariosActivos + $uso->invitacionesPendientes }} {{ $uso->limiteUsuarios() === null ? '· sin límite' : 'de '.$uso->limiteUsuarios() }}</td>
+                                <td>{{ $uso->postulacionesConIa }} {{ $uso->cupoIa() === null ? '· sin límite' : 'de '.$uso->cupoIa() }}</td>
                             </tr>
                         @endforeach
                     </x-ui.table>

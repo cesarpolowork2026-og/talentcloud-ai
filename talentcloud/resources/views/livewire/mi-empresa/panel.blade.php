@@ -1,6 +1,6 @@
 {{-- Pantalla "Mi empresa" del prototipo (TalentCloud App.dc.html, isMiEmpresa). --}}
 <div>
-    <x-ui.page-header title="Mi empresa" :subtitle="$empresa->nombre.' — plan '.$empresa->plan->etiqueta().'.'" />
+    <x-ui.page-header title="Mi empresa" :subtitle="$empresa->nombre.' — plan '.$empresa->etiquetaDelPlan().'.'" />
 
     <div class="grid items-start gap-6 md:grid-cols-2">
         <section>
@@ -63,9 +63,24 @@
         </section>
 
         <div class="grid gap-4">
-            <x-ui.card kicker="Plan" :title="$empresa->plan->etiqueta()">
+            <x-ui.card kicker="Plan" :title="$empresa->etiquetaDelPlan()">
+                @if ($empresa->enPrueba())
+                    <p class="card-body text-14">
+                        Tu prueba del plan {{ $uso->plan->etiqueta() }} termina el {{ \App\Support\Formato::fechaCorta($empresa->prueba_hasta) }}
+                        ({{ $empresa->diasDePrueba() === 1 ? 'queda 1 día' : 'quedan '.$empresa->diasDePrueba().' días' }}).
+                        Después pasarás al plan Gratis: conservas todo lo que tengas, pero no podrás sumar por encima de sus límites.
+                    </p>
+                @endif
                 <x-empresas.uso-del-plan :uso="$uso" />
-                <p class="card-body text-13">Para cambiar de plan, escribe al equipo de TalentCloud.</p>
+                @if ($empresa->plan_solicitado)
+                    <p class="card-body text-13">Solicitaste el plan {{ $empresa->plan_solicitado->etiqueta() }} el {{ \App\Support\Formato::fechaCorta($empresa->plan_solicitado_at) }}. El equipo de TalentCloud te escribirá para coordinar el pago y aplicarlo.</p>
+                @endif
+                <div class="flex flex-wrap items-center gap-3">
+                    @can('solicitarPlan', $empresa)
+                        <x-ui.button size="sm" wire:click="abrirPlanes">Ver planes y precios</x-ui.button>
+                    @endcan
+                    <x-ui.action-message on="plan-solicitado">Solicitud enviada.</x-ui.action-message>
+                </div>
             </x-ui.card>
 
             <x-ui.card kicker="Datos de la empresa" :title="$empresa->nombre">
@@ -84,6 +99,20 @@
             </x-ui.card>
         </div>
     </div>
+
+    {{-- Planes: precios y «Solicitar plan» (sin pasarela de pago todavía: lo aplica el admin SaaS). --}}
+    <x-ui.dialog wire:model="mostrarPlanes" title="Planes y precios" ancho="1180px" max-width="1180px">
+        <div class="grid gap-3">
+            <p class="m-0">Pagas por vacantes activas, no por usuario. Precios en soles, más IGV. Al solicitar un plan, el equipo de TalentCloud te escribe para coordinar el pago y lo aplica.</p>
+            @error('plan')
+                <p class="field-error m-0 text-14" role="alert">{{ $message }}</p>
+            @enderror
+            <x-planes.tabla :empresa="$empresa" />
+        </div>
+        <x-slot:actions>
+            <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
+        </x-slot:actions>
+    </x-ui.dialog>
 
     {{-- Invitar usuario --}}
     <x-ui.dialog wire:model="mostrarInvitacion" title="Invitar usuario" max-width="460px">

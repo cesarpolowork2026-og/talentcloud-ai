@@ -37,7 +37,10 @@ test('crear empresa registra la empresa y su cuenta con rol empresa', function (
 
     expect($user->rol())->toBe(Rol::Empresa)
         ->and($user->empresa->nombre)->toBe('Nimbus Corp')
-        ->and($user->empresa->plan)->toBe(PlanEmpresa::Starter)
+        // Plan Gratis con la prueba del plan Pro.
+        ->and($user->empresa->plan)->toBe(PlanEmpresa::Gratis)
+        ->and($user->empresa->planVigente())->toBe(PlanEmpresa::Pro)
+        ->and($user->empresa->prueba_hasta->isSameDay(now()->addDays(PlanEmpresa::DIAS_DE_PRUEBA)))->toBeTrue()
         ->and($user->empresa->estado)->toBe(EstadoEmpresa::Activa)
         ->and($user->empresa->onboarding)->toEqualCanonicalizing(['perfil' => false, 'vacante' => false, 'invitar' => false]);
 });

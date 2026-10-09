@@ -46,6 +46,12 @@ class EmpresaPolicy
         return $user->tieneRol(Rol::Admin);
     }
 
+    /** Pedir otro plan: la cuenta de empresa, para la suya (lo aplica el admin SaaS). */
+    public function solicitarPlan(User $user, Empresa $empresa): bool
+    {
+        return $user->tieneRol(Rol::Empresa) && $this->esDeLaEmpresa($user, $empresa);
+    }
+
     /** Invitar reclutadores: la cuenta de empresa, a su propia empresa. */
     public function invitar(User $user, Empresa $empresa): bool
     {

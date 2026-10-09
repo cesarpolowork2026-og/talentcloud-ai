@@ -123,7 +123,8 @@ class Listado extends Component
 
         $this->resetValidation();
         $this->empresaSeleccionada = $empresa->id;
-        $this->planNuevo = $empresa->plan->value;
+        // Si la empresa pidió un plan, viene propuesto: atenderla es aplicarlo.
+        $this->planNuevo = ($empresa->plan_solicitado ?? $empresa->plan)->value;
         $this->mostrarDetalle = false;
         $this->mostrarCambioDePlan = true;
     }

@@ -13,6 +13,7 @@ use App\Livewire\Kanban;
 use App\Livewire\Matching;
 use App\Livewire\MiEmpresa;
 use App\Livewire\Onboarding;
+use App\Livewire\Planes;
 use App\Livewire\Plataforma;
 use App\Livewire\Postulante;
 use App\Livewire\Vacantes;
@@ -34,6 +35,9 @@ Volt::route('/', 'pages.auth.login')->middleware('guest')->name('inicio');
 Route::get('empleos', Empleos\Listado::class)->name('empleos.index');
 Route::get('empleos/{id}', Empleos\Detalle::class)->whereNumber('id')->name('empleos.show');
 Route::get('empleos/{id}/postular', PostularDesdeEmpleosController::class)->whereNumber('id')->name('empleos.postular');
+
+// Planes y precios (ampliación): página pública con los precios de PlanEmpresa.
+Route::get('planes', Planes\Precios::class)->name('planes');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Personal de selección: admin SaaS, empresa y reclutador.

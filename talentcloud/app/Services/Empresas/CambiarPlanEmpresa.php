@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\DB;
 /**
  * "Cambiar plan" del admin SaaS. Una bajada de plan no toca lo existente: la
  * empresa conserva sus vacantes y usuarios aunque superen el nuevo límite, y
- * solo deja de poder sumar más (LimitesDelPlan).
+ * solo deja de poder sumar más (LimitesDelPlan). Cambiar el plan termina la
+ * prueba y atiende la solicitud de la empresa, si la había.
  */
 class CambiarPlanEmpresa
 {
@@ -28,6 +29,9 @@ class CambiarPlanEmpresa
             }
 
             $fila->plan = $plan;
+            $fila->prueba_hasta = null;
+            $fila->plan_solicitado = null;
+            $fila->plan_solicitado_at = null;
             $fila->save();
 
             return $anterior;

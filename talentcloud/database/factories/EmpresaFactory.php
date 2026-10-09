@@ -20,7 +20,8 @@ class EmpresaFactory extends Factory
         return [
             'nombre' => fake()->unique()->company(),
             'sector' => fake()->randomElement(['Tecnología', 'Diseño', 'Consultoría', 'Finanzas']),
-            'plan' => fake()->randomElement(PlanEmpresa::cases()),
+            // Gratis (1 vacante, 2 usuarios) se elige a propósito en los tests que lo necesitan.
+            'plan' => fake()->randomElement([PlanEmpresa::Starter, PlanEmpresa::Pro, PlanEmpresa::Enterprise]),
             'estado' => EstadoEmpresa::Activa,
         ];
     }

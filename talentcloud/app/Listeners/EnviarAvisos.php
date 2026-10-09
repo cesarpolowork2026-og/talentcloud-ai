@@ -12,6 +12,7 @@ use App\Events\EntrevistaCancelada;
 use App\Events\EntrevistaProgramada;
 use App\Events\EntrevistaReprogramada;
 use App\Events\PlanEmpresaCambiado;
+use App\Events\PlanSolicitado;
 use App\Events\PostulacionCambioDeEtapa;
 use App\Events\PostulacionRetirada;
 use App\Events\VacanteCerrada;
@@ -28,6 +29,7 @@ use App\Notifications\AvisoDeEntrevista;
 use App\Notifications\AvisoEntrevistaReprogramada;
 use App\Notifications\AvisoNuevaPostulacion;
 use App\Notifications\AvisoPostulacionRetirada;
+use App\Notifications\AvisoSolicitudDePlan;
 use App\Services\Avisos\AvisoAlCandidato;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Notifications\Notification;
@@ -175,6 +177,19 @@ class EnviarAvisos
         User::query()
             ->deEmpresa($empresa->id)
             ->role(Rol::Empresa->value)
+            ->whereNull('desactivado_at')
+            ->get()
+            ->each(fn (User $u) => $u->notify($aviso));
+    }
+
+    /** Solicitud de plan de una empresa: aviso a los admins SaaS activos, que la aplican. */
+    public function handlePlanSolicitado(PlanSolicitado $evento): void
+    {
+        $empresa = $evento->empresa;
+        $aviso = AvisoSolicitudDePlan::de($empresa->nombre, $empresa->etiquetaDelPlan(), $evento->plan->etiqueta(), $evento->solicitante->name, route('empresas.index'));
+
+        User::query()
+            ->role(Rol::Admin->value)
             ->whereNull('desactivado_at')
             ->get()
             ->each(fn (User $u) => $u->notify($aviso));

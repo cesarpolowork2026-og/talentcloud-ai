@@ -5,8 +5,10 @@
       - name="x" + $dispatch('open-dialog', 'x') / $dispatch('close-dialog', 'x')
     Cierra con Escape, clic en el fondo o open = false dentro del slot.
     Slot "actions": botones alineados a la derecha.
+    max-width solo lo estrecha (el DS lo fija en 440 px); ancho="1100px" lo ensancha
+    hasta ese valor sin pasar del de la pantalla.
 --}}
-@props(['title' => null, 'name' => null, 'maxWidth' => '440px'])
+@props(['title' => null, 'name' => null, 'maxWidth' => '440px', 'ancho' => null])
 
 @php
     $wireModel = $attributes->wire('model');
@@ -35,7 +37,7 @@
         role="dialog"
         aria-modal="true"
         @if ($title) aria-labelledby="{{ $titleId }}" @endif
-        style="max-width: {{ $maxWidth }}"
+        style="max-width: {{ $maxWidth }};@if ($ancho) width: min({{ $ancho }}, 100%);@endif"
         x-trap.inert.noscroll="open"
     >
         @if ($title)

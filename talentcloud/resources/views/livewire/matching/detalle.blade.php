@@ -100,6 +100,9 @@
 
             @if ($resultado->motor === MotorMatching::Http)
                 <p class="mt-4 max-w-[60ch] text-13 text-neutral-600">Los porcentajes se calculan por correspondencia semántica (embeddings) entre el CV y los requisitos de la vacante. La IA explica cada coincidencia con evidencia textual; la decisión final permanece bajo control humano.</p>
+            @elseif ($postulacion->ia_sin_cupo)
+                {{-- Lo evaluó CalcularMatch sin lugar en el cupo mensual de IA del plan (CupoDeIa). --}}
+                <p class="mt-4 max-w-[60ch] text-13 text-neutral-600">Análisis básico: cuando se calculó, el cupo mensual de matching con IA del plan de {{ $vacante?->empresa?->nombre ?? 'la empresa' }} estaba agotado. Los porcentajes se calculan por coincidencia de palabras clave entre el CV y los requisitos; «Recalcular coincidencia» usa la IA si vuelve a haber cupo. Cada resultado muestra su evidencia textual; la decisión final permanece bajo control humano.</p>
             @else
                 <p class="mt-4 max-w-[60ch] text-13 text-neutral-600">Análisis básico: los porcentajes se calculan por coincidencia de palabras clave entre el CV y los requisitos, mientras el análisis semántico con IA no está disponible. Cada resultado muestra su evidencia textual; la decisión final permanece bajo control humano.</p>
             @endif

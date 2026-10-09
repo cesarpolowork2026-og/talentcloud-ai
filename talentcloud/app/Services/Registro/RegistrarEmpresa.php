@@ -13,8 +13,9 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\DB;
 
 /**
- * "Crear empresa": da de alta la empresa (plan Starter, activa, onboarding
- * pendiente) y su primera cuenta con rol empresa.
+ * "Crear empresa": da de alta la empresa (plan Gratis con la prueba del plan Pro
+ * durante PlanEmpresa::DIAS_DE_PRUEBA días, activa, onboarding pendiente) y su
+ * primera cuenta con rol empresa.
  */
 class RegistrarEmpresa
 {
@@ -25,10 +26,14 @@ class RegistrarEmpresa
         $user = DB::transaction(function () use ($datos): User {
             $empresa = $this->empresas->crear([
                 'nombre' => $datos->nombreEmpresa,
-                'plan' => PlanEmpresa::Starter,
+                'plan' => PlanEmpresa::Gratis,
                 'estado' => EstadoEmpresa::Activa,
                 'onboarding' => array_fill_keys(Empresa::PASOS_ONBOARDING, false),
             ]);
+
+            // Al vencer, rige el plan Gratis sin tocar nada (Empresa::planVigente()).
+            $empresa->prueba_hasta = now()->addDays(PlanEmpresa::DIAS_DE_PRUEBA);
+            $empresa->save();
 
             $user = new User([
                 'name' => $datos->nombre,

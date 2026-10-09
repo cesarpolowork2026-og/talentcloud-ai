@@ -272,13 +272,17 @@ it('formatea los días con coma decimal', function () {
 // — Límites por plan —
 
 it('fija los límites de cada plan', function () {
-    expect(PlanEmpresa::Starter->limiteVacantesActivas())->toBe(3)
+    expect(PlanEmpresa::Gratis->limiteVacantesActivas())->toBe(1)
+        ->and(PlanEmpresa::Gratis->limiteUsuarios())->toBe(2)
+        ->and(PlanEmpresa::Gratis->cupoIaMensual())->toBe(30)
+        ->and(PlanEmpresa::Starter->limiteVacantesActivas())->toBe(3)
         ->and(PlanEmpresa::Starter->limiteUsuarios())->toBe(3)
         ->and(PlanEmpresa::Pro->limiteVacantesActivas())->toBe(15)
         ->and(PlanEmpresa::Pro->limiteUsuarios())->toBe(10)
         ->and(PlanEmpresa::Enterprise->limiteVacantesActivas())->toBeNull()
-        ->and(PlanEmpresa::Starter->descripcionDeLimites())->toBe('Hasta 3 vacantes activas y 3 usuarios.')
-        ->and(PlanEmpresa::Enterprise->descripcionDeLimites())->toBe('Vacantes activas y usuarios sin límite.');
+        ->and(PlanEmpresa::Gratis->descripcionDeLimites())->toBe('Hasta 1 vacante activa, 2 usuarios y 30 postulaciones con IA al mes.')
+        ->and(PlanEmpresa::Pro->descripcionDeLimites())->toBe('Hasta 15 vacantes activas, 10 usuarios y 2 000 postulaciones con IA al mes.')
+        ->and(PlanEmpresa::Enterprise->descripcionDeLimites())->toBe('Vacantes activas sin límite, usuarios sin límite y matching con IA sin límite.');
 });
 
 it('no deja publicar una vacante por encima del límite, pero sí mover entre activas', function () {
@@ -431,7 +435,7 @@ it('deja al admin cambiar el plan, avisa a la cuenta de empresa y lo anota en la
         ->assertHasErrors(['planNuevo'])
         ->assertSee('Vela Studio ya tiene el plan Starter.')
         ->set('planNuevo', 'pro')
-        ->assertSee('Hasta 15 vacantes activas y 10 usuarios.')
+        ->assertSee('Hasta 15 vacantes activas, 10 usuarios y 2 000 postulaciones con IA al mes.')
         ->call('cambiarPlan')
         ->assertHasNoErrors()
         ->assertSet('mostrarCambioDePlan', false);

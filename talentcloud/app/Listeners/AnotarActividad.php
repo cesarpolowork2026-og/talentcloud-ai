@@ -13,6 +13,7 @@ use App\Events\EntrevistaReprogramada;
 use App\Events\EvaluacionAprobada;
 use App\Events\NotaAgregada;
 use App\Events\PlanEmpresaCambiado;
+use App\Events\PlanSolicitado;
 use App\Events\PostulacionCambioDeEtapa;
 use App\Events\PostulacionCreada;
 use App\Events\PostulacionRetirada;
@@ -210,6 +211,19 @@ class AnotarActividad
             "{$empresa->nombre} pasó del plan {$evento->anterior->etiqueta()} al plan {$empresa->plan->etiqueta()}.",
             $empresa,
             $evento->actor,
+        );
+    }
+
+    public function handlePlanSolicitado(PlanSolicitado $evento): void
+    {
+        $empresa = $evento->empresa;
+
+        $this->actividad->registrar(
+            $empresa->id,
+            TipoActividad::PlanSolicitado,
+            "{$evento->solicitante->name} solicitó el plan {$evento->plan->etiqueta()} para {$empresa->nombre}.",
+            $empresa,
+            $evento->solicitante,
         );
     }
 

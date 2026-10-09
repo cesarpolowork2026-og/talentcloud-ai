@@ -1,4 +1,7 @@
-{{-- Uso de los límites del plan ("2 de 3 vacantes activas"). Lo usan "Mi empresa" y el detalle de empresa del admin. --}}
+{{--
+    Uso de los límites del plan vigente ("2 de 3 vacantes activas") y del cupo de IA del mes.
+    Lo usan "Mi empresa" y el detalle de empresa del admin.
+--}}
 @props(['uso'])
 
 @php
@@ -19,6 +22,15 @@
                 ? $uso->invitacionesPendientes.' '.($uso->invitacionesPendientes === 1 ? 'invitación pendiente ocupa' : 'invitaciones pendientes ocupan').' lugar hasta que se acepte o se revoque.'
                 : null,
         ],
+        [
+            'nombre' => 'Postulaciones con IA este mes',
+            'usado' => $uso->postulacionesConIa,
+            'limite' => $uso->cupoIa(),
+            'excede' => false,
+            'nota' => $uso->cupoIaAgotado()
+                ? 'Cupo agotado: hasta el '.\App\Support\Formato::fechaCorta(\App\Services\Empresas\CupoDeIa::renovacion()).' las nuevas postulaciones se evalúan con el análisis básico.'
+                : null,
+        ],
     ];
 @endphp
 
@@ -27,10 +39,10 @@
         <div class="grid gap-1">
             <div class="flex items-baseline justify-between gap-2 text-14">
                 <span class="text-neutral-800">{{ $fila['nombre'] }}</span>
-                <span class="font-semibold">{{ $fila['limite'] === null ? $fila['usado'].' · sin límite' : $fila['usado'].' de '.$fila['limite'] }}</span>
+                <span class="font-semibold">{{ $fila['limite'] === null ? $fila['usado'].' · sin límite' : $fila['usado'].' de '.number_format($fila['limite'], 0, ',', ' ') }}</span>
             </div>
             @if ($fila['limite'] !== null)
-                <x-ui.progress :value="$fila['usado'] * 100 / $fila['limite']" :label="$fila['nombre'].': '.$fila['usado'].' de '.$fila['limite']" />
+                <x-ui.progress :value="min(100, $fila['usado'] * 100 / $fila['limite'])" :label="$fila['nombre'].': '.$fila['usado'].' de '.$fila['limite']" />
             @endif
             @if ($fila['excede'])
                 <p class="m-0 text-13 text-accent-2-700">Supera el límite del plan: se conserva lo existente, pero no se pueden sumar más.</p>

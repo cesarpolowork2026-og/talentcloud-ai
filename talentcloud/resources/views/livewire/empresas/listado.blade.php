@@ -24,7 +24,12 @@
             @foreach ($filas as $empresa)
                 <tr wire:key="empresa-{{ $empresa->id }}">
                     <td class="tc-row" wire:click="verDetalle({{ $empresa->id }})"><x-ui.boton-fila wire:click.stop="verDetalle({{ $empresa->id }})">{{ $empresa->nombre }}</x-ui.boton-fila></td>
-                    <td>{{ $empresa->plan->etiqueta() }}</td>
+                    <td>
+                        {{ $empresa->etiquetaDelPlan() }}
+                        @if ($empresa->plan_solicitado)
+                            <x-ui.tag tone="accent-2" class="ml-1">Pide {{ $empresa->plan_solicitado->etiqueta() }}</x-ui.tag>
+                        @endif
+                    </td>
                     <td>{{ $empresa->usuarios_count }}</td>
                     <td>{{ $empresa->vacantes_activas_count }}</td>
                     <td><x-ui.estado :valor="$empresa->estado" /></td>
@@ -43,7 +48,9 @@
     {{-- Detalle (diálogo informativo del prototipo) --}}
     <x-ui.dialog wire:model="mostrarDetalle" :title="$seleccionada?->nombre" max-width="520px">
         @if ($seleccionada)
-            <p class="m-0 whitespace-pre-line">Plan: {{ $seleccionada->plan->etiqueta() }}
+            <p class="m-0 whitespace-pre-line">Plan: {{ $seleccionada->etiquetaDelPlan() }}{{ $seleccionada->enPrueba() ? ' hasta el '.\App\Support\Formato::fechaCorta($seleccionada->prueba_hasta).'; después, Gratis' : '' }}
+@if ($seleccionada->plan_solicitado)Solicitud: plan {{ $seleccionada->plan_solicitado->etiqueta() }}, el {{ \App\Support\Formato::fechaCorta($seleccionada->plan_solicitado_at) }}
+@endif
 Usuarios: {{ $seleccionada->usuarios_count }}
 Vacantes activas: {{ $seleccionada->vacantes_activas_count }}
 Estado: {{ $seleccionada->estado->etiqueta() }}</p>
@@ -87,7 +94,10 @@ Estado: {{ $seleccionada->estado->etiqueta() }}</p>
             <x-ui.field label="Plan" for="cambiar-plan" error="planNuevo" :hint="$planElegido?->descripcionDeLimites()">
                 <x-ui.select wire:model.live="planNuevo" id="cambiar-plan" :options="$planes" class="w-full" error="planNuevo" />
             </x-ui.field>
-            <p class="m-0 text-13 text-neutral-700">Con un plan menor, la empresa conserva sus vacantes y usuarios aunque superen el nuevo límite; solo no podrá sumar más. Se avisará a la cuenta de la empresa.</p>
+            @if ($seleccionada?->plan_solicitado)
+                <p class="m-0 text-14">La empresa solicitó el plan {{ $seleccionada->plan_solicitado->etiqueta() }} el {{ \App\Support\Formato::fechaCorta($seleccionada->plan_solicitado_at) }}. Aplícalo cuando el pago esté coordinado.</p>
+            @endif
+            <p class="m-0 text-13 text-neutral-700">Con un plan menor, la empresa conserva sus vacantes y usuarios aunque superen el nuevo límite; solo no podrá sumar más. Cambiar el plan termina la prueba del plan Pro y se avisará a la cuenta de la empresa.</p>
         </form>
         <x-slot:actions>
             <x-ui.button x-on:click="open = false">Cancelar</x-ui.button>

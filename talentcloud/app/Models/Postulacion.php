@@ -35,6 +35,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $retirada_at La retiró el propio postulante (no asignable en masa).
  * @property Carbon $created_at
  * @property EstadoDeMiPostulacion|null $estado_avisado Último estado comunicado al postulante (no asignable en masa).
+ * @property Carbon|null $ia_cupo_at Cuándo consumió su lugar del cupo mensual de IA (CupoDeIa; no asignable en masa).
+ * @property bool $ia_sin_cupo Se evaluó con el análisis básico por cupo de IA agotado (no asignable en masa).
  */
 #[ObservedBy(PostulacionObserver::class)]
 class Postulacion extends Model
@@ -78,6 +80,8 @@ class Postulacion extends Model
             'match_detalle' => 'array',
             'match_motor' => MotorMatching::class,
             'match_calculado_at' => 'datetime',
+            'ia_cupo_at' => 'datetime',
+            'ia_sin_cupo' => 'boolean',
         ];
     }
 

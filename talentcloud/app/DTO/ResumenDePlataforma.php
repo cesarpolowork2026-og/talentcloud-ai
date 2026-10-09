@@ -12,6 +12,7 @@ final readonly class ResumenDePlataforma
     /**
      * @param  array<string, int>  $porPlan  valor de PlanEmpresa => empresas activas con ese plan
      * @param  Collection<int, array{empresa: Empresa, uso: UsoDelPlan}>  $cercaDelLimite
+     * @param  Collection<int, Empresa>  $solicitudesDePlan  empresas activas que pidieron otro plan, la más antigua primero
      */
     public function __construct(
         public int $empresasActivas,
@@ -19,6 +20,8 @@ final readonly class ResumenDePlataforma
         public array $porPlan,
         public Collection $cercaDelLimite,
         public ResumenCalidadIa $ia,
+        public int $enPrueba = 0,
+        public Collection $solicitudesDePlan = new Collection,
     ) {}
 
     public function empresasConPlan(PlanEmpresa $plan): int

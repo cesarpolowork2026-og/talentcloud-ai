@@ -12,7 +12,8 @@ use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Límites de uso del plan de la empresa (PlanEmpresa). Solo impiden crear más:
+ * Límites de uso del plan vigente de la empresa (Empresa::planVigente(): el de
+ * prueba mientras dure, después el contratado). Solo impiden crear más:
  * nunca bloquean lo existente, así que tras una bajada de plan la empresa
  * conserva sus vacantes y usuarios aunque pase del límite.
  *
@@ -22,13 +23,17 @@ use Illuminate\Support\Facades\DB;
  */
 class LimitesDelPlan
 {
+    public function __construct(private readonly CupoDeIa $cupoDeIa) {}
+
     public function uso(Empresa $empresa): UsoDelPlan
     {
         return new UsoDelPlan(
-            plan: $empresa->plan,
+            plan: $empresa->planVigente(),
             vacantesActivas: $this->vacantesActivas($empresa->id),
             usuariosActivos: $this->usuariosActivos($empresa->id),
             invitacionesPendientes: $this->invitacionesPendientes($empresa->id),
+            postulacionesConIa: $this->cupoDeIa->usadasEsteMes($empresa->id),
+            pruebaHasta: $empresa->enPrueba() ? $empresa->prueba_hasta : null,
         );
     }
 
@@ -36,11 +41,11 @@ class LimitesDelPlan
     public function verificarVacanteActiva(int $empresaId): void
     {
         $empresa = $this->bloquear($empresaId);
-        $limite = $empresa->plan->limiteVacantesActivas();
+        $limite = $empresa->planVigente()->limiteVacantesActivas();
 
         if ($limite !== null && $this->vacantesActivas($empresa->id) >= $limite) {
             throw new OperacionNoPermitida(
-                'El plan '.$empresa->plan->etiqueta().' permite '.$limite.' vacantes activas a la vez. Cierra una vacante o solicita un cambio de plan.',
+                'El plan '.$empresa->etiquetaDelPlan().' permite '.$limite.' vacantes activas a la vez. Cierra una vacante o solicita un cambio de plan.',
                 'estado',
             );
         }
@@ -53,7 +58,7 @@ class LimitesDelPlan
     public function verificarInvitacion(int $empresaId, string $email): void
     {
         $empresa = $this->bloquear($empresaId);
-        $limite = $empresa->plan->limiteUsuarios();
+        $limite = $empresa->planVigente()->limiteUsuarios();
 
         if ($limite === null) {
             return;
@@ -63,7 +68,7 @@ class LimitesDelPlan
 
         if ($ocupados >= $limite) {
             throw new OperacionNoPermitida(
-                'El plan '.$empresa->plan->etiqueta().' permite '.$limite.' usuarios, contando las invitaciones pendientes. Revoca una invitación, desactiva un usuario o solicita un cambio de plan.',
+                'El plan '.$empresa->etiquetaDelPlan().' permite '.$limite.' usuarios, contando las invitaciones pendientes. Revoca una invitación, desactiva un usuario o solicita un cambio de plan.',
                 'invitadoEmail',
             );
         }
@@ -73,11 +78,11 @@ class LimitesDelPlan
     public function verificarUsuarioActivo(int $empresaId): void
     {
         $empresa = $this->bloquear($empresaId);
-        $limite = $empresa->plan->limiteUsuarios();
+        $limite = $empresa->planVigente()->limiteUsuarios();
 
         if ($limite !== null && $this->usuariosActivos($empresa->id) >= $limite) {
             throw new OperacionNoPermitida(
-                'El plan '.$empresa->plan->etiqueta().' de '.$empresa->nombre.' permite '.$limite.' usuarios activos y ya están en uso. Desactiva a otro usuario o solicita un cambio de plan.',
+                'El plan '.$empresa->etiquetaDelPlan().' de '.$empresa->nombre.' permite '.$limite.' usuarios activos y ya están en uso. Desactiva a otro usuario o solicita un cambio de plan.',
                 'usuario',
             );
         }

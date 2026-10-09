@@ -44,6 +44,11 @@
                 class="barra-enlace border-b-2 border-transparent py-2 text-15"
                 @if (request()->routeIs('empleos.*')) aria-current="page" @endif
             >Empleos</a>
+            <a
+                href="{{ route('planes') }}"
+                class="barra-enlace border-b-2 border-transparent py-2 text-15"
+                @if (request()->routeIs('planes')) aria-current="page" @endif
+            >Planes</a>
         </nav>
 
         <div class="ml-auto flex items-center gap-2 lg:ml-0">

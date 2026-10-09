@@ -10,6 +10,7 @@
                 <a href="{{ route('inicio') }}#{{ $ancla }}">{{ $nombre }}</a>
             @endforeach
             <a href="{{ route('empleos.index') }}">Empleos</a>
+            <a href="{{ route('planes') }}">Planes</a>
         </nav>
     </div>
 </footer>

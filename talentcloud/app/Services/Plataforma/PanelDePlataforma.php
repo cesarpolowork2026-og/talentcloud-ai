@@ -7,6 +7,7 @@ use App\DTO\UsoDelPlan;
 use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoVacante;
 use App\Models\Empresa;
+use App\Services\Empresas\CupoDeIa;
 use App\Tenancy\EmpresaScope;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -32,6 +33,9 @@ class PanelDePlataforma
                     ->withoutGlobalScope(EmpresaScope::class)
                     ->whereNull('aceptada_at')
                     ->where('expira_at', '>', now()),
+                'postulaciones as postulaciones_con_ia_count' => fn (Builder $q) => $q
+                    ->withoutGlobalScope(EmpresaScope::class)
+                    ->where('ia_cupo_at', '>=', CupoDeIa::inicioDelMes()),
             ])
             ->orderBy('nombre')
             ->get();
@@ -44,14 +48,21 @@ class PanelDePlataforma
             porPlan: $activas->countBy(fn (Empresa $e) => $e->plan->value)->all(),
             cercaDelLimite: $activas
                 ->map(fn (Empresa $e) => ['empresa' => $e, 'uso' => new UsoDelPlan(
-                    plan: $e->plan,
+                    plan: $e->planVigente(),
                     vacantesActivas: (int) $e->getAttribute('vacantes_activas_count'),
                     usuariosActivos: (int) $e->getAttribute('usuarios_activos_count'),
                     invitacionesPendientes: (int) $e->getAttribute('invitaciones_pendientes_count'),
+                    postulacionesConIa: (int) $e->getAttribute('postulaciones_con_ia_count'),
+                    pruebaHasta: $e->enPrueba() ? $e->prueba_hasta : null,
                 )])
                 ->filter(fn (array $fila) => $fila['uso']->cercaDelLimite())
                 ->values(),
             ia: $this->calidad->indicadores(),
+            enPrueba: $activas->filter(fn (Empresa $e) => $e->enPrueba())->count(),
+            solicitudesDePlan: $activas
+                ->filter(fn (Empresa $e) => $e->plan_solicitado !== null)
+                ->sortBy(fn (Empresa $e) => $e->plan_solicitado_at)
+                ->values(),
         );
     }
 }
