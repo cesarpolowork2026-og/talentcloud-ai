@@ -60,15 +60,13 @@
                 @unless (request()->routeIs('register'))
                     <x-ui.button variant="ghost" :href="route('register')" class="hidden whitespace-nowrap sm:inline-flex lg:hidden xl:inline-flex">Crear empresa</x-ui.button>
                 @endunless
-                {{-- En la presentación abre el diálogo de acceso; en el resto, lleva al login. La flecha va en un
-                     span: .btn svg { display: block } ganaría a .hidden sobre el propio svg. --}}
+                {{-- En la presentación abre el diálogo de acceso; en el resto, lleva al login. --}}
                 <x-ui.button
                     :href="route('login')"
                     class="whitespace-nowrap"
                     :x-on:click.prevent="$enPresentacion ? '$dispatch(\'open-dialog\', \'acceso\')' : false"
                 >
                     <span class="sm:hidden">Ingresar</span><span class="hidden sm:inline">Iniciar sesión</span>
-                    <span class="hidden sm:inline"><x-ui.icon name="arrow-right" :size="14" /></span>
                 </x-ui.button>
             @endauth
         </div>
