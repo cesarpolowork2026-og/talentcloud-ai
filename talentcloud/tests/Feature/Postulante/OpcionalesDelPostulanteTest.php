@@ -301,6 +301,17 @@ it('muestra las vacantes abiertas en la presentación', function () {
     $this->get('/')->assertOk()->assertSee('Vacantes abiertas ahora')->assertSee('Desarrollador Backend')->assertDontSee('QA Engineer');
 });
 
+it('con pocas vacantes, ocupa el hueco de la fila con la invitación a publicar', function () {
+    auth()->logout();
+
+    // Una sola vacante abierta: la fila de tres se completa con la tarjeta para empresas.
+    $this->get('/')->assertOk()->assertSee('¿Tu empresa está contratando?');
+
+    app(TenantContext::class)->ejecutarGlobal(fn () => Vacante::factory()->count(2)->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Abierta)->create());
+
+    $this->get('/')->assertOk()->assertDontSee('¿Tu empresa está contratando?');
+});
+
 it('lleva a iniciar sesión o registrarse y vuelve a la vacante', function () {
     auth()->logout();
 

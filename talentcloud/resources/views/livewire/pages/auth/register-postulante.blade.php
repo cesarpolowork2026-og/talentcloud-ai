@@ -74,8 +74,10 @@ new #[Layout('layouts.guest')] #[Title('Registro de postulante')] class extends 
 
         <x-ui.field error="consentimiento">
             <x-ui.checkbox wire:model="consentimiento" id="consentimiento">
-                Acepto que TalentCloud trate mis datos y analice mi CV con IA para mis postulaciones. Puedo eliminar mi cuenta y mis datos cuando quiera.
+                Acepto que TalentCloud trate mis datos y analice mi CV con IA para mis postulaciones, según la Política de privacidad. Puedo eliminar mi cuenta y mis datos cuando quiera.
             </x-ui.checkbox>
+            {{-- Fuera de la etiqueta de la casilla: un enlace dentro de ella marcaría la casilla al pulsarlo. --}}
+            <p class="field-hint m-0">Lee la <a href="{{ route('privacidad') }}" target="_blank" rel="noopener">Política de privacidad</a> (qué datos se guardan, quién los ve y cómo eliminarlos) y los <a href="{{ route('terminos') }}" target="_blank" rel="noopener">Términos de uso</a>.</p>
         </x-ui.field>
 
         <x-ui.button type="submit" variant="primary" block wire:loading.attr="disabled">Crear cuenta</x-ui.button>

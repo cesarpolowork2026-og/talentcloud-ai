@@ -40,4 +40,18 @@ return [
         'demora_minutos' => (int) env('AVISOS_DEMORA_MINUTOS', 10),
     ],
 
+    /*
+    | Responsable del tratamiento de datos (Ley 29733), para la política de
+    | privacidad y los términos de uso. RUC y domicilio se muestran solo si
+    | están definidos: completarlos antes de abrir el servicio al público.
+    */
+    'legal' => [
+        'responsable' => env('LEGAL_RESPONSABLE', env('APP_NAME', 'TalentCloud AI')),
+        'contacto' => env('LEGAL_CONTACTO', env('MAIL_FROM_ADDRESS')),
+        'ruc' => env('LEGAL_RUC'),
+        'domicilio' => env('LEGAL_DOMICILIO'),
+        // Fecha de la última versión de los textos (cambiarla al editarlos).
+        'actualizado' => '2026-10-09',
+    ],
+
 ];

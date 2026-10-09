@@ -71,6 +71,8 @@ new #[Layout('layouts.guest')] #[Title('Crear empresa')] class extends Component
             <x-ui.input wire:model="password_confirmation" id="password_confirmation" type="password" error="password_confirmation" required autocomplete="new-password" />
         </x-ui.field>
 
+        <p class="m-0 text-13 text-neutral-700">Al crear la cuenta aceptas los <a href="{{ route('terminos') }}" target="_blank" rel="noopener">Términos de uso</a> y la <a href="{{ route('privacidad') }}" target="_blank" rel="noopener">Política de privacidad</a>.</p>
+
         <x-ui.button type="submit" variant="primary" block wire:loading.attr="disabled">Crear empresa</x-ui.button>
     </form>
 

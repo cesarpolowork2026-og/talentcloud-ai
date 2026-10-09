@@ -10,6 +10,7 @@ use App\Livewire\Empresas;
 use App\Livewire\Entrevistas;
 use App\Livewire\Evaluaciones;
 use App\Livewire\Kanban;
+use App\Livewire\Legal;
 use App\Livewire\Matching;
 use App\Livewire\MiEmpresa;
 use App\Livewire\Onboarding;
@@ -38,6 +39,10 @@ Route::get('empleos/{id}/postular', PostularDesdeEmpleosController::class)->wher
 
 // Planes y precios (ampliación): página pública con los precios de PlanEmpresa.
 Route::get('planes', Planes\Precios::class)->name('planes');
+
+// Política de privacidad (Ley 29733) y términos de uso: públicas, enlazadas desde el pie y el registro.
+Route::get('privacidad', Legal\Privacidad::class)->name('privacidad');
+Route::get('terminos', Legal\Terminos::class)->name('terminos');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Personal de selección: admin SaaS, empresa y reclutador.

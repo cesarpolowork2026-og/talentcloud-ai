@@ -13,13 +13,6 @@
         ['maqueta' => 'dashboard', 'etiqueta' => 'Dashboard', 'titulo' => 'El proceso de un vistazo.', 'descripcion' => 'Vacantes activas, match promedio, entrevistas del día y actividad reciente.'],
     ];
 
-    $modulos = [
-        ['icono' => 'briefcase', 'titulo' => 'Vacantes', 'texto' => 'Publica y gestiona tus vacantes con requisitos claros.'],
-        ['icono' => 'users', 'titulo' => 'Candidatos', 'texto' => 'Organiza y da seguimiento a cada postulación.'],
-        ['icono' => 'sparkle', 'titulo' => 'Matching con IA', 'texto' => 'Compara CVs con los requisitos y explica el porqué.'],
-        ['icono' => 'calendar-check', 'titulo' => 'Entrevistas y evaluaciones', 'texto' => 'Coordina entrevistas y evalúa por criterios.'],
-    ];
-
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -36,55 +29,80 @@
     <x-presentacion.cabecera en-presentacion lema />
 
     <main>
-        {{-- Hero: mensaje y pantallas de la app. --}}
+        {{-- Hero: mensaje, acciones y pantallas de la app. --}}
         <section id="inicio" class="mx-auto max-w-[1480px] px-4 pb-16 pt-10 sm:px-8 xl:pt-14" x-intersect.margin.-45%.0px.-45%.0px="seccion = 'inicio'">
             <div class="presentacion-hero">
                 <div class="presentacion-texto">
                     <p class="mb-3 text-12 uppercase tracking-[0.12em] text-accent-700">— Reclutamiento con IA explicable</p>
                     <h1 class="mb-4 text-[clamp(32px,6vw,44px)] leading-[1.08] [text-wrap:balance] min-[1400px]:text-[40px]">Todo tu reclutamiento en un solo lugar</h1>
                     <p class="m-0 max-w-[48ch] text-17 !leading-[1.6] text-neutral-800">Gestiona vacantes, candidatos, entrevistas y evaluaciones en un flujo simple. La IA analiza cada CV y explica cada coincidencia; la decisión siempre es tuya.</p>
-                </div>
 
-                <ul class="presentacion-modulos m-0 grid list-none gap-5 p-0 sm:grid-cols-2 min-[1400px]:grid-cols-4 min-[1400px]:gap-8">
-                    @foreach ($modulos as $modulo)
-                        <li class="flex items-start gap-4">
-                            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent-100 text-accent-700">
-                                <x-ui.icon :name="$modulo['icono']" :size="20" />
-                            </span>
-                            <span>
-                                <span class="block text-16 font-semibold">{{ $modulo['titulo'] }}</span>
-                                <span class="block text-14 text-neutral-700">{{ $modulo['texto'] }}</span>
-                            </span>
-                        </li>
-                    @endforeach
-                </ul>
+                    {{-- Qué hacer: la empresa empieza gratis; el postulante va a la bolsa de empleos. --}}
+                    <div class="mt-7 flex flex-wrap gap-3">
+                        <x-ui.button variant="primary" :href="route('register')" class="!px-5 !py-3 text-15">Crear empresa gratis</x-ui.button>
+                        <x-ui.button :href="route('empleos.index')" class="!px-5 !py-3 text-15">Buscar empleo</x-ui.button>
+                    </div>
+                    <p class="mb-0 mt-3 text-13 text-neutral-700">Gratis con una vacante · {{ \App\Enums\PlanEmpresa::DIAS_DE_PRUEBA }} días del plan Pro al empezar · Sin tarjeta · <a href="{{ route('planes') }}" class="underline">Ver planes</a></p>
+                </div>
 
                 <x-presentacion.carrusel class="presentacion-pantallas" :diapositivas="$diapositivas" />
             </div>
         </section>
 
-        {{-- Características --}}
+        {{-- Características: lo que hace el producto, junto a la pantalla que lo muestra (maquetas ilustrativas). --}}
         <section id="caracteristicas" class="bg-surface py-16" x-intersect.margin.-45%.0px.-45%.0px="seccion = 'caracteristicas'">
             <div class="mx-auto max-w-[1480px] px-4 sm:px-8">
                 <p class="mb-2 text-12 uppercase tracking-[0.12em] text-accent-700">Características</p>
-                <h2 class="mb-10 max-w-[28ch] text-[clamp(26px,3vw,34px)] leading-[1.15]">De la vacante a la contratación, sin cambiar de herramienta</h2>
-                <div class="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+                <h2 class="mb-12 max-w-[28ch] text-[clamp(26px,3vw,34px)] leading-[1.15]">De la vacante a la contratación, sin cambiar de herramienta</h2>
+
+                <div class="grid gap-16 lg:gap-20">
                     @foreach ([
-                        ['briefcase', 'Vacantes y requisitos', 'Requisitos obligatorios y deseables, con su peso y los años mínimos de experiencia.'],
-                        ['kanban', 'Kanban de selección', 'Arrastra candidatos entre etapas; la vacante cerrada queda de solo lectura.'],
-                        ['file-text', 'Análisis de CV con IA', 'Sube CVs en PDF o Word: competencias, años de experiencia y certificaciones al instante.'],
-                        ['sparkle', 'Matching explicable', 'Cada requisito dice si coincide y cita el fragmento del CV que lo respalda.'],
-                        ['calendar-check', 'Entrevistas y evaluaciones', 'Agenda sin choques de horario y evaluación por criterios de 0 a 10.'],
-                        ['chart-bar', 'Dashboard y exportación', 'Indicadores del proceso, actividad reciente y exportación a Excel de lo que ves.'],
-                    ] as [$icono, $titulo, $texto])
-                        <div class="flex items-start gap-4">
-                            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent-100 text-accent-700">
-                                <x-ui.icon :name="$icono" :size="20" />
-                            </span>
-                            <div>
-                                <h3 class="mb-1 text-17">{{ $titulo }}</h3>
-                                <p class="m-0 text-14 text-neutral-700">{{ $texto }}</p>
+                        [
+                            'maqueta' => 'matching',
+                            'titulo' => 'Matching que se explica',
+                            'texto' => 'Sube CVs en PDF o Word y compáralos con los requisitos de la vacante. Cada coincidencia cita el fragmento del CV que la respalda.',
+                            'puntos' => [
+                                'Competencias, años de experiencia y certificaciones extraídas de cada CV.',
+                                'Requisito por requisito: coincide, para revisar o no encontrado.',
+                                'Si un resultado no te convence, márcalo como incorrecto y ayuda a mejorar la IA.',
+                            ],
+                        ],
+                        [
+                            'maqueta' => 'entrevistas',
+                            'titulo' => 'Del primer CV a la contratación',
+                            'texto' => 'Cada vacante tiene su Kanban: mueve candidatos entre etapas, agenda entrevistas y evalúa con criterios claros.',
+                            'puntos' => [
+                                'Requisitos obligatorios y deseables, con su peso y los años mínimos.',
+                                'Entrevistas sin choques de horario y avisos al candidato.',
+                                'Evaluaciones de 0 a 10 por criterio y el historial completo de cada etapa.',
+                            ],
+                        ],
+                        [
+                            'maqueta' => 'dashboard',
+                            'titulo' => 'El proceso de un vistazo',
+                            'texto' => 'Vacantes activas, match promedio, entrevistas del día y el embudo de selección, en una sola pantalla.',
+                            'puntos' => [
+                                'Embudo de los últimos 90 días, por vacante.',
+                                'Actividad reciente y avisos en la aplicación y por correo.',
+                                'Exportación a Excel de lo que ves en cada listado.',
+                            ],
+                        ],
+                    ] as $indice => $fila)
+                        <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
+                            <div @class(['lg:order-last' => $indice % 2 === 1])>
+                                <h3 class="mb-3 text-[clamp(22px,2.4vw,28px)] leading-[1.2]">{{ $fila['titulo'] }}</h3>
+                                <p class="mb-5 max-w-[50ch] text-16 text-neutral-800">{{ $fila['texto'] }}</p>
+                                <ul class="m-0 grid list-none gap-3 p-0">
+                                    @foreach ($fila['puntos'] as $punto)
+                                        <li class="flex items-start gap-3 text-15 text-neutral-800">
+                                            <x-ui.icon name="check-circle" :size="20" class="mt-0.5 shrink-0 text-accent-700" />
+                                            <span>{{ $punto }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
                             </div>
+                            {{-- En móvil, a ~40 % de escala, no se leería: ahí las enseña el carrusel. --}}
+                            <x-presentacion.pantalla :maqueta="$fila['maqueta']" class="hidden md:block" />
                         </div>
                     @endforeach
                 </div>
@@ -151,12 +169,15 @@
         <x-presentacion.vacantes-abiertas />
 
         {{-- Llamada final --}}
-        <section class="py-16">
+        <section class="pb-16 pt-4">
             <div class="mx-auto grid max-w-[1480px] gap-6 px-4 sm:px-8 md:grid-cols-2">
                 <x-ui.card elev="sm" class="!bg-white !p-8">
                     <h2 class="m-0 text-24">¿Reclutas para tu empresa?</h2>
-                    <p class="m-0 text-15 text-neutral-800">Crea la cuenta de tu empresa, publica tu primera vacante e invita a tu equipo.</p>
-                    <div><x-ui.button variant="primary" :href="route('register')">Crear empresa</x-ui.button></div>
+                    <p class="m-0 text-15 text-neutral-800">Crea la cuenta de tu empresa, publica tu primera vacante e invita a tu equipo. Empiezas gratis, con {{ \App\Enums\PlanEmpresa::DIAS_DE_PRUEBA }} días del plan Pro.</p>
+                    <div class="flex flex-wrap gap-3">
+                        <x-ui.button variant="primary" :href="route('register')">Crear empresa gratis</x-ui.button>
+                        <x-ui.button variant="ghost" :href="route('planes')">Ver planes y precios</x-ui.button>
+                    </div>
                 </x-ui.card>
                 <x-ui.card elev="sm" class="!bg-white !p-8">
                     <h2 class="m-0 text-24">¿Buscas empleo?</h2>
