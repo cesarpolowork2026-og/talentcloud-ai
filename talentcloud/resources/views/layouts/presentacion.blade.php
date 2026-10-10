@@ -56,8 +56,9 @@
         {{-- Características: lo que hace el producto, junto a la pantalla que lo muestra (maquetas ilustrativas). --}}
         <section id="caracteristicas" class="bg-surface py-16" x-intersect.margin.-45%.0px.-45%.0px="seccion = 'caracteristicas'">
             <div class="mx-auto max-w-[1480px] px-4 sm:px-8">
-                <p class="mb-2 text-12 uppercase tracking-[0.12em] text-accent-700">Características</p>
-                <h2 class="mb-12 max-w-[28ch] text-[clamp(26px,3vw,34px)] leading-[1.15]">De la vacante a la contratación, sin cambiar de herramienta</h2>
+                <x-presentacion.encabezado rotulo="Características" titulo="De la vacante a la contratación, sin cambiar de herramienta" class="!mb-12">
+                    Requisitos, CV, Kanban, entrevistas, evaluaciones e indicadores en un mismo lugar, con los datos de cada empresa separados de los de las demás.
+                </x-presentacion.encabezado>
 
                 <div class="grid gap-16 lg:gap-20">
                     @foreach ([
@@ -144,8 +145,9 @@
         {{-- Seguridad --}}
         <section id="seguridad" class="bg-surface py-16" x-intersect.margin.-45%.0px.-45%.0px="seccion = 'seguridad'">
             <div class="mx-auto max-w-[1480px] px-4 sm:px-8">
-                <p class="mb-2 text-12 uppercase tracking-[0.12em] text-accent-700">Seguridad</p>
-                <h2 class="mb-10 max-w-[30ch] text-[clamp(26px,3vw,34px)] leading-[1.15]">Datos de candidatos protegidos desde el diseño</h2>
+                <x-presentacion.encabezado rotulo="Seguridad" titulo="Datos de candidatos protegidos desde el diseño">
+                    Cada empresa ve solo lo suyo, los CV no tienen una dirección pública y cada candidato decide sobre sus datos. <a href="{{ route('privacidad') }}">Lee la política de privacidad</a>.
+                </x-presentacion.encabezado>
                 <div class="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach ([
                         ['buildings', 'Datos aislados por empresa', 'Cada empresa ve solo sus vacantes, postulaciones y evaluaciones.'],

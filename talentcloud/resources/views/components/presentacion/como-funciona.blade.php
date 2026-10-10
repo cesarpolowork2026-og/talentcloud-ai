@@ -14,9 +14,9 @@
     aria-labelledby="como-funciona-titulo"
 >
     <div class="mx-auto max-w-[1480px] px-4 sm:px-8">
-        <p class="mb-2 text-12 uppercase tracking-[0.12em] text-accent-700">Cómo funciona</p>
-        <h2 id="como-funciona-titulo" class="mb-4 max-w-[28ch] text-[clamp(26px,3vw,34px)] leading-[1.15]">Cada coincidencia, con su evidencia</h2>
-        <p class="mb-10 max-w-[60ch] text-16 text-neutral-800">La IA no da puntajes a ciegas: por cada requisito de la vacante señala la frase del CV que lo respalda, para que revises en segundos y decidas con fundamento.</p>
+        <x-presentacion.encabezado rotulo="Cómo funciona" titulo="Cada coincidencia, con su evidencia" id="como-funciona-titulo">
+            La IA no da puntajes a ciegas: por cada requisito de la vacante señala la frase del CV que lo respalda, para que revises en segundos y decidas con fundamento.
+        </x-presentacion.encabezado>
 
         <p class="sr-only">Ejemplo: el requisito obligatorio Spring Boot coincide en un 94 %, porque el CV dice «Diseñé APIs REST con Java y Spring Boot para una pasarela de pagos de alto tráfico» en la sección Experiencia.</p>
 
