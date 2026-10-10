@@ -98,6 +98,15 @@ trait WithListado
         }
     }
 
+    /**
+     * Hay una búsqueda o un filtro aplicado. Un listado vacío sin filtros es la "primera vez"
+     * (estado vacío con ilustración y acción); con filtros, "sin resultados".
+     */
+    public function hayFiltros(): bool
+    {
+        return trim($this->busqueda) !== '' || $this->estado !== '';
+    }
+
     public function updatedBusqueda(): void
     {
         $this->resetPage();

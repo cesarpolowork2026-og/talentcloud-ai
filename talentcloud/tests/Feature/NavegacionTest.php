@@ -135,8 +135,12 @@ it('muestra la página 403 del prototipo', function () {
         ->assertSee('No tienes permisos para ver esta sección con tu rol actual.');
 });
 
-it('muestra la 404 a un invitado con acceso al login', function () {
+it('muestra la 404 a un invitado con la vuelta al inicio y el acceso al login en la cabecera', function () {
     $this->get('/ruta-que-no-existe')
         ->assertNotFound()
-        ->assertSee('Ir a iniciar sesión');
+        ->assertSee('Página no encontrada')
+        ->assertSee('Volver al inicio')
+        ->assertSee('href="'.route('login').'"', escape: false)
+        // Ilustración propia, decorativa.
+        ->assertSee('viewBox="0 0 240 160"', escape: false);
 });

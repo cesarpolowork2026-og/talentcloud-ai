@@ -18,7 +18,15 @@
     />
 
     @if ($filas->isEmpty())
-        <x-ui.empty-state icon="stack" message="No se encontraron candidatos." />
+        @if ($this->hayFiltros())
+            <x-ui.empty-state icon="stack" message="No se encontraron candidatos." />
+        @else
+            <x-ui.empty-state ilustracion="sin-candidatos" titulo="Aún no hay candidatos" message="Llegan cuando alguien postula a tus vacantes publicadas, o cuando registras a uno con su CV.">
+                @if ($puedeRegistrar)
+                    <x-ui.button variant="primary" class="mt-4" wire:click="abrirFormulario">+ Nuevo candidato</x-ui.button>
+                @endif
+            </x-ui.empty-state>
+        @endif
     @else
         <div class="grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
             @foreach ($filas as $candidato)

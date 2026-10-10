@@ -19,7 +19,15 @@
     />
 
     @if ($filas->isEmpty())
-        <x-ui.empty-state icon="stack" message="No se encontraron vacantes con estos filtros." />
+        @if ($this->hayFiltros())
+            <x-ui.empty-state icon="stack" message="No se encontraron vacantes con estos filtros." />
+        @else
+            <x-ui.empty-state ilustracion="primera-vacante" titulo="Publica tu primera vacante" message="Define sus requisitos y empieza a recibir candidatos: la IA te dirá quién encaja y por qué.">
+                @can('create', App\Models\Vacante::class)
+                    <x-ui.button variant="primary" class="mt-4" wire:click="abrirFormulario">+ Nueva vacante</x-ui.button>
+                @endcan
+            </x-ui.empty-state>
+        @endif
     @else
         <x-ui.table>
             <x-slot:head>

@@ -29,8 +29,8 @@
 
     @if ($registrada)
         <x-ui.card elev="sm" class="!bg-white" role="status">
-            <div class="flex items-start gap-3">
-                <x-ui.icon name="check-circle" :size="28" class="shrink-0 text-accent-700" />
+            <div class="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:text-left">
+                <x-ilustracion nombre="hoja-enviada" class="w-[160px] shrink-0" />
                 <div class="grid gap-2">
                     <h2 class="m-0 text-20">Recibimos tu hoja {{ $registrada }}</h2>
                     <p class="m-0 text-15">Te enviamos una copia a <strong>{{ $correo }}</strong>. Te responderemos a ese correo a más tardar el <strong>{{ $fechaLimite }}</strong> ({{ $diasHabiles }} días hábiles).</p>

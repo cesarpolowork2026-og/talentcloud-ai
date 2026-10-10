@@ -265,7 +265,7 @@ it('niega las vacantes del postulante al personal de selección', function () {
 
 it('invita a ver vacantes cuando todavía no tiene postulaciones', function () {
     Livewire::test(MisPostulaciones::class)
-        ->assertSee('Todavía no tienes postulaciones.')
+        ->assertSee('Todavía no tienes postulaciones')
         ->assertSee('Ver vacantes abiertas');
 });
 

@@ -167,6 +167,19 @@ Publicada el 2 sep.</p>
             @endforeach
         </div>
     </section>
+
+    {{-- Ilustraciones propias (x-ilustracion): todas juntas, para revisar que comparten estilo. --}}
+    <section class="mt-8" id="ilustraciones">
+        <h2 class="mb-4 text-20">Ilustraciones</h2>
+        <div class="grid gap-6" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));">
+            @foreach (['primera-vacante', 'sin-candidatos', 'agenda-libre', 'sin-postulaciones', 'pagina-no-encontrada', 'acceso-restringido', 'hoja-enviada'] as $nombre)
+                <figure class="m-0 grid gap-2 rounded border border-divider bg-white p-4">
+                    <x-ilustracion :nombre="$nombre" class="mx-auto w-[200px]" />
+                    <figcaption class="text-center text-13 text-neutral-700">{{ $nombre }}</figcaption>
+                </figure>
+            @endforeach
+        </div>
+    </section>
 </main>
 @livewireScripts
 </body>

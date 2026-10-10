@@ -18,7 +18,15 @@
     @enderror
 
     @if ($filas->isEmpty())
-        <x-ui.empty-state icon="calendar" message="No se encontraron entrevistas." />
+        @if ($this->hayFiltros())
+            <x-ui.empty-state icon="calendar" message="No se encontraron entrevistas." />
+        @else
+            <x-ui.empty-state ilustracion="agenda-libre" titulo="Tu agenda está libre" message="Programa una entrevista aquí o desde el Kanban de una vacante; avisaremos al candidato.">
+                @can('create', App\Models\Entrevista::class)
+                    <x-ui.button variant="primary" class="mt-4" wire:click="abrirFormulario">+ Programar entrevista</x-ui.button>
+                @endcan
+            </x-ui.empty-state>
+        @endif
     @else
         <x-ui.table>
             <x-slot:head>

@@ -20,14 +20,20 @@
 
         <main class="mx-auto w-full max-w-page flex-1 px-4 py-6 sm:p-8">
             <div class="mx-auto my-8 max-w-[460px] text-center">
-                <x-ui.icon :name="$icono" :size="48" @class(['mx-auto', $colorIcono]) />
+                @if (isset($ilustracion))
+                    <x-ilustracion :nombre="$ilustracion" class="mx-auto w-[260px] max-w-full" />
+                @else
+                    <x-ui.icon :name="$icono" :size="48" @class(['mx-auto', $colorIcono]) />
+                @endif
                 <h1 class="mb-2 mt-4 text-24">{{ $titulo }}</h1>
                 <p class="text-15 text-neutral-700">{{ $mensaje }}</p>
                 @if (! ($conNavegacion ?? true))
                     <x-ui.button variant="primary" class="mt-4" href="/">Volver al inicio</x-ui.button>
                 @else
-                    <x-ui.button variant="primary" class="mt-4" :href="\App\Support\Navegacion::rutaInicio($usuario)">
-                        {{ $usuario ? 'Volver a mi panel' : 'Ir a iniciar sesión' }}
+                    {{-- Sin sesión, una página que no existe lleva al inicio; un 401 o un 419 (sesión caducada), a iniciar sesión. --}}
+                    @php($alInicio = ! $usuario && ($invitadoAlInicio ?? false))
+                    <x-ui.button variant="primary" class="mt-4" :href="$alInicio ? route('inicio') : \App\Support\Navegacion::rutaInicio($usuario)">
+                        {{ $usuario ? 'Volver a mi panel' : ($alInicio ? 'Volver al inicio' : 'Ir a iniciar sesión') }}
                     </x-ui.button>
                 @endif
             </div>

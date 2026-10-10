@@ -248,6 +248,9 @@
   .ilu-oscuro { fill: var(--color-accent-700); }
   .ilu-gris { fill: var(--color-neutral-200); }
   .ilu-acento { fill: var(--color-accent-2-300); }
+  .ilu-trazo-claro { fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .ilu-punteado { stroke-dasharray: 5 6; }
+  .ilu-grueso { stroke-width: 4; }
 
   /* TalentCloud: pie de página (también .barra): separador tenue y el acceso al Libro de Reclamaciones
      como un botón con borde, para que se reconozca de un vistazo (es obligatorio y debe verse). */

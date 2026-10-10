@@ -11,6 +11,13 @@
     $cajas = [
         'conector-horizontal' => '0 0 120 40',
         'conector-vertical' => '0 0 40 72',
+        'primera-vacante' => '0 0 240 160',
+        'sin-candidatos' => '0 0 240 160',
+        'agenda-libre' => '0 0 240 160',
+        'sin-postulaciones' => '0 0 240 160',
+        'pagina-no-encontrada' => '0 0 240 160',
+        'acceso-restringido' => '0 0 240 160',
+        'hoja-enviada' => '0 0 240 160',
     ];
     $caja = $cajas[$nombre] ?? throw new InvalidArgumentException("Ilustración desconocida: {$nombre}");
     $tituloId = 'ilu-'.$nombre.'-'.\Illuminate\Support\Str::random(6);
