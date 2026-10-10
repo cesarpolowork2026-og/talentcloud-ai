@@ -3,8 +3,10 @@
 use App\Enums\EstadoDeMiPostulacion;
 use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoEntrevista;
+use App\Enums\EstadoReclamacion;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
 use App\Models\Actividad;
 use App\Models\Empresa;
@@ -12,6 +14,7 @@ use App\Models\Entrevista;
 use App\Models\Evaluacion;
 use App\Models\Postulacion;
 use App\Models\PostulacionEtapa;
+use App\Models\Reclamacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Support\Formato;
@@ -102,8 +105,41 @@ it('muestra a Marta solo las vacantes, entrevistas y evaluaciones de Nimbus Corp
     });
 });
 
-it('muestra al admin SaaS las cinco vacantes de la plataforma', function () {
-    app(TenantContext::class)->ejecutarGlobal(fn () => expect(Vacante::count())->toBe(5));
+it('muestra al admin SaaS las quince vacantes de la plataforma', function () {
+    app(TenantContext::class)->ejecutarGlobal(fn () => expect(Vacante::count())->toBe(15));
+});
+
+it('cuenta la historia de las empresas de otros sectores con los mismos servicios', function () {
+    $rocio = User::where('email', 'rocio@brioretail.pe')->firstOrFail();
+
+    // Cada reclutador ve solo lo suyo.
+    app(TenantContext::class)->ejecutarPara($rocio->empresa_id, fn () => expect(Vacante::orderBy('titulo')->pluck('titulo')->all())
+        ->toBe(['Analista de Marketing Digital', 'Desarrollador Frontend', 'Ejecutivo Comercial B2B', 'Jefe de Tienda']));
+
+    app(TenantContext::class)->ejecutarGlobal(function () {
+        $etapaDe = fn (string $email) => Postulacion::whereHas('candidato', fn ($q) => $q->where('email', $email))->firstOrFail();
+
+        // Contrataciones y vacantes cerradas.
+        expect($etapaDe('manuel.quispe@correo.com')->etapa)->toBe(EtapaPostulacion::Contratado)
+            ->and($etapaDe('carla.mendoza@correo.com')->etapa)->toBe(EtapaPostulacion::Contratado)
+            ->and($etapaDe('analucia.ramos@correo.com')->etapa)->toBe(EtapaPostulacion::Contratado)
+            ->and(Vacante::where('titulo', 'Jefe de Almacén')->firstOrFail()->estado)->toBe(EstadoVacante::Cerrada);
+
+        // Milagros retiró su postulación; Pamela seguía en revisión cuando cerró la vacante.
+        $milagros = $etapaDe('milagros.huaman@correo.com');
+        expect($milagros->estaRetirada())->toBeTrue()
+            ->and(EstadoDeMiPostulacion::de($milagros))->toBe(EstadoDeMiPostulacion::Retirada)
+            ->and($etapaDe('pamela.rojas@correo.com')->estado_avisado)->toBe(EstadoDeMiPostulacion::Cerrada);
+    });
+
+    // Altura Café se registró hace cinco días (en la prueba del plan Pro); Nuna Salud pidió el plan Enterprise.
+    $altura = Empresa::where('nombre', 'Altura Café')->firstOrFail();
+    $nuna = Empresa::where('nombre', 'Nuna Salud')->firstOrFail();
+    expect($altura->enPrueba())->toBeTrue()
+        ->and($nuna->plan_solicitado)->toBe(PlanEmpresa::Enterprise);
+
+    // Libro de Reclamaciones: una hoja respondida y otra pendiente.
+    expect(Reclamacion::orderBy('numero')->pluck('estado')->all())->toBe([EstadoReclamacion::Respondida, EstadoReclamacion::Pendiente]);
 });
 
 it('se puede ejecutar dos veces sin duplicar datos', function () {
@@ -112,9 +148,9 @@ it('se puede ejecutar dos veces sin duplicar datos', function () {
     $this->seed(DatabaseSeeder::class);
 
     app(TenantContext::class)->ejecutarGlobal(function () {
-        expect(User::count())->toBe(8)
-            ->and(Vacante::count())->toBe(5)
-            ->and(Postulacion::count())->toBe(7);
+        expect(User::count())->toBe(24)
+            ->and(Vacante::count())->toBe(15)
+            ->and(Postulacion::count())->toBe(42);
     });
     expect([PostulacionEtapa::count(), $this->marta->notifications()->count(), app(TenantContext::class)->ejecutarGlobal(fn () => Actividad::count())])->toBe($antes);
 });

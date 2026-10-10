@@ -63,6 +63,49 @@ class CatalogoCompetenciasSeeder extends Seeder
             'Scrum' => ['metodologías ágiles', 'Agile'],
             'Comunicación' => [],
             'Inglés' => ['English'],
+            'Liderazgo de equipos' => ['liderazgo', 'gestión de equipos'],
+        ],
+        // TalentCloud: competencias de otros sectores, para vacantes que no son de tecnología.
+        'Comercial' => [
+            'Ventas consultivas' => ['venta consultiva', 'ventas B2B', 'venta B2B'],
+            'Negociación' => ['negociación comercial'],
+            'CRM' => ['Salesforce', 'HubSpot'],
+            'Atención al cliente' => ['servicio al cliente', 'experiencia del cliente'],
+            'Visual merchandising' => ['merchandising'],
+        ],
+        'Marketing' => [
+            'Marketing digital' => ['marketing online'],
+            'SEO' => ['posicionamiento web'],
+            'Google Ads' => ['SEM'],
+            'Meta Ads' => ['Facebook Ads', 'Instagram Ads'],
+            'Analítica web' => ['Google Analytics', 'GA4'],
+        ],
+        'Finanzas' => [
+            'Contabilidad' => ['contabilidad general'],
+            'NIIF' => ['IFRS'],
+            'Tributación' => ['SUNAT', 'declaraciones tributarias'],
+            'SAP' => ['SAP FI'],
+        ],
+        'Logística' => [
+            'Gestión de inventarios' => ['control de inventarios', 'inventarios'],
+            'Gestión de almacenes' => ['almacenes', 'WMS'],
+            'Distribución' => ['última milla', 'rutas de reparto'],
+            'Comercio exterior' => ['importaciones', 'exportaciones'],
+        ],
+        'Salud' => [
+            'Atención de pacientes' => ['cuidado de pacientes', 'cuidado del paciente'],
+            'Enfermería hospitalaria' => ['hospitalización'],
+            'Colegiatura CEP' => ['CEP', 'Colegio de Enfermeros del Perú'],
+            'BLS' => ['RCP', 'soporte vital básico'],
+        ],
+        'Recursos humanos' => [
+            'Reclutamiento y selección' => ['selección de personal', 'reclutamiento'],
+            'Planillas' => ['nómina', 'PLAME'],
+            'Legislación laboral' => ['normativa laboral'],
+        ],
+        'Gastronomía' => [
+            'Barismo' => ['barista', 'espresso'],
+            'Manipulación de alimentos' => ['buenas prácticas de manufactura', 'BPM'],
         ],
     ];
 

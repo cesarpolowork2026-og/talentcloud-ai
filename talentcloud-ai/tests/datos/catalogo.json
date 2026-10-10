@@ -251,5 +251,220 @@
     "sinonimos": [
       "English"
     ]
+  },
+  {
+    "id": 38,
+    "nombre": "Liderazgo de equipos",
+    "sinonimos": [
+      "liderazgo",
+      "gestión de equipos"
+    ]
+  },
+  {
+    "id": 39,
+    "nombre": "Ventas consultivas",
+    "sinonimos": [
+      "venta consultiva",
+      "ventas B2B",
+      "venta B2B"
+    ]
+  },
+  {
+    "id": 40,
+    "nombre": "Negociación",
+    "sinonimos": [
+      "negociación comercial"
+    ]
+  },
+  {
+    "id": 41,
+    "nombre": "CRM",
+    "sinonimos": [
+      "Salesforce",
+      "HubSpot"
+    ]
+  },
+  {
+    "id": 42,
+    "nombre": "Atención al cliente",
+    "sinonimos": [
+      "servicio al cliente",
+      "experiencia del cliente"
+    ]
+  },
+  {
+    "id": 43,
+    "nombre": "Visual merchandising",
+    "sinonimos": [
+      "merchandising"
+    ]
+  },
+  {
+    "id": 44,
+    "nombre": "Marketing digital",
+    "sinonimos": [
+      "marketing online"
+    ]
+  },
+  {
+    "id": 45,
+    "nombre": "SEO",
+    "sinonimos": [
+      "posicionamiento web"
+    ]
+  },
+  {
+    "id": 46,
+    "nombre": "Google Ads",
+    "sinonimos": [
+      "SEM"
+    ]
+  },
+  {
+    "id": 47,
+    "nombre": "Meta Ads",
+    "sinonimos": [
+      "Facebook Ads",
+      "Instagram Ads"
+    ]
+  },
+  {
+    "id": 48,
+    "nombre": "Analítica web",
+    "sinonimos": [
+      "Google Analytics",
+      "GA4"
+    ]
+  },
+  {
+    "id": 49,
+    "nombre": "Contabilidad",
+    "sinonimos": [
+      "contabilidad general"
+    ]
+  },
+  {
+    "id": 50,
+    "nombre": "NIIF",
+    "sinonimos": [
+      "IFRS"
+    ]
+  },
+  {
+    "id": 51,
+    "nombre": "Tributación",
+    "sinonimos": [
+      "SUNAT",
+      "declaraciones tributarias"
+    ]
+  },
+  {
+    "id": 52,
+    "nombre": "SAP",
+    "sinonimos": [
+      "SAP FI"
+    ]
+  },
+  {
+    "id": 53,
+    "nombre": "Gestión de inventarios",
+    "sinonimos": [
+      "control de inventarios",
+      "inventarios"
+    ]
+  },
+  {
+    "id": 54,
+    "nombre": "Gestión de almacenes",
+    "sinonimos": [
+      "almacenes",
+      "WMS"
+    ]
+  },
+  {
+    "id": 55,
+    "nombre": "Distribución",
+    "sinonimos": [
+      "última milla",
+      "rutas de reparto"
+    ]
+  },
+  {
+    "id": 56,
+    "nombre": "Comercio exterior",
+    "sinonimos": [
+      "importaciones",
+      "exportaciones"
+    ]
+  },
+  {
+    "id": 57,
+    "nombre": "Atención de pacientes",
+    "sinonimos": [
+      "cuidado de pacientes",
+      "cuidado del paciente"
+    ]
+  },
+  {
+    "id": 58,
+    "nombre": "Enfermería hospitalaria",
+    "sinonimos": [
+      "hospitalización"
+    ]
+  },
+  {
+    "id": 59,
+    "nombre": "Colegiatura CEP",
+    "sinonimos": [
+      "CEP",
+      "Colegio de Enfermeros del Perú"
+    ]
+  },
+  {
+    "id": 60,
+    "nombre": "BLS",
+    "sinonimos": [
+      "RCP",
+      "soporte vital básico"
+    ]
+  },
+  {
+    "id": 61,
+    "nombre": "Reclutamiento y selección",
+    "sinonimos": [
+      "selección de personal",
+      "reclutamiento"
+    ]
+  },
+  {
+    "id": 62,
+    "nombre": "Planillas",
+    "sinonimos": [
+      "nómina",
+      "PLAME"
+    ]
+  },
+  {
+    "id": 63,
+    "nombre": "Legislación laboral",
+    "sinonimos": [
+      "normativa laboral"
+    ]
+  },
+  {
+    "id": 64,
+    "nombre": "Barismo",
+    "sinonimos": [
+      "barista",
+      "espresso"
+    ]
+  },
+  {
+    "id": 65,
+    "nombre": "Manipulación de alimentos",
+    "sinonimos": [
+      "buenas prácticas de manufactura",
+      "BPM"
+    ]
   }
 ]

@@ -42,17 +42,22 @@ use App\Services\Registro\RegistrarPostulante;
 use App\Services\Vacantes\CambiarEstadoVacante;
 use App\Tenancy\TenantContext;
 use Database\Seeders\Demo\CvsDeDemostracion;
+use Database\Seeders\Demo\CvsDeOtrasEmpresas;
 use Database\Seeders\Demo\DocumentosDePrueba;
+use Database\Seeders\Demo\HistoriaDeOtrasEmpresas;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use LogicException;
 use Throwable;
 
 /**
- * Datos de demostración con las personas y vacantes del prototipo
- * (TalentCloud App.dc.html). Todas las cuentas usan la contraseña "password".
+ * Datos de demostración: las personas y vacantes de Nimbus Corp, Vela Studio y
+ * Orbita Labs, y otras cuatro empresas de sectores distintos (retail, logística,
+ * salud y gastronomía; ver HistoriaDeOtrasEmpresas). Todas las cuentas usan la
+ * contraseña "password".
  *
  * La demo no se escribe tabla a tabla: se REPRODUCE la historia de cada
  * postulación, en orden y en su fecha, con los mismos servicios que usan las
@@ -72,6 +77,8 @@ use Throwable;
  */
 class DemoSeeder extends Seeder
 {
+    use HistoriaDeOtrasEmpresas;
+
     private const PASSWORD = 'password';
 
     /** @var array<string, Competencia> */
@@ -79,6 +86,9 @@ class DemoSeeder extends Seeder
 
     /** Día en que se siembra (la historia se cuenta hacia atrás desde aquí). */
     private Carbon $hoy;
+
+    /** Mientras se cuenta la historia, el reloj solo puede avanzar. */
+    private bool $enHistoria = false;
 
     public function run(): void
     {
@@ -135,6 +145,7 @@ class DemoSeeder extends Seeder
 
         if (! Vacante::where('empresa_id', $nimbus->id)->where('titulo', 'Desarrollador Backend')->exists()) {
             try {
+                $this->enHistoria = true;
                 $this->historia($admin, $marta, $diego, $clara, $adminOrbita, $orbita);
             } catch (Throwable $e) {
                 // No hay transacción (los trabajos deben correr en su fecha): lo sembrado se queda.
@@ -142,6 +153,8 @@ class DemoSeeder extends Seeder
                 $this->command->error('La historia de la demo quedó a medias. Vuelve a sembrar desde cero: php artisan migrate:fresh --seed');
 
                 throw $e;
+            } finally {
+                $this->enHistoria = false;
             }
         }
 
@@ -160,6 +173,11 @@ class DemoSeeder extends Seeder
      */
     private function historia(User $admin, User $marta, User $diego, User $clara, User $adminOrbita, Empresa $orbita): void
     {
+        // Brío Retail, Ruta Sur Logística, Nuna Salud, Altura Café y el Libro de Reclamaciones,
+        // intercalados por fecha con lo que sigue (HistoriaDeOtrasEmpresas).
+        $this->gente['admin'] = $admin;
+        $this->agendarOtrasEmpresas();
+
         // Vela Studio abre DevOps; Marco crea su cuenta, sube su CV y postula.
         $this->a(40, '09:00', $clara);
         $devops = $this->vacante($clara, 'DevOps Engineer', 'Remoto', Modalidad::Remoto,
@@ -308,6 +326,8 @@ class DemoSeeder extends Seeder
         // Elena: segunda entrevista con Diego, por confirmar.
         $this->a(1, '16:00', $diego);
         $this->programar($diego, $elena, $diego, $this->dia(2, '15:00'));
+
+        $this->ejecutarAgendaHasta();
     }
 
     /**
@@ -316,7 +336,19 @@ class DemoSeeder extends Seeder
      */
     private function a(int $haceDias, string $hora, ?User $quien = null): void
     {
-        Carbon::setTestNow($this->dia(-$haceDias, $hora));
+        $momento = $this->dia(-$haceDias, $hora);
+        $this->ejecutarAgendaHasta($momento);
+
+        if ($this->enHistoria && $momento->lessThan(now())) {
+            throw new LogicException('Un paso de la demo cae dentro de otro ('.$momento->toDateTimeString().'): el reloj retrocedería.');
+        }
+
+        $this->fijarReloj($momento, $quien);
+    }
+
+    private function fijarReloj(Carbon $momento, ?User $quien): void
+    {
+        Carbon::setTestNow($momento);
 
         if ($quien === null) {
             auth()->forgetUser();
@@ -450,7 +482,7 @@ class DemoSeeder extends Seeder
     /** El CV de demostración como un archivo subido (PDF o Word reales). */
     private function archivoCv(string $email): UploadedFile
     {
-        $datos = CvsDeDemostracion::CVS[$email];
+        $datos = CvsDeDemostracion::CVS[$email] ?? CvsDeOtrasEmpresas::CVS[$email];
         $esDocx = str_ends_with($datos['archivo'], '.docx');
         $contenido = $esDocx ? DocumentosDePrueba::docx((string) $datos['texto']) : DocumentosDePrueba::pdf($datos['texto']);
 
@@ -484,14 +516,14 @@ class DemoSeeder extends Seeder
     /**
      * @param  list<int|float>  $puntajes  Técnico, comunicación, resolución de problemas, ajuste cultural.
      */
-    private function evaluar(User $evaluador, Postulacion $postulacion, array $puntajes, string $comentario): void
+    private function evaluar(User $evaluador, Postulacion $postulacion, array $puntajes, string $comentario, EstadoEvaluacion $estado = EstadoEvaluacion::Aprobado): void
     {
         $porCriterio = array_combine(
             array_map(fn (CriterioEvaluacion $c) => $c->value, CriterioEvaluacion::cases()),
             array_map(fn (int|float $p) => (float) $p, $puntajes),
         );
 
-        app(GuardarEvaluacion::class)->registrar($postulacion->id, $evaluador, new EvaluacionData($porCriterio, $comentario, EstadoEvaluacion::Aprobado));
+        app(GuardarEvaluacion::class)->registrar($postulacion->id, $evaluador, new EvaluacionData($porCriterio, $comentario, $estado));
     }
 
     private function competencia(string $nombre): Competencia

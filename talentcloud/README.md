@@ -33,7 +33,7 @@ básico. La primera vez, el servicio descarga el modelo (unos 470 MB).
 
 ## Datos de demostración
 
-`php artisan migrate:fresh --seed` carga los datos del prototipo reproduciendo la historia de cada postulación
+`php artisan migrate:fresh --seed` carga siete empresas (tecnología, diseño, retail, logística, salud y gastronomía), 15 vacantes y 42 postulaciones con su CV, reproduciendo la historia de cada postulación
 con fechas relativas al día de la carga. Con el servicio de IA en marcha (`composer dev`), analiza los CV y
 calcula el matching durante la carga; si la IA no responde, avisa y siembra con el análisis básico, y después
 basta con `php artisan talentcloud:reindexar-embeddings --sync` y `php artisan talentcloud:recalcular-matching`.
@@ -48,7 +48,18 @@ Todas las cuentas usan la contraseña `password`:
 | admin@vela.studio | Empresa | Vela Studio |
 | clara@vela.studio | Reclutador | Vela Studio |
 | admin@orbita.dev | Empresa | Orbita Labs (suspendida: no puede ingresar) |
+| admin@brioretail.pe | Empresa | Brío Retail |
+| rocio@brioretail.pe | Reclutador | Brío Retail |
+| admin@rutasur.pe | Empresa | Ruta Sur Logística |
+| jorge@rutasur.pe | Reclutador | Ruta Sur Logística |
+| admin@nunasalud.pe | Empresa | Nuna Salud (pidió el plan Enterprise) |
+| patricia@nunasalud.pe | Reclutador | Nuna Salud |
+| admin@alturacafe.pe | Empresa | Altura Café (registrada hace 5 días, en la prueba del plan Pro) |
 | marco@correo.com | Postulante | — |
+
+Otros postulantes con cuenta: renzo.paredes, milagros.huaman (retiró su postulación), gianella.torres, luis.chavez,
+karen.espinoza, kevin.morales, mariana.alarcon, lucero.mamani y thiago.huillca, todos `@correo.com`.
+El Libro de Reclamaciones tiene una hoja respondida y otra pendiente.
 
 El postulante ve las vacantes abiertas de las empresas activas en «Vacantes» y postula con su CV; la empresa recibe el aviso y la postulación entra en su Kanban con el matching de la IA. También puede retirar una postulación en curso, editar su titular y teléfono en «Mi perfil» y descargar sus datos en JSON. Sin iniciar sesión, cualquiera ve las vacantes abiertas en `/empleos` (y las más recientes en la presentación); «Postular» lleva a iniciar sesión o registrarse y vuelve a la vacante.
 
