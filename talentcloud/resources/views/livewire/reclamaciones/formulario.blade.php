@@ -6,10 +6,11 @@
 @use('App\Enums\TipoReclamacion')
 <div class="mx-auto max-w-[860px]">
     <div class="mb-6 flex items-start gap-4">
-        <span class="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-accent-100 text-accent-700" aria-hidden="true">
+        {{-- Decorativo: por debajo de 640 px no cabe junto a «Reclamaciones» (palabra larga a 30 px). --}}
+        <span class="hidden h-14 w-14 shrink-0 place-items-center rounded-lg bg-accent-100 text-accent-700 sm:grid" aria-hidden="true">
             <x-ui.icon name="book-open-text" :size="30" />
         </span>
-        <x-ui.page-header class="!mb-0" title="Libro de Reclamaciones" subtitle="Conforme al Código de Protección y Defensa del Consumidor (Ley N.º 29571), contamos con un Libro de Reclamaciones a tu disposición." compact />
+        <x-ui.page-header class="!mb-0 min-w-0" title="Libro de Reclamaciones" subtitle="Conforme al Código de Protección y Defensa del Consumidor (Ley N.º 29571), contamos con un Libro de Reclamaciones a tu disposición." compact />
     </div>
 
     {{-- Proveedor: razón social, RUC y domicilio (config talentcloud.legal; RUC y domicilio, si están definidos). --}}
