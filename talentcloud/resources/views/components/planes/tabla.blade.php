@@ -17,24 +17,33 @@
         @php
             $recomendado = $plan === \App\Enums\PlanEmpresa::Pro;
             $esSuPlan = $empresa !== null && $empresa->plan === $plan;
+            // A más precio, un fondo más intenso: degradados claros donde manda el teal de la marca y que
+            // se funden hacia menta (Starter) o lila (Pro y, más marcado, Enterprise). Texto oscuro en todas.
+            // Clases escritas completas para que Tailwind las genere.
+            [$fondo, $secundario] = match ($plan) {
+                \App\Enums\PlanEmpresa::Gratis => ['!bg-white', 'text-neutral-700'],
+                \App\Enums\PlanEmpresa::Starter => ['plan-starter', 'text-neutral-700'],
+                \App\Enums\PlanEmpresa::Pro => ['plan-pro !border-2 !border-accent-700', 'text-neutral-800'],
+                \App\Enums\PlanEmpresa::Enterprise => ['plan-premium', 'text-ink'],
+            };
         @endphp
-        <section @class(['card elev-sm flex flex-col', '!border-2 !border-accent-700' => $recomendado]) aria-labelledby="plan-{{ $plan->value }}" wire:key="plan-{{ $plan->value }}">
+        <section @class(['card elev-sm flex flex-col', $fondo]) aria-labelledby="plan-{{ $plan->value }}" wire:key="plan-{{ $plan->value }}">
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <h3 id="plan-{{ $plan->value }}" class="m-0 text-20">{{ $plan->etiqueta() }}</h3>
                 @if ($recomendado)
                     <x-ui.tag tone="accent">Recomendado</x-ui.tag>
                 @endif
             </div>
-            <p class="m-0 text-14 text-neutral-700">{{ $plan->descripcion() }}</p>
+            <p class="m-0 text-14 {{ $secundario }}">{{ $plan->descripcion() }}</p>
 
             <p class="m-0">
                 @if ($plan->seCotiza())
-                    <span class="text-13 text-neutral-700">Desde</span>
+                    <span class="text-13 {{ $secundario }}">Desde</span>
                 @endif
                 <span class="text-30 font-semibold">{{ $soles($plan->precioMensual()) }}</span>
-                <span class="text-14 text-neutral-700">al mes</span>
+                <span class="text-14 {{ $secundario }}">al mes</span>
             </p>
-            <p class="m-0 text-13 text-neutral-700">
+            <p class="m-0 text-13 {{ $secundario }}">
                 @if ($plan->precioMensualAnual() !== null)
                     {{ $soles($plan->precioMensualAnual()) }} al mes con pago anual. Más IGV.
                 @elseif ($plan->seCotiza())

@@ -42,6 +42,13 @@
   --color-accent-2-800: #790e3d;
   --color-accent-2-900: #4b1528;
 
+  /* TalentCloud: verde menta y morado «premium», solo como destino de los degradados de las tarjetas
+     de planes (no forman parte del DS Broadsheet): el color que manda sigue siendo el azul petróleo. */
+  --color-menta-100: #dcf5ea;
+  --color-premium-100: #ede9fe;
+  --color-premium-200: #ddd6fe;
+  --color-premium-300: #c4b5fd;
+
   /* Tinta de impresión, no un acento de interfaz: el texto y la UI no la usan. */
   --color-process-yellow: #edbb00;
 

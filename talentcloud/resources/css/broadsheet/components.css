@@ -252,6 +252,13 @@
   .ilu-punteado { stroke-dasharray: 5 6; }
   .ilu-grueso { stroke-width: 4; }
 
+  /* TalentCloud: fondos de las tarjetas de planes (x-planes.tabla). Todos claros y con texto oscuro, en
+     degradados donde manda la familia teal de la marca y que se funden hacia menta o lila; más intensos
+     cuanto más caro (Gratis blanco → Starter → Pro → Enterprise). */
+  .plan-starter { background: linear-gradient(140deg, var(--color-accent-100) 0%, var(--color-accent-100) 45%, var(--color-menta-100) 100%) !important; }
+  .plan-pro { background: linear-gradient(140deg, var(--color-accent-200) 0%, var(--color-accent-200) 50%, var(--color-premium-100) 100%) !important; }
+  .plan-premium { background: linear-gradient(140deg, var(--color-accent-400) 0%, var(--color-accent-300) 45%, var(--color-premium-300) 100%) !important; }
+
   /* TalentCloud: pie de página (también .barra): separador tenue y el acceso al Libro de Reclamaciones
      como un botón con borde, para que se reconozca de un vistazo (es obligatorio y debe verse). */
   .barra .barra-divisor { border-color: color-mix(in srgb, #fff 20%, transparent); }
