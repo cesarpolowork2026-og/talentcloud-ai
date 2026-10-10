@@ -298,7 +298,10 @@ it('filtra la bolsa pública por modalidad y texto', function () {
 it('muestra las vacantes abiertas en la presentación', function () {
     auth()->logout();
 
-    $this->get('/')->assertOk()->assertSee('Vacantes abiertas ahora')->assertSee('Desarrollador Backend')->assertDontSee('QA Engineer');
+    // Solo la sección de vacantes: las maquetas ilustrativas usan nombres de puesto ficticios.
+    $vacantes = Str::between($this->get('/')->assertOk()->getContent(), 'id="empleos"', '</section>');
+
+    expect($vacantes)->toContain('Vacantes abiertas ahora')->toContain('Desarrollador Backend')->not->toContain('QA Engineer');
 });
 
 it('con pocas vacantes, ocupa el hueco de la fila con la invitación a publicar', function () {

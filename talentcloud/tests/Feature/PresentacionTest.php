@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\EstadoDeMiPostulacion;
 use App\Models\User;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
@@ -144,4 +145,23 @@ it('pinta las ilustraciones decorativas ocultas y las que comunican algo con su 
         ->and($conTexto)->toContain('role="img"')->toContain('<title id="ilu-conector-vertical-')->toContain('Une el CV con el requisito');
 
     expect(fn () => Blade::render('<x-ilustracion nombre="no-existe" />'))->toThrow(Exception::class);
+});
+
+it('muestra la vista del postulante en un teléfono, con los estados que ve en la aplicación', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+    $seccion = Str::between($html, 'id="postulantes"', '</section>');
+
+    expect($seccion)->toContain('Tu búsqueda de empleo, en orden y en tu celular')
+        ->toContain('Mis postulaciones')
+        ->toContain('href="'.route('register.postulante').'"');
+
+    // Mismas etiquetas que EstadoDeMiPostulacion (la imagen no promete otra cosa).
+    foreach ([EstadoDeMiPostulacion::Entrevista, EstadoDeMiPostulacion::EnRevision, EstadoDeMiPostulacion::NoSeleccionado] as $estado) {
+        expect($seccion)->toContain('>'.$estado->etiqueta().'<');
+    }
+});
+
+it('usa el mismo teléfono en el registro de postulante', function () {
+    $this->get('/registro/postulante')->assertOk()->assertSee('Próxima entrevista')->assertSee('cv_andrea.pdf');
+    $this->get('/register')->assertOk()->assertDontSee('cv_andrea.pdf');
 });

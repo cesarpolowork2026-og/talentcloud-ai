@@ -1,5 +1,5 @@
 {{-- Vacantes abiertas en la presentación (datos reales, solo los públicos de VacanteRepository::publicadas()). --}}
-<section id="empleos" class="py-16" x-intersect.margin.-45%.0px.-45%.0px="seccion = 'empleos'">
+<section id="empleos" class="bg-surface py-16" x-intersect.margin.-45%.0px.-45%.0px="seccion = 'empleos'">
     <div class="mx-auto max-w-[1480px] px-4 sm:px-8">
         <p class="mb-2 text-12 uppercase tracking-[0.12em] text-accent-700">Empleos</p>
         <div class="mb-8 flex flex-wrap items-end justify-between gap-4">

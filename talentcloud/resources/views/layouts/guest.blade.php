@@ -30,17 +30,11 @@
 
             {{-- Ejemplo ilustrativo (contenido fijo, no son datos reales). --}}
             @if ($paraPostulante)
-                <x-ui.card kicker="Mis postulaciones" elev="md" class="max-w-[440px] !bg-white" aria-hidden="true">
-                    @foreach ([['Desarrollador Backend', 'Nimbus Corp', 'En revisión', 'neutral'], ['Data Analyst', 'Vela Studio', 'Entrevista', 'accent'], ['QA Engineer', 'Orbita Labs', 'Postulado', 'neutral']] as [$vacante, $empresa, $estado, $tono])
-                        <div class="flex items-center justify-between gap-3 border-b border-divider pb-2 last:border-0 last:pb-0">
-                            <span>
-                                <span class="block text-14 font-semibold">{{ $vacante }}</span>
-                                <span class="block text-13 text-neutral-700">{{ $empresa }}</span>
-                            </span>
-                            <x-ui.tag :tone="$tono">{{ $estado }}</x-ui.tag>
-                        </div>
-                    @endforeach
-                </x-ui.card>
+                {{-- Su pantalla en el teléfono, con los estados reales de EstadoDeMiPostulacion. En móvil se omite:
+                     va debajo del formulario y alargaría la página sin aportar al registro. --}}
+                <x-presentacion.telefono class="hidden !mx-0 lg:block">
+                    <x-presentacion.maqueta-mis-postulaciones-movil />
+                </x-presentacion.telefono>
             @else
                 <x-ui.card kicker="Vacante · Desarrollador Backend" elev="md" class="max-w-[440px] !bg-white" aria-hidden="true">
                     <div class="card-title mb-3">Coincidencias encontradas</div>

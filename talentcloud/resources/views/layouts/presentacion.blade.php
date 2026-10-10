@@ -163,11 +163,14 @@
             </div>
         </section>
 
+        {{-- El otro lado del producto: el postulante, en su teléfono. --}}
+        <x-presentacion.para-postulantes />
+
         {{-- Bolsa pública: las vacantes abiertas más recientes (si hay). --}}
         <x-presentacion.vacantes-abiertas />
 
         {{-- Llamada final --}}
-        <section class="pb-16 pt-4">
+        <section class="py-16">
             <div class="mx-auto grid max-w-[1480px] gap-6 px-4 sm:px-8 md:grid-cols-2">
                 <x-ui.card elev="sm" class="!bg-white !p-8">
                     <h2 class="m-0 text-24">¿Reclutas para tu empresa?</h2>
