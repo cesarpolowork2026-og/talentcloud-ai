@@ -26,6 +26,25 @@
   .carrusel-pista { display: grid; }
   .carrusel-pista > * { grid-area: 1 / 1; }
 
+  /* «Cómo funciona»: la frase del CV se resalta, la línea se dibuja y aparece el requisito, una vez.
+     Solo con .animar (lo pone Alpine si no se pide reducir el movimiento): sin JavaScript, terminado. */
+  .resaltado {
+    background-image: linear-gradient(var(--color-accent-200), var(--color-accent-200));
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    padding: 0 2px;
+  }
+  /* La transición solo existe con .visto: ocultar al cargar es instantáneo (si no, se animaría al revés). */
+  .como-funciona.animar.visto .resaltado { transition: background-size 900ms ease 200ms; }
+  .como-funciona.animar:not(.visto) .resaltado { background-size: 0% 100%; }
+  .como-funciona.animar .conector-dibujo { stroke-dasharray: 1; }
+  .como-funciona.animar.visto .conector-dibujo { transition: stroke-dashoffset 700ms ease 1000ms; }
+  .como-funciona.animar:not(.visto) .conector-dibujo { stroke-dashoffset: 1; }
+  .como-funciona.animar.visto .requisito-aparece { transition: opacity 500ms ease 1500ms, transform 500ms ease 1500ms; }
+  .como-funciona.animar:not(.visto) .requisito-aparece { opacity: 0; transform: translateY(8px); }
+
   /* Documentos legales (privacidad, términos): texto largo, cómodo de leer. */
   .legal h2 { margin: var(--space-6) 0 var(--space-2); font-size: 20px; line-height: 1.25; }
   .legal p, .legal li { font-size: 15px; line-height: 1.65; color: var(--color-neutral-800); }

@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Str;
 
 it('muestra a los invitados la presentación con el login en la raíz', function () {
     $this->get('/')
@@ -120,4 +122,26 @@ it('publica la política de privacidad y los términos con los datos del respons
 it('enlaza la política de privacidad junto al consentimiento del postulante', function () {
     $this->get('/registro/postulante')
         ->assertSee('Lee la <a href="'.route('privacidad').'"', escape: false);
+});
+
+it('explica con un esquema cómo la IA respalda cada coincidencia, también para lectores de pantalla', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->toContain('id="como-funciona"')
+        ->toContain('Cada coincidencia, con su evidencia')
+        // El esquema es ilustrativo (oculto); la frase accesible dice lo mismo.
+        ->toContain('<p class="sr-only">Ejemplo: el requisito obligatorio Spring Boot coincide')
+        ->toContain('href="#como-funciona"')
+        // El ejemplo de evidencia ya no se repite en Beneficios.
+        ->and(Str::between($html, 'id="beneficios"', 'id="seguridad"'))->not->toContain('Diseñé APIs REST');
+});
+
+it('pinta las ilustraciones decorativas ocultas y las que comunican algo con su descripción', function () {
+    $decorativa = Blade::render('<x-ilustracion nombre="conector-horizontal" />');
+    $conTexto = Blade::render('<x-ilustracion nombre="conector-vertical" descripcion="Une el CV con el requisito" />');
+
+    expect($decorativa)->toContain('aria-hidden="true"')->not->toContain('role="img"')
+        ->and($conTexto)->toContain('role="img"')->toContain('<title id="ilu-conector-vertical-')->toContain('Une el CV con el requisito');
+
+    expect(fn () => Blade::render('<x-ilustracion nombre="no-existe" />'))->toThrow(Exception::class);
 });

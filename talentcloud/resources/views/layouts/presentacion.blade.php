@@ -41,6 +41,7 @@
                     <div class="mt-7 flex flex-wrap gap-3">
                         <x-ui.button variant="primary" :href="route('register')" class="!px-5 !py-3 text-15">Crear empresa gratis</x-ui.button>
                         <x-ui.button :href="route('empleos.index')" class="!px-5 !py-3 text-15">Buscar empleo</x-ui.button>
+                        <x-ui.button variant="ghost" href="#como-funciona" class="!px-3 !py-3 text-15">Cómo funciona</x-ui.button>
                     </div>
                     <p class="mb-0 mt-3 text-13 text-neutral-700">Gratis con una vacante · {{ \App\Enums\PlanEmpresa::DIAS_DE_PRUEBA }} días del plan Pro al empezar · Sin tarjeta · <a href="{{ route('planes') }}" class="underline">Ver planes</a></p>
                 </div>
@@ -48,6 +49,9 @@
                 <x-presentacion.carrusel class="presentacion-pantallas" :diapositivas="$diapositivas" />
             </div>
         </section>
+
+        {{-- Cómo funciona: el fragmento del CV que respalda cada requisito, dibujado. --}}
+        <x-presentacion.como-funciona />
 
         {{-- Características: lo que hace el producto, junto a la pantalla que lo muestra (maquetas ilustrativas). --}}
         <section id="caracteristicas" class="bg-surface py-16" x-intersect.margin.-45%.0px.-45%.0px="seccion = 'caracteristicas'">
@@ -115,14 +119,8 @@
                 <div>
                     <p class="mb-2 text-12 uppercase tracking-[0.12em] text-accent-700">Beneficios</p>
                     <h2 class="mb-4 text-[clamp(26px,3vw,34px)] leading-[1.15]">La IA analiza y explica. Tú decides.</h2>
-                    <p class="mb-6 max-w-[46ch] text-16 text-neutral-800">Un flujo de trabajo claro para decidir mejor: menos tiempo leyendo CVs y más tiempo con las personas.</p>
-                    <x-ui.card elev="md" kicker="Evidencia · Spring Boot" class="max-w-[420px] !bg-white" aria-hidden="true">
-                        <p class="m-0 font-heading text-15 italic leading-[1.55]">“Diseñé APIs REST con Java y Spring Boot para una pasarela de pagos de alto tráfico.”</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-13 text-neutral-700">Sección Experiencia</span>
-                            <x-ui.tag tone="accent">Coincide</x-ui.tag>
-                        </div>
-                    </x-ui.card>
+                    {{-- El ejemplo de evidencia que había aquí lo muestra ahora «Cómo funciona». --}}
+                    <p class="m-0 max-w-[46ch] text-16 text-neutral-800">Un flujo de trabajo claro para decidir mejor: menos tiempo leyendo CVs y más tiempo con las personas.</p>
                 </div>
                 <ul class="m-0 grid list-none content-start gap-8 p-0 sm:grid-cols-2">
                     @foreach ([

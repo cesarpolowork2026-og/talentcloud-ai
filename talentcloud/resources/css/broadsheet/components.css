@@ -236,6 +236,19 @@
   .barra .btn-secondary { background: #fff; border-color: #fff; color: var(--color-accent-800); }
   .barra .btn-secondary:hover { background: var(--color-accent-100); color: var(--color-accent-900); }
   .barra .card { color: var(--color-text); }
+  /* TalentCloud: ilustraciones propias (x-ilustracion). Mismo lenguaje que los iconos Phosphor
+     duotono: trazo de 2 px con puntas redondeadas y rellenos suaves de la marca. Los colores salen
+     de los tokens, así que siguen a la marca si cambia. */
+  .ilu-trazo { fill: none; stroke: var(--color-accent-800); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .ilu-trazo-suave { fill: none; stroke: var(--color-accent-500); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .ilu-papel { fill: #fff; }
+  .ilu-fondo { fill: var(--color-accent-100); }
+  .ilu-medio { fill: var(--color-accent-200); }
+  .ilu-fuerte { fill: var(--color-accent-300); }
+  .ilu-oscuro { fill: var(--color-accent-700); }
+  .ilu-gris { fill: var(--color-neutral-200); }
+  .ilu-acento { fill: var(--color-accent-2-300); }
+
   /* TalentCloud: pie de página (también .barra): separador tenue y el acceso al Libro de Reclamaciones
      como un botón con borde, para que se reconozca de un vistazo (es obligatorio y debe verse). */
   .barra .barra-divisor { border-color: color-mix(in srgb, #fff 20%, transparent); }
