@@ -9,7 +9,10 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    @include('partials.head')
+    {{-- Vista previa al compartir solo en los registros: la invitación y la de contraseña llevan un token en la URL. --}}
+    @include('partials.head', request()->routeIs('register', 'register.postulante') ? ['compartir' => $paraPostulante
+        ? 'Postula con tu CV y sigue cada proceso de selección en TalentCloud AI. Crear tu cuenta es gratis.'
+        : 'TalentCloud AI: gestiona vacantes, candidatos, entrevistas y evaluaciones con un matching de CVs que la IA explica. La IA sugiere; tú decides.'] : [])
 </head>
 <body class="antialiased">
 <div class="flex min-h-screen flex-col bg-bg">

@@ -18,8 +18,9 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     {{-- En la raíz, el título es solo el nombre del producto. --}}
-    @include('partials.head', ['title' => request()->routeIs('inicio') ? null : ($title ?? null)])
-    <meta name="description" content="TalentCloud AI: gestiona vacantes, candidatos, entrevistas y evaluaciones con un matching de CVs que la IA explica. La IA sugiere; tú decides.">
+    @php($descripcionDelSitio = 'TalentCloud AI: gestiona vacantes, candidatos, entrevistas y evaluaciones con un matching de CVs que la IA explica. La IA sugiere; tú decides.')
+    @include('partials.head', ['title' => request()->routeIs('inicio') ? null : ($title ?? null), 'compartir' => $descripcionDelSitio])
+    <meta name="description" content="{{ $descripcionDelSitio }}">
     <link rel="canonical" href="{{ route('inicio') }}">
 </head>
 <body class="antialiased">
@@ -41,9 +42,8 @@
                     <div class="mt-7 flex flex-wrap gap-3">
                         <x-ui.button variant="primary" :href="route('register')" class="!px-5 !py-3 text-15">Crear empresa gratis</x-ui.button>
                         <x-ui.button :href="route('empleos.index')" class="!px-5 !py-3 text-15">Buscar empleo</x-ui.button>
-                        <x-ui.button variant="ghost" href="#como-funciona" class="!px-3 !py-3 text-15">Cómo funciona</x-ui.button>
                     </div>
-                    <p class="mb-0 mt-3 text-13 text-neutral-700">Gratis con una vacante · {{ \App\Enums\PlanEmpresa::DIAS_DE_PRUEBA }} días del plan Pro al empezar · Sin tarjeta · <a href="{{ route('planes') }}" class="underline">Ver planes</a></p>
+                    <p class="mb-0 mt-3 text-13 text-neutral-700">Gratis con una vacante · {{ \App\Enums\PlanEmpresa::DIAS_DE_PRUEBA }} días del plan Pro al empezar · Sin tarjeta · <a href="{{ route('planes') }}" class="whitespace-nowrap underline">Ver planes</a> · <a href="#como-funciona" class="whitespace-nowrap underline">Cómo funciona</a></p>
                 </div>
 
                 <x-presentacion.carrusel class="presentacion-pantallas" :diapositivas="$diapositivas" />

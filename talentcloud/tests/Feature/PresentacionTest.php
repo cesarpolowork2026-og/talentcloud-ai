@@ -165,3 +165,14 @@ it('usa el mismo teléfono en el registro de postulante', function () {
     $this->get('/registro/postulante')->assertOk()->assertSee('Próxima entrevista')->assertSee('cv_andrea.pdf');
     $this->get('/register')->assertOk()->assertDontSee('cv_andrea.pdf');
 });
+
+it('ofrece vista previa al compartir las páginas públicas, pero no las que llevan un token', function () {
+    $this->get('/')->assertOk()
+        ->assertSee('<meta property="og:image" content="'.asset('marca/vista-previa.png').'">', escape: false)
+        ->assertSee('<meta name="twitter:card" content="summary_large_image">', escape: false);
+    $this->get('/empleos')->assertOk()->assertSee('property="og:title" content="Empleos · TalentCloud AI"', escape: false);
+    $this->get('/registro/postulante')->assertOk()->assertSee('Postula con tu CV y sigue cada proceso', escape: false);
+
+    $this->get('/forgot-password')->assertOk()->assertDontSee('og:image', escape: false);
+    expect(file_exists(public_path('marca/vista-previa.png')))->toBeTrue();
+});

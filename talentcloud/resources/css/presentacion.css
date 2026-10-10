@@ -12,11 +12,16 @@
 
   @media (min-width: 1024px) {
     .presentacion-hero {
-      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.6fr);
+      /* Hasta 1279 px, columnas más parejas: con 0,85/1,6 el título se partía en 4 líneas. */
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
       grid-template-areas: 'texto pantallas';
       column-gap: 56px;
       align-items: center;
     }
+  }
+
+  @media (min-width: 1280px) {
+    .presentacion-hero { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.6fr); }
   }
 
   .presentacion-texto { grid-area: texto; }
