@@ -48,7 +48,18 @@ class Formulario extends Component
 
         $this->form->validate();
 
+        // La copia va a la dirección escrita: sin este límite, cambiando de IP se podría
+        // usar el libro para enviar correos a un tercero una y otra vez.
+        $claveCorreo = 'libro-reclamaciones-correo|'.sha1(mb_strtolower(trim($this->form->email)));
+
+        if (RateLimiter::tooManyAttempts($claveCorreo, (int) config('talentcloud.reclamaciones.por_correo_al_dia'))) {
+            $this->addError('form.email', 'Ya se enviaron varias hojas a este correo hoy. Si necesitas presentar otra, escríbenos a '.config('talentcloud.soporte.correo').'.');
+
+            return;
+        }
+
         RateLimiter::hit($clave, 3600);
+        RateLimiter::hit($claveCorreo, 86400);
 
         if ($this->web !== '') {
             // Un bot: se le responde como si nada para no darle pistas, pero no se registra.

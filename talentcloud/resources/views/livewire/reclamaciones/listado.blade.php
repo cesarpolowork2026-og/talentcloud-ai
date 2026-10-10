@@ -9,7 +9,7 @@
     </div>
 
     <x-ui.listado-controles
-        placeholder="Buscar por nombre, correo, documento o servicio…"
+        placeholder="Buscar por código (LR-…), nombre, correo o documento…"
         :estados="$this->opcionesEstado()"
         :estado-actual="$estado"
         :ordenes="$this->opcionesOrden()"

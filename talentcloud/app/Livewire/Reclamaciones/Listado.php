@@ -11,6 +11,8 @@ use App\Services\Reclamaciones\PlazoDeRespuesta;
 use App\Services\Reclamaciones\ResponderReclamacion;
 use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -23,7 +25,9 @@ use Livewire\Component;
 #[Title('Reclamaciones')]
 class Listado extends Component
 {
-    use WithListado;
+    use WithListado {
+        filtrar as filtrarListado;
+    }
 
     public bool $mostrarDetalle = false;
 
@@ -47,6 +51,31 @@ class Listado extends Component
     protected function camposBusqueda(): array
     {
         return ['nombre', 'email', 'numero_documento', 'servicio'];
+    }
+
+    /**
+     * Con un código de hoja ("LR-2026-000001") se busca por su número; si no, el texto
+     * se busca en las columnas de camposBusqueda().
+     *
+     * @template TModel of Model
+     *
+     * @param  Builder<TModel>  $consulta
+     * @return Builder<TModel>
+     */
+    protected function filtrar(Builder $consulta): Builder
+    {
+        if (! preg_match('/^\s*LR-\d{4}-0*(\d{1,9})\s*$/i', $this->busqueda, $codigo)) {
+            return $this->filtrarListado($consulta);
+        }
+
+        $busqueda = $this->busqueda;
+        $this->busqueda = '';
+
+        try {
+            return $this->filtrarListado($consulta->where('numero', (int) $codigo[1]));
+        } finally {
+            $this->busqueda = $busqueda;
+        }
     }
 
     /** @return array<string, string> */

@@ -75,8 +75,9 @@ return [
             '01-01', '05-01', '06-07', '06-29', '07-23', '07-28', '07-29',
             '08-06', '08-30', '10-08', '11-01', '12-08', '12-09', '12-25',
         ],
-        // Hojas por IP y hora (el formulario es público).
+        // Hojas por IP y hora, y copias a un mismo correo por día (el formulario es público).
         'por_hora' => 5,
+        'por_correo_al_dia' => 3,
     ],
 
 ];

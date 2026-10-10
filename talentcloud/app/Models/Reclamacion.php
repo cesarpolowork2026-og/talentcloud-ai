@@ -104,7 +104,7 @@ class Reclamacion extends Model
 
         return array_filter([
             'Hoja' => $this->codigo(),
-            'Fecha' => Formato::fechaHora($this->created_at),
+            'Fecha' => Formato::fechaLarga($this->created_at).', '.$this->created_at->timezone(config('app.timezone'))->format('H:i'),
             'Tipo' => $this->tipo->etiqueta().': '.Str::lcfirst($this->tipo->definicion()),
             'Nombre' => $this->nombre,
             'Documento' => $documento($this->tipo_documento, $this->numero_documento),

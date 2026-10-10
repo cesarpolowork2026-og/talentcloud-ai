@@ -53,6 +53,7 @@ function llenarHojaDeReclamacion(array $cambios = [])
 beforeEach(function () {
     Notification::fake();
     RateLimiter::clear('libro-reclamaciones|127.0.0.1');
+    RateLimiter::clear('libro-reclamaciones-correo|'.sha1('lucia@correo.com'));
     config(['talentcloud.soporte.correo' => 'talentcloudia@gmail.com']);
     $this->admin = User::factory()->admin()->create();
 });
@@ -140,6 +141,28 @@ it('muestra la página pública con los datos del proveedor', function () {
         ->assertSee('no impide acudir a otras vías de solución de controversias');
 });
 
+it('envía lo que escribe el consumidor como texto literal: sin enlaces disfrazados en el correo', function () {
+    llenarHojaDeReclamacion(['detalle' => 'Revisen esto: [Recupera tu cuenta](https://phishing.test) **urgente**'])->call('presentar');
+
+    $html = (string) HojaDeReclamacion::paraConsumidor(Reclamacion::sole())->toMail(new AnonymousNotifiable)->render();
+
+    expect($html)->not->toContain('href="https://phishing.test"')
+        ->and($html)->not->toContain('<strong>urgente</strong>')
+        ->and($html)->toContain('Recupera tu cuenta');
+});
+
+it('limita las copias que recibe un mismo correo al día, aunque cambie la conexión', function () {
+    config(['talentcloud.reclamaciones.por_correo_al_dia' => 2]);
+
+    llenarHojaDeReclamacion()->call('presentar');
+    RateLimiter::clear('libro-reclamaciones|127.0.0.1');
+    llenarHojaDeReclamacion()->call('presentar');
+    RateLimiter::clear('libro-reclamaciones|127.0.0.1');
+    llenarHojaDeReclamacion()->call('presentar')->assertHasErrors('form.email');
+
+    expect(Reclamacion::count())->toBe(2);
+});
+
 // — Plazo —
 
 it('cuenta días hábiles sin fines de semana ni feriados, Semana Santa incluida', function () {
@@ -180,6 +203,21 @@ it('el admin ve la hoja y registra la respuesta, que se envía al consumidor una
     // Una segunda respuesta no se registra.
     expect(fn () => app(ResponderReclamacion::class)->ejecutar($hoja, 'Otra respuesta distinta y suficientemente larga.', $this->admin))
         ->toThrow(OperacionNoPermitida::class, 'ya fue respondida');
+});
+
+it('encuentra una hoja por su código, como llega en los correos', function () {
+    llenarHojaDeReclamacion()->call('presentar');
+    llenarHojaDeReclamacion(['nombre' => 'Marco Díaz', 'email' => 'marco@correo.com'])->call('presentar');
+    $segunda = Reclamacion::where('numero', 2)->sole();
+    actuarComo($this->admin);
+
+    Livewire::test(Listado::class)
+        ->set('busqueda', $segunda->codigo())
+        ->assertSee('Marco Díaz')
+        ->assertDontSee('Lucía Prat')
+        ->set('busqueda', 'lucía')
+        ->assertSee('Lucía Prat')
+        ->assertDontSee('Marco Díaz');
 });
 
 it('abre la hoja desde el enlace del correo a soporte', function () {

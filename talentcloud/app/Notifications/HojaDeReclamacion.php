@@ -72,7 +72,7 @@ class HojaDeReclamacion extends Notification implements ShouldQueue
             ->line($this->introduccion);
 
         foreach ($this->hoja as $etiqueta => $valor) {
-            $mensaje->line($etiqueta.': '.$valor);
+            $mensaje->line($etiqueta.': '.self::literal($valor));
         }
 
         foreach ($this->avisos as $aviso) {
@@ -80,5 +80,16 @@ class HojaDeReclamacion extends Notification implements ShouldQueue
         }
 
         return $this->url !== null ? $mensaje->action('Atender en TalentCloud', $this->url) : $mensaje;
+    }
+
+    /**
+     * Texto del consumidor como literal: las líneas del correo se interpretan como Markdown y
+     * "[Pulsa aquí](https://…)" llegaría como un enlace disfrazado, enviado desde nuestra
+     * cuenta a cualquier dirección que se escriba en la hoja. Se escapan los signos de
+     * Markdown (el HTML ya lo escapa la plantilla, por eso no se tocan <, > ni &).
+     */
+    public static function literal(string $texto): string
+    {
+        return (string) preg_replace('/([\\\\`*_{}\[\]()#+\-.!|])/', '\\\\$1', $texto);
     }
 }
