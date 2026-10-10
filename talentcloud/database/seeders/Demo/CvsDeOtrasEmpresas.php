@@ -19,7 +19,7 @@ Carla Mendoza
 Ejecutiva Comercial B2B · Lima · carla.mendoza@correo.com
 
 Perfil
-Ejecutiva con 5 años de experiencia en ventas consultivas a empresas, enfocada en relaciones de largo plazo.
+Ejecutiva con 7 años de experiencia en ventas consultivas a empresas, enfocada en relaciones de largo plazo.
 
 Experiencia
 Ejecutiva de Cuentas Corporativas — Distribuidora Andina (2021 – actualidad)
@@ -41,7 +41,7 @@ Renzo Paredes
 Vendedor de tienda · Lima · renzo.paredes@correo.com
 
 Perfil
-Vendedor con 3 años de experiencia en tiendas por departamento, orientado a metas diarias.
+Vendedor con 5 años de experiencia en tiendas por departamento, orientado a metas diarias.
 
 Experiencia
 Vendedor — Tiendas Moda Total (2022 – actualidad)
@@ -62,7 +62,7 @@ Milagros Huamán
 Asesora Comercial · Lima · milagros.huaman@correo.com
 
 Perfil
-Asesora comercial con 2 años de experiencia en ventas B2B de servicios de limpieza industrial.
+Asesora comercial con 3 años de experiencia en ventas B2B de servicios de limpieza industrial.
 
 Experiencia
 Asesora Comercial — Servicios Integrales del Sur (2023 – actualidad)
@@ -101,7 +101,7 @@ Andrea Villanueva
 Ejecutiva de Cuentas · Lima · andrea.villanueva@correo.com
 
 Perfil
-Ejecutiva con 3 años de experiencia en ventas B2B de software para empresas.
+Ejecutiva con 4 años de experiencia en ventas B2B de software para empresas.
 
 Experiencia
 Ejecutiva de Cuentas — Soluciones Digitales Perú (2022 – actualidad)
@@ -122,7 +122,7 @@ Valeria Castro
 Analista de Marketing Digital · Lima · valeria.castro@correo.com
 
 Perfil
-Analista con 4 años de experiencia en marketing digital para retail y comercio electrónico.
+Analista con 5 años de experiencia en marketing digital para retail y comercio electrónico.
 
 Experiencia
 Analista de Marketing Digital — Mercado Express (2022 – actualidad)
@@ -144,7 +144,7 @@ Sebastián Ríos
 Community Manager · Lima · sebastian.rios@correo.com
 
 Perfil
-Community manager con 3 años de experiencia en marketing digital para marcas de consumo.
+Community manager con 4 años de experiencia en marketing digital para marcas de consumo.
 
 Experiencia
 Community Manager — Agencia Pulso (2022 – actualidad)
@@ -165,7 +165,7 @@ Fiorella Campos
 Diseñadora y Marketing · Lima · fiorella.campos@correo.com
 
 Perfil
-Diseñadora gráfica con 2 años de experiencia en marketing digital para emprendimientos.
+Diseñadora gráfica con 3 años de experiencia en marketing digital para emprendimientos.
 
 Experiencia
 Diseñadora Freelance (2023 – actualidad)
@@ -183,7 +183,7 @@ Joaquín Lara
 Asistente de Marketing · Trujillo · joaquin.lara@correo.com
 
 Perfil
-Asistente de marketing con 3 años de experiencia en activaciones y material punto de venta.
+Asistente de marketing con 4 años de experiencia en activaciones y material punto de venta.
 
 Experiencia
 Asistente de Marketing — Bebidas del Norte (2022 – actualidad)
@@ -223,7 +223,7 @@ Gianella Torres
 Subgerente de Tienda · Arequipa · gianella.torres@correo.com
 
 Perfil
-Subgerente de tienda con 3 años de experiencia en tiendas de conveniencia.
+Subgerente de tienda con 4 años de experiencia en tiendas de conveniencia.
 
 Experiencia
 Subgerente de Tienda — Mini Market 24 (2022 – actualidad)
@@ -242,7 +242,7 @@ Héctor Ramírez
 Cajero · Arequipa · hector.ramirez@correo.com
 
 Perfil
-Cajero con 1 año de experiencia en supermercados.
+Cajero con 2 años de experiencia en supermercados.
 
 Experiencia
 Cajero — Supermercados Sur (2024 – actualidad)
@@ -261,7 +261,7 @@ Camila Ortiz
 Desarrolladora Frontend · Lima · camila.ortiz@correo.com
 
 Perfil
-Desarrolladora frontend con 4 años de experiencia con React y TypeScript en comercio electrónico.
+Desarrolladora frontend con 5 años de experiencia con React y TypeScript en comercio electrónico.
 
 Experiencia
 Frontend Developer — Tienda Click (2022 – actualidad)
@@ -283,7 +283,7 @@ Luis Alberto Chávez
 Desarrollador Frontend · Lima · luis.chavez@correo.com
 
 Perfil
-Desarrollador frontend con 2 años de experiencia con React y JavaScript.
+Desarrollador frontend con 3 años de experiencia con React y JavaScript.
 
 Experiencia
 Desarrollador Frontend — Startup Delivery Ya (2023 – actualidad)
@@ -304,7 +304,7 @@ Nicolás Benites
 Desarrollador Full Stack · Lima · nicolas.benites@correo.com
 
 Perfil
-Desarrollador full stack con 3 años de experiencia con PHP, Laravel y JavaScript.
+Desarrollador full stack con 4 años de experiencia con PHP, Laravel y JavaScript.
 
 Experiencia
 Desarrollador Full Stack — Software Contable SAC (2022 – actualidad)
@@ -322,7 +322,7 @@ Ariana Soto
 Diseñadora UI · Lima · ariana.soto@correo.com
 
 Perfil
-Diseñadora de interfaces con 3 años de experiencia en Figma para aplicaciones móviles.
+Diseñadora de interfaces con 4 años de experiencia en Figma para aplicaciones móviles.
 
 Experiencia
 Diseñadora UI — Fintech Monedero (2022 – actualidad)
@@ -344,7 +344,7 @@ Manuel Quispe
 Jefe de Almacén · Lima · manuel.quispe@correo.com
 
 Perfil
-Jefe de almacén con 8 años de experiencia en centros de distribución de consumo masivo.
+Jefe de almacén con 9 años de experiencia en centros de distribución de consumo masivo.
 
 Experiencia
 Jefe de Almacén — Distribuidora Lurín (2019 – actualidad)
@@ -367,7 +367,7 @@ Rosa Condori
 Supervisora de Almacén · Lima · rosa.condori@correo.com
 
 Perfil
-Supervisora con 3 años de experiencia en almacenes de repuestos.
+Supervisora con 4 años de experiencia en almacenes de repuestos.
 
 Experiencia
 Supervisora de Almacén — Repuestos del Centro (2022 – actualidad)
@@ -386,7 +386,7 @@ Wilmer Ccori
 Operario de Almacén · Lima · wilmer.ccori@correo.com
 
 Perfil
-Operario con 2 años de experiencia en carga, descarga y despacho.
+Operario con 3 años de experiencia en carga, descarga y despacho.
 
 Experiencia
 Operario de Almacén — Bodegas del Sur (2023 – actualidad)
@@ -405,7 +405,7 @@ Karen Espinoza
 Analista de Logística · Lima · karen.espinoza@correo.com
 
 Perfil
-Analista con 3 años de experiencia en distribución y comercio exterior.
+Analista con 4 años de experiencia en distribución y comercio exterior.
 
 Experiencia
 Analista de Logística — Importaciones Rímac (2022 – actualidad)
@@ -424,7 +424,7 @@ Bruno Medina
 Asistente de Compras · Lima · bruno.medina@correo.com
 
 Perfil
-Asistente con 2 años de experiencia en compras de insumos.
+Asistente con 3 años de experiencia en compras de insumos.
 
 Experiencia
 Asistente de Compras — Plásticos Unidos (2023 – actualidad)
@@ -441,7 +441,7 @@ Lorena Paz
 Analista de Operaciones · Lima · lorena.paz@correo.com
 
 Perfil
-Analista con 2 años de experiencia en operaciones de reparto.
+Analista con 3 años de experiencia en operaciones de reparto.
 
 Experiencia
 Analista de Operaciones — Courier Rápido (2023 – actualidad)
@@ -459,7 +459,7 @@ TXT],
 Coordinador de Transporte · Lima · oscar.vilca@correo.com
 
 Perfil
-Coordinador con 5 años de experiencia en distribución a provincias.
+Coordinador con 6 años de experiencia en distribución a provincias.
 
 Experiencia
 Coordinador de Transporte — Transportes Andinos (2020 – actualidad)
@@ -479,7 +479,7 @@ Ana Lucía Ramos
 Licenciada en Enfermería · Lima · analucia.ramos@correo.com
 
 Perfil
-Enfermera con 6 años de experiencia en hospitalización de medicina interna y cirugía.
+Enfermera con 8 años de experiencia en hospitalización de medicina interna y cirugía.
 
 Experiencia
 Enfermera Asistencial — Hospital Santa Rosa del Sur (2020 – actualidad)
@@ -501,7 +501,7 @@ Jessica Huaroto
 Licenciada en Enfermería · Lima · jessica.huaroto@correo.com
 
 Perfil
-Enfermera con 3 años de experiencia en hospitalización pediátrica.
+Enfermera con 4 años de experiencia en hospitalización pediátrica.
 
 Experiencia
 Enfermera — Clínica Infantil Los Olivos (2022 – actualidad)
@@ -520,7 +520,7 @@ Kevin Morales
 Técnico en Enfermería · Lima · kevin.morales@correo.com
 
 Perfil
-Técnico en enfermería con 4 años de experiencia en consultorios y tópicos.
+Técnico en enfermería con 5 años de experiencia en consultorios y tópicos.
 
 Experiencia
 Técnico en Enfermería — Policlínico Vida (2021 – actualidad)
@@ -557,7 +557,7 @@ Daniela Cárdenas
 Analista de Recursos Humanos · Lima · daniela.cardenas@correo.com
 
 Perfil
-Analista con 3 años de experiencia en reclutamiento y planillas en el sector salud.
+Analista con 4 años de experiencia en reclutamiento y planillas en el sector salud.
 
 Experiencia
 Analista de RR. HH. — Laboratorios Unidos (2022 – actualidad)
@@ -577,7 +577,7 @@ Jean Pierre Soto
 Asistente Administrativo · Lima · jeanpierre.soto@correo.com
 
 Perfil
-Asistente administrativo con 1 año de experiencia de apoyo en nómina.
+Asistente administrativo con 2 años de experiencia de apoyo en nómina.
 
 Experiencia
 Asistente Administrativo — Consultora Contable Lima (2024 – actualidad)
@@ -613,7 +613,7 @@ Fernando Gutiérrez
 Contador Público Colegiado · Lima · fernando.gutierrez@correo.com
 
 Perfil
-Contador con 7 años de experiencia en contabilidad general de empresas de servicios de salud.
+Contador con 8 años de experiencia en contabilidad general de empresas de servicios de salud.
 
 Experiencia
 Contador General — Grupo Médico Integral (2020 – actualidad)
@@ -635,7 +635,7 @@ Silvia Paredes
 Contadora · Lima · silvia.paredes@correo.com
 
 Perfil
-Contadora con 4 años de experiencia en pequeñas empresas comerciales.
+Contadora con 5 años de experiencia en pequeñas empresas comerciales.
 
 Experiencia
 Contadora — Comercial Pacífico (2021 – actualidad)
@@ -656,7 +656,7 @@ Raúl Inga
 Asistente Contable · Huancayo · raul.inga@correo.com
 
 Perfil
-Asistente contable con 2 años de experiencia en registro de compras y ventas.
+Asistente contable con 3 años de experiencia en registro de compras y ventas.
 
 Experiencia
 Asistente Contable — Ferretería El Constructor (2023 – actualidad)
@@ -675,7 +675,7 @@ Lucero Mamani
 Barista · Cusco · lucero.mamani@correo.com
 
 Perfil
-Barista con 2 años de experiencia en cafeterías de especialidad.
+Barista con 3 años de experiencia en cafeterías de especialidad.
 
 Experiencia
 Barista — Café de la Plaza (2023 – actualidad)
@@ -694,7 +694,7 @@ Thiago Huillca
 Mozo · Cusco · thiago.huillca@correo.com
 
 Perfil
-Mozo con 1 año de experiencia en restaurantes turísticos.
+Mozo con 2 años de experiencia en restaurantes turísticos.
 
 Experiencia
 Mozo — Restaurante Inti (2024 – actualidad)

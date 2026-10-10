@@ -122,7 +122,7 @@ trait HistoriaDeOtrasEmpresas
         $this->en(47, '11:00', 'jorge', fn () => $this->completar('manuel'));
         $this->en(47, '16:00', 'jorge', fn () => $this->completar('rosa'));
         $this->en(46, '17:30', 'jorge', function () {
-            $this->evaluar($this->gente['jorge'], $this->postulaciones['manuel'], [9, 8.5, 8.8, 9], 'Ocho años en centros de distribución y manejo de WMS; muy claro al explicar sus indicadores.');
+            $this->evaluar($this->gente['jorge'], $this->postulaciones['manuel'], [9, 8.5, 8.8, 9], 'Nueve años en centros de distribución y manejo de WMS; muy claro al explicar sus indicadores.');
             $this->evaluar($this->gente['jorge'], $this->postulaciones['rosa'], [6.5, 7, 6, 7.5], 'Buena actitud, pero no ha liderado almacenes de este tamaño ni trabajado con WMS.', EstadoEvaluacion::Rechazado);
             $this->mover($this->postulaciones['rosa'], EtapaPostulacion::Descartado, $this->gente['jorge']);
         });
@@ -197,7 +197,7 @@ trait HistoriaDeOtrasEmpresas
         $this->en(40, '11:50', 'rocio', fn () => $this->completar('carla'));
         $this->en(39, '11:50', 'rocio', fn () => $this->completar('andrea'));
         $this->en(39, '15:15', 'rocio', function () {
-            $this->evaluar($this->gente['rocio'], $this->postulaciones['carla'], [9, 9, 8.5, 9], 'Cinco años de venta consultiva con cuentas grandes; negocia con datos y sin presionar.');
+            $this->evaluar($this->gente['rocio'], $this->postulaciones['carla'], [9, 9, 8.5, 9], 'Siete años de venta consultiva con cuentas grandes; negocia con datos y sin presionar.');
             $this->evaluar($this->gente['rocio'], $this->postulaciones['andrea'], [8, 8.5, 7.5, 8], 'Muy buena en el ciclo de venta de software; menos experiencia con productos físicos.');
         });
         $this->en(38, '15:15', 'rocio', fn () => $this->moverVarias([
@@ -253,7 +253,7 @@ trait HistoriaDeOtrasEmpresas
         $this->en(14, '16:15', 'rocio', fn () => $this->moverVarias(['camila' => EtapaPostulacion::EnRevision, 'luis' => EtapaPostulacion::EnRevision, 'nicolas' => EtapaPostulacion::EnRevision, 'ariana' => EtapaPostulacion::Descartado], 'rocio'));
         $this->en(11, '15:15', 'rocio', fn () => $this->programarYConfirmar('camila', 'rocio', -8, '15:00'));
         $this->en(8, '16:00', 'rocio', fn () => $this->completar('camila'));
-        $this->en(7, '15:15', 'rocio', fn () => $this->evaluar($this->gente['rocio'], $this->postulaciones['camila'], [9.2, 8.5, 9, 8.8], 'Cuatro años con React y TypeScript en comercio electrónico; cuida la accesibilidad.'));
+        $this->en(7, '15:15', 'rocio', fn () => $this->evaluar($this->gente['rocio'], $this->postulaciones['camila'], [9.2, 8.5, 9, 8.8], 'Cinco años con React y TypeScript en comercio electrónico; cuida la accesibilidad.'));
         $this->en(6, '11:15', 'rocio', fn () => $this->entrevistas['gianella'] = $this->programar($this->gente['rocio'], $this->postulaciones['gianella'], $this->gente['rocio'], $this->dia(1, '11:00')));
         $this->en(5, '15:15', 'rocio', fn () => $this->entrevistas['luis'] = $this->programar($this->gente['rocio'], $this->postulaciones['luis'], $this->gente['rocio'], $this->dia(3, '16:00')));
         $this->en(4, '15:15', 'rocio', fn () => app(CambiarEstadoEntrevista::class)->confirmar($this->entrevistas['luis']));
@@ -292,7 +292,7 @@ trait HistoriaDeOtrasEmpresas
         $this->en(35, '11:00', 'patricia', fn () => $this->completar('analucia'));
         $this->en(35, '16:00', 'patricia', fn () => $this->completar('jessica'));
         $this->en(34, '15:15', 'patricia', function () {
-            $this->evaluar($this->gente['patricia'], $this->postulaciones['analucia'], [9, 9.2, 8.8, 9.4], 'Seis años en hospitalización y capacitadora en BLS; trato muy cercano con los pacientes.');
+            $this->evaluar($this->gente['patricia'], $this->postulaciones['analucia'], [9, 9.2, 8.8, 9.4], 'Ocho años en hospitalización y capacitadora en BLS; trato muy cercano con los pacientes.');
             $this->evaluar($this->gente['patricia'], $this->postulaciones['jessica'], [8, 8.2, 7.8, 8.5], 'Sólida en pediatría; menos experiencia con pacientes adultos.');
         });
         $this->en(32, '11:15', 'patricia', fn () => $this->mover($this->postulaciones['analucia'], EtapaPostulacion::Oferta, $this->gente['patricia']));
@@ -346,7 +346,7 @@ trait HistoriaDeOtrasEmpresas
     {
         $this->en(5, '19:00', null, function () {
             $gabriela = app(RegistrarEmpresa::class)->ejecutar(new RegistroEmpresaData('Altura Café', 'Gabriela Rojas', 'admin@alturacafe.pe', self::PASSWORD));
-            $gabriela->forceFill(['email_verified_at' => now()->addMinutes(5)])->save();
+            $gabriela->forceFill(['email_verified_at' => now()])->save();
             $gabriela->empresa?->forceFill(['sector' => 'Gastronomía'])->save();
             $this->gente['gabriela'] = $gabriela;
         });
@@ -377,15 +377,16 @@ trait HistoriaDeOtrasEmpresas
             apoderadoNombre: null,
             apoderadoTipoDocumento: null,
             apoderadoNumeroDocumento: null,
-            servicio: 'Registro de postulante en TalentCloud AI',
+            servicio: 'Bolsa de empleos de TalentCloud AI',
             monto: null,
-            detalle: 'No me llegó el correo para verificar mi cuenta y no pude postular durante dos días.',
-            pedido: 'Que revisen el envío de correos y me ayuden a activar mi cuenta.',
+            detalle: 'Quise postular a una vacante de la bolsa de empleos y me pidió crear una cuenta; no encontré cómo enviar solo mi CV.',
+            pedido: 'Que se pueda postular sin crear una cuenta.',
         )));
         $this->en(17, '11:30', 'admin', fn () => app(ResponderReclamacion::class)->ejecutar(
             $this->reclamacion ?? throw new LogicException('Falta la hoja de reclamación.'),
-            'Revisamos el envío: el correo de verificación salió correctamente, pero su proveedor lo dejó en la carpeta de correo no deseado. '
-            .'Puede buscarlo allí o pedir uno nuevo con «Reenviar el correo de verificación» al iniciar sesión. Gracias por avisarnos.',
+            'Pedimos una cuenta para que pueda seguir el estado de cada postulación, recibir los avisos de sus entrevistas, '
+            .'retirar una postulación y descargar o eliminar sus datos cuando quiera. Crearla es gratuito y toma un minuto: '
+            .'en la vacante, pulse «Crear mi cuenta de postulante» y, al terminar, volverá a la misma vacante para postular con su CV. Gracias por su comentario.',
             $this->gente['admin'],
         ));
         $this->en(2, '20:00', null, fn () => app(RegistrarReclamacion::class)->ejecutar(new DatosDeReclamacion(
