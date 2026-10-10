@@ -8,12 +8,13 @@ use Illuminate\Notifications\Messages\MailMessage;
  * alternativo y los iconos de la pestaña.
  */
 
-it('usa la versión clara del logo en la barra y la de colores en el pie', function () {
-    $this->get('/empleos')
-        ->assertOk()
-        ->assertSee('marca/talentcloud-ai-oscuro.svg', false)
-        ->assertSee('marca/talentcloud-ai.svg', false)
-        ->assertSee('alt="TalentCloud AI"', false);
+it('usa la versión para fondo oscuro del logo en la barra y en el pie, que comparten color', function () {
+    $html = $this->get('/empleos')->assertOk()->assertSee('alt="TalentCloud AI"', false)->getContent();
+
+    // Barra y pie: el mismo azul petróleo (.barra) y el mismo logo.
+    expect(substr_count($html, 'marca/talentcloud-ai-oscuro.svg'))->toBe(2)
+        ->and($html)->not->toContain('marca/talentcloud-ai.svg')
+        ->and($html)->toContain('<footer class="barra">');
 });
 
 it('muestra el lema en las páginas del menú público y no en los formularios', function () {

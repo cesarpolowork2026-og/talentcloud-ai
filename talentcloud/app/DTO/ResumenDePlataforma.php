@@ -22,6 +22,7 @@ final readonly class ResumenDePlataforma
         public ResumenCalidadIa $ia,
         public int $enPrueba = 0,
         public Collection $solicitudesDePlan = new Collection,
+        public ?ResumenDeReclamaciones $reclamaciones = null,
     ) {}
 
     public function empresasConPlan(PlanEmpresa $plan): int

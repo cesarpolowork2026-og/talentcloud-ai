@@ -44,6 +44,7 @@ class Navegacion
                 self::enlace('Panel', 'dashboard', 'dashboard'),
                 self::enlace('Empresas', 'empresas.index', 'empresas.*'),
                 self::enlace('Calidad de la IA', 'calidad-ia', 'calidad-ia'),
+                self::enlace('Reclamaciones', 'reclamaciones.index', 'reclamaciones.index'),
                 self::grupo('Procesos de selección', 'Supervisión de las empresas', self::pantallasDeSeleccion()),
             ];
         }

@@ -17,6 +17,7 @@ use App\Livewire\Onboarding;
 use App\Livewire\Planes;
 use App\Livewire\Plataforma;
 use App\Livewire\Postulante;
+use App\Livewire\Reclamaciones;
 use App\Livewire\Vacantes;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
@@ -44,6 +45,9 @@ Route::get('planes', Planes\Precios::class)->name('planes');
 Route::get('privacidad', Legal\Privacidad::class)->name('privacidad');
 Route::get('terminos', Legal\Terminos::class)->name('terminos');
 
+// Libro de Reclamaciones virtual (Ley 29571): público; las hojas las atiende el admin SaaS en /reclamaciones.
+Route::get('libro-de-reclamaciones', Reclamaciones\Formulario::class)->name('reclamaciones.crear');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     // Personal de selección: admin SaaS, empresa y reclutador.
     Route::middleware('rol:admin|empresa|reclutador')->group(function () {
@@ -69,6 +73,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('rol:admin')->group(function () {
         Route::get('empresas', Empresas\Listado::class)->name('empresas.index');
         Route::get('calidad-ia', Plataforma\CalidadIa::class)->name('calidad-ia');
+        Route::get('reclamaciones', Reclamaciones\Listado::class)->name('reclamaciones.index');
     });
 
     // Cuenta de empresa.

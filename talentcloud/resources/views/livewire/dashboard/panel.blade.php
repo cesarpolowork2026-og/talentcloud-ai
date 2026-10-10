@@ -43,6 +43,25 @@
                 </x-ui.card>
             @endif
 
+            @if ($plataforma->reclamaciones)
+                @php($libro = $plataforma->reclamaciones)
+                <x-ui.card class="mb-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="card-kicker">Libro de Reclamaciones</div>
+                        <x-ui.button size="sm" :href="route('reclamaciones.index')" wire:navigate>Atender reclamaciones</x-ui.button>
+                    </div>
+                    <p class="m-0 text-14 text-neutral-800">
+                        @if ($libro->pendientes === 0)
+                            No hay hojas pendientes de respuesta.
+                        @else
+                            {{ $libro->pendientes === 1 ? '1 hoja pendiente' : $libro->pendientes.' hojas pendientes' }}:
+                            {{ $libro->vencidas }} {{ $libro->vencidas === 1 ? 'vencida' : 'vencidas' }} y
+                            {{ $libro->porVencer }} por vencer en los próximos {{ App\Services\Plataforma\PanelDePlataforma::DIAS_POR_VENCER }} días hábiles.
+                        @endif
+                    </p>
+                </x-ui.card>
+            @endif
+
             <x-ui.card>
                 <div class="card-kicker">Cerca del límite de su plan</div>
                 @if ($plataforma->cercaDelLimite->isEmpty())

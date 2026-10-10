@@ -3,11 +3,14 @@
 namespace App\Services\Plataforma;
 
 use App\DTO\ResumenDePlataforma;
+use App\DTO\ResumenDeReclamaciones;
 use App\DTO\UsoDelPlan;
 use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoVacante;
 use App\Models\Empresa;
+use App\Repositories\Contracts\ReclamacionRepository;
 use App\Services\Empresas\CupoDeIa;
+use App\Services\Reclamaciones\PlazoDeRespuesta;
 use App\Tenancy\EmpresaScope;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -18,7 +21,14 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class PanelDePlataforma
 {
-    public function __construct(private readonly CalidadDeLaIa $calidad) {}
+    /** Días hábiles con los que una hoja pendiente se cuenta "por vencer". */
+    public const DIAS_POR_VENCER = 3;
+
+    public function __construct(
+        private readonly CalidadDeLaIa $calidad,
+        private readonly ReclamacionRepository $reclamaciones,
+        private readonly PlazoDeRespuesta $plazo,
+    ) {}
 
     public function resumen(): ResumenDePlataforma
     {
@@ -63,6 +73,11 @@ class PanelDePlataforma
                 ->filter(fn (Empresa $e) => $e->plan_solicitado !== null)
                 ->sortBy(fn (Empresa $e) => $e->plan_solicitado_at)
                 ->values(),
+            reclamaciones: new ResumenDeReclamaciones(
+                pendientes: $this->reclamaciones->pendientes(),
+                vencidas: $this->reclamaciones->vencidas(),
+                porVencer: $this->reclamaciones->porVencerHasta($this->plazo->sumarDiasHabiles(now(), self::DIAS_POR_VENCER)),
+            ),
         );
     }
 }

@@ -48,6 +48,18 @@ class Formato
     }
 
     /** "23 sep · 10:00". */
+    /** "23 de octubre de 2026": fechas que se citan en documentos (Libro de Reclamaciones, textos legales). */
+    public static function fechaLarga(?DateTimeInterface $fecha): string
+    {
+        if ($fecha === null) {
+            return '—';
+        }
+
+        $fecha = Carbon::instance($fecha)->timezone(config('app.timezone'));
+
+        return $fecha->day.' de '.$fecha->locale('es')->monthName.' de '.$fecha->year;
+    }
+
     public static function fechaHora(?DateTimeInterface $fecha): string
     {
         if ($fecha === null) {

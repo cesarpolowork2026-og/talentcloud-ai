@@ -15,6 +15,7 @@
             <li>Tus postulaciones: a qué vacante, en qué etapa está cada una y sus entrevistas (fecha, modalidad y lugar o enlace).</li>
         </ul>
         <p><strong>Si trabajas en una empresa cliente</strong> (cuenta de empresa o reclutador): tu nombre, correo, rol y las acciones que realizas en la plataforma (por ejemplo, «programó una entrevista»).</p>
+        <p><strong>Si presentas una hoja en el <a href="{{ route('reclamaciones.crear') }}">Libro de Reclamaciones</a>:</strong> tu nombre, documento de identidad, domicilio, correo y teléfono (y los de tu padre, madre o apoderado si eres menor de edad), el servicio y lo que nos cuentas. Los usamos solo para atender tu reclamo o queja y responderte, y los conservamos el tiempo que exige la normativa de protección al consumidor.</p>
         <p><strong>Datos técnicos:</strong> la dirección IP de cada intento de inicio de sesión o de recuperación de contraseña, solo para limitar intentos y proteger las cuentas, y las cookies necesarias para mantener tu sesión (ver el punto 8).</p>
 
         <h2 id="finalidad">2. Para qué los usamos</h2>

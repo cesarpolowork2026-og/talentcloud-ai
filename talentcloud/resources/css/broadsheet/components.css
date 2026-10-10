@@ -236,4 +236,13 @@
   .barra .btn-secondary { background: #fff; border-color: #fff; color: var(--color-accent-800); }
   .barra .btn-secondary:hover { background: var(--color-accent-100); color: var(--color-accent-900); }
   .barra .card { color: var(--color-text); }
+  /* TalentCloud: pie de página (también .barra): separador tenue y el acceso al Libro de Reclamaciones
+     como un botón con borde, para que se reconozca de un vistazo (es obligatorio y debe verse). */
+  .barra .barra-divisor { border-color: color-mix(in srgb, #fff 20%, transparent); }
+  .barra .barra-libro {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    padding: var(--space-2) var(--space-3); border: 1px solid color-mix(in srgb, #fff 70%, transparent);
+    border-radius: var(--radius-md); color: #fff; font-size: 14px; font-weight: 600; text-decoration: none;
+  }
+  .barra .barra-libro:hover, .barra .barra-libro[aria-current='page'] { background: color-mix(in srgb, #fff 12%, transparent); color: #fff; }
 }
