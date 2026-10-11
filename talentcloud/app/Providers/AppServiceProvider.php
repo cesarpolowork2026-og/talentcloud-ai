@@ -9,6 +9,8 @@ use App\Matching\FakeMatchingEngine;
 use App\Matching\HttpMatchingEngine;
 use App\Matching\MatchingEngineInterface;
 use App\Matching\MotorConRespaldo;
+use App\Pagos\PasarelaDePago;
+use App\Pagos\PasarelaStripe;
 use App\Tenancy\TenantContext;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +18,7 @@ use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use LogicException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -44,6 +47,12 @@ class AppServiceProvider extends ServiceProvider
             timeout: (int) config('talentcloud.ia.timeout'),
             reintentos: (int) config('talentcloud.ia.reintentos'),
         ));
+
+        // Pasarela de pago (PAGOS_PASARELA). Solo se resuelve con el cobro en línea habilitado.
+        $this->app->bind(PasarelaDePago::class, fn () => match (config('talentcloud.pagos.pasarela')) {
+            'stripe' => PasarelaStripe::desdeConfig(),
+            default => throw new LogicException('No hay pasarela de pago configurada (PAGOS_PASARELA).'),
+        });
     }
 
     /**

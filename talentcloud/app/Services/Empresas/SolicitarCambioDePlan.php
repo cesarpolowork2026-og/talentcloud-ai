@@ -6,14 +6,16 @@ use App\Enums\PlanEmpresa;
 use App\Events\PlanSolicitado;
 use App\Models\Empresa;
 use App\Models\User;
+use App\Pagos\CobroEnLinea;
 use App\Services\Vacantes\OperacionNoPermitida;
 use App\Support\Formato;
 use Illuminate\Support\Facades\DB;
 
 /**
- * "Solicitar plan" de la cuenta de empresa. Sin pasarela de pago todavía, la
- * solicitud avisa al admin SaaS, que la aplica con CambiarPlanEmpresa (y eso la
- * da por atendida). Cuando haya pasarela, este es el punto que pasa a cobrar.
+ * "Solicitar plan" de la cuenta de empresa: sin pasarela de pago, o para un plan
+ * que se cotiza (Enterprise). La solicitud avisa al admin SaaS, que la aplica con
+ * CambiarPlanEmpresa (y eso la da por atendida). Con pasarela, Starter y Pro se
+ * pagan con ContratarPlan.
  */
 class SolicitarCambioDePlan
 {
@@ -21,6 +23,16 @@ class SolicitarCambioDePlan
     {
         DB::transaction(function () use ($empresa, $plan): void {
             $fila = Empresa::query()->lockForUpdate()->findOrFail($empresa->id);
+
+            // Con cobro en línea, Starter y Pro se pagan y una suscripción se cancela en su portal;
+            // a mano solo se pide lo que se cotiza (Enterprise).
+            if (CobroEnLinea::habilitado() && $plan->sePagaEnLinea()) {
+                throw new OperacionNoPermitida('El plan '.$plan->etiqueta().' se contrata pagando en línea.', 'plan');
+            }
+
+            if ($fila->tieneSuscripcionVigente() && $plan === PlanEmpresa::Gratis) {
+                throw new OperacionNoPermitida('Para pasar al plan Gratis, cancela tu suscripción en «Gestionar suscripción».', 'plan');
+            }
 
             if ($fila->plan === $plan && ! $fila->enPrueba()) {
                 throw new OperacionNoPermitida('Tu empresa ya tiene el plan '.$plan->etiqueta().'.', 'plan');

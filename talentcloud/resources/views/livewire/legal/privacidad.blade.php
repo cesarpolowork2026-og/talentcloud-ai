@@ -15,6 +15,9 @@
             <li>Tus postulaciones: a qué vacante, en qué etapa está cada una y sus entrevistas (fecha, modalidad y lugar o enlace).</li>
         </ul>
         <p><strong>Si trabajas en una empresa cliente</strong> (cuenta de empresa o reclutador): tu nombre, correo, rol y las acciones que realizas en la plataforma (por ejemplo, «programó una entrevista»).</p>
+        @if (\App\Pagos\CobroEnLinea::habilitado())
+            <p><strong>Si tu empresa paga un plan en línea:</strong> el pago se hace en la página de Stripe, que recibe y guarda los datos de la tarjeta; TalentCloud AI nunca los ve. A Stripe le enviamos el nombre de la empresa y el correo de quien paga, y guardamos solo el identificador de cliente, el plan, el estado de la suscripción y su fecha de renovación.</p>
+        @endif
         <p><strong>Si presentas una hoja en el <a href="{{ route('reclamaciones.crear') }}">Libro de Reclamaciones</a>:</strong> tu nombre, documento de identidad, domicilio, correo y teléfono (y los de tu padre, madre o apoderado si eres menor de edad), el servicio y lo que nos cuentas. Los usamos solo para atender tu reclamo o queja y responderte, y los conservamos el tiempo que exige la normativa de protección al consumidor.</p>
         <p><strong>Datos técnicos:</strong> la dirección IP de cada intento de inicio de sesión o de recuperación de contraseña, solo para limitar intentos y proteger las cuentas, y las cookies necesarias para mantener tu sesión (ver el punto 8).</p>
 
@@ -36,6 +39,9 @@
             <li>Cada empresa escribe sus propias notas internas y evaluaciones de tu proceso; las demás empresas no las ven.</li>
             <li>El equipo de administración de TalentCloud AI, para dar soporte y supervisar la calidad del análisis.</li>
             <li>Nuestros proveedores de infraestructura (alojamiento en Google Cloud y envío de correos), que tratan los datos por nuestro encargo y con sus propias garantías de seguridad. Los servidores pueden estar fuera del Perú.</li>
+            @if (\App\Pagos\CobroEnLinea::habilitado())
+                <li>Stripe, procesador de los pagos de los planes, solo con los datos de pago de las empresas descritos en el punto 1. Stripe los trata en Estados Unidos y en otros países (transferencia internacional de datos) con sus propias garantías de seguridad.</li>
+            @endif
         </ul>
         <p>Tus datos de postulante nunca son públicos. Lo único público son las vacantes abiertas que las empresas publican en la bolsa de empleos.</p>
 

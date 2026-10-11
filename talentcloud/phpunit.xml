@@ -31,6 +31,7 @@
         <env name="IA_HABILITADA" value="false"/>
         <env name="IA_API_KEY" value=""/>
         <env name="MATCHING_ENGINE" value="fake"/>
+        <env name="PAGOS_PASARELA" value=""/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>

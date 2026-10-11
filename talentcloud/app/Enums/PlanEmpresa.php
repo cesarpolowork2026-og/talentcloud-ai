@@ -4,8 +4,9 @@ namespace App\Enums;
 
 /**
  * Plan de suscripción de la empresa: límites de uso y precio de lista (en soles,
- * más IGV). Se cobra por vacantes activas, no por usuario. El cobro (pasarela de
- * pago) está fuera del alcance actual: el cambio lo aplica el admin SaaS.
+ * más IGV). Se cobra por vacantes activas, no por usuario. Starter y Pro se pagan
+ * en línea si hay pasarela (App\Pagos); si no, y para Enterprise, el cambio lo
+ * aplica el admin SaaS.
  * Origen de los precios: «Estudio de mercado y planes - TalentCloud AI.docx».
  */
 enum PlanEmpresa: string
@@ -98,6 +99,12 @@ enum PlanEmpresa: string
             self::Pro => 279,
             default => null,
         };
+    }
+
+    /** Starter y Pro se contratan pagando en línea (mensual o anual); Gratis no se paga y Enterprise se cotiza. */
+    public function sePagaEnLinea(): bool
+    {
+        return $this === self::Starter || $this === self::Pro;
     }
 
     /** Enterprise no tiene precio cerrado: se cotiza con contrato anual. */

@@ -7,7 +7,11 @@ use App\Models\Empresa;
 use App\Models\User;
 use Illuminate\Foundation\Events\Dispatchable;
 
-/** El admin SaaS cambió el plan de una empresa: aviso a su cuenta y línea en la actividad. */
+/**
+ * Cambió el plan de una empresa: lo aplicó el admin SaaS (actor) o la pasarela de
+ * pago al confirmar un pago o el fin de la suscripción (actor null). Aviso a su
+ * cuenta y línea en la actividad.
+ */
 class PlanEmpresaCambiado
 {
     use Dispatchable;

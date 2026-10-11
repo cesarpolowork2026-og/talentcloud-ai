@@ -63,9 +63,34 @@ El Libro de Reclamaciones tiene una hoja respondida y otra pendiente.
 
 El postulante ve las vacantes abiertas de las empresas activas en «Vacantes» y postula con su CV; la empresa recibe el aviso y la postulación entra en su Kanban con el matching de la IA. También puede retirar una postulación en curso, editar su titular y teléfono en «Mi perfil» y descargar sus datos en JSON. Sin iniciar sesión, cualquiera ve las vacantes abiertas en `/empleos` (y las más recientes en la presentación); «Postular» lleva a iniciar sesión o registrarse y vuelve a la vacante.
 
-La empresa ve en el dashboard el embudo de selección de los últimos 90 días, y en «Mi empresa» el uso de su plan: vacantes activas, usuarios y postulaciones evaluadas con IA en el mes (Gratis: 1, 2 y 30; Starter: 3, 3 y 300; Pro: 15, 10 y 2 000; Enterprise: sin límite). Toda empresa nueva entra en Gratis con 14 días del plan Pro. Los precios están en `/planes`; la empresa solicita un plan desde «Mi empresa» y el admin SaaS lo aplica desde «Empresas» (todavía sin pago en línea).
+La empresa ve en el dashboard el embudo de selección de los últimos 90 días, y en «Mi empresa» el uso de su plan: vacantes activas, usuarios y postulaciones evaluadas con IA en el mes (Gratis: 1, 2 y 30; Starter: 3, 3 y 300; Pro: 15, 10 y 2 000; Enterprise: sin límite). Toda empresa nueva entra en Gratis con 14 días del plan Pro. Los precios están en `/planes`. Con la pasarela configurada (`PAGOS_PASARELA=stripe`, ver «Pagos con Stripe»), Starter y Pro se pagan con tarjeta desde «Mi empresa»; sin ella, y para Enterprise, la empresa solicita el plan y el admin SaaS lo aplica desde «Empresas».
 
 `docker compose` toma `DB_PASSWORD` del `.env`. Crea las bases `talentcloud` y `talentcloud_testing`, ambas con la extensión `vector`.
+
+## Pagos con Stripe
+
+La empresa es el cliente de Stripe. «Pagar» en «Mi empresa» abre Stripe Checkout (precio en soles más IGV) y
+el plan cambia **solo** cuando llega el aviso firmado de Stripe a `POST /stripe/webhook`: la suscripción se
+relee de Stripe en cada aviso, así que un aviso repetido o desordenado da el mismo resultado. Cambiar de plan,
+la tarjeta o cancelar se hace en el portal de clientes de Stripe («Gestionar suscripción»). Un cobro fallido
+mantiene el plan mientras Stripe reintenta y avisa a la cuenta de empresa; si la suscripción termina, la
+empresa pasa a Gratis sin perder nada. Código en `app/Pagos` (puerto `PasarelaDePago`) y `app/Services/Pagos`.
+
+En el panel de Stripe (modo de prueba): los productos Starter y Pro con un precio mensual y otro anual en PEN
+sin IGV, una tasa de impuesto IGV del 18 % excluida del precio, el portal de clientes (tarjeta, facturas,
+cambio entre Starter y Pro, cancelación al final del periodo) y, en pagos fallidos, cancelar la suscripción
+cuando se agoten los reintentos. Sus identificadores van en el `.env` (ver `.env.example`).
+
+En local, para recibir los avisos (el `whsec_...` que muestra va en `STRIPE_WEBHOOK_SECRET`):
+
+```bash
+stripe listen --events checkout.session.completed,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,invoice.payment_failed --forward-to http://127.0.0.1:8000/stripe/webhook
+```
+
+Tarjetas de prueba: `4242 4242 4242 4242` (aprobada), `4000 0000 0000 9995` (fondos insuficientes),
+`4000 0025 0000 3155` (pide 3D Secure); cualquier fecha futura y CVC. En producción se crea el endpoint
+`https://<dominio>/stripe/webhook` en el panel de Stripe con esos mismos eventos y su secreto va en
+`STRIPE_WEBHOOK_SECRET`. Los recibos de Stripe no son comprobantes electrónicos de SUNAT.
 
 ## Calidad
 

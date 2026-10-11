@@ -52,7 +52,7 @@ return [
         'ruc' => env('LEGAL_RUC'),
         'domicilio' => env('LEGAL_DOMICILIO'),
         // Fecha de la última versión de los textos (cambiarla al editarlos).
-        'actualizado' => '2026-10-09',
+        'actualizado' => '2026-10-11',
     ],
 
     /*
@@ -63,6 +63,26 @@ return [
     | entonces env() devuelve null fuera de config/.
     */
     'proxies' => env('TRUSTED_PROXIES'),
+
+    /*
+    | Cobro en línea de los planes Starter y Pro (App\Pagos). Sin pasarela
+    | (PAGOS_PASARELA vacío), «Mi empresa» solo permite solicitar el plan y lo
+    | aplica el admin SaaS. Con "stripe", la empresa paga en Stripe Checkout y el
+    | plan cambia solo cuando Stripe lo confirma por webhook. Precios e IGV:
+    | identificadores creados en el panel de Stripe (en soles, sin IGV).
+    */
+    'pagos' => [
+        'pasarela' => env('PAGOS_PASARELA') ?: null,
+        'stripe' => [
+            'clave_secreta' => env('STRIPE_SECRET'),
+            'secreto_webhook' => env('STRIPE_WEBHOOK_SECRET'),
+            'igv' => env('STRIPE_IGV') ?: null,
+            'precios' => [
+                'starter' => ['mensual' => env('STRIPE_PRECIO_STARTER_MENSUAL'), 'anual' => env('STRIPE_PRECIO_STARTER_ANUAL')],
+                'pro' => ['mensual' => env('STRIPE_PRECIO_PRO_MENSUAL'), 'anual' => env('STRIPE_PRECIO_PRO_ANUAL')],
+            ],
+        ],
+    ],
 
     /*
     | Correo de soporte: lo muestra el pie y recibe las hojas del Libro de

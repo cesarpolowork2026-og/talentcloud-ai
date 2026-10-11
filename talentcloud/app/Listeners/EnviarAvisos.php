@@ -11,6 +11,7 @@ use App\Events\CvAnalizado;
 use App\Events\EntrevistaCancelada;
 use App\Events\EntrevistaProgramada;
 use App\Events\EntrevistaReprogramada;
+use App\Events\PagoFallido;
 use App\Events\PlanEmpresaCambiado;
 use App\Events\PlanSolicitado;
 use App\Events\PostulacionCambioDeEtapa;
@@ -20,6 +21,7 @@ use App\Events\ReclamacionRespondida;
 use App\Events\VacanteCerrada;
 use App\Jobs\AvisarEstadoDePostulacion;
 use App\Models\Candidato;
+use App\Models\Empresa;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\User;
@@ -31,6 +33,7 @@ use App\Notifications\AvisoDeEntrevista;
 use App\Notifications\AvisoEntrevistaReprogramada;
 use App\Notifications\AvisoGeneral;
 use App\Notifications\AvisoNuevaPostulacion;
+use App\Notifications\AvisoPagoFallido;
 use App\Notifications\AvisoPostulacionRetirada;
 use App\Notifications\AvisoSolicitudDePlan;
 use App\Notifications\HojaDeReclamacion;
@@ -175,18 +178,22 @@ class EnviarAvisos
         $evento->user->notify(AvisoContrasenaCambiada::ahora());
     }
 
-    /** Cambio de plan por el admin SaaS: aviso a la cuenta de empresa. */
+    /** Cambio de plan (por el admin SaaS o por la pasarela de pago): aviso a la cuenta de empresa. */
     public function handlePlan(PlanEmpresaCambiado $evento): void
     {
         $empresa = $evento->empresa;
         $aviso = AvisoCambioDePlan::de($empresa->nombre, $empresa->plan->etiqueta(), $empresa->plan->descripcionDeLimites(), route('mi-empresa'));
 
-        User::query()
-            ->deEmpresa($empresa->id)
-            ->role(Rol::Empresa->value)
-            ->whereNull('desactivado_at')
-            ->get()
-            ->each(fn (User $u) => $u->notify($aviso));
+        $this->cuentasDeEmpresa($empresa)->each(fn (User $u) => $u->notify($aviso));
+    }
+
+    /** La pasarela no pudo cobrar la renovación: la cuenta de empresa debe actualizar su tarjeta. */
+    public function handlePagoFallido(PagoFallido $evento): void
+    {
+        $empresa = $evento->empresa;
+        $aviso = AvisoPagoFallido::de($empresa->nombre, $empresa->plan->etiqueta(), route('mi-empresa'));
+
+        $this->cuentasDeEmpresa($empresa)->each(fn (User $u) => $u->notify($aviso));
     }
 
     /** Solicitud de plan de una empresa: aviso a los admins SaaS activos, que la aplican. */
@@ -275,6 +282,20 @@ class EnviarAvisos
         }
 
         $this->avisoAlCandidato->enviar($candidato, $aviso);
+    }
+
+    /**
+     * Las cuentas de empresa activas de $empresa (quienes gestionan su plan).
+     *
+     * @return Collection<int, User>
+     */
+    private function cuentasDeEmpresa(Empresa $empresa): Collection
+    {
+        return User::query()
+            ->deEmpresa($empresa->id)
+            ->role(Rol::Empresa->value)
+            ->whereNull('desactivado_at')
+            ->get();
     }
 
     private function usuarioActual(): ?User

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\EstadoEmpresa;
+use App\Enums\EstadoSuscripcion;
+use App\Enums\Periodicidad;
 use App\Enums\PlanEmpresa;
 use Database\Factories\EmpresaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +22,12 @@ use Illuminate\Support\Carbon;
  * @property PlanEmpresa|null $plan_solicitado
  * @property Carbon|null $plan_solicitado_at
  * @property EstadoEmpresa $estado
+ * @property string|null $pasarela_cliente_id cliente de la pasarela de pago
+ * @property string|null $pasarela_suscripcion_id última suscripción en línea
+ * @property EstadoSuscripcion|null $suscripcion_estado
+ * @property Periodicidad|null $suscripcion_periodicidad
+ * @property Carbon|null $suscripcion_renueva_at fin del periodo pagado
+ * @property bool $suscripcion_cancela_al_final
  * @property array<string, bool>|null $onboarding
  */
 class Empresa extends Model
@@ -55,6 +63,10 @@ class Empresa extends Model
             'plan_solicitado_at' => 'datetime',
             'estado' => EstadoEmpresa::class,
             'onboarding' => 'array',
+            'suscripcion_estado' => EstadoSuscripcion::class,
+            'suscripcion_periodicidad' => Periodicidad::class,
+            'suscripcion_renueva_at' => 'datetime',
+            'suscripcion_cancela_al_final' => 'boolean',
         ];
     }
 
@@ -114,6 +126,24 @@ class Empresa extends Model
     public function etiquetaDelPlan(): string
     {
         return $this->enPrueba() ? PlanEmpresa::PLAN_DE_PRUEBA->etiqueta().' (prueba)' : $this->plan->etiqueta();
+    }
+
+    /**
+     * Fija el plan contratado: termina la prueba y atiende la solicitud de plan, si
+     * la había. Lo usan el admin SaaS (CambiarPlanEmpresa) y el cobro en línea.
+     */
+    public function contratar(PlanEmpresa $plan): void
+    {
+        $this->plan = $plan;
+        $this->prueba_hasta = null;
+        $this->plan_solicitado = null;
+        $this->plan_solicitado_at = null;
+    }
+
+    /** Paga su plan en línea (aunque un cobro esté en reintento): el plan lo cambia la pasarela. */
+    public function tieneSuscripcionVigente(): bool
+    {
+        return $this->suscripcion_estado?->esVigente() === true;
     }
 
     public function estaActiva(): bool

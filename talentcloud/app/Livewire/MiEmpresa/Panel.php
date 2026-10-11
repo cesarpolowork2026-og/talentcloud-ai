@@ -4,11 +4,13 @@ namespace App\Livewire\MiEmpresa;
 
 use App\DTO\DatosEmpresaData;
 use App\DTO\InvitacionData;
+use App\Enums\Periodicidad;
 use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
 use App\Models\Empresa;
 use App\Models\Invitacion;
 use App\Models\User;
+use App\Pagos\CobroEnLinea;
 use App\Repositories\Contracts\EmpresaRepository;
 use App\Repositories\Contracts\EquipoRepository;
 use App\Services\Empresas\ActualizarEmpresa;
@@ -17,6 +19,8 @@ use App\Services\Empresas\SolicitarCambioDePlan;
 use App\Services\Equipo\CambiarEstadoUsuario;
 use App\Services\Equipo\InvitacionNoValida;
 use App\Services\Equipo\InvitarUsuario;
+use App\Services\Pagos\ContratarPlan;
+use App\Services\Pagos\GestionarSuscripcion;
 use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
@@ -58,8 +62,12 @@ class Panel extends Component
     #[Locked]
     public bool $desactivarSeleccionado = true;
 
-    // Planes y solicitud de cambio de plan.
+    // Planes: solicitar (sin pasarela o Enterprise) o pagar en línea.
     public bool $mostrarPlanes = false;
+
+    /** Vuelta de la página de pago: "confirmando" (pagó; falta el aviso de la pasarela) o "cancelado". */
+    #[Locked]
+    public ?string $pago = null;
 
     // Revocar invitación.
     public bool $mostrarConfirmacionInvitacion = false;
@@ -78,6 +86,9 @@ class Panel extends Component
             'planes' => $this->abrirPlanes(),
             default => null,
         };
+
+        $pago = request()->query('pago');
+        $this->pago = in_array($pago, ['confirmando', 'cancelado'], true) ? $pago : null;
     }
 
     public function abrirInvitacion(): void
@@ -192,6 +203,49 @@ class Panel extends Component
         $this->dispatch('plan-solicitado');
     }
 
+    /** Lleva a la página de pago de la pasarela; el plan cambia cuando la pasarela confirma el pago. */
+    public function contratarPlan(string $plan, string $periodicidad, ContratarPlan $contratar): void
+    {
+        $empresa = $this->empresa();
+        $this->authorize('pagarPlan', $empresa);
+        abort_unless(CobroEnLinea::habilitado(), 404);
+
+        $elegido = PlanEmpresa::tryFrom($plan);
+        $cada = Periodicidad::tryFrom($periodicidad);
+        abort_if($elegido === null || $cada === null, 404);
+
+        /** @var User $actor */
+        $actor = auth()->user();
+
+        try {
+            $url = $contratar->ejecutar($empresa, $elegido, $cada, $actor);
+        } catch (OperacionNoPermitida $e) {
+            $this->addError('plan', $e->getMessage());
+
+            return;
+        }
+
+        $this->redirect($url);
+    }
+
+    /** Portal de la pasarela: tarjeta, cambio de plan, facturas y cancelación. */
+    public function gestionarSuscripcion(GestionarSuscripcion $gestionar): void
+    {
+        $empresa = $this->empresa();
+        $this->authorize('pagarPlan', $empresa);
+        abort_unless(CobroEnLinea::habilitado(), 404);
+
+        try {
+            $url = $gestionar->url($empresa);
+        } catch (OperacionNoPermitida $e) {
+            $this->addError('plan', $e->getMessage());
+
+            return;
+        }
+
+        $this->redirect($url);
+    }
+
     public function abrirDatos(): void
     {
         $empresa = $this->empresa();
@@ -234,6 +288,7 @@ class Panel extends Component
         return view('livewire.mi-empresa.panel', [
             'empresa' => $empresa,
             'uso' => $limites->uso($empresa),
+            'cobroEnLinea' => CobroEnLinea::habilitado(),
             'usuarios' => $equipo->usuariosDe($empresa),
             'invitaciones' => $equipo->invitacionesPendientesDe($empresa),
             'seleccionado' => $this->usuarioSeleccionado ? User::find($this->usuarioSeleccionado) : null,

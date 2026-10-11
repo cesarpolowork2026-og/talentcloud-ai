@@ -45,7 +45,7 @@ class LimitesDelPlan
 
         if ($limite !== null && $this->vacantesActivas($empresa->id) >= $limite) {
             throw new OperacionNoPermitida(
-                'El plan '.$empresa->etiquetaDelPlan().' permite '.($limite === 1 ? '1 vacante activa' : $limite.' vacantes activas').' a la vez. Cierra una vacante o solicita un cambio de plan.',
+                'El plan '.$empresa->etiquetaDelPlan().' permite '.($limite === 1 ? '1 vacante activa' : $limite.' vacantes activas').' a la vez. Cierra una vacante o cambia de plan en Mi empresa.',
                 'estado',
             );
         }
@@ -68,7 +68,7 @@ class LimitesDelPlan
 
         if ($ocupados >= $limite) {
             throw new OperacionNoPermitida(
-                'El plan '.$empresa->etiquetaDelPlan().' permite '.$limite.' usuarios, contando las invitaciones pendientes. Revoca una invitación, desactiva un usuario o solicita un cambio de plan.',
+                'El plan '.$empresa->etiquetaDelPlan().' permite '.$limite.' usuarios, contando las invitaciones pendientes. Revoca una invitación, desactiva un usuario o cambia de plan en Mi empresa.',
                 'invitadoEmail',
             );
         }
@@ -82,7 +82,7 @@ class LimitesDelPlan
 
         if ($limite !== null && $this->usuariosActivos($empresa->id) >= $limite) {
             throw new OperacionNoPermitida(
-                'El plan '.$empresa->etiquetaDelPlan().' de '.$empresa->nombre.' permite '.$limite.' usuarios activos y ya están en uso. Desactiva a otro usuario o solicita un cambio de plan.',
+                'El plan '.$empresa->etiquetaDelPlan().' de '.$empresa->nombre.' permite '.$limite.' usuarios activos y ya están en uso. Desactiva a otro usuario o cambia de plan en Mi empresa.',
                 'usuario',
             );
         }

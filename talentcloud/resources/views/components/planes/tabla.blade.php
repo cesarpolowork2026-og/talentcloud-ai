@@ -1,10 +1,12 @@
 {{--
     Tabla de planes con sus precios (PlanEmpresa). La usan la página pública /planes y
     el diálogo «Planes» de Mi empresa.
-    empresa: null en la página pública. Con empresa, marca su plan y muestra «Solicitar
-    plan…» (wire:click="solicitarPlan('pro')" del componente Livewire que la contiene).
+    empresa: null en la página pública. Con empresa, marca su plan y muestra las acciones
+    del componente Livewire que la contiene: «Solicitar plan…» (solicitarPlan('pro')) o,
+    con cobro (pasarela de pago), «Pagar…» (contratarPlan('pro', 'mensual')) y el portal
+    de la suscripción (gestionarSuscripcion) para cambiarla o cancelarla.
 --}}
-@props(['empresa' => null])
+@props(['empresa' => null, 'cobro' => false])
 
 @php
     $soles = fn (int $monto) => 'S/ '.number_format($monto, 0, ',', ' ');
@@ -68,6 +70,19 @@
                         <x-ui.tag tone="outline">Al terminar la prueba</x-ui.tag>
                     @elseif ($empresa->plan_solicitado === $plan)
                         <x-ui.tag>Solicitado el {{ \App\Support\Formato::fechaCorta($empresa->plan_solicitado_at) }}</x-ui.tag>
+                    @elseif ($cobro && $empresa->tieneSuscripcionVigente() && ($plan->sePagaEnLinea() || $plan === \App\Enums\PlanEmpresa::Gratis))
+                        {{-- Con una suscripción en curso, cambiar de plan o cancelarla se hace en el portal de la pasarela. --}}
+                        <x-ui.button size="sm" variant="secondary" wire:click="gestionarSuscripcion" wire:loading.attr="disabled">
+                            {{ $plan === \App\Enums\PlanEmpresa::Gratis ? 'Cancelar suscripción' : 'Cambiar al plan '.$plan->etiqueta() }}
+                        </x-ui.button>
+                    @elseif ($cobro && $plan->sePagaEnLinea())
+                        <div class="grid gap-2">
+                            @foreach (\App\Enums\Periodicidad::cases() as $periodicidad)
+                                <x-ui.button size="sm" :variant="$recomendado && $periodicidad === \App\Enums\Periodicidad::Mensual ? 'primary' : 'secondary'" wire:click="contratarPlan('{{ $plan->value }}', '{{ $periodicidad->value }}')" wire:loading.attr="disabled">
+                                    Pagar {{ $periodicidad->importe($plan) }}
+                                </x-ui.button>
+                            @endforeach
+                        </div>
                     @else
                         <x-ui.button size="sm" :variant="$recomendado ? 'primary' : 'secondary'" wire:click="solicitarPlan('{{ $plan->value }}')" wire:loading.attr="disabled">
                             {{ $plan->seCotiza() ? 'Solicitar cotización' : 'Solicitar plan '.$plan->etiqueta() }}

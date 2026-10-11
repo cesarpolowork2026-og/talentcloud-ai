@@ -28,7 +28,16 @@
             <li>Los postulantes no pagan.</li>
             <li>Las empresas eligen un plan según sus vacantes activas, usuarios y cupo mensual de análisis con IA. Los precios están publicados en <a href="{{ route('planes') }}">Planes y precios</a>, en soles y sin IGV.</li>
             <li>Toda empresa empieza en el plan Gratis con {{ \App\Enums\PlanEmpresa::DIAS_DE_PRUEBA }} días del plan Pro. Al terminar la prueba, o al bajar de plan, se conserva todo lo existente, pero no se puede sumar por encima de los límites del plan.</li>
-            <li>El cambio de plan se solicita desde «Mi empresa» y lo aplica el equipo de TalentCloud AI una vez coordinado el pago.</li>
+            @if (\App\Pagos\CobroEnLinea::habilitado())
+                <li>Starter y Pro se pagan por adelantado con tarjeta, a través de Stripe, cada mes o cada año según lo elegido, más IGV. El plan cambia cuando Stripe confirma el pago. Si pagas durante la prueba, la prueba termina ese día.</li>
+                <li>La suscripción se renueva automáticamente al final de cada periodo hasta que la canceles en «Mi empresa» → «Gestionar suscripción». Al cancelar, conservas el plan hasta el final del periodo ya pagado, no se vuelve a cobrar y después la empresa pasa al plan Gratis.</li>
+                <li>Si cambias de plan en «Gestionar suscripción», el importe se ajusta en proporción al tiempo que queda del periodo.</li>
+                <li>Si un cobro falla, te avisamos y se reintenta durante los días siguientes. Si no se completa, la suscripción se cancela y la empresa pasa al plan Gratis.</li>
+                <li>Stripe envía un recibo de cada cobro. Ese recibo no es un comprobante de pago electrónico de SUNAT.</li>
+                <li>El plan Enterprise se cotiza: se solicita desde «Mi empresa» y lo aplica el equipo de TalentCloud AI una vez coordinado el pago.</li>
+            @else
+                <li>El cambio de plan se solicita desde «Mi empresa» y lo aplica el equipo de TalentCloud AI una vez coordinado el pago.</li>
+            @endif
         </ul>
 
         <h2 id="contenido">6. Contenido de cada usuario</h2>

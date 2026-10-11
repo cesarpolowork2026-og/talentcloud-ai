@@ -64,6 +64,28 @@
 
         <div class="grid gap-4">
             <x-ui.card kicker="Plan" :title="$empresa->etiquetaDelPlan()">
+                {{-- Vuelta de la página de pago: el plan cambia cuando Stripe confirma el pago (webhook). --}}
+                @if ($pago === 'confirmando' && ! $empresa->tieneSuscripcionVigente())
+                    <p class="card-body text-14" role="status" wire:poll.3s>Estamos confirmando tu pago con Stripe. Tu plan se actualizará en unos segundos.</p>
+                @elseif ($pago === 'confirmando')
+                    <p class="card-body text-14" role="status">Pago confirmado: tu empresa ya tiene el plan {{ $empresa->plan->etiqueta() }}.</p>
+                @elseif ($pago === 'cancelado')
+                    <p class="card-body text-14" role="status">No se completó el pago: tu plan no cambió y no se hizo ningún cobro.</p>
+                @endif
+                @if ($empresa->tieneSuscripcionVigente())
+                    <p class="card-body text-14">
+                        @if ($empresa->suscripcion_estado === \App\Enums\EstadoSuscripcion::PagoPendiente)
+                            <span class="text-accent-2-700">No pudimos cobrar la última cuota de tu plan.</span> Actualiza tu tarjeta en «Gestionar suscripción»: volveremos a intentarlo y, si no se completa el pago, pasarás al plan Gratis.
+                        @elseif ($empresa->suscripcion_cancela_al_final && $empresa->suscripcion_renueva_at)
+                            Cancelaste tu suscripción: tendrás el plan {{ $empresa->plan->etiqueta() }} hasta el {{ \App\Support\Formato::fechaCorta($empresa->suscripcion_renueva_at) }} y después pasarás al plan Gratis, sin perder nada de lo que tengas.
+                        @else
+                            Pagas {{ $empresa->suscripcion_periodicidad?->importe($empresa->plan) }} más IGV con tarjeta.
+                            @if ($empresa->suscripcion_renueva_at)
+                                Se renueva el {{ \App\Support\Formato::fechaCorta($empresa->suscripcion_renueva_at) }}.
+                            @endif
+                        @endif
+                    </p>
+                @endif
                 @if ($empresa->enPrueba())
                     <p class="card-body text-14">
                         Tu prueba del plan {{ $uso->plan->etiqueta() }} termina el {{ \App\Support\Formato::fechaCorta($empresa->prueba_hasta) }}
@@ -79,8 +101,19 @@
                     @can('solicitarPlan', $empresa)
                         <x-ui.button size="sm" wire:click="abrirPlanes">Ver planes y precios</x-ui.button>
                     @endcan
+                    {{-- También sin suscripción en curso: el portal guarda las facturas de las anteriores. --}}
+                    @if ($cobroEnLinea && $empresa->pasarela_cliente_id)
+                        @can('pagarPlan', $empresa)
+                            <x-ui.button size="sm" variant="ghost" wire:click="gestionarSuscripcion" wire:loading.attr="disabled">Gestionar suscripción</x-ui.button>
+                        @endcan
+                    @endif
                     <x-ui.action-message on="plan-solicitado">Solicitud enviada.</x-ui.action-message>
                 </div>
+                @error('plan')
+                    @unless ($mostrarPlanes)
+                        <p class="field-error m-0 text-14" role="alert">{{ $message }}</p>
+                    @endunless
+                @enderror
             </x-ui.card>
 
             <x-ui.card kicker="Datos de la empresa" :title="$empresa->nombre">
@@ -100,14 +133,18 @@
         </div>
     </div>
 
-    {{-- Planes: precios y «Solicitar plan» (sin pasarela de pago todavía: lo aplica el admin SaaS). --}}
+    {{-- Planes: precios y pago en línea (Stripe) o, sin pasarela y para Enterprise, «Solicitar plan» (lo aplica el admin SaaS). --}}
     <x-ui.dialog wire:model="mostrarPlanes" title="Planes y precios" ancho="1180px" max-width="1180px">
         <div class="grid gap-3">
-            <p class="m-0">Pagas por vacantes activas, no por usuario. Precios en soles, más IGV. Al solicitar un plan, el equipo de TalentCloud te escribe para coordinar el pago y lo aplica.</p>
+            @if ($cobroEnLinea)
+                <p class="m-0">Pagas por vacantes activas, no por usuario. Precios en soles, más IGV (18 %). Starter y Pro se pagan con tarjeta en la página segura de Stripe, cada mes o cada año, y se renuevan solos hasta que canceles. Si pagas durante la prueba, la prueba termina ese día. Enterprise se cotiza: al solicitarlo, el equipo de TalentCloud te escribe.</p>
+            @else
+                <p class="m-0">Pagas por vacantes activas, no por usuario. Precios en soles, más IGV. Al solicitar un plan, el equipo de TalentCloud te escribe para coordinar el pago y lo aplica.</p>
+            @endif
             @error('plan')
                 <p class="field-error m-0 text-14" role="alert">{{ $message }}</p>
             @enderror
-            <x-planes.tabla :empresa="$empresa" />
+            <x-planes.tabla :empresa="$empresa" :cobro="$cobroEnLinea" />
         </div>
         <x-slot:actions>
             <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
@@ -120,7 +157,7 @@
             <p class="m-0">Se enviará una invitación por correo para unirse a {{ $empresa->nombre }}.</p>
             @if ($uso->usuariosAlLimite())
                 {{-- Reenviar a un correo con invitación pendiente sí se permite: no se bloquea el formulario. --}}
-                <p class="m-0 text-14 text-accent-2-700">Tu plan {{ $uso->plan->etiqueta() }} ya tiene sus {{ $uso->limiteUsuarios() }} lugares ocupados, contando las invitaciones pendientes. Para invitar a alguien nuevo, revoca una invitación, desactiva un usuario o solicita un cambio de plan.</p>
+                <p class="m-0 text-14 text-accent-2-700">Tu plan {{ $uso->plan->etiqueta() }} ya tiene sus {{ $uso->limiteUsuarios() }} lugares ocupados, contando las invitaciones pendientes. Para invitar a alguien nuevo, revoca una invitación, desactiva un usuario o cambia de plan en Mi empresa.</p>
             @endif
             <x-ui.field label="Nombre" for="invitado-nombre" error="invitadoNombre">
                 <x-ui.input wire:model="invitadoNombre" id="invitado-nombre" placeholder="Nombre y apellido" error="invitadoNombre" />

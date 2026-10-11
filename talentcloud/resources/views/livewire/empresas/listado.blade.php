@@ -29,6 +29,9 @@
                         @if ($empresa->plan_solicitado)
                             <x-ui.tag tone="accent-2" class="ml-1">Pide {{ $empresa->plan_solicitado->etiqueta() }}</x-ui.tag>
                         @endif
+                        @if ($empresa->tieneSuscripcionVigente())
+                            <x-ui.tag :tone="$empresa->suscripcion_estado->tono()" class="ml-1">Tarjeta · {{ $empresa->suscripcion_estado->etiqueta() }}</x-ui.tag>
+                        @endif
                     </td>
                     <td>{{ $empresa->usuarios_count }}</td>
                     <td>{{ $empresa->vacantes_activas_count }}</td>
@@ -50,6 +53,8 @@
         @if ($seleccionada)
             <p class="m-0 whitespace-pre-line">Plan: {{ $seleccionada->etiquetaDelPlan() }}{{ $seleccionada->enPrueba() ? ' hasta el '.\App\Support\Formato::fechaCorta($seleccionada->prueba_hasta).'; después, Gratis' : '' }}
 @if ($seleccionada->plan_solicitado)Solicitud: plan {{ $seleccionada->plan_solicitado->etiqueta() }}, el {{ \App\Support\Formato::fechaCorta($seleccionada->plan_solicitado_at) }}
+@endif
+@if ($seleccionada->tieneSuscripcionVigente())Pago con tarjeta: {{ $seleccionada->suscripcion_periodicidad?->importe($seleccionada->plan) }} más IGV, {{ mb_strtolower($seleccionada->suscripcion_estado->etiqueta()) }}{{ $seleccionada->suscripcion_renueva_at ? ($seleccionada->suscripcion_cancela_al_final ? '; cancelada, termina el ' : '; se renueva el ').\App\Support\Formato::fechaCorta($seleccionada->suscripcion_renueva_at) : '' }}
 @endif
 Usuarios: {{ $seleccionada->usuarios_count }}
 Vacantes activas: {{ $seleccionada->vacantes_activas_count }}
@@ -81,8 +86,11 @@ Estado: {{ $seleccionada->estado->etiqueta() }}</p>
         <x-slot:actions>
             <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
             @if ($seleccionada)
+                {{-- Un plan pagado con tarjeta lo cambia la empresa en su suscripción (CambiarPlanEmpresa lo impide). --}}
                 @can('cambiarPlan', $seleccionada)
-                    <x-ui.button variant="primary" wire:click="abrirCambioDePlan({{ $seleccionada->id }})">Cambiar plan</x-ui.button>
+                    @unless ($seleccionada->tieneSuscripcionVigente())
+                        <x-ui.button variant="primary" wire:click="abrirCambioDePlan({{ $seleccionada->id }})">Cambiar plan</x-ui.button>
+                    @endunless
                 @endcan
             @endif
         </x-slot:actions>

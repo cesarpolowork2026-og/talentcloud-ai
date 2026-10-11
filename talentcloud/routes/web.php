@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AvisoDePagoController;
 use App\Http\Controllers\DescargarCvController;
 use App\Http\Controllers\DescargarMisDatosController;
 use App\Http\Controllers\PostularDesdeEmpleosController;
@@ -19,6 +20,7 @@ use App\Livewire\Plataforma;
 use App\Livewire\Postulante;
 use App\Livewire\Reclamaciones;
 use App\Livewire\Vacantes;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -47,6 +49,11 @@ Route::get('terminos', Legal\Terminos::class)->name('terminos');
 
 // Libro de Reclamaciones virtual (Ley 29571): público; las hojas las atiende el admin SaaS en /reclamaciones.
 Route::get('libro-de-reclamaciones', Reclamaciones\Formulario::class)->name('reclamaciones.crear');
+
+// Avisos de la pasarela de pago (Stripe): sin sesión ni CSRF, autenticados por su firma.
+Route::post('stripe/webhook', AvisoDePagoController::class)
+    ->withoutMiddleware(ValidateCsrfToken::class)
+    ->name('pagos.aviso');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Personal de selección: admin SaaS, empresa y reclutador.

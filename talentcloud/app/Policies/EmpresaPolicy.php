@@ -52,6 +52,12 @@ class EmpresaPolicy
         return $user->tieneRol(Rol::Empresa) && $this->esDeLaEmpresa($user, $empresa);
     }
 
+    /** Pagar un plan en línea y gestionar la suscripción: la cuenta de empresa, para la suya. */
+    public function pagarPlan(User $user, Empresa $empresa): bool
+    {
+        return $user->tieneRol(Rol::Empresa) && $this->esDeLaEmpresa($user, $empresa);
+    }
+
     /** Invitar reclutadores: la cuenta de empresa, a su propia empresa. */
     public function invitar(User $user, Empresa $empresa): bool
     {

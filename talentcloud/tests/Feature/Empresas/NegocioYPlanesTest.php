@@ -315,7 +315,7 @@ it('muestra el límite de vacantes en la pantalla de la vacante', function () {
     Livewire::test(DetalleVacante::class, ['vacante' => $borrador])
         ->call('cambiarEstado', EstadoVacante::Abierta->value)
         ->assertHasErrors('estado')
-        ->assertSee('Cierra una vacante o solicita un cambio de plan.');
+        ->assertSee('Cierra una vacante o cambia de plan en Mi empresa.');
 });
 
 it('bloquea la fila de la empresa al verificar el límite', function () {
