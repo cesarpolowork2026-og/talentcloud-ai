@@ -1,7 +1,7 @@
 """Experiencia: años declarados en el texto y puestos con su periodo ("Backend Developer — Acme (2020 – 2022)")."""
 
 import re
-from collections.abc import Iterable
+from collections.abc import Collection, Iterable, Sequence
 from dataclasses import dataclass
 from datetime import date
 
@@ -78,9 +78,15 @@ _PERIODO = re.compile(
     rf"\(?\s*{_mes('mes_desde')}(?P<desde>(?:19|20)\d{{2}})"
     rf"(?:\s*(?:-|–|—|a|al|hasta)\s*{_mes('mes_hasta')}(?P<hasta>(?:19|20)\d{{2}}|{_ACTUAL}))?\s*\)?"
 )
+# Lo que muchos CV escriben después del periodo y no cambia sus fechas: la duración ("(4 meses)",
+# "· 1 año y 2 meses", como en LinkedIn) o el estado de un estudio ("(previsto)", "(en curso)").
+_DURACION = rf"(?:{_NUMERO})\s+(?:anos?|mes(?:es)?)"
+_TRAS_EL_PERIODO = re.compile(
+    rf"\s*[·•|,-]?\s*\(?\s*(?:{_DURACION}(?:\s*(?:y|,)\s*{_DURACION})?|previst[oa]|en curso)\s*\)?[\s.]*$"
+)
 # Separadores entre cargo y organización, por prioridad ("Cargo — Empresa" antes que "Cargo en Empresa").
 _SEPARADORES = (re.compile(r"\s+[—–|@-]\s+"), re.compile(r",\s+"), re.compile(r"\s+(?:en|at)\s+"))
-_BORDES = " \t()[]|,.;:—–-"
+_BORDES = " \t()[]|,.;:—–-·•"
 _MAX_LARGO_CARGO = 160
 
 
@@ -118,8 +124,15 @@ def leer_puesto(linea: str, hoy: date) -> PuestoLeido | None:
     if len(linea) > _MAX_LARGO_CARGO:
         return None
     normal = normalizar_alineado(linea)
+    # Lo que sigue al periodo y no es parte de él ("(4 meses)") no impide reconocerlo al final de la línea.
+    sufijo = _TRAS_EL_PERIODO.search(normal)
+    fin_del_periodo = sufijo.start() if sufijo else len(normal)
     periodo = next(
-        (m for m in _PERIODO.finditer(normal) if m.start() == 0 or m.end() >= len(normal.rstrip(". "))),
+        (
+            m
+            for m in _PERIODO.finditer(normal, 0, fin_del_periodo)
+            if m.start() == 0 or m.end() >= len(normal[:fin_del_periodo].rstrip(". "))
+        ),
         None,
     )
     if periodo is None:
@@ -134,7 +147,8 @@ def leer_puesto(linea: str, hoy: date) -> PuestoLeido | None:
     elif texto_hasta.isdigit():
         hasta = int(texto_hasta)
         mes_hasta = _MESES.get(periodo["mes_hasta"] or "")
-        fin = _decimal(hasta, mes_hasta) if mes_hasta else float(hasta)
+        # Un mes final cuenta entero: "Mar. 2025 – Jul. 2025" son cinco meses, como los cuenta el CV.
+        fin = _decimal(hasta, mes_hasta) + 1 / 12 if mes_hasta else float(hasta)
     else:
         hasta = None
         fin = _decimal_de_fecha(hoy)
@@ -143,12 +157,24 @@ def leer_puesto(linea: str, hoy: date) -> PuestoLeido | None:
     if fin < inicio or desde > hoy.year:
         return None
 
-    descripcion = (linea[: periodo.start()] + " " + linea[periodo.end() :]).strip(_BORDES)
+    descripcion = (linea[: periodo.start()] + " " + linea[periodo.end() : fin_del_periodo]).strip(_BORDES)
     if not descripcion:
         return None
 
     cargo, organizacion = _cargo_y_organizacion(descripcion)
     return PuestoLeido(cargo, organizacion, desde, hasta, Periodo(inicio, fin))
+
+
+def puestos_del_bloque(lineas: Sequence[str], vinetas: Collection[int], hoy: date) -> dict[int, PuestoLeido]:
+    """Los puestos de un bloque del CV, por posición de la línea.
+
+    Una viñeta que termina en un año ("• En 2024 superé la cuota" escrito como "• Superé la cuota en 2024")
+    es un logro, no un puesto: las viñetas solo cuentan si el bloque no tiene ningún puesto fuera de una
+    (hay CV que escriben también los puestos como viñetas).
+    """
+    leidos = {i: puesto for i, linea in enumerate(lineas) if (puesto := leer_puesto(linea, hoy))}
+    sin_vineta = {i: puesto for i, puesto in leidos.items() if i not in vinetas}
+    return sin_vineta or leidos
 
 
 def _cargo_y_organizacion(descripcion: str) -> tuple[str, str | None]:

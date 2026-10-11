@@ -95,6 +95,41 @@ def test_lee_puestos_y_experiencia_total(cv: Callable[[str], str], catalogo: lis
     assert analisis.cargos[0].evidencia == "Desarrollador Junior — Soluciones Web SAC (2024 – actualidad)"
 
 
+CV_CON_FECHAS_A_LA_DERECHA = """Rosa Quispe Lazo
+Ingeniera de Software
++51 900 000 001 · rosa.quispe@correo.com · Lima
+
+PERFIL PROFESIONAL
+Desarrolladora con experiencia en servicios backend.
+
+EXPERIENCIA PROFESIONAL
+Desarrolladora Backend | Andes Pagos S.A.C.\tEne. 2024 – May. 2026 (2 años y 5 meses)
+●\tDiseñé APIs con Java y Spring Boot para pagos con tarjeta.
+●\tReduje el tiempo de respuesta en 40 % durante 2025
+Practicante de Sistemas | Municipalidad Distrital\tMar. 2023 – Dic. 2023 (10 meses)
+●\tReportes con SQL para el área de rentas.
+
+PROYECTOS ACADÉMICOS Y PERSONALES
+●\tChatbot de atención con Python — proyecto del curso de IA.
+"""
+
+
+def test_lee_cv_con_fechas_a_la_derecha_duracion_y_vinetas(catalogo: list[CompetenciaCatalogo]) -> None:
+    analisis = analizar(CV_CON_FECHAS_A_LA_DERECHA, catalogo)
+
+    # Los dos puestos, con sus fechas, y ningún logro confundido con un puesto.
+    assert [(c.cargo, c.organizacion, c.desde, c.hasta) for c in analisis.cargos] == [
+        ("Desarrolladora Backend", "Andes Pagos S.A.C", 2024, 2026),
+        ("Practicante de Sistemas", "Municipalidad Distrital", 2023, 2023),
+    ]
+    # La experiencia de cada competencia sale del puesto donde se usó.
+    assert por_nombre(analisis)["Java"].anios == pytest.approx(2.4, abs=0.05)
+    assert por_nombre(analisis)["SQL"].anios == pytest.approx(0.8, abs=0.05)
+    assert por_nombre(analisis)["Python"].seccion is SeccionCv.PROYECTOS
+    # El logro sigue siendo evidencia para el matching semántico.
+    assert "Reduje el tiempo de respuesta en 40 % durante 2025" in [f.texto for f in analisis.fragmentos]
+
+
 def test_toma_la_experiencia_del_perfil_si_no_hay_puestos_con_fechas(catalogo: list[CompetenciaCatalogo]) -> None:
     analisis = analizar("Perfil\nAnalista con 8 años de experiencia en SQL.", catalogo)
 

@@ -8,6 +8,8 @@ import re
 import unicodedata
 
 _VINETAS = re.compile(r"^[\s•·▪●◦*\-–—]+")
+# Una línea que empieza con viñeta es un elemento de lista (un logro, una tarea), no un título.
+_EMPIEZA_CON_VINETA = re.compile(r"^\s*[•·▪●◦*\-–—]")
 _ESPACIOS = re.compile(r"\s+")
 # Fin de oración: . ; ! ? seguidos de espacio y una mayúscula o dígito (no parte "Node.js" ni "S.A.").
 _FIN_DE_ORACION = re.compile(r"(?<=[.;!?])\s+(?=[A-ZÁÉÍÓÚÑ0-9¿¡])")
@@ -44,7 +46,16 @@ def limpiar_linea(linea: str) -> str:
 
 def lineas(texto: str) -> list[str]:
     """Líneas no vacías del texto, ya limpias."""
-    return [limpia for linea in texto.splitlines() if (limpia := limpiar_linea(linea))]
+    return [limpia for limpia, _ in lineas_con_vineta(texto)]
+
+
+def lineas_con_vineta(texto: str) -> list[tuple[str, bool]]:
+    """Líneas no vacías del texto, ya limpias, indicando si empezaban con una viñeta."""
+    return [
+        (limpia, _EMPIEZA_CON_VINETA.match(linea) is not None)
+        for linea in texto.splitlines()
+        if (limpia := limpiar_linea(linea))
+    ]
 
 
 def oraciones(linea: str) -> list[str]:

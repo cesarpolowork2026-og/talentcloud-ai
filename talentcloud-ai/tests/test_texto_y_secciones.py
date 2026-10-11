@@ -53,6 +53,9 @@ def test_recorta_la_evidencia_sin_partir_palabras() -> None:
         ("Certificaciones", SeccionCv.CERTIFICACIONES),
         ("Datos personales", SeccionCv.DATOS_PERSONALES),
         ("Sobre mí", SeccionCv.PERFIL),
+        ("PROYECTOS ACADÉMICOS Y PERSONALES", SeccionCv.PROYECTOS),
+        ("Herramientas y tecnologías", SeccionCv.HABILIDADES),
+        ("Habilidades blandas", SeccionCv.HABILIDADES),
         ("Experiencia con Java en proyectos", None),
         ("Java, Spring Boot, Docker", None),
     ],
@@ -67,6 +70,13 @@ def test_segmenta_el_cv_y_deja_el_nombre_en_el_encabezado(cv: object) -> None:
     assert [b.nombre for b in bloques] == [SeccionCv.ENCABEZADO, SeccionCv.PERFIL, SeccionCv.EXPERIENCIA]
     assert bloques[0].lineas == ["Elena Ruiz", "elena@correo.com"]
     assert [b.orden for b in bloques] == [0, 1, 2]
+
+
+def test_recuerda_que_lineas_empezaban_con_vineta() -> None:
+    bloques = segmentar("Experiencia\nDev — Acme (2020 – 2022)\n• Superé la meta en 2021\n- Revisión de código")
+
+    assert bloques[0].lineas == ["Dev — Acme (2020 – 2022)", "Superé la meta en 2021", "Revisión de código"]
+    assert bloques[0].vinetas == {1, 2}
 
 
 def test_ignora_encabezados_sin_contenido() -> None:

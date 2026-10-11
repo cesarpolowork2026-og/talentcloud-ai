@@ -12,7 +12,7 @@ from datetime import date
 
 from talentcloud_ai.contrato.comun import SeccionCv
 from talentcloud_ai.contrato.cv import Fragmento
-from talentcloud_ai.extraccion.experiencia import leer_puesto
+from talentcloud_ai.extraccion.experiencia import puestos_del_bloque
 from talentcloud_ai.extraccion.privacidad import es_dato_personal
 from talentcloud_ai.extraccion.secciones import BloqueDeSeccion
 from talentcloud_ai.extraccion.texto import oraciones
@@ -44,14 +44,15 @@ def _cortar(texto: str) -> Iterator[str]:
 
 
 def construir(
-    bloques: Iterable[BloqueDeSeccion], excluir: Callable[[BloqueDeSeccion, str], bool] | None = None
+    bloques: Iterable[BloqueDeSeccion], excluir: Callable[[BloqueDeSeccion, int], bool] | None = None
 ) -> list[Fragmento]:
+    """Fragmentos del CV; `excluir` recibe el bloque y la posición de cada línea."""
     fragmentos: list[Fragmento] = []
     for bloque in bloques:
         if bloque.nombre in SECCIONES_PERSONALES:
             continue
-        for linea in bloque.lineas:
-            if es_dato_personal(linea) or (excluir is not None and excluir(bloque, linea)):
+        for indice, linea in enumerate(bloque.lineas):
+            if es_dato_personal(linea) or (excluir is not None and excluir(bloque, indice)):
                 continue
             for texto in unidades(linea):
                 fragmentos.append(Fragmento(seccion=bloque.nombre, orden=len(fragmentos), texto=texto))
@@ -65,7 +66,9 @@ def descriptivos(bloques: Iterable[BloqueDeSeccion], hoy: date) -> list[Fragment
     formación: son títulos genéricos que se parecen a casi cualquier requisito sin demostrarlo. Siguen
     contando para la coincidencia exacta (años por puesto) y se guardan en Laravel como el resto.
     """
+    bloques = list(bloques)
+    puestos = {bloque.orden: puestos_del_bloque(bloque.lineas, bloque.vinetas, hoy) for bloque in bloques}
     return construir(
         bloques,
-        excluir=lambda bloque, linea: bloque.nombre is SeccionCv.EDUCACION or leer_puesto(linea, hoy) is not None,
+        excluir=lambda bloque, indice: bloque.nombre is SeccionCv.EDUCACION or indice in puestos[bloque.orden],
     )

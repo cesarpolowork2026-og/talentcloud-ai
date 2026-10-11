@@ -52,6 +52,15 @@ Multietapa con `uv sync --frozen` (dependencias en su propia capa), PyTorch CPU,
 | POST | `/requisitos/embeddings` | Vectores normalizados de los textos de los requisitos. |
 | POST | `/matching/evaluar` | `MatchInput` → `MatchResult`: porcentaje, nivel, evidencia y motivo por requisito; puntaje ponderado y resumen. |
 
+### Cómo lee la experiencia
+
+Los años de una competencia salen de los puestos donde se usó (o de "N años de experiencia con…" junto a ella).
+Un puesto es una línea de la sección de experiencia con su periodo al principio o al final, en los formatos
+habituales: "Cargo — Empresa (2020 – 2022)", "Cargo | Empresa ⇥ Mar. 2025 – Jul. 2025 (5 meses)" (fechas
+alineadas a la derecha y duración), "Cargo — Empresa · ene. 2022 - actualidad · 4 años y 8 meses" (LinkedIn).
+El mes final cuenta entero. Las líneas con viñeta son logros, no puestos ("• Superé la cuota en 2024"), salvo
+que el CV escriba también sus puestos con viñetas.
+
 ## Matching
 
 Por requisito, `matching/calificacion.py` decide con este orden de confianza:

@@ -8,7 +8,13 @@ from talentcloud_ai.contrato.comun import SeccionCv
 from talentcloud_ai.contrato.cv import AnalisisCv, Cargo, CompetenciaCatalogo, CompetenciaDetectada, Seccion
 from talentcloud_ai.extraccion import certificaciones, fragmentos
 from talentcloud_ai.extraccion.competencias import DetectorDeCompetencias, es_mencion_dudosa
-from talentcloud_ai.extraccion.experiencia import Periodo, anios_cerca_de, anios_declarados, anios_totales, leer_puesto
+from talentcloud_ai.extraccion.experiencia import (
+    Periodo,
+    anios_cerca_de,
+    anios_declarados,
+    anios_totales,
+    puestos_del_bloque,
+)
 from talentcloud_ai.extraccion.secciones import BloqueDeSeccion, segmentar
 from talentcloud_ai.extraccion.texto import normalizar_alineado, oraciones, recortar
 
@@ -88,8 +94,13 @@ class AnalizadorDeCv:
             if bloque.nombre in _SIN_ANALIZAR:
                 continue
             periodo_actual: Periodo | None = None
-            for linea in bloque.lineas:
-                if bloque.nombre is SeccionCv.EXPERIENCIA and (puesto := leer_puesto(linea, self._hoy)):
+            puestos = (
+                puestos_del_bloque(bloque.lineas, bloque.vinetas, self._hoy)
+                if bloque.nombre is SeccionCv.EXPERIENCIA
+                else {}
+            )
+            for indice, linea in enumerate(bloque.lineas):
+                if puesto := puestos.get(indice):
                     periodo_actual = puesto.periodo
                     periodos.append(puesto.periodo)
                     cargos.append(

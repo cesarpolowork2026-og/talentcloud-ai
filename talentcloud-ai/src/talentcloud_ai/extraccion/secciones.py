@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass, field
 
 from talentcloud_ai.contrato.comun import SeccionCv
-from talentcloud_ai.extraccion.texto import lineas, normalizar
+from talentcloud_ai.extraccion.texto import lineas_con_vineta, normalizar
 
 # Un encabezado es una línea corta que coincide por completo con uno de estos patrones (normalizados).
 _ENCABEZADOS: dict[SeccionCv, str] = {
@@ -12,12 +12,13 @@ _ENCABEZADOS: dict[SeccionCv, str] = {
     SeccionCv.EXPERIENCIA: r"experiencia( laboral| profesional)?|trayectoria( profesional| laboral)?|historial laboral",
     SeccionCv.EDUCACION: r"educacion|formacion( academica| profesional)?|estudios",
     SeccionCv.HABILIDADES: (
-        r"habilidades( tecnicas)?|competencias( tecnicas)?|conocimientos( tecnicos)?|skills|tecnologias"
-        r"|herramientas|stack( tecnologico)?|aptitudes"
+        r"habilidades( tecnicas| blandas)?|competencias( tecnicas)?|conocimientos( tecnicos)?|skills"
+        r"|tecnologias( y herramientas)?|herramientas( y tecnologias)?|habilidades y herramientas"
+        r"|stack( tecnologico)?|aptitudes"
     ),
     SeccionCv.CERTIFICACIONES: r"certificaciones( y cursos)?|certificados|cursos( y certificaciones)?",
     SeccionCv.IDIOMAS: r"idiomas|lenguas",
-    SeccionCv.PROYECTOS: r"proyectos( destacados| personales)?",
+    SeccionCv.PROYECTOS: r"proyectos( destacados| personales| academicos)?( y (personales|academicos|profesionales))?",
     SeccionCv.INTERESES: r"intereses|aficiones|hobbies",
     SeccionCv.DATOS_PERSONALES: r"datos personales|informacion personal|(datos de )?contacto",
     SeccionCv.REFERENCIAS: r"referencias( laborales| personales)?",
@@ -35,6 +36,13 @@ class BloqueDeSeccion:
     titulo: str | None
     orden: int
     lineas: list[str] = field(default_factory=list)
+    # Posiciones (en `lineas`) de las que empezaban con viñeta: logros y tareas, no títulos de puesto.
+    vinetas: set[int] = field(default_factory=set)
+
+    def agregar(self, linea: str, es_vineta: bool) -> None:
+        if es_vineta:
+            self.vinetas.add(len(self.lineas))
+        self.lineas.append(linea)
 
     @property
     def texto(self) -> str:
@@ -57,10 +65,11 @@ def segmentar(texto: str) -> list[BloqueDeSeccion]:
     bloques: list[BloqueDeSeccion] = []
     actual = BloqueDeSeccion(SeccionCv.ENCABEZADO, None, 0)
 
-    for linea in lineas(texto):
+    todas = lineas_con_vineta(texto)
+    for linea, es_vineta in todas:
         seccion = tipo_de_encabezado(linea)
         if seccion is None:
-            actual.lineas.append(linea)
+            actual.agregar(linea, es_vineta)
             continue
         if actual.lineas:
             bloques.append(actual)
@@ -70,7 +79,7 @@ def segmentar(texto: str) -> list[BloqueDeSeccion]:
         bloques.append(actual)
 
     if len(bloques) == 1 and bloques[0].nombre is SeccionCv.ENCABEZADO:
-        bloques = _sin_encabezados(bloques[0].lineas)
+        bloques = _sin_encabezados(todas)
 
     # Reenumera por si hubo encabezados sin contenido.
     for orden, bloque in enumerate(bloques):
@@ -78,13 +87,23 @@ def segmentar(texto: str) -> list[BloqueDeSeccion]:
     return bloques
 
 
-def _sin_encabezados(todas: list[str]) -> list[BloqueDeSeccion]:
+def _sin_encabezados(todas: list[tuple[str, bool]]) -> list[BloqueDeSeccion]:
     """Sin ningún encabezado de sección, el resto del CV no puede quedar como "encabezado" (se excluiría entero)."""
     cantidad = 0
     while (
         cantidad < min(_MAX_LINEAS_DE_ENCABEZADO, len(todas) - 1)
-        and len(todas[cantidad]) <= _MAX_LARGO_LINEA_DE_ENCABEZADO
+        and len(todas[cantidad][0]) <= _MAX_LARGO_LINEA_DE_ENCABEZADO
     ):
         cantidad += 1
-    bloques = [BloqueDeSeccion(SeccionCv.ENCABEZADO, None, 0, todas[:cantidad])] if cantidad else []
-    return [*bloques, BloqueDeSeccion(SeccionCv.OTROS, None, len(bloques), todas[cantidad:])]
+
+    bloques: list[BloqueDeSeccion] = []
+    if cantidad:
+        bloques.append(_bloque(SeccionCv.ENCABEZADO, 0, todas[:cantidad]))
+    return [*bloques, _bloque(SeccionCv.OTROS, len(bloques), todas[cantidad:])]
+
+
+def _bloque(nombre: SeccionCv, orden: int, lineas: list[tuple[str, bool]]) -> BloqueDeSeccion:
+    bloque = BloqueDeSeccion(nombre, None, orden)
+    for linea, es_vineta in lineas:
+        bloque.agregar(linea, es_vineta)
+    return bloque
