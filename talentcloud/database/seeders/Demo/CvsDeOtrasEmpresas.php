@@ -4,10 +4,15 @@ namespace Database\Seeders\Demo;
 
 /**
  * CV de demostración de las empresas que no son de tecnología (Brío Retail, Ruta Sur
- * Logística, Nuna Salud y Altura Café). Personas y textos ficticios. Cada vacante tiene
+ * Logística, Nuna Salud y Altura Café). Personas, empresas, teléfonos y textos son
+ * ficticios. Están escritos como CV reales (contacto, perfil, puestos con mes y año,
+ * logros con cifras, formación, cursos, idiomas y referencias) y cada vacante tiene
  * candidatos fuertes y débiles, para que el matching muestre de todo: coincidencias con
  * años, menciones dudosas ("interés en aprender", "nociones") y requisitos no encontrados.
- * Se separan de CvsDeDemostracion, cuyos textos replica la evaluación del servicio de IA.
+ *
+ * Convenciones que el lector de CV espera: el puesto y su periodo van en una sola línea
+ * ("Cargo — Empresa | Mar 2021 – Actualidad"), los logros empiezan con "•" y los títulos
+ * de sección son los habituales. Los años del perfil están calculados para 2026.
  */
 class CvsDeOtrasEmpresas
 {
@@ -15,324 +20,452 @@ class CvsDeOtrasEmpresas
     public const CVS = [
         // — Brío Retail · Ejecutivo Comercial B2B —
         'carla.mendoza@correo.com' => ['archivo' => 'CV_CarlaMendoza.pdf', 'texto' => <<<'TXT'
-Carla Mendoza
-Ejecutiva Comercial B2B · Lima · carla.mendoza@correo.com
+Carla Mendoza Salas
+Ejecutiva Comercial B2B
++51 987 214 563 · carla.mendoza@correo.com · San Borja, Lima
 
-Perfil
-Ejecutiva con 7 años de experiencia en ventas consultivas a empresas, enfocada en relaciones de largo plazo.
+Perfil profesional
+Ejecutiva comercial con 7 años de experiencia en ventas consultivas a empresas de consumo masivo y retail. Construyo relaciones de largo plazo con las áreas de compras y cierro contratos anuales cuidando el margen.
 
-Experiencia
-Ejecutiva de Cuentas Corporativas — Distribuidora Andina (2021 – actualidad)
-Gestioné una cartera de 60 clientes corporativos con ventas B2B y superé la cuota anual tres años seguidos.
-Lideré la negociación comercial de contratos marco con cadenas de supermercados.
-Registré oportunidades y seguimiento de clientes en Salesforce.
+Experiencia laboral
+Ejecutiva de Cuentas Corporativas — Distribuidora Andina S.A.C. | Mar 2021 – Actualidad
+• Gestiono una cartera de 60 clientes corporativos con ventas B2B y superé la cuota anual tres años seguidos (hasta 118 %).
+• Lideré la negociación comercial de contratos marco con dos cadenas de supermercados por S/ 4,2 millones al año.
+• Registro oportunidades, visitas y pronósticos de venta en Salesforce; mi pipeline es la base del forecast mensual del área.
+• Capacité a tres ejecutivos nuevos en el proceso de venta consultiva de la empresa.
 
-Asesora Comercial — Grupo Textil Lima (2019 – 2021)
-Venta consultiva de uniformes corporativos; reportes semanales con Excel avanzado (tablas dinámicas).
+Asesora Comercial Corporativa — Grupo Textil Lima S.A. | Feb 2019 – Feb 2021
+• Venta consultiva de uniformes corporativos a empresas industriales y de servicios.
+• Abrí 25 cuentas nuevas en Lima Norte y Callao en dos años.
+• Preparé reportes semanales de ventas con Excel avanzado (tablas dinámicas y BUSCARV).
 
-Formación
-Administración de Empresas — Universidad de Lima.
+Formación académica
+Bachiller en Administración de Empresas — Universidad de Lima | 2013 – 2018
 
-Habilidades
-Ventas consultivas, negociación, Salesforce, Excel avanzado, comunicación.
+Cursos y certificaciones
+Programa de Ventas Consultivas B2B — ESAN Graduate School of Business (2022)
+Negociación efectiva — Centrum PUCP (2020)
+
+Idiomas
+Inglés — intermedio (B1)
+
+Herramientas
+Salesforce, Excel avanzado, Power BI (reportes), Microsoft Teams
+
+Referencias
+Disponibles a solicitud.
 TXT],
         'renzo.paredes@correo.com' => ['archivo' => 'CV_RenzoParedes.docx', 'texto' => <<<'TXT'
-Renzo Paredes
-Vendedor de tienda · Lima · renzo.paredes@correo.com
+Renzo Paredes Gómez
+Vendedor de tienda
++51 954 330 182 · renzo.paredes@correo.com · Los Olivos, Lima
 
 Perfil
-Vendedor con 5 años de experiencia en tiendas por departamento, orientado a metas diarias.
+Vendedor con 5 años de experiencia en tiendas por departamento y retail de electrodomésticos. Me motivan las metas diarias y el trato directo con el público.
 
-Experiencia
-Vendedor — Tiendas Moda Total (2022 – actualidad)
-Atención al cliente en piso de venta y manejo de caja.
-Cumplimiento de metas mensuales de venta de la tienda.
+Experiencia laboral
+Vendedor — Tiendas Moda Total S.A.C. | Ago 2022 – Actualidad
+• Atención al cliente en piso de venta, cambios y devoluciones.
+• En 2024 fui vendedor del mes en cuatro ocasiones.
+• Manejo de caja y cuadre al cierre del turno.
 
-Promotor de ventas — Electro Hogar (2021 – 2022)
-Demostraciones de productos en módulos de centros comerciales.
+Promotor de Ventas — Electro Hogar Perú S.A. | Abr 2021 – Jul 2022
+• Demostraciones de productos en módulos de centros comerciales.
+• Cumplimiento de la meta mensual de unidades vendidas en 14 de 16 meses.
 
-Formación
-Técnico en Administración — Instituto San Ignacio de Loyola.
+Formación académica
+Técnico en Administración de Negocios — Instituto San Ignacio de Loyola | 2018 – 2021
+
+Idiomas
+Inglés — básico
 
 Habilidades
-Atención al cliente, trabajo en equipo, manejo de caja.
+Trabajo en equipo, manejo de caja, Microsoft Office.
 TXT],
         'milagros.huaman@correo.com' => ['archivo' => 'CV_MilagrosHuaman.pdf', 'texto' => <<<'TXT'
-Milagros Huamán
-Asesora Comercial · Lima · milagros.huaman@correo.com
+Milagros Huamán Ríos
+Asesora Comercial B2B
++51 962 418 905 · milagros.huaman@correo.com · Surquillo, Lima
 
-Perfil
-Asesora comercial con 3 años de experiencia en ventas B2B de servicios de limpieza industrial.
+Perfil profesional
+Asesora comercial con 3 años de experiencia en ventas B2B de servicios para empresas. Organizada, constante en el seguimiento y orientada a cerrar contratos de renovación anual.
 
-Experiencia
-Asesora Comercial — Servicios Integrales del Sur (2023 – actualidad)
-Prospecté y cerré contratos con pequeñas y medianas empresas mediante venta consultiva.
-Participé en la negociación de renovaciones anuales.
+Experiencia laboral
+Asesora Comercial — Servicios Integrales del Sur S.A.C. | Ene 2023 – Actualidad
+• Prospecto y cierro contratos de limpieza industrial con pymes mediante venta consultiva.
+• Participo en la negociación de renovaciones anuales; en 2025 renovamos el 85 % de la cartera.
+• Elaboro propuestas económicas y presentaciones para comités de compra.
 
-Formación
-Marketing — Universidad San Martín de Porres.
+Formación académica
+Bachiller en Marketing — Universidad de San Martín de Porres | 2017 – 2022
 
-Habilidades
-Ventas B2B, prospección, comunicación.
+Cursos y certificaciones
+Técnicas de prospección comercial — Cámara de Comercio de Lima (2023)
+
+Idiomas
+Inglés — intermedio
+
+Herramientas
+Excel, PowerPoint, Google Workspace
+
+Referencias
+Disponibles a solicitud.
 TXT],
         'diego.salazar@correo.com' => ['archivo' => 'CV_DiegoSalazar.docx', 'texto' => <<<'TXT'
-Diego Salazar
-Practicante Comercial · Lima · diego.salazar@correo.com
+Diego Salazar Vega
+Egresado de Administración
++51 945 667 210 · diego.salazar@correo.com · Jesús María, Lima
 
 Perfil
-Egresado de Administración con 1 año de prácticas en el área comercial.
+Egresado de Administración con un año de prácticas en el área comercial de una importadora. Busco mi primer empleo como ejecutivo de ventas.
 
-Experiencia
-Practicante Comercial — Importadora del Pacífico (2024 – 2025)
-Elaboré cotizaciones y reportes de ventas con Excel avanzado.
-Apoyé a los ejecutivos en la preparación de visitas a clientes.
+Formación académica
+Bachiller en Administración — Universidad Ricardo Palma | 2019 – 2024
 
-Formación
-Administración — Universidad Ricardo Palma.
+Experiencia laboral
+Practicante Comercial — Importadora del Pacífico S.A.C. | Mar 2024 – Mar 2025
+• Elaboré cotizaciones y reportes de ventas semanales con Excel avanzado.
+• Apoyé a los ejecutivos en la preparación de visitas y en el seguimiento de pedidos.
 
-Habilidades
-Excel avanzado, organización.
+Cursos y certificaciones
+Excel avanzado para negocios — Cibertec (2023)
+
+Idiomas
+Inglés — intermedio
 
 Intereses
-CRM (interés en aprender Salesforce).
+CRM (interés en aprender Salesforce) y ventas a empresas.
 TXT],
         'andrea.villanueva@correo.com' => ['archivo' => 'CV_AndreaVillanueva.pdf', 'texto' => <<<'TXT'
-Andrea Villanueva
-Ejecutiva de Cuentas · Lima · andrea.villanueva@correo.com
+Andrea Villanueva Torres
+Ejecutiva de Cuentas · Software para empresas
++51 981 552 047 · andrea.villanueva@correo.com · Miraflores, Lima
 
-Perfil
-Ejecutiva con 4 años de experiencia en ventas B2B de software para empresas.
+Perfil profesional
+Ejecutiva con 4 años de experiencia en ventas B2B de software empresarial. Acompaño el ciclo completo: diagnóstico, demostración, propuesta y cierre.
 
-Experiencia
-Ejecutiva de Cuentas — Soluciones Digitales Perú (2022 – actualidad)
-Gestioné el ciclo completo de venta consultiva, desde la demostración hasta el cierre.
-Mantuve el pipeline de oportunidades actualizado en HubSpot.
-Negociación de precios y condiciones con gerencias de compras.
+Experiencia laboral
+Ejecutiva de Cuentas — Soluciones Digitales Perú S.A.C. | Jun 2022 – Actualidad
+• Gestiono el ciclo completo de venta consultiva de un ERP para medianas empresas; en 2025 cerré 38 contratos.
+• Mantengo el pipeline actualizado en HubSpot y reporto el forecast quincenal a la gerencia.
+• Negociación de precios y condiciones con gerencias de compras y de TI.
 
-Formación
-Ingeniería Industrial — Universidad Nacional de Ingeniería.
+Analista Comercial — Soluciones Digitales Perú S.A.C. | Ago 2021 – May 2022
+• Calificación de leads entrantes y agendamiento de demostraciones para el equipo de ventas.
 
-Habilidades
-Ventas B2B, HubSpot, negociación, inglés intermedio.
+Formación académica
+Ingeniera Industrial — Universidad Nacional de Ingeniería | 2015 – 2020
+
+Cursos y certificaciones
+HubSpot Sales Software Certification — HubSpot Academy (2023)
+
+Idiomas
+Inglés — avanzado (C1)
+
+Herramientas
+HubSpot, Excel, Google Workspace, Notion
+
+Referencias
+Disponibles a solicitud.
 TXT],
 
         // — Brío Retail · Analista de Marketing Digital —
         'valeria.castro@correo.com' => ['archivo' => 'CV_ValeriaCastro.docx', 'texto' => <<<'TXT'
-Valeria Castro
-Analista de Marketing Digital · Lima · valeria.castro@correo.com
+Valeria Castro Núñez
+Analista de Marketing Digital
++51 993 120 774 · valeria.castro@correo.com · Pueblo Libre, Lima
 
-Perfil
-Analista con 5 años de experiencia en marketing digital para retail y comercio electrónico.
+Perfil profesional
+Analista con 5 años de experiencia en marketing digital para retail y comercio electrónico. Planifico campañas con objetivos de negocio y mido cada sol invertido.
 
-Experiencia
-Analista de Marketing Digital — Mercado Express (2022 – actualidad)
-Gestioné campañas de Google Ads con un presupuesto mensual de 80 000 soles y mejoré el retorno un 30 %.
-Planifiqué campañas de Meta Ads para lanzamientos de temporada.
-Construí tableros de Google Analytics (GA4) para medir conversiones de la tienda online.
+Experiencia laboral
+Analista de Marketing Digital — Mercado Express S.A.C. | Ene 2022 – Actualidad
+• Gestiono campañas de Google Ads con un presupuesto mensual de S/ 80 000 y mejoré el retorno de la inversión en 30 %.
+• Planifico campañas de Meta Ads para campañas de temporada (Día de la Madre, Cyber Wow, Navidad).
+• Construí tableros de Google Analytics (GA4) y Looker Studio para medir conversiones de la tienda online.
+• Coordino con la agencia de contenidos y con el equipo comercial el calendario de promociones.
 
-Asistente de Marketing — Café Andino (2021 – 2022)
-Mejoré el posicionamiento web del blog con buenas prácticas de SEO.
+Asistente de Marketing — Café Andino S.A.C. | Mar 2021 – Dic 2021
+• Mejoré el posicionamiento web del blog con buenas prácticas de SEO: el tráfico orgánico creció 45 %.
+• Publicación de anuncios y reportes mensuales de redes sociales.
 
-Formación
-Ciencias de la Comunicación — Pontificia Universidad Católica del Perú.
+Formación académica
+Licenciada en Ciencias de la Comunicación — Pontificia Universidad Católica del Perú | 2015 – 2020
 
-Habilidades
-Marketing digital, Google Ads, Meta Ads, Google Analytics, SEO.
+Cursos y certificaciones
+Google Ads Search Certification — Google (2024)
+Google Analytics Certification — Google (2023)
+
+Idiomas
+Inglés — avanzado
+
+Herramientas
+Google Ads, Meta Business Suite, Google Analytics 4, Looker Studio, Excel
+
+Referencias
+Disponibles a solicitud.
 TXT],
         'sebastian.rios@correo.com' => ['archivo' => 'CV_SebastianRios.pdf', 'texto' => <<<'TXT'
-Sebastián Ríos
-Community Manager · Lima · sebastian.rios@correo.com
+Sebastián Ríos Paredes
+Community Manager
++51 970 645 318 · sebastian.rios@correo.com · Barranco, Lima
 
 Perfil
-Community manager con 4 años de experiencia en marketing digital para marcas de consumo.
+Community manager con 5 años de experiencia en marketing digital para marcas de consumo. Creativo, con buen manejo de comunidades y de pauta en redes sociales.
 
-Experiencia
-Community Manager — Agencia Pulso (2022 – actualidad)
-Administré las redes de seis marcas y sus campañas de Meta Ads e Instagram Ads.
-Elaboré calendarios de contenido y reportes mensuales de alcance.
+Experiencia laboral
+Community Manager — Agencia Pulso S.A.C. | Ene 2022 – Actualidad
+• Administro las redes de seis marcas de consumo masivo y sus campañas de Meta Ads e Instagram Ads.
+• Elaboro calendarios de contenido y reportes mensuales de alcance e interacción.
+• Una campaña de lanzamiento para una marca de snacks superó el millón de reproducciones orgánicas.
 
-Formación
-Marketing — Instituto Toulouse Lautrec.
+Asistente de Redes Sociales — Freelance | Mar 2021 – Dic 2021
+• Contenido y respuesta a comentarios para emprendimientos de moda y gastronomía.
 
-Habilidades
-Marketing digital, Meta Ads, redacción, fotografía.
+Formación académica
+Profesional técnico en Marketing — Instituto Toulouse Lautrec | 2018 – 2021
+
+Idiomas
+Inglés — intermedio
+
+Herramientas
+Meta Business Suite, Canva, CapCut, Adobe Lightroom
 
 Intereses
 SEO (nociones) y Google Ads (interés en aprender).
 TXT],
         'fiorella.campos@correo.com' => ['archivo' => 'CV_FiorellaCampos.docx', 'texto' => <<<'TXT'
-Fiorella Campos
-Diseñadora y Marketing · Lima · fiorella.campos@correo.com
+Fiorella Campos León
+Diseñadora gráfica
++51 948 772 603 · fiorella.campos@correo.com · San Miguel, Lima
 
 Perfil
-Diseñadora gráfica con 3 años de experiencia en marketing digital para emprendimientos.
+Diseñadora gráfica con 3 años de experiencia en piezas de marketing digital para emprendimientos y pequeñas marcas.
 
-Experiencia
-Diseñadora Freelance (2023 – actualidad)
-Diseño de piezas para campañas de marketing digital en Figma.
-Apoyo en la publicación de anuncios en redes sociales.
+Experiencia laboral
+Diseñadora Gráfica — Freelance | Feb 2023 – Actualidad
+• Diseño de piezas para campañas de marketing digital en Figma e Illustrator.
+• Apoyo en la publicación de anuncios en redes sociales de mis clientes.
+• Manuales de marca para ocho emprendimientos.
 
-Formación
-Diseño Gráfico — Instituto Toulouse Lautrec.
+Formación académica
+Profesional técnica en Diseño Gráfico — Instituto Toulouse Lautrec | 2019 – 2022
 
-Habilidades
-Figma, marketing digital, Illustrator.
+Idiomas
+Inglés — básico
+
+Herramientas
+Figma, Adobe Illustrator, Adobe Photoshop, Canva
 TXT],
         'joaquin.lara@correo.com' => ['archivo' => 'CV_JoaquinLara.pdf', 'texto' => <<<'TXT'
-Joaquín Lara
-Asistente de Marketing · Trujillo · joaquin.lara@correo.com
+Joaquín Lara Benavides
+Asistente de Marketing
++51 949 801 256 · joaquin.lara@correo.com · Trujillo, La Libertad
 
 Perfil
-Asistente de marketing con 4 años de experiencia en activaciones y material punto de venta.
+Asistente de marketing con 4 años de experiencia en activaciones y material para punto de venta en el norte del país.
 
-Experiencia
-Asistente de Marketing — Bebidas del Norte (2022 – actualidad)
-Coordiné activaciones BTL en supermercados y ferias.
-Gestioné proveedores de material impreso para las campañas.
+Experiencia laboral
+Asistente de Marketing — Bebidas del Norte S.A.C. | Feb 2022 – Actualidad
+• Coordino activaciones BTL en supermercados y ferias de Trujillo, Chiclayo y Piura.
+• Gestiono proveedores de material impreso y exhibidores para las campañas.
+• Controlo el presupuesto de las activaciones en hojas de cálculo.
 
-Formación
-Administración y Marketing — Universidad Privada Antenor Orrego.
+Formación académica
+Bachiller en Administración y Marketing — Universidad Privada Antenor Orrego | 2016 – 2021
+
+Idiomas
+Inglés — básico
 
 Habilidades
-Activaciones BTL, coordinación con proveedores.
+Activaciones BTL, coordinación con proveedores, licencia de conducir A-I.
 TXT],
 
         // — Brío Retail · Jefe de Tienda —
         'ricardo.flores@correo.com' => ['archivo' => 'CV_RicardoFlores.docx', 'texto' => <<<'TXT'
-Ricardo Flores
-Supervisor de Tienda · Arequipa · ricardo.flores@correo.com
+Ricardo Flores Zegarra
+Supervisor de Tienda · Retail
++51 959 263 418 · ricardo.flores@correo.com · Cayma, Arequipa
 
-Perfil
-Supervisor de tienda con 6 años de experiencia en retail de moda y calzado.
+Perfil profesional
+Supervisor de tienda con 6 años liderando equipos de venta y más de 8 años en retail de moda y calzado. Formo equipos comprometidos con la meta y cuido la operación de la tienda de punta a punta.
 
-Experiencia
-Supervisor de Tienda — Calzados Misti (2020 – actualidad)
-Liderazgo de un equipo de 14 vendedores y cumplimiento de metas de venta trimestrales.
-Control de inventarios semanal con mermas por debajo del 1 %.
-Mejoré la atención al cliente con un programa de capacitación interna.
-Armé exhibiciones de visual merchandising para cada temporada.
+Experiencia laboral
+Supervisor de Tienda — Calzados Misti S.A.C. | Abr 2020 – Actualidad
+• Liderazgo de un equipo de 14 vendedores en dos turnos; la tienda cumplió su meta trimestral en 9 de los últimos 10 trimestres.
+• Control de inventarios semanal con mermas por debajo del 1 % de la venta.
+• Implementé un programa de capacitación en atención al cliente que subió la satisfacción de 82 % a 91 %.
+• Armo las exhibiciones de visual merchandising de cada temporada con los lineamientos de la marca.
 
-Formación
-Administración de Empresas — Universidad Católica de Santa María.
+Vendedor Senior — Calzados Misti S.A.C. | Ene 2018 – Mar 2020
+• En 2019 tuve el mejor ticket promedio de la tienda.
 
-Habilidades
-Liderazgo de equipos, control de inventarios, atención al cliente, visual merchandising.
+Formación académica
+Bachiller en Administración de Empresas — Universidad Católica de Santa María | 2012 – 2017
+
+Cursos y certificaciones
+Gestión de tiendas retail — Centrum PUCP (2022)
+
+Idiomas
+Inglés — intermedio
+
+Herramientas
+Sistema de punto de venta, Excel, Google Sheets
+
+Referencias
+Disponibles a solicitud.
 TXT],
         'gianella.torres@correo.com' => ['archivo' => 'CV_GianellaTorres.pdf', 'texto' => <<<'TXT'
-Gianella Torres
-Subgerente de Tienda · Arequipa · gianella.torres@correo.com
+Gianella Torres Cáceres
+Subgerente de Tienda
++51 974 102 395 · gianella.torres@correo.com · Yanahuara, Arequipa
 
 Perfil
-Subgerente de tienda con 4 años de experiencia en tiendas de conveniencia.
+Subgerente de tienda con 4 años de experiencia en tiendas de conveniencia de alto tránsito.
 
-Experiencia
-Subgerente de Tienda — Mini Market 24 (2022 – actualidad)
-Gestión de equipos de turno y armado de horarios.
-Conteos de inventarios y pedidos a proveedores.
-Atención al cliente en horas punta.
+Experiencia laboral
+Subgerente de Tienda — Mini Market 24 S.A.C. | Mar 2022 – Actualidad
+• Gestión de equipos de turno (6 personas) y armado de horarios semanales.
+• Conteos de inventarios y pedidos semanales a proveedores.
+• Atención al cliente en horas punta y solución de reclamos en tienda.
 
-Formación
-Técnica en Administración — Instituto Superior Tecnológico Arequipa.
+Formación académica
+Profesional técnica en Administración — Instituto Superior Tecnológico Arequipa | 2018 – 2021
+
+Idiomas
+Inglés — básico
 
 Habilidades
-Gestión de equipos, inventarios, atención al cliente.
+Gestión de equipos, inventarios, atención al cliente, Excel intermedio.
 TXT],
         'hector.ramirez@correo.com' => ['archivo' => 'CV_HectorRamirez.docx', 'texto' => <<<'TXT'
-Héctor Ramírez
-Cajero · Arequipa · hector.ramirez@correo.com
+Héctor Ramírez Quispe
+Cajero
++51 958 446 721 · hector.ramirez@correo.com · Paucarpata, Arequipa
 
 Perfil
-Cajero con 2 años de experiencia en supermercados.
+Cajero con 2 años de experiencia en supermercados. Responsable, puntual y con buen trato al público.
 
-Experiencia
-Cajero — Supermercados Sur (2024 – actualidad)
-Atención al cliente en caja y cuadre de efectivo al cierre del turno.
+Experiencia laboral
+Cajero — Supermercados Sur S.A. | Jun 2024 – Actualidad
+• Atención al cliente en caja y cuadre de efectivo al cierre del turno sin diferencias.
 
-Formación
-Secundaria completa; curso de Excel básico.
+Formación académica
+Secundaria completa — I.E. Independencia Americana | 2019 – 2023
 
-Habilidades
-Atención al cliente, manejo de caja.
+Cursos y certificaciones
+Excel básico — SENATI (2024)
 TXT],
 
         // — Brío Retail · Desarrollador Frontend —
         'camila.ortiz@correo.com' => ['archivo' => 'CV_CamilaOrtiz.pdf', 'texto' => <<<'TXT'
-Camila Ortiz
-Desarrolladora Frontend · Lima · camila.ortiz@correo.com
+Camila Ortiz Medina
+Desarrolladora Frontend
++51 986 731 402 · camila.ortiz@correo.com · Santiago de Surco, Lima
 
-Perfil
-Desarrolladora frontend con 5 años de experiencia con React y TypeScript en comercio electrónico.
+Perfil profesional
+Desarrolladora frontend con 5 años de experiencia con React y TypeScript en comercio electrónico. Me importan el rendimiento, la accesibilidad y el trabajo cercano con diseño.
 
-Experiencia
-Frontend Developer — Tienda Click (2022 – actualidad)
-Desarrollé la tienda online con React y TypeScript, con más de 200 000 visitas al mes.
-Construí una librería de componentes accesibles en JavaScript a partir de los diseños en Figma.
-Revisión de código y flujo de ramas en Git.
+Experiencia laboral
+Frontend Developer — Tienda Click S.A.C. | Feb 2022 – Actualidad
+• Desarrollé la tienda online con React y TypeScript, con más de 200 000 visitas al mes.
+• Construí una librería de componentes accesibles en JavaScript a partir de los diseños en Figma.
+• Reduje el tiempo de carga del catálogo de 4,1 s a 1,6 s con carga diferida de imágenes.
+• Revisión de código y flujo de ramas en Git con integración continua.
 
-Frontend Developer Jr. — Agencia Pixel (2021 – 2022)
-Sitios web con JavaScript y React para clientes de retail.
+Frontend Developer Junior — Agencia Pixel S.A.C. | Mar 2021 – Ene 2022
+• Sitios web con JavaScript y React para clientes de retail y educación.
 
-Formación
-Ingeniería de Software — Universidad Peruana de Ciencias Aplicadas.
+Formación académica
+Ingeniera de Software — Universidad Peruana de Ciencias Aplicadas | 2016 – 2021
+
+Cursos y certificaciones
+Web Accessibility (WCAG 2.2) — Platzi (2024)
+
+Idiomas
+Inglés — avanzado (C1)
 
 Habilidades
-React, TypeScript, JavaScript, Figma, Git.
+React, TypeScript, JavaScript, Next.js, Tailwind CSS, Figma, Git, Jest
+
+Referencias
+Disponibles a solicitud.
 TXT],
         'luis.chavez@correo.com' => ['archivo' => 'CV_LuisChavez.docx', 'texto' => <<<'TXT'
-Luis Alberto Chávez
-Desarrollador Frontend · Lima · luis.chavez@correo.com
+Luis Alberto Chávez Rojas
+Desarrollador Frontend
++51 951 280 663 · luis.chavez@correo.com · San Juan de Lurigancho, Lima
 
 Perfil
-Desarrollador frontend con 3 años de experiencia con React y JavaScript.
+Desarrollador frontend con 3 años de experiencia con React y JavaScript en una startup de delivery.
 
-Experiencia
-Desarrollador Frontend — Startup Delivery Ya (2023 – actualidad)
-Desarrollé pantallas del panel de pedidos con React.js y JavaScript.
-Integré APIs REST y manejé el repositorio en GitHub.
+Experiencia laboral
+Desarrollador Frontend — Delivery Ya S.A.C. | Abr 2023 – Actualidad
+• Desarrollé las pantallas del panel de pedidos con React.js y JavaScript.
+• Integré APIs REST del equipo backend y manejo el repositorio en GitHub con Git.
+• En 2025 corregí 120 incidencias reportadas por los restaurantes aliados.
 
-Formación
-Computación e Informática — Instituto Cibertec.
+Formación académica
+Computación e Informática — Instituto Cibertec | 2019 – 2022
+
+Idiomas
+Inglés — intermedio
 
 Habilidades
-React, JavaScript, Git, CSS.
+React, JavaScript, HTML, CSS, Git
 
 Intereses
 TypeScript (interés en aprender).
 TXT],
         'nicolas.benites@correo.com' => ['archivo' => 'CV_NicolasBenites.pdf', 'texto' => <<<'TXT'
-Nicolás Benites
-Desarrollador Full Stack · Lima · nicolas.benites@correo.com
+Nicolás Benites Arce
+Desarrollador Full Stack
++51 966 504 871 · nicolas.benites@correo.com · Breña, Lima
 
 Perfil
-Desarrollador full stack con 4 años de experiencia con PHP, Laravel y JavaScript.
+Desarrollador full stack con 4 años de experiencia con PHP, Laravel y JavaScript en sistemas administrativos.
 
-Experiencia
-Desarrollador Full Stack — Software Contable SAC (2022 – actualidad)
-Desarrollé módulos de facturación con Laravel y vistas con JavaScript.
-Mantuve el código en Git y desplegué en servidores Linux.
+Experiencia laboral
+Desarrollador Full Stack — Software Contable S.A.C. | May 2022 – Actualidad
+• Desarrollé los módulos de facturación electrónica con Laravel y vistas con JavaScript.
+• Mantengo el código en Git y despliego en servidores Linux.
 
-Formación
-Ingeniería de Sistemas — Universidad Nacional Federico Villarreal.
+Desarrollador Web — Freelance | Ene 2022 – Abr 2022
+• Sitios en WordPress para negocios locales.
+
+Formación académica
+Bachiller en Ingeniería de Sistemas — Universidad Nacional Federico Villarreal | 2016 – 2021
+
+Idiomas
+Inglés — intermedio
 
 Habilidades
-PHP, Laravel, JavaScript, MySQL, Git.
+PHP, Laravel, JavaScript, MySQL, Git, Linux
 TXT],
         'ariana.soto@correo.com' => ['archivo' => 'CV_ArianaSoto.docx', 'texto' => <<<'TXT'
-Ariana Soto
-Diseñadora UI · Lima · ariana.soto@correo.com
+Ariana Soto Delgado
+Diseñadora UI
++51 977 315 096 · ariana.soto@correo.com · Lince, Lima
 
 Perfil
-Diseñadora de interfaces con 4 años de experiencia en Figma para aplicaciones móviles.
+Diseñadora de interfaces con 4 años de experiencia en Figma para aplicaciones móviles financieras.
 
-Experiencia
-Diseñadora UI — Fintech Monedero (2022 – actualidad)
-Diseñé el sistema de diseño de la app en Figma y prototipos de alta fidelidad.
+Experiencia laboral
+Diseñadora UI — Fintech Monedero S.A.C. | Ago 2022 – Actualidad
+• Diseñé el sistema de diseño de la app en Figma (más de 150 componentes).
+• Prototipos de alta fidelidad para las pruebas con usuarios del equipo de producto.
 
-Formación
-Diseño Interactivo — Universidad Peruana de Ciencias Aplicadas.
+Diseñadora Gráfica Junior — Estudio Kuntur | Ene 2022 – Jul 2022
+• Piezas para redes sociales y presentaciones.
 
-Habilidades
-Figma, prototipado, design systems.
+Formación académica
+Licenciada en Diseño Profesional Interactivo — Universidad Peruana de Ciencias Aplicadas | 2016 – 2021
+
+Idiomas
+Inglés — avanzado
+
+Herramientas
+Figma, FigJam, Adobe XD, Maze
 
 Intereses
 React (nociones) para colaborar mejor con el equipo de desarrollo.
@@ -340,60 +473,85 @@ TXT],
 
         // — Ruta Sur Logística · Jefe de Almacén —
         'manuel.quispe@correo.com' => ['archivo' => 'CV_ManuelQuispe.pdf', 'texto' => <<<'TXT'
-Manuel Quispe
-Jefe de Almacén · Lima · manuel.quispe@correo.com
+Manuel Quispe Huarcaya
+Jefe de Almacén · Centros de distribución
++51 990 457 128 · manuel.quispe@correo.com · Villa El Salvador, Lima
 
-Perfil
-Jefe de almacén con 9 años de experiencia en centros de distribución de consumo masivo.
+Perfil profesional
+Jefe de almacén con 9 años de experiencia en centros de distribución de consumo masivo. Ordeno la operación con indicadores, procesos claros y un equipo que conoce sus metas.
 
-Experiencia
-Jefe de Almacén — Distribuidora Lurín (2019 – actualidad)
-Gestión de almacenes de 12 000 m² con WMS y 40 operarios a cargo.
-Liderazgo de equipos en tres turnos y programas de seguridad.
-Control de inventarios cíclicos con exactitud superior al 99 %.
-Reportes de productividad con Excel avanzado.
+Experiencia laboral
+Jefe de Almacén — Distribuidora Lurín S.A.C. | Mar 2019 – Actualidad
+• Gestión de almacenes de 12 000 m² con WMS y 40 operarios a cargo en tres turnos.
+• Liderazgo de equipos de recepción, almacenamiento y despacho; rotación de personal reducida de 30 % a 12 % anual.
+• Control de inventarios cíclicos con exactitud superior al 99 %.
+• Reportes de productividad y costos por pallet con Excel avanzado.
+• Implementé el programa de seguridad que llevó el centro a 400 días sin accidentes incapacitantes.
 
-Supervisor de Almacén — Operador Logístico Callao (2017 – 2019)
-Recepción, almacenamiento y despacho de mercadería importada.
+Supervisor de Almacén — Operador Logístico Callao S.A. | Feb 2017 – Feb 2019
+• Recepción, almacenamiento y despacho de mercadería importada.
+• Coordinación con agentes de aduanas para el retiro de la carga importada.
 
-Formación
-Ingeniería Industrial — Universidad Nacional del Callao.
+Formación académica
+Ingeniero Industrial — Universidad Nacional del Callao | 2010 – 2015
 
-Habilidades
-Gestión de almacenes, WMS, control de inventarios, liderazgo, Excel avanzado.
+Cursos y certificaciones
+Diplomado en Gestión de la Cadena de Suministro — Universidad del Pacífico (2021)
+Operación segura de montacargas para supervisores — SENATI (2018)
+
+Idiomas
+Inglés — intermedio
+
+Herramientas
+WMS (Manhattan), SAP MM (consultas), Excel avanzado, Power BI
+
+Referencias
+Disponibles a solicitud.
 TXT],
         'rosa.condori@correo.com' => ['archivo' => 'CV_RosaCondori.docx', 'texto' => <<<'TXT'
-Rosa Condori
-Supervisora de Almacén · Lima · rosa.condori@correo.com
+Rosa Condori Mamani
+Supervisora de Almacén
++51 953 778 214 · rosa.condori@correo.com · Ate, Lima
 
 Perfil
-Supervisora con 4 años de experiencia en almacenes de repuestos.
+Supervisora de almacén desde 2022, con más de 5 años en una distribuidora de repuestos automotrices.
 
-Experiencia
-Supervisora de Almacén — Repuestos del Centro (2022 – actualidad)
-Conteos de inventarios y control de ingresos y salidas.
-Coordinación de un equipo de cinco operarios.
-Reportes de existencias en Excel.
+Experiencia laboral
+Supervisora de Almacén — Repuestos del Centro S.A.C. | Feb 2022 – Actualidad
+• Conteos de inventarios mensuales y control de ingresos y salidas.
+• Coordinación de un equipo de cinco operarios.
+• Reportes de existencias en Excel para el área de compras.
 
-Formación
-Administración Logística — Instituto IDAT.
+Asistente de Almacén — Repuestos del Centro S.A.C. | Mar 2021 – Ene 2022
+• Recepción de mercadería y registro de guías de remisión.
+
+Formación académica
+Profesional técnica en Administración Logística — Instituto IDAT | 2018 – 2021
+
+Cursos y certificaciones
+Metodología 5S — SENATI (2023)
 
 Habilidades
 Inventarios, Excel, orden y limpieza (5S).
 TXT],
         'wilmer.ccori@correo.com' => ['archivo' => 'CV_WilmerCcori.pdf', 'texto' => <<<'TXT'
-Wilmer Ccori
-Operario de Almacén · Lima · wilmer.ccori@correo.com
+Wilmer Ccori Huamán
+Operario de Almacén
++51 941 625 380 · wilmer.ccori@correo.com · Lurín, Lima
 
 Perfil
-Operario con 3 años de experiencia en carga, descarga y despacho.
+Operario con 3 años de experiencia en carga, descarga y despacho de mercadería. Montacarguista certificado.
 
-Experiencia
-Operario de Almacén — Bodegas del Sur (2023 – actualidad)
-Picking y despacho de pedidos; manejo de montacargas con licencia vigente.
+Experiencia laboral
+Operario de Almacén — Bodegas del Sur S.A.C. | Ene 2023 – Actualidad
+• Picking y despacho de pedidos para bodegas de Lima Sur.
+• Manejo de montacargas con licencia vigente.
 
-Formación
-Secundaria completa; certificación de montacarguista.
+Formación académica
+Secundaria completa — I.E. Fe y Alegría N.º 17 | 2015 – 2019
+
+Cursos y certificaciones
+Operador de montacargas — SENATI (2023)
 
 Habilidades
 Montacargas, picking, trabajo en equipo.
@@ -401,310 +559,399 @@ TXT],
 
         // — Ruta Sur Logística · Analista de Logística —
         'karen.espinoza@correo.com' => ['archivo' => 'CV_KarenEspinoza.docx', 'texto' => <<<'TXT'
-Karen Espinoza
-Analista de Logística · Lima · karen.espinoza@correo.com
+Karen Espinoza Salinas
+Analista de Logística
++51 989 336 547 · karen.espinoza@correo.com · Bellavista, Callao
 
-Perfil
-Analista con 4 años de experiencia en distribución y comercio exterior.
+Perfil profesional
+Analista con 4 años de experiencia en distribución de última milla y comercio exterior. Me gusta resolver problemas de operación con datos.
 
-Experiencia
-Analista de Logística — Importaciones Rímac (2022 – actualidad)
-Planifiqué rutas de reparto de última milla para 300 pedidos diarios.
-Seguimiento de importaciones y coordinación con agentes de aduanas.
-Construí tableros de indicadores en Power BI y modelos de costos con Excel avanzado.
+Experiencia laboral
+Analista de Logística — Importaciones Rímac S.A.C. | Mar 2022 – Actualidad
+• Planifico rutas de reparto de última milla para 300 pedidos diarios; el costo por entrega bajó 18 %.
+• Seguimiento de importaciones marítimas y coordinación con agentes de aduanas y navieras.
+• Construí tableros de indicadores en Power BI (entregas a tiempo, costo por ruta, lead time de importación).
+• Modelos de costos y presupuestos con Excel avanzado.
 
-Formación
-Ingeniería Industrial — Universidad de Lima.
+Formación académica
+Bachiller en Ingeniería Industrial — Universidad de Lima | 2016 – 2021
 
-Habilidades
-Distribución, importaciones, Power BI, Excel avanzado, SQL básico.
+Cursos y certificaciones
+Gestión de importaciones y exportaciones — ADEX (2023)
+Power BI para analistas — Data Academy Perú (2022)
+
+Idiomas
+Inglés — intermedio (B2)
+
+Herramientas
+Power BI, Excel avanzado, SQL (nociones), SAP (consultas)
+
+Referencias
+Disponibles a solicitud.
 TXT],
         'bruno.medina@correo.com' => ['archivo' => 'CV_BrunoMedina.pdf', 'texto' => <<<'TXT'
-Bruno Medina
-Asistente de Compras · Lima · bruno.medina@correo.com
+Bruno Medina Alva
+Asistente de Compras
++51 947 210 538 · bruno.medina@correo.com · Comas, Lima
 
 Perfil
-Asistente con 3 años de experiencia en compras de insumos.
+Asistente con 3 años de experiencia en compras de insumos para una fábrica de plásticos.
 
-Experiencia
-Asistente de Compras — Plásticos Unidos (2023 – actualidad)
-Cotizaciones con proveedores y órdenes de compra en Excel.
+Experiencia laboral
+Asistente de Compras — Plásticos Unidos S.A.C. | Feb 2023 – Actualidad
+• Cotizaciones con proveedores nacionales y órdenes de compra en Excel.
+• Seguimiento de entregas y conformidad de facturas.
 
-Formación
-Administración — Universidad Tecnológica del Perú.
+Formación académica
+Bachiller en Administración — Universidad Tecnológica del Perú | 2017 – 2022
 
 Habilidades
-Excel, negociación con proveedores.
+Excel, negociación con proveedores, Microsoft Office.
 TXT],
         'lorena.paz@correo.com' => ['archivo' => 'CV_LorenaPaz.docx', 'texto' => <<<'TXT'
-Lorena Paz
-Analista de Operaciones · Lima · lorena.paz@correo.com
+Lorena Paz Gutiérrez
+Analista de Operaciones
++51 972 485 163 · lorena.paz@correo.com · San Isidro, Lima
 
 Perfil
-Analista con 3 años de experiencia en operaciones de reparto.
+Analista con 3 años de experiencia en operaciones de reparto urbano. Fuerte en análisis de datos.
 
-Experiencia
-Analista de Operaciones — Courier Rápido (2023 – actualidad)
-Optimicé rutas de reparto con consultas SQL sobre el historial de entregas.
-Reportes diarios de cumplimiento en Excel avanzado.
+Experiencia laboral
+Analista de Operaciones — Courier Rápido S.A.C. | Feb 2023 – Actualidad
+• Optimicé rutas de reparto con consultas SQL sobre el historial de entregas: 12 % menos kilómetros por pedido.
+• Reportes diarios de cumplimiento en Excel avanzado para la gerencia de operaciones.
+• Coordino a 25 repartidores tercerizados en Lima Moderna.
 
-Formación
-Ingeniería Industrial — Universidad Nacional Mayor de San Marcos.
+Formación académica
+Bachiller en Ingeniería Industrial — Universidad Nacional Mayor de San Marcos | 2017 – 2022
 
-Habilidades
-Rutas de reparto, SQL, Excel avanzado.
+Idiomas
+Inglés — intermedio
+
+Herramientas
+SQL, Excel avanzado, Google Sheets, Tableau
 TXT],
         'oscar.vilca@correo.com' => ['archivo' => 'CV_OscarVilca.pdf', 'texto' => <<<'TXT'
-Óscar Vilca
-Coordinador de Transporte · Lima · oscar.vilca@correo.com
+Óscar Vilca Ramos
+Coordinador de Transporte
++51 964 318 702 · oscar.vilca@correo.com · Chorrillos, Lima
 
-Perfil
-Coordinador con 6 años de experiencia en distribución a provincias.
+Perfil profesional
+Coordinador con 6 años de experiencia en distribución a provincias para empresas de consumo masivo.
 
-Experiencia
-Coordinador de Transporte — Transportes Andinos (2020 – actualidad)
-Programación de la distribución a 15 ciudades y control de la flota tercerizada.
-Indicadores de entregas a tiempo en Excel.
+Experiencia laboral
+Coordinador de Transporte — Transportes Andinos S.A.C. | Mar 2020 – Actualidad
+• Programación de la distribución a 15 ciudades y control de la flota tercerizada (22 unidades).
+• Indicadores de entregas a tiempo en Excel: en 2024 pasamos de 88 % a 95 %.
+• Negociación de tarifas con transportistas.
 
-Formación
-Administración — Universidad Nacional del Centro del Perú.
+Formación académica
+Bachiller en Administración — Universidad Nacional del Centro del Perú | 2013 – 2018
 
 Habilidades
-Distribución, gestión de transportistas, Excel.
+Distribución, gestión de transportistas, Excel, licencia de conducir A-IIb.
+
+Referencias
+Disponibles a solicitud.
 TXT],
 
         // — Nuna Salud · Enfermera(o) de Hospitalización —
         'analucia.ramos@correo.com' => ['archivo' => 'CV_AnaLuciaRamos.docx', 'texto' => <<<'TXT'
-Ana Lucía Ramos
-Licenciada en Enfermería · Lima · analucia.ramos@correo.com
+Ana Lucía Ramos Ccahuana
+Licenciada en Enfermería
++51 985 602 731 · analucia.ramos@correo.com · La Molina, Lima
 
-Perfil
-Enfermera con 8 años de experiencia en hospitalización de medicina interna y cirugía.
+Perfil profesional
+Enfermera con 8 años de experiencia en hospitalización de medicina interna y cirugía. Trato cercano con los pacientes y sus familias, y registros clínicos rigurosos.
 
-Experiencia
-Enfermera Asistencial — Hospital Santa Rosa del Sur (2020 – actualidad)
-Atención en el servicio de hospitalización de 30 camas, con cuidado de pacientes posquirúrgicos.
-Capacitadora interna en RCP y soporte vital básico (BLS).
+Experiencia laboral
+Enfermera Asistencial — Hospital Santa Rosa del Sur | Ene 2020 – Actualidad
+• Atención en el servicio de hospitalización de 30 camas, con cuidado de pacientes posquirúrgicos y adultos mayores.
+• Capacitadora interna en RCP y BLS para el personal del servicio.
+• Integré el comité de prevención de caídas, que en 2023 redujo las caídas en 40 %.
 
-Enfermera — Clínica San Gabriel (2018 – 2020)
-Cuidado del paciente adulto mayor y administración de medicamentos.
+Enfermera — Clínica San Gabriel | Ene 2018 – Dic 2019
+• Cuidado del paciente adulto mayor, administración de medicamentos y curaciones.
 
-Formación
-Enfermería — Universidad Nacional Mayor de San Marcos.
+Formación académica
+Licenciada en Enfermería — Universidad Nacional Mayor de San Marcos | 2012 – 2017
 Colegiatura CEP vigente (Colegio de Enfermeros del Perú).
 
-Habilidades
-Enfermería hospitalaria, BLS, cuidado de pacientes, registros clínicos.
+Cursos y certificaciones
+BLS Provider — American Heart Association (2025)
+Especialización en Enfermería en Centro Quirúrgico (en curso) — Universidad Peruana Cayetano Heredia
+
+Idiomas
+Inglés — intermedio
+
+Referencias
+Disponibles a solicitud.
 TXT],
         'jessica.huaroto@correo.com' => ['archivo' => 'CV_JessicaHuaroto.pdf', 'texto' => <<<'TXT'
-Jessica Huaroto
-Licenciada en Enfermería · Lima · jessica.huaroto@correo.com
+Jessica Huaroto Vílchez
+Licenciada en Enfermería
++51 976 213 584 · jessica.huaroto@correo.com · Los Olivos, Lima
 
 Perfil
 Enfermera con 4 años de experiencia en hospitalización pediátrica.
 
-Experiencia
-Enfermera — Clínica Infantil Los Olivos (2022 – actualidad)
-Atención en hospitalización pediátrica y cuidado de pacientes en aislamiento.
-Certificada en RCP pediátrico.
+Experiencia laboral
+Enfermera — Clínica Infantil Los Olivos | Feb 2022 – Actualidad
+• Atención en hospitalización pediátrica y cuidado de pacientes en aislamiento.
+• Educación a padres sobre cuidados en casa al alta.
 
-Formación
-Enfermería — Universidad Peruana Cayetano Heredia.
+Formación académica
+Licenciada en Enfermería — Universidad Peruana Cayetano Heredia | 2015 – 2020
 Colegiatura CEP vigente.
 
-Habilidades
-Hospitalización, RCP, atención de pacientes.
+Cursos y certificaciones
+RCP pediátrico — Sociedad Peruana de Pediatría (2024)
+
+Idiomas
+Inglés — básico
 TXT],
         'kevin.morales@correo.com' => ['archivo' => 'CV_KevinMorales.docx', 'texto' => <<<'TXT'
-Kevin Morales
-Técnico en Enfermería · Lima · kevin.morales@correo.com
+Kevin Morales Ticona
+Técnico en Enfermería
++51 963 741 029 · kevin.morales@correo.com · Independencia, Lima
 
 Perfil
 Técnico en enfermería con 5 años de experiencia en consultorios y tópicos.
 
-Experiencia
-Técnico en Enfermería — Policlínico Vida (2021 – actualidad)
-Atención de pacientes en tópico, toma de signos vitales y apoyo en procedimientos.
+Experiencia laboral
+Técnico en Enfermería — Policlínico Vida | Mar 2021 – Actualidad
+• Atención de pacientes en tópico, toma de signos vitales y apoyo en procedimientos menores.
+• Control del material estéril y del botiquín de emergencias.
 
-Formación
-Técnico en Enfermería — Instituto Daniel Alcides Carrión.
+Formación académica
+Técnico en Enfermería — Instituto Daniel Alcides Carrión | 2018 – 2020
 
 Habilidades
-Atención de pacientes, signos vitales, inyectables.
+Signos vitales, inyectables, trato amable.
 TXT],
         'pamela.rojas@correo.com' => ['archivo' => 'CV_PamelaRojas.pdf', 'texto' => <<<'TXT'
-Pamela Rojas
-Licenciada en Enfermería · Lima · pamela.rojas@correo.com
+Pamela Rojas Espinoza
+Licenciada en Enfermería
++51 982 657 140 · pamela.rojas@correo.com · Magdalena del Mar, Lima
 
 Perfil
-Enfermera recién colegiada, con internado hospitalario de un año.
+Enfermera recién colegiada, con un año de internado hospitalario. Busco mi primer puesto asistencial.
 
-Experiencia
-Interna de Enfermería — Hospital Nacional Dos de Mayo (2024 – 2025)
-Rotación por hospitalización, emergencia y centro quirúrgico.
-
-Formación
-Enfermería — Universidad Norbert Wiener.
+Formación académica
+Licenciada en Enfermería — Universidad Privada Norbert Wiener | 2019 – 2024
 Colegiatura CEP vigente.
 
-Habilidades
-Cuidado del paciente, BLS, trabajo en equipo.
+Experiencia laboral
+Interna de Enfermería — Hospital Nacional Dos de Mayo | Ene 2024 – Dic 2024
+• Rotación por hospitalización, emergencia y centro quirúrgico.
+• Cuidado del paciente bajo supervisión de la enfermera jefa.
+
+Cursos y certificaciones
+BLS Provider — American Heart Association (2025)
+
+Idiomas
+Inglés — intermedio
 TXT],
 
         // — Nuna Salud · Asistente de Recursos Humanos —
         'daniela.cardenas@correo.com' => ['archivo' => 'CV_DanielaCardenas.docx', 'texto' => <<<'TXT'
-Daniela Cárdenas
-Analista de Recursos Humanos · Lima · daniela.cardenas@correo.com
+Daniela Cárdenas Lozano
+Analista de Recursos Humanos
++51 991 274 806 · daniela.cardenas@correo.com · Jesús María, Lima
 
-Perfil
-Analista con 4 años de experiencia en reclutamiento y planillas en el sector salud.
+Perfil profesional
+Analista con 4 años de experiencia en reclutamiento y planillas en el sector salud. Ordenada, confidencial y cercana con los colaboradores.
 
-Experiencia
-Analista de RR. HH. — Laboratorios Unidos (2022 – actualidad)
-Reclutamiento y selección de personal técnico y administrativo, con 25 ingresos al trimestre.
-Elaboración de planillas y declaración del PLAME.
-Aplicación de la normativa laboral en contratos y liquidaciones.
-Reportes de rotación con Excel avanzado.
+Experiencia laboral
+Analista de Recursos Humanos — Laboratorios Unidos S.A. | Feb 2022 – Actualidad
+• Reclutamiento y selección de personal técnico y administrativo: 25 ingresos por trimestre.
+• Elaboración de planillas para 320 colaboradores y declaración mensual del PLAME.
+• Aplicación de la normativa laboral en contratos, vacaciones y liquidaciones.
+• Reportes de rotación y ausentismo con Excel avanzado.
 
-Formación
-Psicología Organizacional — Universidad San Ignacio de Loyola.
+Formación académica
+Licenciada en Psicología Organizacional — Universidad San Ignacio de Loyola | 2016 – 2021
 
-Habilidades
-Reclutamiento, planillas, legislación laboral, Excel avanzado.
+Cursos y certificaciones
+Gestión de planillas y PLAME — Instituto Pacífico (2023)
+Legislación laboral peruana — ESAN (2022)
+
+Idiomas
+Inglés — intermedio
+
+Herramientas
+Excel avanzado, Buk, Sistema de planillas Starsoft
+
+Referencias
+Disponibles a solicitud.
 TXT],
         'jeanpierre.soto@correo.com' => ['archivo' => 'CV_JeanPierreSoto.pdf', 'texto' => <<<'TXT'
-Jean Pierre Soto
-Asistente Administrativo · Lima · jeanpierre.soto@correo.com
+Jean Pierre Soto Quiroz
+Asistente Administrativo
++51 955 893 412 · jeanpierre.soto@correo.com · Cercado de Lima
 
 Perfil
-Asistente administrativo con 2 años de experiencia de apoyo en nómina.
+Asistente administrativo con 2 años de experiencia en un estudio contable.
 
-Experiencia
-Asistente Administrativo — Consultora Contable Lima (2024 – actualidad)
-Apoyo en el cálculo de la nómina y archivo de legajos.
+Experiencia laboral
+Asistente Administrativo — Consultora Contable Lima S.A.C. | Ene 2024 – Actualidad
+• Apoyo en el cálculo de la nómina de los clientes y archivo de legajos.
+• Atención de llamadas y correspondencia.
 
-Formación
-Administración — Instituto Superior Tecnológico Lima.
+Formación académica
+Profesional técnico en Administración — Instituto Superior Tecnológico Lima | 2020 – 2023
 
 Habilidades
-Nómina, archivo, Excel.
+Archivo, Excel, Microsoft Office.
 TXT],
         'mariana.alarcon@correo.com' => ['archivo' => 'CV_MarianaAlarcon.docx', 'texto' => <<<'TXT'
-Mariana Alarcón
-Practicante de Recursos Humanos · Lima · mariana.alarcon@correo.com
+Mariana Alarcón Pérez
+Estudiante de Psicología
++51 984 506 317 · mariana.alarcon@correo.com · Santiago de Surco, Lima
 
 Perfil
-Estudiante de último año de Psicología con prácticas en selección de personal.
+Estudiante de último año de Psicología con prácticas en selección de personal. Comunicativa y con interés en el área de gestión humana.
 
-Experiencia
-Practicante de RR. HH. — Retail Express (2025 – actualidad)
-Apoyo en el reclutamiento: publicación de avisos, filtro de CV y coordinación de entrevistas.
+Formación académica
+Psicología (décimo ciclo) — Universidad Femenina del Sagrado Corazón | 2022 – Actualidad
 
-Formación
-Psicología — Universidad Femenina del Sagrado Corazón (último año).
+Experiencia laboral
+Practicante de Recursos Humanos — Retail Express S.A.C. | Mar 2025 – Actualidad
+• Apoyo en el reclutamiento: publicación de avisos, filtro de CV y coordinación de entrevistas.
+• Aplicación de pruebas psicométricas a postulantes de tienda.
+
+Idiomas
+Inglés — intermedio
 
 Habilidades
-Selección de personal, entrevistas, comunicación.
+Selección de personal, entrevistas por competencias, comunicación.
 TXT],
 
         // — Nuna Salud · Contador General —
         'fernando.gutierrez@correo.com' => ['archivo' => 'CV_FernandoGutierrez.pdf', 'texto' => <<<'TXT'
-Fernando Gutiérrez
-Contador Público Colegiado · Lima · fernando.gutierrez@correo.com
+Fernando Gutiérrez Valdivia
+Contador Público Colegiado
++51 994 120 653 · fernando.gutierrez@correo.com · San Borja, Lima
 
-Perfil
-Contador con 8 años de experiencia en contabilidad general de empresas de servicios de salud.
+Perfil profesional
+Contador con 8 años de experiencia en contabilidad general de empresas de servicios de salud. Cierres puntuales, estados financieros confiables y cero contingencias tributarias.
 
-Experiencia
-Contador General — Grupo Médico Integral (2020 – actualidad)
-Cierres contables mensuales y estados financieros bajo NIIF.
-Declaraciones tributarias mensuales y anuales ante SUNAT.
-Implementación del módulo SAP FI.
+Experiencia laboral
+Contador General — Grupo Médico Integral S.A.C. | Feb 2020 – Actualidad
+• Cierres contables mensuales al quinto día hábil y estados financieros bajo NIIF.
+• Declaraciones tributarias mensuales y anuales ante SUNAT para cuatro empresas del grupo.
+• Implementé el módulo SAP FI junto con la consultora externa.
+• Atendí dos fiscalizaciones de SUNAT sin reparos.
 
-Contador — Estudio Contable Asociados (2018 – 2020)
-Contabilidad general de diez clientes y conciliaciones con Excel avanzado.
+Contador — Estudio Contable Asociados | Mar 2018 – Ene 2020
+• Contabilidad general de diez clientes y conciliaciones bancarias con Excel avanzado.
 
-Formación
-Contabilidad — Universidad Nacional Mayor de San Marcos. Contador Público Colegiado.
+Formación académica
+Contador Público — Universidad Nacional Mayor de San Marcos | 2011 – 2016
+Colegiado en el Colegio de Contadores Públicos de Lima.
 
-Habilidades
-Contabilidad, NIIF, tributación, SAP FI, Excel avanzado.
+Cursos y certificaciones
+Diplomado en NIIF — Colegio de Contadores Públicos de Lima (2021)
+SAP FI para usuarios clave — SAP Training (2022)
+
+Idiomas
+Inglés — intermedio
+
+Herramientas
+SAP FI, Excel avanzado, PDT y SIRE de SUNAT
+
+Referencias
+Disponibles a solicitud.
 TXT],
         'silvia.paredes@correo.com' => ['archivo' => 'CV_SilviaParedes.docx', 'texto' => <<<'TXT'
-Silvia Paredes
-Contadora · Lima · silvia.paredes@correo.com
+Silvia Paredes Huanca
+Contadora
++51 969 431 287 · silvia.paredes@correo.com · Cercado de Lima
 
 Perfil
 Contadora con 5 años de experiencia en pequeñas empresas comerciales.
 
-Experiencia
-Contadora — Comercial Pacífico (2021 – actualidad)
-Contabilidad general y declaraciones tributarias mensuales.
-Conciliaciones bancarias con Excel avanzado.
+Experiencia laboral
+Contadora — Comercial Pacífico S.A.C. | Feb 2021 – Actualidad
+• Contabilidad general y declaraciones tributarias mensuales.
+• Conciliaciones bancarias y de proveedores con Excel avanzado.
+• Coordinación con el estudio externo para el cierre anual.
 
-Formación
-Contabilidad — Universidad de San Martín de Porres.
+Formación académica
+Contadora Pública — Universidad de San Martín de Porres | 2014 – 2019
 
-Habilidades
-Contabilidad, declaraciones tributarias, Excel avanzado.
+Cursos y certificaciones
+Tributación para pymes — Instituto Pacífico (2022)
+
+Idiomas
+Inglés — básico
 
 Intereses
-NIIF (nociones, curso en progreso).
+NIIF (nociones, curso por empezar).
 TXT],
         'raul.inga@correo.com' => ['archivo' => 'CV_RaulInga.pdf', 'texto' => <<<'TXT'
-Raúl Inga
-Asistente Contable · Huancayo · raul.inga@correo.com
+Raúl Inga Ponce
+Asistente Contable
++51 957 264 819 · raul.inga@correo.com · El Tambo, Huancayo
 
 Perfil
 Asistente contable con 3 años de experiencia en registro de compras y ventas.
 
-Experiencia
-Asistente Contable — Ferretería El Constructor (2023 – actualidad)
-Registro de comprobantes y apoyo en la contabilidad general.
+Experiencia laboral
+Asistente Contable — Ferretería El Constructor S.A.C. | Mar 2023 – Actualidad
+• Registro de comprobantes de compras y ventas y apoyo en la contabilidad general.
+• Archivo y control de la documentación contable.
 
-Formación
-Contabilidad — Universidad Continental.
+Formación académica
+Bachiller en Contabilidad — Universidad Continental | 2018 – 2023
 
 Habilidades
-Contabilidad, registro de comprobantes, Excel.
+Registro de comprobantes, Excel, Concar.
 TXT],
 
         // — Altura Café · Barista —
         'lucero.mamani@correo.com' => ['archivo' => 'CV_LuceroMamani.docx', 'texto' => <<<'TXT'
-Lucero Mamani
-Barista · Cusco · lucero.mamani@correo.com
+Lucero Mamani Condori
+Barista
++51 984 216 390 · lucero.mamani@correo.com · San Blas, Cusco
 
 Perfil
-Barista con 3 años de experiencia en cafeterías de especialidad.
+Barista con 3 años de experiencia en cafeterías de especialidad. Me apasiona el café peruano y explicárselo a cada cliente.
 
-Experiencia
-Barista — Café de la Plaza (2023 – actualidad)
-Preparación de espresso y métodos filtrados con café peruano de especialidad.
-Atención al cliente nacional y extranjero, en español e inglés básico.
-Aplicación de buenas prácticas de manufactura (BPM) en la barra.
+Experiencia laboral
+Barista — Café de la Plaza | Mar 2023 – Actualidad
+• Preparación de espresso y métodos filtrados con café de especialidad de Cusco y Puno.
+• Atención al cliente nacional y extranjero, en español e inglés.
+• Aplicación de buenas prácticas de manufactura (BPM) en la barra y control de temperaturas.
+• Calibración diaria del molino y la máquina.
 
-Formación
-Curso de barismo profesional — Escuela de Café del Cusco.
+Formación académica
+Secundaria completa — I.E. Ciencias | 2016 – 2020
 
-Habilidades
-Barismo, atención al cliente, manipulación de alimentos.
+Cursos y certificaciones
+Barismo profesional — Escuela de Café del Cusco (2022)
+Manipulación de alimentos — Municipalidad del Cusco (2025)
+
+Idiomas
+Inglés — intermedio, Quechua — nativo
 TXT],
         'thiago.huillca@correo.com' => ['archivo' => 'CV_ThiagoHuillca.pdf', 'texto' => <<<'TXT'
-Thiago Huillca
-Mozo · Cusco · thiago.huillca@correo.com
+Thiago Huillca Quispe
+Mozo
++51 973 580 214 · thiago.huillca@correo.com · Wanchaq, Cusco
 
 Perfil
-Mozo con 2 años de experiencia en restaurantes turísticos.
+Mozo con 2 años de experiencia en restaurantes turísticos del centro histórico.
 
-Experiencia
-Mozo — Restaurante Inti (2024 – actualidad)
-Atención al cliente en salón y toma de pedidos.
+Experiencia laboral
+Mozo — Restaurante Inti S.A.C. | Feb 2024 – Actualidad
+• Atención al cliente en salón y toma de pedidos para grupos de turistas.
 
-Formación
-Secundaria completa.
+Formación académica
+Secundaria completa — I.E. Clorinda Matto de Turner | 2018 – 2022
 
-Habilidades
-Atención al cliente, inglés básico.
+Idiomas
+Inglés — básico
 
 Intereses
 Barismo (interés en aprender).
