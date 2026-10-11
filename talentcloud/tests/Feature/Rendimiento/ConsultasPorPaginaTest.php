@@ -14,16 +14,25 @@ use Illuminate\Support\Facades\DB;
  * subirlo. (Las cifras no incluyen la sesión: en los tests va en memoria.)
  */
 
-/** @return array{0: int, 1: array<string, int>} consultas y las que se repiten */
-function consultasDeLaPagina(Closure $peticion): array
+/**
+ * Consultas de la petición: la segunda visita, como en uso normal (la primera
+ * llena cachés, como la de roles, y su cifra dependería del orden de las páginas).
+ * $preparar (sesión y usuario) queda fuera de la cuenta.
+ *
+ * @return array{0: int, 1: array<string, int>} consultas y las que se repiten
+ */
+function consultasDeLaPagina(Closure $preparar, Closure $peticion): array
 {
-    $consultas = [];
-    DB::listen(function ($consulta) use (&$consultas) {
-        $consultas[] = $consulta->sql;
-    });
-
+    $preparar();
     $peticion();
 
+    $preparar();
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+    $peticion();
+    DB::disableQueryLog();
+
+    $consultas = array_column(DB::getQueryLog(), 'query');
     $repetidas = array_filter(array_count_values($consultas), fn (int $n) => $n > 1);
 
     return [count($consultas), $repetidas];
@@ -40,7 +49,7 @@ it('no supera el presupuesto de consultas de cada página', function () {
     $presupuestos = [
         'invitado' => ['/empleos' => 5, "/empleos/{$ids['abierta']}" => 5],
         'marta@nimbus.com' => [
-            '/dashboard' => 17, '/vacantes' => 7, '/candidatos' => 12, "/vacantes/{$ids['backend']}/kanban" => 11,
+            '/dashboard' => 16, '/vacantes' => 7, '/candidatos' => 12, "/vacantes/{$ids['backend']}/kanban" => 11,
             '/entrevistas' => 11, '/evaluaciones' => 11,
         ],
         'admin@talentcloud.ai' => ['/dashboard' => 23, '/calidad-ia' => 9, '/candidatos' => 14],
@@ -50,14 +59,17 @@ it('no supera el presupuesto de consultas de cada página', function () {
     $excedidas = [];
     foreach ($presupuestos as $quien => $paginas) {
         foreach ($paginas as $ruta => $maximo) {
-            // Cada página como una visita nueva: sin la sesión ni el usuario de la anterior.
-            $this->flushSession();
-            $this->app['auth']->forgetGuards();
-            if ($quien !== 'invitado') {
-                $this->actingAs(User::where('email', $quien)->firstOrFail());
-            }
+            // Cada visita, como una petición real: sin la sesión de la anterior y con el usuario
+            // recién leído (sus roles se cargan en la petición, no quedan de la visita anterior).
+            $preparar = function () use ($quien) {
+                $this->flushSession();
+                $this->app['auth']->forgetGuards();
+                if ($quien !== 'invitado') {
+                    $this->actingAs(User::where('email', $quien)->firstOrFail());
+                }
+            };
 
-            [$total, $repetidas] = consultasDeLaPagina(fn () => $this->get($ruta)->assertOk());
+            [$total, $repetidas] = consultasDeLaPagina($preparar, fn () => $this->get($ruta)->assertOk());
 
             if ($total > $maximo) {
                 $excedidas[] = "{$quien} {$ruta}: {$total} consultas (máximo {$maximo}); repetidas: ".json_encode($repetidas);
