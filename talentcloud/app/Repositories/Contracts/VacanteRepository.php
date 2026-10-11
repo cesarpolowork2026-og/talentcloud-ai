@@ -33,6 +33,9 @@ interface VacanteRepository
     /** Una vacante de publicadas(), o null si no existe o ya no es pública. */
     public function buscarPublicada(int $id): ?Vacante;
 
+    /** Si la vacante está en publicadas(), sin cargarla (una sola consulta). */
+    public function existePublicada(int $id): bool;
+
     /** Carga empresa, requisitos (con su competencia) y postulaciones_count. */
     public function conDetalle(Vacante $vacante): Vacante;
 

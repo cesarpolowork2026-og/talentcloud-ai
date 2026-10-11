@@ -56,6 +56,15 @@ return [
     ],
 
     /*
+    | Proxies de confianza (balanceador o proxy de GCP, con HTTPS terminado
+    | antes de llegar a la aplicación): IP o rangos separados por comas, o "*"
+    | si solo el proxy alcanza la app. Se lee aquí, y no con env() al arrancar,
+    | porque en producción la configuración va en caché (config:cache) y desde
+    | entonces env() devuelve null fuera de config/.
+    */
+    'proxies' => env('TRUSTED_PROXIES'),
+
+    /*
     | Correo de soporte: lo muestra el pie y recibe las hojas del Libro de
     | Reclamaciones. Un solo valor para no tener correos distintos por ahí.
     */

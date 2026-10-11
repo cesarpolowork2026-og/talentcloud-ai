@@ -12,6 +12,7 @@ use App\Matching\MotorConRespaldo;
 use App\Tenancy\TenantContext;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -63,5 +64,21 @@ class AppServiceProvider extends ServiceProvider
 
         // Fechas en español ("23 sep", "30 de septiembre").
         Carbon::setLocale(config('app.locale'));
+
+        $this->confiarEnLosProxies();
+    }
+
+    /**
+     * Detrás del balanceador o proxy de GCP (HTTPS terminado antes de llegar aquí): sin esto,
+     * Laravel creería que la petición es http y generaría enlaces y firmas http, y los límites
+     * por IP verían la IP del proxy.
+     */
+    private function confiarEnLosProxies(): void
+    {
+        $proxies = (string) config('talentcloud.proxies');
+
+        if ($proxies !== '') {
+            TrustProxies::at($proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
     }
 }

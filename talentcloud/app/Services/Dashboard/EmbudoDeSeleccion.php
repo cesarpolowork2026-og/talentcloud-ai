@@ -4,6 +4,7 @@ namespace App\Services\Dashboard;
 
 use App\DTO\EmbudoDeSeleccionData;
 use App\Enums\EtapaPostulacion;
+use App\Enums\OrigenPostulacion;
 use App\Models\Postulacion;
 use App\Models\PostulacionEtapa;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,7 +32,8 @@ class EmbudoDeSeleccion
             ->where('postulaciones.created_at', '>=', $desde)
             ->when($vacanteId !== null, fn (Builder $q) => $q->where('postulaciones.vacante_id', $vacanteId));
 
-        $total = (clone $postulaciones)->count();
+        $conteos = $this->conteos(clone $postulaciones);
+        $total = $conteos['total'];
         $etapas = self::etapasDelEmbudo();
         $porRango = $this->postulacionesPorRangoAlcanzado(clone $postulaciones);
 
@@ -51,17 +53,45 @@ class EmbudoDeSeleccion
             dias: self::DIAS,
             total: $total,
             etapas: $filas,
-            descartadas: (clone $postulaciones)->where('etapa', EtapaPostulacion::Descartado)->whereNull('retirada_at')->count(),
-            retiradas: (clone $postulaciones)->whereNotNull('retirada_at')->count(),
+            descartadas: $conteos['descartadas'],
+            retiradas: $conteos['retiradas'],
             diasHastaContratar: $diasHastaContratar,
             contrataciones: $contrataciones,
-            porOrigen: (clone $postulaciones)->toBase()
-                ->selectRaw('origen, COUNT(*) AS total')
-                ->groupBy('origen')
-                ->pluck('total', 'origen')
-                ->map(fn ($n) => (int) $n)
-                ->all(),
+            porOrigen: $conteos['porOrigen'],
         );
+    }
+
+    /**
+     * Total, descartadas, retiradas y postulaciones por origen en una sola
+     * lectura (con consultas separadas, en la vista de toda la plataforma se
+     * recorrían las postulaciones del periodo cuatro veces).
+     *
+     * @param  Builder<Postulacion>  $postulaciones
+     * @return array{total: int, descartadas: int, retiradas: int, porOrigen: array<string, int>}
+     */
+    private function conteos(Builder $postulaciones): array
+    {
+        $consulta = $postulaciones->toBase()
+            ->selectRaw('COUNT(*) AS total')
+            ->selectRaw('COUNT(*) FILTER (WHERE etapa = ? AND retirada_at IS NULL) AS descartadas', [EtapaPostulacion::Descartado->value])
+            ->selectRaw('COUNT(*) FILTER (WHERE retirada_at IS NOT NULL) AS retiradas');
+
+        foreach (OrigenPostulacion::cases() as $i => $origen) {
+            $consulta->selectRaw("COUNT(*) FILTER (WHERE origen = ?) AS origen_{$i}", [$origen->value]);
+        }
+
+        $fila = (array) $consulta->first();
+        $porOrigen = [];
+        foreach (OrigenPostulacion::cases() as $i => $origen) {
+            $porOrigen[$origen->value] = (int) $fila["origen_{$i}"];
+        }
+
+        return [
+            'total' => (int) $fila['total'],
+            'descartadas' => (int) $fila['descartadas'],
+            'retiradas' => (int) $fila['retiradas'],
+            'porOrigen' => $porOrigen,
+        ];
     }
 
     /**

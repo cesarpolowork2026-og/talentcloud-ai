@@ -46,6 +46,11 @@ class EloquentVacanteRepository implements VacanteRepository
         return $this->publicadas()->find($id);
     }
 
+    public function existePublicada(int $id): bool
+    {
+        return $this->publicadas()->whereKey($id)->exists();
+    }
+
     public function conDetalle(Vacante $vacante): Vacante
     {
         return $vacante->load(['empresa', 'requisitos.competencia'])->loadCount('postulaciones');

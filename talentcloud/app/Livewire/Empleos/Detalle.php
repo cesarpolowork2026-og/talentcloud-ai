@@ -21,7 +21,8 @@ class Detalle extends Component
 
     public function mount(int $id, VacanteRepository $vacantes): void
     {
-        abort_if($vacantes->buscarPublicada($id) === null, 404);
+        // Solo se comprueba aquí: render() la carga una vez, con sus requisitos.
+        abort_unless($vacantes->existePublicada($id), 404);
 
         $this->vacanteId = $id;
     }

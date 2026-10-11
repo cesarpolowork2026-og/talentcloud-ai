@@ -47,24 +47,44 @@ class CalidadDeLaIa
     private function construir(bool $conListas): ResumenCalidadIa
     {
         $desde = now()->subDays(self::DIAS);
-
-        $calculadas = Postulacion::sinFiltroDeEmpresa()->whereNotNull('match_motor')->where('match_calculado_at', '>=', $desde);
-
-        // Un análisis básico por cupo de IA agotado (plan de la empresa) no es una falla del servicio.
-        $sinCupo = (clone $calculadas)->where('ia_sin_cupo', true)->count();
+        $conteos = $this->conteosDeMatching($desde);
 
         return new ResumenCalidadIa(
-            calculadas: (clone $calculadas)->count() - $sinCupo,
-            conIa: (clone $calculadas)->where('match_motor', MotorMatching::Http)->count(),
-            basicas: (clone $calculadas)->where('match_motor', MotorMatching::Fake)->where('ia_sin_cupo', false)->count(),
-            basicasPendientes: Postulacion::sinFiltroDeEmpresa()->where('match_motor', MotorMatching::Fake)->where('ia_sin_cupo', false)->count(),
+            // Un análisis básico por cupo de IA agotado (plan de la empresa) no es una falla del servicio.
+            calculadas: $conteos['calculadas'] - $conteos['sin_cupo'],
+            conIa: $conteos['con_ia'],
+            basicas: $conteos['basicas'],
+            basicasPendientes: $conteos['basicas_pendientes'],
             cvsConError: Cv::query()->where('estado_procesamiento', EstadoProcesamientoCv::Error)->count(),
             trabajosFallidos: DB::table('failed_jobs')->count(),
             ultimosTrabajosFallidos: $conListas ? $this->ultimosTrabajosFallidos() : collect(),
             marcasDelPeriodo: MatchFeedback::sinFiltroDeEmpresa()->where('created_at', '>=', $desde)->count(),
             marcas: $conListas ? $this->ultimasMarcas() : collect(),
-            sinCupo: $sinCupo,
+            sinCupo: $conteos['sin_cupo'],
         );
+    }
+
+    /**
+     * Los conteos de matching de toda la plataforma en una sola lectura de la
+     * tabla (con cinco consultas separadas, el panel la recorría cinco veces).
+     *
+     * @return array{calculadas: int, sin_cupo: int, con_ia: int, basicas: int, basicas_pendientes: int}
+     */
+    private function conteosDeMatching(Carbon $desde): array
+    {
+        $delPeriodo = 'match_motor IS NOT NULL AND match_calculado_at >= ?';
+        $basica = 'match_motor = ? AND NOT ia_sin_cupo';
+        $fake = MotorMatching::Fake->value;
+
+        $fila = Postulacion::sinFiltroDeEmpresa()->toBase()
+            ->selectRaw("COUNT(*) FILTER (WHERE {$delPeriodo}) AS calculadas", [$desde])
+            ->selectRaw("COUNT(*) FILTER (WHERE {$delPeriodo} AND ia_sin_cupo) AS sin_cupo", [$desde])
+            ->selectRaw("COUNT(*) FILTER (WHERE {$delPeriodo} AND match_motor = ?) AS con_ia", [$desde, MotorMatching::Http->value])
+            ->selectRaw("COUNT(*) FILTER (WHERE {$delPeriodo} AND {$basica}) AS basicas", [$desde, $fake])
+            ->selectRaw("COUNT(*) FILTER (WHERE {$basica}) AS basicas_pendientes", [$fake])
+            ->first();
+
+        return array_map(fn ($n) => (int) $n, (array) $fila);
     }
 
     /**

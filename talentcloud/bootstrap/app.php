@@ -40,12 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
             prepend: RoleMiddleware::class,
         );
 
-        // Detrás del balanceador o proxy de GCP (HTTPS terminado antes de llegar aquí): sin esto,
-        // Laravel creería que la petición es http y generaría enlaces y firmas http.
-        // TRUSTED_PROXIES: IP o rangos separados por comas, o "*" si solo el proxy alcanza la app.
-        if (filled($proxies = env('TRUSTED_PROXIES'))) {
-            $middleware->trustProxies(at: $proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
-        }
+        // Los proxies de confianza (TRUSTED_PROXIES) se configuran en AppServiceProvider, desde config.
 
         // Cambiar o recuperar la contraseña cierra las demás sesiones abiertas de la cuenta (la actual se
         // conserva): quien la tuviera robada pierde el acceso.

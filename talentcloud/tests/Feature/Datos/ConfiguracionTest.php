@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -58,6 +59,18 @@ function conEntornoTemporal(array $variables, Closure $prueba): mixed
 it('marca la cookie de sesión como segura en producción aunque no se declare', function () {
     expect(conEntornoTemporal(['APP_ENV' => 'production'], fn () => (require base_path('config/session.php'))['secure']))->toBeTrue()
         ->and(conEntornoTemporal(['APP_ENV' => 'local'], fn () => (require base_path('config/session.php'))['secure']))->toBeFalse();
+});
+
+it('lee el entorno solo desde config/, para que funcione con la configuración en caché', function () {
+    // Con "php artisan optimize" (producción), env() devuelve null fuera de config/.
+    $archivos = collect(['app', 'routes', 'resources/views'])
+        ->flatMap(fn (string $carpeta) => File::allFiles(base_path($carpeta)))
+        ->map(fn (SplFileInfo $archivo) => $archivo->getPathname())
+        ->push(base_path('bootstrap/app.php'));
+
+    $conEnv = $archivos->filter(fn (string $ruta) => preg_match('/(?<![\w>:$])env\(/', (string) file_get_contents($ruta)) === 1);
+
+    expect($conEnv->map(fn (string $ruta) => str_replace(base_path().DIRECTORY_SEPARATOR, '', $ruta))->values()->all())->toBe([]);
 });
 
 it('reconoce el HTTPS del balanceador cuando se declara TRUSTED_PROXIES', function () {

@@ -26,11 +26,14 @@ class DashboardService
 
     public function resumen(): ResumenDelDashboard
     {
+        // Promedio y cantidad en una sola lectura.
         $conMatch = Postulacion::query()
             ->whereNotNull('match_score')
-            ->where('match_calculado_at', '>=', now()->subDays(self::DIAS_DEL_MATCH_PROMEDIO));
-
-        $promedio = (clone $conMatch)->avg('match_score');
+            ->where('match_calculado_at', '>=', now()->subDays(self::DIAS_DEL_MATCH_PROMEDIO))
+            ->toBase()
+            ->selectRaw('AVG(match_score) AS promedio, COUNT(*) AS cantidad')
+            ->first();
+        $promedio = $conMatch->promedio ?? null;
 
         return new ResumenDelDashboard(
             vacantesActivas: Vacante::query()->whereIn('estado', EstadoVacante::activos())->count(),
@@ -39,7 +42,7 @@ class DashboardService
                 ->distinct()
                 ->count('postulaciones.candidato_id'),
             matchPromedio: $promedio === null ? null : (int) round((float) $promedio),
-            postulacionesConMatch: $conMatch->count(),
+            postulacionesConMatch: (int) ($conMatch->cantidad ?? 0),
             entrevistasHoy: Entrevista::query()
                 ->whereBetween('inicia_at', [now()->startOfDay(), now()->endOfDay()])
                 ->where('estado', '!=', EstadoEntrevista::Cancelada)

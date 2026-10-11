@@ -77,3 +77,28 @@ php artisan test --filter=NombreDelTest
 ```
 
 Los tests usan PostgreSQL (`talentcloud_testing`), no SQLite, porque el esquema usa pgvector.
+`tests/Feature/Rendimiento` fija cuántas consultas hace cada página: si una supera su presupuesto, buscar la
+relación que se carga dentro de un bucle (N+1) antes de subir la cifra.
+
+## Rendimiento en producción
+
+En la nube cada consulta viaja por la red hasta la base de datos, así que importan sobre todo cuántas consultas
+hace una página y que el arranque de Laravel no relea su configuración en cada petición.
+
+```bash
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+php artisan optimize          # configuración, rutas, eventos, vistas e iconos en caché
+```
+
+- Después de `optimize`, `env()` solo funciona dentro de `config/` (lo vigila un test): toda variable nueva se
+  lee con `config()`.
+- PHP con OPcache (`opcache.enable=1`, `opcache.validate_timestamps=0` en producción: tras cada despliegue,
+  reiniciar PHP-FPM) y compresión gzip en el servidor web.
+- Cloud SQL en la misma región que la aplicación y por IP privada. Sesiones, caché y colas siguen en la base
+  de datos (compartidas si hay más de un servidor); con un solo servidor, `PERMISSION_CACHE_STORE=file` evita
+  una lectura por petición.
+- Medido con 300 000 postulaciones (base sintética): los listados y el dashboard de una empresa responden en
+  decenas de milisegundos gracias a los índices por empresa. El embudo de toda la plataforma (admin SaaS) tarda
+  unos 300 ms; si el volumen real se acerca a esa cifra, guardar en la postulación la etapa más avanzada
+  alcanzada en lugar de calcularla del historial.

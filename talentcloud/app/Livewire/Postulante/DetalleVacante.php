@@ -31,7 +31,8 @@ class DetalleVacante extends Component
     {
         $this->authorize('verPublicadas', Vacante::class);
 
-        abort_if($vacantes->buscarPublicada($id) === null, 404);
+        // Solo se comprueba aquí: render() la carga una vez, con sus requisitos.
+        abort_unless($vacantes->existePublicada($id), 404);
 
         $this->vacanteId = $id;
     }

@@ -201,6 +201,8 @@ return [
          * file. Using 'default' here means to use the `default` set in cache.php.
          */
 
-        'store' => 'default',
+        // En un solo servidor, "file" evita leer la caché de la base de datos en cada petición
+        // (los roles no cambian en uso: se crean en una migración).
+        'store' => env('PERMISSION_CACHE_STORE', 'default'),
     ],
 ];
