@@ -101,8 +101,8 @@
                     @can('solicitarPlan', $empresa)
                         <x-ui.button size="sm" wire:click="abrirPlanes">Ver planes y precios</x-ui.button>
                     @endcan
-                    {{-- También sin suscripción en curso: el portal guarda las facturas de las anteriores. --}}
-                    @if ($cobroEnLinea && $empresa->pasarela_cliente_id)
+                    {{-- Desde la primera suscripción (también si ya terminó: el portal guarda sus facturas). Un pago abandonado no cuenta. --}}
+                    @if ($cobroEnLinea && $empresa->pasarela_suscripcion_id)
                         @can('pagarPlan', $empresa)
                             <x-ui.button size="sm" variant="ghost" wire:click="gestionarSuscripcion" wire:loading.attr="disabled">Gestionar suscripción</x-ui.button>
                         @endcan

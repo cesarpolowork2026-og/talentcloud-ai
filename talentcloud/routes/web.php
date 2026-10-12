@@ -21,7 +21,10 @@ use App\Livewire\Postulante;
 use App\Livewire\Reclamaciones;
 use App\Livewire\Vacantes;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Livewire\Volt\Volt;
 
 /*
@@ -50,9 +53,10 @@ Route::get('terminos', Legal\Terminos::class)->name('terminos');
 // Libro de Reclamaciones virtual (Ley 29571): público; las hojas las atiende el admin SaaS en /reclamaciones.
 Route::get('libro-de-reclamaciones', Reclamaciones\Formulario::class)->name('reclamaciones.crear');
 
-// Avisos de la pasarela de pago (Stripe): sin sesión ni CSRF, autenticados por su firma.
+// Avisos de la pasarela de pago (Stripe): sin sesión ni CSRF, autenticados por su firma. Sin la sesión,
+// cada aviso no deja una fila en la tabla de sesiones.
 Route::post('stripe/webhook', AvisoDePagoController::class)
-    ->withoutMiddleware(ValidateCsrfToken::class)
+    ->withoutMiddleware([StartSession::class, ShareErrorsFromSession::class, AuthenticateSession::class, ValidateCsrfToken::class])
     ->name('pagos.aviso');
 
 Route::middleware(['auth', 'verified'])->group(function () {

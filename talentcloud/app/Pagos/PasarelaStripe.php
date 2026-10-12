@@ -10,6 +10,7 @@ use App\Enums\PlanEmpresa;
 use App\Models\Empresa;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Stripe\Exception\InvalidRequestException;
 use Stripe\Exception\SignatureVerificationException;
@@ -102,6 +103,19 @@ class PasarelaStripe implements PasarelaDePago
         }
     }
 
+    public function suscripcionVigenteDe(string $clienteId): ?SuscripcionData
+    {
+        foreach ($this->stripe->subscriptions->all(['customer' => $clienteId, 'status' => 'all', 'limit' => 20])->data as $suscripcion) {
+            $datos = $this->datosDe($suscripcion);
+
+            if ($datos->estado->esVigente()) {
+                return $datos;
+            }
+        }
+
+        return null;
+    }
+
     public function leerAviso(string $cuerpo, string $firma): AvisoDePago
     {
         try {
@@ -140,6 +154,11 @@ class PasarelaStripe implements PasarelaDePago
         $precio = (string) data_get($item, 'price.id');
         [$plan, $periodicidad] = $this->planDelPrecio($precio)
             ?? throw new RuntimeException("La suscripción {$s['id']} usa el precio {$precio}, que no está en config('talentcloud.pagos.stripe.precios').");
+
+        if ((int) data_get($item, 'quantity', 1) !== 1) {
+            // Un plan es por empresa: más unidades se cobrarían sin dar nada más. El portal no debe permitirlo.
+            Log::warning("La suscripción {$s['id']} tiene una cantidad distinta de 1: revisar el portal de clientes de Stripe.", ['cantidad' => data_get($item, 'quantity')]);
+        }
 
         // El portal de Stripe programa la cancelación con cancel_at (API reciente) o cancel_at_period_end.
         $cancelaEn = $s['cancel_at'] ?? null;

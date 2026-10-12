@@ -17,7 +17,7 @@ class GestionarSuscripcion
 
     public function url(Empresa $empresa): string
     {
-        if ($empresa->pasarela_cliente_id === null) {
+        if ($empresa->pasarela_cliente_id === null || $empresa->pasarela_suscripcion_id === null) {
             throw new OperacionNoPermitida('Tu empresa todavía no ha pagado un plan en línea.', 'plan');
         }
 

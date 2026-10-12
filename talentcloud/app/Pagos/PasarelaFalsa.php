@@ -62,6 +62,17 @@ class PasarelaFalsa implements PasarelaDePago
         return $this->suscripciones[$id] ?? null;
     }
 
+    public function suscripcionVigenteDe(string $clienteId): ?SuscripcionData
+    {
+        foreach ($this->suscripciones as $suscripcion) {
+            if ($suscripcion->clienteId === $clienteId && $suscripcion->estado->esVigente()) {
+                return $suscripcion;
+            }
+        }
+
+        return null;
+    }
+
     public function leerAviso(string $cuerpo, string $firma): AvisoDePago
     {
         $datos = json_decode($cuerpo, true);

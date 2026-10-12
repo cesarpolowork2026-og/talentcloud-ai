@@ -159,6 +159,23 @@ it('traduce la suscripción de Stripe: plan, periodicidad, estado y fin del peri
         ->and($pasarela->datosDe($suscripcion(['status' => 'incomplete_expired']))->estado)->toBe(EstadoSuscripcion::Terminada);
 });
 
+it('busca entre las suscripciones del cliente la que está vigente', function () {
+    $suscripcion = fn (string $id, string $estado) => [
+        'id' => $id, 'object' => 'subscription', 'customer' => 'cus_1', 'status' => $estado,
+        'items' => ['object' => 'list', 'data' => [['id' => 'si_'.$id, 'object' => 'subscription_item', 'quantity' => 1, 'price' => ['id' => 'price_pro_mes', 'object' => 'price']]]],
+    ];
+    ApiRequestor::setHttpClient($http = clienteHttpDeStripeFalso(['object' => 'list', 'url' => '/v1/subscriptions', 'has_more' => false, 'data' => [
+        $suscripcion('sub_vieja', 'canceled'),
+        $suscripcion('sub_actual', 'past_due'),
+    ]]));
+
+    $vigente = pasarelaStripeDePrueba()->suscripcionVigenteDe('cus_1');
+
+    expect($vigente?->id)->toBe('sub_actual')
+        ->and($vigente?->estado)->toBe(EstadoSuscripcion::PagoPendiente)
+        ->and($http->peticiones[0]['params'])->toMatchArray(['customer' => 'cus_1', 'status' => 'all']);
+});
+
 it('no adivina el plan de un precio que no está configurado', function () {
     $suscripcion = Subscription::constructFrom([
         'id' => 'sub_1', 'object' => 'subscription', 'customer' => 'cus_1', 'status' => 'active',

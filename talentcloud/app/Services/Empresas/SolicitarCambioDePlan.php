@@ -25,8 +25,8 @@ class SolicitarCambioDePlan
             $fila = Empresa::query()->lockForUpdate()->findOrFail($empresa->id);
 
             // Con cobro en línea, Starter y Pro se pagan y una suscripción se cancela en su portal;
-            // a mano solo se pide lo que se cotiza (Enterprise).
-            if (CobroEnLinea::habilitado() && $plan->sePagaEnLinea()) {
+            // a mano solo se pide lo que se cotiza (Enterprise) o dejar un contrato Enterprise.
+            if (CobroEnLinea::habilitado() && $plan->sePagaEnLinea() && $fila->plan !== PlanEmpresa::Enterprise) {
                 throw new OperacionNoPermitida('El plan '.$plan->etiqueta().' se contrata pagando en línea.', 'plan');
             }
 

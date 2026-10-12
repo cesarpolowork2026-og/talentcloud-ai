@@ -17,7 +17,10 @@ use App\Services\Vacantes\OperacionNoPermitida;
  */
 class ContratarPlan
 {
-    public function __construct(private readonly PasarelaDePago $pasarela) {}
+    public function __construct(
+        private readonly PasarelaDePago $pasarela,
+        private readonly SincronizarSuscripcion $sincronizar,
+    ) {}
 
     public function ejecutar(Empresa $empresa, PlanEmpresa $plan, Periodicidad $periodicidad, User $quien): string
     {
@@ -27,9 +30,12 @@ class ContratarPlan
 
         $empresa->refresh();
 
-        if ($empresa->tieneSuscripcionVigente()) {
-            throw new OperacionNoPermitida('Tu empresa ya paga el plan '.$empresa->plan->etiqueta().'. Para cambiarlo o cancelarlo, usa «Gestionar suscripción».', 'plan');
+        if ($empresa->plan === PlanEmpresa::Enterprise) {
+            // Pagar Starter o Pro bajaría un contrato a medida: el cambio se coordina con el equipo.
+            throw new OperacionNoPermitida('Tu plan Enterprise se gestiona con el equipo de TalentCloud: solicita el cambio y te escribiremos.', 'plan');
         }
+
+        $this->verificarSinSuscripcion($empresa);
 
         $cliente = $empresa->pasarela_cliente_id ?? $this->registrarCliente($empresa, $quien);
 
@@ -41,6 +47,24 @@ class ContratarPlan
             route('mi-empresa', ['pago' => 'confirmando']),
             route('mi-empresa', ['pago' => 'cancelado']),
         );
+    }
+
+    /**
+     * Una empresa paga una sola suscripción. Se pregunta también a la pasarela: si acaba
+     * de pagar y su aviso aún no llegó, volver a «Pagar» abriría una segunda suscripción.
+     * Lo que responda se aplica ya, sin esperar al aviso.
+     */
+    private function verificarSinSuscripcion(Empresa $empresa): void
+    {
+        if (! $empresa->tieneSuscripcionVigente() && $empresa->pasarela_cliente_id !== null
+            && ($vigente = $this->pasarela->suscripcionVigenteDe($empresa->pasarela_cliente_id)) !== null) {
+            $this->sincronizar->ejecutar($vigente);
+            $empresa->refresh();
+        }
+
+        if ($empresa->tieneSuscripcionVigente()) {
+            throw new OperacionNoPermitida('Tu empresa ya paga el plan '.$empresa->plan->etiqueta().'. Para cambiarlo o cancelarlo, usa «Gestionar suscripción».', 'plan');
+        }
     }
 
     /** Una sola vez por empresa: si dos pestañas lo crean a la vez, se queda el primero guardado. */

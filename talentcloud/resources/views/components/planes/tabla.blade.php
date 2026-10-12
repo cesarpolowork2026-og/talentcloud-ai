@@ -75,7 +75,7 @@
                         <x-ui.button size="sm" variant="secondary" wire:click="gestionarSuscripcion" wire:loading.attr="disabled">
                             {{ $plan === \App\Enums\PlanEmpresa::Gratis ? 'Cancelar suscripción' : 'Cambiar al plan '.$plan->etiqueta() }}
                         </x-ui.button>
-                    @elseif ($cobro && $plan->sePagaEnLinea())
+                    @elseif ($cobro && $plan->sePagaEnLinea() && $empresa->plan !== \App\Enums\PlanEmpresa::Enterprise)
                         <div class="grid gap-2">
                             @foreach (\App\Enums\Periodicidad::cases() as $periodicidad)
                                 <x-ui.button size="sm" :variant="$recomendado && $periodicidad === \App\Enums\Periodicidad::Mensual ? 'primary' : 'secondary'" wire:click="contratarPlan('{{ $plan->value }}', '{{ $periodicidad->value }}')" wire:loading.attr="disabled">

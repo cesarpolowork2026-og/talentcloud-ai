@@ -78,7 +78,7 @@ empresa pasa a Gratis sin perder nada. Código en `app/Pagos` (puerto `PasarelaD
 
 En el panel de Stripe (modo de prueba): los productos Starter y Pro con un precio mensual y otro anual en PEN
 sin IGV, una tasa de impuesto IGV del 18 % excluida del precio, el portal de clientes (tarjeta, facturas,
-cambio entre Starter y Pro, cancelación al final del periodo) y, en pagos fallidos, cancelar la suscripción
+cambio entre Starter y Pro **sin** permitir cambiar la cantidad, cancelación al final del periodo) y, en pagos fallidos, cancelar la suscripción
 cuando se agoten los reintentos. Sus identificadores van en el `.env` (ver `.env.example`).
 
 En local, para recibir los avisos (el `whsec_...` que muestra va en `STRIPE_WEBHOOK_SECRET`):

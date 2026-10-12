@@ -144,6 +144,49 @@ it('con una suscripción en curso, el cambio de plan y la cancelación van al po
     expect($this->pasarela->pagosIniciados)->toBe([]);
 });
 
+it('si acaba de pagar y el aviso aún no llegó, no deja pagar otra vez y aplica el plan ya', function () {
+    empresaConClienteDePago($this->empresa);
+    $this->pasarela->conSuscripcion(suscripcionDePrueba());
+    actuarComo($this->cuenta);
+
+    Livewire::test(MiEmpresa::class)
+        ->call('contratarPlan', 'pro', 'mensual')
+        ->assertHasErrors('plan')
+        ->assertSee('Tu empresa ya paga el plan Pro.');
+
+    expect($this->pasarela->pagosIniciados)->toBe([])
+        ->and($this->empresa->fresh()->plan)->toBe(PlanEmpresa::Pro);
+    Notification::assertSentToTimes($this->cuenta, AvisoCambioDePlan::class, 1);
+});
+
+it('un plan Enterprise no se baja pagando en línea: el cambio se solicita', function () {
+    $this->empresa->forceFill(['plan' => PlanEmpresa::Enterprise, 'prueba_hasta' => null])->save();
+    actuarComo($this->cuenta);
+
+    Livewire::test(MiEmpresa::class)
+        ->call('abrirPlanes')
+        ->assertDontSee('Pagar S/ 349 al mes')
+        ->assertSee('Solicitar plan Pro')
+        ->call('contratarPlan', 'pro', 'mensual')
+        ->assertHasErrors('plan')
+        ->assertSee('Tu plan Enterprise se gestiona con el equipo de TalentCloud');
+
+    Livewire::test(MiEmpresa::class)->call('solicitarPlan', 'pro')->assertHasNoErrors();
+
+    expect($this->pasarela->pagosIniciados)->toBe([])
+        ->and($this->empresa->fresh()->plan_solicitado)->toBe(PlanEmpresa::Pro);
+});
+
+it('un pago abandonado no muestra «Gestionar suscripción»', function () {
+    actuarComo($this->cuenta);
+    Livewire::test(MiEmpresa::class)->call('contratarPlan', 'pro', 'mensual');
+
+    Livewire::test(MiEmpresa::class)
+        ->assertDontSee('Gestionar suscripción')
+        ->call('gestionarSuscripcion')
+        ->assertHasErrors('plan');
+});
+
 it('solo la cuenta de empresa paga y gestiona la suscripción', function () {
     empresaConClienteDePago($this->empresa);
     actuarComo($this->reclutador);
@@ -171,7 +214,7 @@ it('rechaza un aviso sin firma válida sin tocar nada', function () {
     empresaConClienteDePago($this->empresa);
     $this->pasarela->conSuscripcion(suscripcionDePrueba());
 
-    enviarAvisoDePago(avisoDeSuscripcion(), 'firma-falsa')->assertStatus(400);
+    enviarAvisoDePago(avisoDeSuscripcion(), 'firma-falsa')->assertStatus(400)->assertCookieMissing(config('session.cookie'));
 
     expect($this->empresa->fresh()->plan)->toBe(PlanEmpresa::Gratis);
 });
@@ -186,7 +229,10 @@ it('el pago confirmado da el plan, termina la prueba, atiende la solicitud y avi
     empresaConClienteDePago($this->empresa)->forceFill(['plan_solicitado' => PlanEmpresa::Enterprise, 'plan_solicitado_at' => now()])->save();
     $this->pasarela->conSuscripcion(suscripcionDePrueba());
 
-    enviarAvisoDePago(['id' => 'evt_1', 'tipo' => 'checkout.session.completed', 'suscripcion' => 'sub_1', 'cliente' => 'cus_orbita'])->assertOk();
+    // Sin sesión: cada aviso no deja una fila en la tabla de sesiones.
+    enviarAvisoDePago(['id' => 'evt_1', 'tipo' => 'checkout.session.completed', 'suscripcion' => 'sub_1', 'cliente' => 'cus_orbita'])
+        ->assertOk()
+        ->assertCookieMissing(config('session.cookie'));
 
     $empresa = $this->empresa->fresh();
     expect($empresa->plan)->toBe(PlanEmpresa::Pro)

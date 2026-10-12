@@ -32,6 +32,12 @@ interface PasarelaDePago
     public function suscripcion(string $id): ?SuscripcionData;
 
     /**
+     * La suscripción vigente del cliente según la pasarela, aunque su aviso aún no
+     * haya llegado (null si no tiene ninguna).
+     */
+    public function suscripcionVigenteDe(string $clienteId): ?SuscripcionData;
+
+    /**
      * Lee un aviso (webhook) de la pasarela.
      *
      * @throws AvisoNoValido si la firma no corresponde al cuerpo

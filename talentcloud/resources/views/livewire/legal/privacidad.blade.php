@@ -16,7 +16,7 @@
         </ul>
         <p><strong>Si trabajas en una empresa cliente</strong> (cuenta de empresa o reclutador): tu nombre, correo, rol y las acciones que realizas en la plataforma (por ejemplo, «programó una entrevista»).</p>
         @if (\App\Pagos\CobroEnLinea::habilitado())
-            <p><strong>Si tu empresa paga un plan en línea:</strong> el pago se hace en la página de Stripe, que recibe y guarda los datos de la tarjeta; TalentCloud AI nunca los ve. A Stripe le enviamos el nombre de la empresa y el correo de quien paga, y guardamos solo el identificador de cliente, el plan, el estado de la suscripción y su fecha de renovación.</p>
+            <p><strong>Si tu empresa paga un plan en línea:</strong> el pago se hace en la página de Stripe, que recibe y guarda los datos de la tarjeta; TalentCloud AI nunca los ve. A Stripe le enviamos el nombre de la empresa y el correo de quien paga, y de Stripe guardamos solo los identificadores del cliente y de la suscripción, el plan, si es mensual o anual, su estado y su fecha de renovación o de término.</p>
         @endif
         <p><strong>Si presentas una hoja en el <a href="{{ route('reclamaciones.crear') }}">Libro de Reclamaciones</a>:</strong> tu nombre, documento de identidad, domicilio, correo y teléfono (y los de tu padre, madre o apoderado si eres menor de edad), el servicio y lo que nos cuentas. Los usamos solo para atender tu reclamo o queja y responderte, y los conservamos el tiempo que exige la normativa de protección al consumidor.</p>
         <p><strong>Datos técnicos:</strong> la dirección IP de cada intento de inicio de sesión o de recuperación de contraseña, solo para limitar intentos y proteger las cuentas, y las cookies necesarias para mantener tu sesión (ver el punto 8).</p>
