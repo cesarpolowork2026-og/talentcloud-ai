@@ -19,12 +19,15 @@ use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Repositories\Contracts\CandidatoRepository;
+use App\Repositories\Contracts\EvaluacionRepository;
 use App\Tenancy\TenantContext;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 use Maatwebsite\Excel\Excel as FormatoExcel;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 beforeEach(function () {
@@ -127,11 +130,44 @@ it('escribe los textos como texto, nunca como fórmula', function () {
 
     $archivo = tempnam(sys_get_temp_dir(), 'xlsx');
     file_put_contents($archivo, Excel::raw(new CandidatosExport(app(CandidatoRepository::class)->consultaListado()), FormatoExcel::XLSX));
-    $celda = IOFactory::load($archivo)->getActiveSheet()->getCell('A2');
+    $celda = IOFactory::load($archivo)->getActiveSheet()->getCell('A6');
     unlink($archivo);
 
     expect($celda->getDataType())->toBe(DataType::TYPE_STRING)
         ->and($celda->getValue())->toBe('=HYPERLINK("https://malicioso.example","Clic")');
+});
+
+it('el archivo lleva título, fecha, encabezado de marca, filtros y semáforo en las evaluaciones', function () {
+    $archivo = tempnam(sys_get_temp_dir(), 'xlsx');
+    file_put_contents($archivo, Excel::raw(new EvaluacionesExport(app(EvaluacionRepository::class)->consultaListado()), FormatoExcel::XLSX));
+    // El enlazador de la exportación (todo texto es texto) sigue activo al leer: se restablece para ver los tipos reales del archivo.
+    Cell::setValueBinder(new DefaultValueBinder);
+    $hoja = IOFactory::load($archivo)->getActiveSheet();
+    unlink($archivo);
+
+    expect($hoja->getCell('A1')->getValue())->toBe('TalentCloud AI · Evaluaciones')
+        ->and($hoja->getCell('A2')->getValue())->toBe('Generado el 24 de septiembre de 2026 · 1 registro')
+        ->and($hoja->getCell('A5')->getValue())->toBe('Candidato')
+        ->and($hoja->getStyle('A5')->getFill()->getStartColor()->getARGB())->toBe('FF0B4A63')
+        ->and($hoja->getStyle('A5')->getFont()->getBold())->toBeTrue()
+        ->and($hoja->getFreezePane())->toBe('A6')
+        ->and($hoja->getAutoFilter()->getRange())->toBe('A5:K6')
+        ->and($hoja->getCell('A6')->getValue())->toBe('Elena Ruiz')
+        ->and((float) $hoja->getCell('H6')->getValue())->toBe(8.5)
+        ->and($hoja->getCell('H6')->getDataType())->toBe(DataType::TYPE_NUMERIC)
+        ->and($hoja->getConditionalStyles('D6:H6'))->not->toBeEmpty()
+        ->and($hoja->getCell('A4')->getDataType())->toBe(DataType::TYPE_FORMULA);
+});
+
+it('una exportación sin filas conserva su título y su encabezado', function () {
+    Evaluacion::query()->delete();
+
+    $archivo = tempnam(sys_get_temp_dir(), 'xlsx');
+    file_put_contents($archivo, Excel::raw(new EvaluacionesExport(app(EvaluacionRepository::class)->consultaListado()), FormatoExcel::XLSX));
+    $hoja = IOFactory::load($archivo)->getActiveSheet();
+    unlink($archivo);
+
+    expect($hoja->getCell('A2')->getValue())->toContain('0 registros')->and($hoja->getCell('A5')->getValue())->toBe('Candidato');
 });
 
 it('no exporta sin permiso de ver el listado', function () {

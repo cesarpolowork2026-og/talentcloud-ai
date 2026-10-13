@@ -10,7 +10,9 @@ use App\Livewire\Concerns\WithListado;
 use App\Models\Evaluacion;
 use App\Models\Postulacion;
 use App\Models\User;
+use App\Models\Vacante;
 use App\Repositories\Contracts\EvaluacionRepository;
+use App\Services\Evaluaciones\ComparativaDeFinalistas;
 use App\Services\Evaluaciones\GuardarEvaluacion;
 use App\Services\Vacantes\OperacionNoPermitida;
 use App\Tenancy\TenantContext;
@@ -19,6 +21,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -28,6 +31,14 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class Listado extends Component
 {
     use WithListado;
+
+    /** «lista» (las evaluaciones, una por fila) o «comparar» (las postulaciones evaluadas de una vacante, lado a lado). */
+    #[Url(as: 'vista', except: 'lista')]
+    public string $vista = 'lista';
+
+    /** Vacante a comparar; vacío = la primera que tenga evaluaciones. */
+    #[Url(as: 'vacante', except: '')]
+    public string $vacanteComparada = '';
 
     // Detalle (diálogo del prototipo).
     public bool $mostrarDetalle = false;
@@ -170,15 +181,32 @@ class Listado extends Component
         return Excel::download(new EvaluacionesExport($this->filtrar($evaluaciones->consultaListado()->latest())), 'evaluaciones-'.now()->format('Y-m-d').'.xlsx');
     }
 
-    public function render(EvaluacionRepository $evaluaciones): View
+    public function updatedVista(string $valor): void
     {
+        if (! in_array($valor, ['lista', 'comparar'], true)) {
+            $this->vista = 'lista';
+        }
+    }
+
+    public function render(EvaluacionRepository $evaluaciones, ComparativaDeFinalistas $comparativa): View
+    {
+        $comparando = $this->vista === 'comparar';
+        $conEvaluaciones = $comparando
+            ? Vacante::query()->whereHas('postulaciones.evaluaciones')->orderBy('titulo')->get(['id', 'titulo'])
+            : collect();
+        // Una vacante que no es visible (otra empresa) no se compara: se usa la primera que sí.
+        $vacanteElegida = $conEvaluaciones->firstWhere('id', (int) $this->vacanteComparada) ?? $conEvaluaciones->first();
+
         $seleccionada = $this->evaluacionSeleccionada ? $evaluaciones->buscar($this->evaluacionSeleccionada) : null;
         $porEvaluar = $this->mostrarFormulario && $this->editando === null
             ? $evaluaciones->postulacionesPorEvaluar($this->usuario())
             : collect();
 
         return view('livewire.evaluaciones.listado', [
-            'filas' => $this->listar($evaluaciones->consultaListado()->latest()),
+            'filas' => $comparando ? null : $this->listar($evaluaciones->consultaListado()->latest()),
+            'vacantesConEvaluaciones' => $conEvaluaciones->mapWithKeys(fn (Vacante $v) => [$v->id => $v->titulo])->all(),
+            'vacanteElegida' => $vacanteElegida,
+            'comparativa' => $vacanteElegida ? $comparativa->para($vacanteElegida) : [],
             // Admin SaaS: columna "Empresa" (ve las evaluaciones de todas).
             'vistaGlobal' => app(TenantContext::class)->esGlobal(),
             'seleccionada' => $seleccionada,

@@ -12,6 +12,7 @@ use App\Models\Evaluacion;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Services\Evaluaciones\ComparativaDeFinalistas;
 use App\Services\Evaluaciones\GuardarEvaluacion;
 use App\Services\Vacantes\OperacionNoPermitida;
 use App\Tenancy\TenantContext;
@@ -251,4 +252,63 @@ it('explica por qué no se puede evaluar al llegar desde el Kanban', function ()
         ->assertSet('postulacionId', '')
         ->assertHasErrors('postulacionId')
         ->assertSee('Pablo Vega todavía no tiene una entrevista realizada');
+});
+
+it('compara los finalistas de una vacante lado a lado, con el promedio de cada criterio', function () {
+    // Segunda evaluación de Elena por Diego: el promedio de cada criterio se toma entre los dos.
+    Evaluacion::factory()->create([
+        'postulacion_id' => $this->elena->id,
+        'evaluador_id' => $this->diego->id,
+        'criterios' => [['nombre' => 'Conocimiento técnico', 'puntaje' => 7], ['nombre' => 'Comunicación', 'puntaje' => 9]],
+        'puntaje' => 8,
+    ]);
+    Evaluacion::factory()->create([
+        'postulacion_id' => $this->marco->id,
+        'evaluador_id' => $this->marta->id,
+        'criterios' => [['nombre' => 'Conocimiento técnico', 'puntaje' => 5]],
+        'puntaje' => 5,
+    ]);
+
+    $filas = app(ComparativaDeFinalistas::class)->para($this->backend);
+
+    expect(array_column($filas, 'candidato'))->toBe(['Elena Ruiz', 'Marco Díaz'])
+        ->and($filas[0]['evaluaciones'])->toBe(2)
+        ->and($filas[0]['criterios']['comunicacion'])->toBe(round((float) collect($this->evaluacion->criterios)->firstWhere('nombre', 'Comunicación')['puntaje'] + 9, 1) / 2)
+        ->and($filas[1]['criterios']['comunicacion'])->toBeNull()
+        ->and($filas[0]['promedio'])->toBeGreaterThan($filas[1]['promedio']);
+
+    $pantalla = Livewire::test(Listado::class)
+        ->set('vista', 'comparar')
+        ->assertSee('Comparar finalistas')
+        ->assertSee('Mayor puntaje')
+        ->assertSee('la decisión es tuya');
+
+    // Con tildes, el orden se comprueba sobre el HTML (el JSON de la respuesta las escapa).
+    $html = $pantalla->html();
+    expect(mb_strpos($html, 'Elena Ruiz'))->toBeLessThan(mb_strpos($html, 'Marco Díaz'));
+});
+
+it('sin evaluaciones, comparar explica qué hacer; una vista inválida vuelve a la lista', function () {
+    Evaluacion::query()->delete();
+
+    Livewire::test(Listado::class)->set('vista', 'comparar')->assertSee('Todavía no hay evaluaciones para comparar');
+    Livewire::test(Listado::class)->set('vista', 'otra')->assertSet('vista', 'lista');
+});
+
+it('no compara vacantes de otra empresa', function () {
+    $vela = app(TenantContext::class)->ejecutarGlobal(function () {
+        $vela = Empresa::factory()->create(['nombre' => 'Vela Studio']);
+        $vacante = Vacante::factory()->deEmpresa($vela)->create(['titulo' => 'Product Designer']);
+        $post = Postulacion::factory()->paraVacante($vacante)->create(['candidato_id' => Candidato::factory()->create(['nombre' => 'Iván Torres'])->id]);
+        Evaluacion::factory()->create(['postulacion_id' => $post->id, 'evaluador_id' => User::factory()->deEmpresa($vela)->reclutador()->create()->id]);
+
+        return $vacante;
+    });
+
+    Livewire::test(Listado::class)
+        ->set('vista', 'comparar')
+        ->set('vacanteComparada', (string) $vela->id)
+        ->assertDontSee('Iván Torres')
+        ->assertDontSee('Product Designer')
+        ->assertSee('Elena Ruiz');
 });

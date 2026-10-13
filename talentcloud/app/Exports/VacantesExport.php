@@ -16,6 +16,11 @@ class VacantesExport extends ExportacionDeListado
         return ['Vacante', 'Empresa', 'Ubicación', 'Modalidad', 'Estado', 'Candidatos', 'Creada', 'Publicada'];
     }
 
+    protected function titulo(): string
+    {
+        return 'Vacantes';
+    }
+
     /**
      * @param  Vacante  $vacante
      * @return list<mixed>
@@ -25,7 +30,8 @@ class VacantesExport extends ExportacionDeListado
         return [
             $vacante->titulo,
             $vacante->empresa?->nombre,
-            $vacante->ubicacion,
+            // En una vacante remota no hay ubicación: la modalidad lo dice y, si la hay, la cobertura.
+            $vacante->modalidad->requiereUbicacion() ? $vacante->ubicacion : ($vacante->ubicacion ? 'Cobertura: '.$vacante->ubicacion : null),
             $vacante->modalidad->etiqueta(),
             $vacante->estado->etiqueta(),
             (int) $vacante->postulaciones_count,

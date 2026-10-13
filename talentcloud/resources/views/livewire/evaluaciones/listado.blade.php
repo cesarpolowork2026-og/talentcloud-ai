@@ -9,6 +9,60 @@
         </x-slot:actions>
     </x-ui.page-header>
 
+    <div class="-mt-2 mb-5 flex flex-wrap items-center gap-3">
+        <span id="evaluaciones-vista" class="text-13 text-neutral-700">Ver como</span>
+        <x-ui.seg labelledby="evaluaciones-vista">
+            <x-ui.seg-option name="vista" value="lista" wire:model.live="vista">Lista</x-ui.seg-option>
+            <x-ui.seg-option name="vista" value="comparar" wire:model.live="vista">Comparar finalistas</x-ui.seg-option>
+        </x-ui.seg>
+    </div>
+
+    @if ($vista === 'comparar')
+        {{-- Comparar: las postulaciones evaluadas de una vacante, lado a lado. Ordena; no decide. --}}
+        @if (! $vacanteElegida)
+            <x-ui.empty-state icon="clipboard-text" message="Todavía no hay evaluaciones para comparar. Cuando evalúes a quienes entrevistaste, aquí los verás lado a lado." />
+        @else
+            <div class="mb-4 flex flex-wrap items-end gap-3">
+                <x-ui.field label="Vacante" for="comparar-vacante">
+                    <x-ui.select wire:model.live="vacanteComparada" id="comparar-vacante" :options="$vacantesConEvaluaciones" :selected="$vacanteElegida->id" />
+                </x-ui.field>
+            </div>
+            @php($mejor = collect($comparativa)->max('promedio'))
+            <x-ui.table>
+                <x-slot:head>
+                    <th>Candidato</th>
+                    @foreach ($criterios as $criterio)
+                        <th>{{ $criterio->etiqueta() }}</th>
+                    @endforeach
+                    <th>Puntaje</th><th>Coincidencia IA</th><th>Etapa</th>
+                </x-slot:head>
+                @foreach ($comparativa as $fila)
+                    <tr wire:key="comparar-{{ $fila['postulacion_id'] }}">
+                        <td>
+                            <a href="{{ route('matching.show', $fila['postulacion_id']) }}" wire:navigate class="font-semibold">{{ $fila['candidato'] }}</a>
+                            <div class="text-12 text-neutral-700">{{ $fila['evaluaciones'] }} {{ $fila['evaluaciones'] === 1 ? 'evaluación' : 'evaluaciones' }}</div>
+                        </td>
+                        @foreach ($criterios as $criterio)
+                            @php($nota = $fila['criterios'][$criterio->value])
+                            <td>{{ $nota === null ? '—' : str_replace('.', ',', (string) $nota) }}</td>
+                        @endforeach
+                        <td class="whitespace-nowrap">
+                            <span class="font-semibold">{{ $fila['promedio'] === null ? '—' : str_replace('.', ',', (string) $fila['promedio']) }}/10</span>
+                            @if ($fila['promedio'] !== null && $fila['promedio'] === $mejor && count($comparativa) > 1)
+                                <x-ui.tag tone="accent" class="ml-1">Mayor puntaje</x-ui.tag>
+                            @endif
+                        </td>
+                        <td>{{ $fila['match'] === null ? '—' : $fila['match'].'%' }}</td>
+                        <td><x-ui.tag tone="neutral">{{ $fila['etapa'] }}</x-ui.tag></td>
+                    </tr>
+                @endforeach
+            </x-ui.table>
+            <p class="mt-3 max-w-[80ch] text-13 text-neutral-700">
+                Promedio de cada criterio entre quienes evaluaron a cada persona, ordenado por puntaje. «Mayor puntaje» resume solo las evaluaciones registradas:
+                no sustituye lo que viste en la entrevista ni las notas del equipo, y la decisión es tuya.
+            </p>
+        @endif
+    @else
     <x-ui.listado-controles placeholder="Buscar candidato o vacante…" />
 
     @if ($filas->isEmpty())
@@ -33,6 +87,7 @@
         </x-ui.table>
 
         {{ $filas->links() }}
+    @endif
     @endif
 
     {{-- Detalle (prototipo: "Evaluación · {candidato}") + criterios y comentario --}}

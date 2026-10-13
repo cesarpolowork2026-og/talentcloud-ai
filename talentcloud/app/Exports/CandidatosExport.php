@@ -21,6 +21,17 @@ class CandidatosExport extends ExportacionDeListado
         return ['Candidato', 'Correo', 'Titular', 'Vacante', 'Etapa', 'Match %', 'Análisis', 'Competencias extraídas por IA', 'Postulación'];
     }
 
+    protected function titulo(): string
+    {
+        return 'Candidatos';
+    }
+
+    /** Competencias extraídas por IA. */
+    protected function columnasDeTexto(): array
+    {
+        return [8];
+    }
+
     /**
      * Carga de una vez lo que usa cada fila (sin N+1). Las postulaciones pasan por
      * el filtro de empresa: cada empresa exporta solo las suyas.
