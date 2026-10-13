@@ -32,6 +32,15 @@ return [
     ],
 
     /*
+    | Dashboard: el ahorro de tiempo que se muestra es un cálculo con este supuesto
+    | (minutos que lleva leer y comparar un CV con los requisitos), visible en la
+    | pantalla y ajustable por despliegue.
+    */
+    'ahorro' => [
+        'minutos_por_cv' => (int) env('AHORRO_MINUTOS_POR_CV', 6),
+    ],
+
+    /*
     | Avisos al postulante sobre el estado de su postulación: se envían con
     | esta demora y solo si el estado sigue igual al enviarse (un arrastre
     | accidental en el Kanban, deshecho a tiempo, no llega a avisarse).

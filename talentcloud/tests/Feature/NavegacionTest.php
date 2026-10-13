@@ -16,8 +16,9 @@ function etiquetasDe(User $user): array
     return array_column(Navegacion::enlaces($user), 'etiqueta');
 }
 
-// En el orden del flujo: lo que entra al proceso y lo que se hace con cada candidato.
-$personal = ['Dashboard', 'Vacantes', 'Candidatos', 'Kanban', 'Matching', 'Entrevistas', 'Evaluaciones'];
+// En el orden del flujo: la vacante, la selección de sus postulaciones (tablero y ranking; el
+// matching es su detalle), el banco de candidatos y, después, entrevistas y evaluaciones.
+$personal = ['Dashboard', 'Vacantes', 'Selección', 'Candidatos', 'Entrevistas', 'Evaluaciones'];
 
 it('muestra al reclutador los módulos de selección', function () use ($personal) {
     expect(etiquetasDe(User::factory()->reclutador()->create()))->toBe($personal);
@@ -47,7 +48,7 @@ it('pinta Mi empresa a la derecha, después de la selección y antes de la campa
     $this->actingAs(User::factory()->empresa()->create())
         ->get('/mi-empresa')
         ->assertOk()
-        ->assertSeeInOrder(['Vacantes', 'Candidatos', 'Kanban', 'Evaluaciones', 'Mi empresa', 'Notificaciones'])
+        ->assertSeeInOrder(['Vacantes', 'Selección', 'Candidatos', 'Evaluaciones', 'Mi empresa', 'Notificaciones'])
         ->assertSee('Administración');
 });
 

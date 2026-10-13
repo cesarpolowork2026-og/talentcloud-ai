@@ -2,12 +2,14 @@
 
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
+use App\Enums\EtapaPostulacion;
+use App\Enums\MotorMatching;
+use App\Livewire\Dashboard\ActividadReciente;
 use App\Livewire\Dashboard\Panel;
 use App\Models\Actividad;
 use App\Models\Candidato;
 use App\Models\Empresa;
 use App\Models\Entrevista;
-use App\Models\Evaluacion;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
@@ -23,23 +25,22 @@ beforeEach(function () {
     $this->marta = User::factory()->deEmpresa($this->nimbus)->reclutador()->create(['name' => 'Marta Solís']);
 
     $this->backend = Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Abierta)->create(['titulo' => 'Desarrollador Backend']);
-    Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::EnRevision)->create(['titulo' => 'Data Analyst']);
+    $this->analyst = Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::EnRevision)->create(['titulo' => 'Data Analyst']);
     Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Cerrada)->create(['titulo' => 'DevOps Engineer']);
 
-    // Elena: evaluada dos veces (cuenta una) y con matching reciente; Marco, con matching de hace dos meses.
+    // Elena: analizada con IA hace dos días; Sofía, hace diez; la tercera, hace dos meses (fuera de los 30 días).
     $this->elena = Postulacion::factory()->paraVacante($this->backend)->create([
         'candidato_id' => Candidato::factory()->create(['nombre' => 'Elena Ruiz'])->id,
-        'match_score' => 80, 'match_calculado_at' => now()->subDays(2),
+        'match_score' => 80, 'match_motor' => MotorMatching::Http, 'match_calculado_at' => now()->subDays(2),
     ]);
     $this->sofia = Postulacion::factory()->paraVacante($this->backend)->create([
-        'match_score' => 91, 'match_calculado_at' => now()->subDays(10),
+        'match_score' => 91, 'match_motor' => MotorMatching::Http, 'match_calculado_at' => now()->subDays(10),
     ]);
     Postulacion::factory()->paraVacante($this->backend)->create([
-        'match_score' => 10, 'match_calculado_at' => now()->subDays(60),
+        'match_score' => 10, 'match_motor' => MotorMatching::Http, 'match_calculado_at' => now()->subDays(60),
     ]);
-    Evaluacion::factory()->count(2)->sequence(fn () => [])->create(['postulacion_id' => $this->elena->id]);
 
-    // Hoy: una confirmada y una cancelada (no cuenta); mañana: no cuenta.
+    // Hoy: una confirmada y una cancelada (no cuenta); mañana: una pendiente.
     Entrevista::factory()->create(['postulacion_id' => $this->elena->id, 'inicia_at' => '2026-09-24 15:00', 'estado' => EstadoEntrevista::Confirmada]);
     Entrevista::factory()->create(['postulacion_id' => $this->sofia->id, 'inicia_at' => '2026-09-24 11:00', 'estado' => EstadoEntrevista::Cancelada]);
     Entrevista::factory()->create(['postulacion_id' => $this->sofia->id, 'inicia_at' => '2026-09-25 11:00']);
@@ -48,7 +49,7 @@ beforeEach(function () {
     app(TenantContext::class)->ejecutarGlobal(function () {
         $vela = Empresa::factory()->create(['nombre' => 'Vela Studio']);
         $vacante = Vacante::factory()->deEmpresa($vela)->enEstado(EstadoVacante::Abierta)->create(['titulo' => 'Product Designer']);
-        Postulacion::factory()->paraVacante($vacante)->create(['match_score' => 20, 'match_calculado_at' => now()]);
+        Postulacion::factory()->paraVacante($vacante)->create(['match_score' => 20, 'match_motor' => MotorMatching::Http, 'match_calculado_at' => now()]);
         $actividad = new Actividad(['tipo' => 'vacante.creada', 'descripcion' => 'Vela Studio creó la vacante Product Designer.']);
         $actividad->empresa_id = $vela->id;
         $actividad->save();
@@ -67,43 +68,107 @@ it('calcula los indicadores con el alcance de la empresa', function () {
     $resumen = app(DashboardService::class)->resumen();
 
     expect($resumen->vacantesActivas)->toBe(2)
-        ->and($resumen->candidatosEvaluados)->toBe(1)
-        ->and($resumen->matchPromedio)->toBe(86) // (80 + 91) / 2; el de hace 60 días no cuenta
-        ->and($resumen->postulacionesConMatch)->toBe(2)
+        ->and($resumen->postulantes)->toBe(3)
+        ->and($resumen->postulacionesNuevas)->toBe(3)
+        ->and($resumen->porRevisar)->toBe(3)
         ->and($resumen->entrevistasHoy)->toBe(1)
-        ->and($resumen->vacantesRecientes->pluck('titulo')->all())->not->toContain('Product Designer')
-        ->and($resumen->actividad->pluck('descripcion')->all())->toBe(['Sofía Nieto avanzó a la etapa de entrevista.']);
+        ->and($resumen->entrevistasProximas)->toBe(2) // la confirmada de hoy a las 15:00 y la pendiente de mañana
+        ->and($resumen->analizadasConIa)->toBe(2) // la de hace dos meses queda fuera de los 30 días
+        ->and($resumen->vacantesConMovimiento->pluck('titulo')->all())->not->toContain('Product Designer', 'DevOps Engineer');
 });
 
-it('muestra el dashboard del prototipo', function () {
+it('calcula las horas ahorradas con el supuesto de minutos por CV y lo declara', function () {
+    config(['talentcloud.ahorro.minutos_por_cv' => 6]);
+
+    $resumen = app(DashboardService::class)->resumen();
+
+    expect($resumen->horasAhorradas())->toBe(0.2) // 2 CV × 6 min = 12 min
+        ->and($resumen->minutosPorCv)->toBe(6);
+
+    Livewire::test(Panel::class)->assertSee('2 postulaciones analizadas con IA en 30 días, a 6 min de lectura por CV (supuesto)');
+});
+
+it('muestra el dashboard con lo que pide atención primero', function () {
     $this->get('/dashboard')
         ->assertOk()
         ->assertSee('Resumen de la actividad de selección de Nimbus Corp.')
-        ->assertSeeInOrder(['Vacantes activas', '2', 'Candidatos evaluados', '1', 'Match promedio', '86%', 'Entrevistas hoy', '1'])
-        ->assertSee('Vacantes recientes')
-        ->assertSeeInOrder(['Vacante', 'Empresa', 'Candidatos', 'Estado'])
-        ->assertSee('Actividad reciente')
+        ->assertSeeInOrder(['Vacantes activas', '2', 'Postulantes', '3', 'Por revisar', '3', 'Entrevistas hoy', '1'])
+        ->assertSeeInOrder(['Requiere tu atención', 'Tienes 1 entrevista hoy.', '1 entrevista por confirmar.'])
+        ->assertSeeInOrder(['Tiempo ahorrado con IA', 'Vacantes en curso', 'Actividad reciente'])
         ->assertSee('Sofía Nieto avanzó a la etapa de entrevista.')
-        ->assertDontSee('Vela Studio creó la vacante');
+        ->assertDontSee('Vela Studio creó la vacante')
+        // Se retiraron los indicadores que informaban pero no ayudaban a decidir.
+        ->assertDontSee('Match promedio')
+        ->assertDontSee('Candidatos evaluados');
 });
 
-it('abre el detalle del match promedio también con el teclado', function () {
-    $html = Livewire::test(Panel::class)->html();
+it('avisa de las postulaciones que llevan días sin revisarse y de las vacantes sin postulaciones', function () {
+    $this->elena->forceFill(['etapa_cambiada_at' => now()->subDays(5)])->save();
+    $this->sofia->forceFill(['etapa_cambiada_at' => now()->subDays(1)])->save();
 
-    // Solo el indicador con acción es un botón; los demás siguen siendo tarjetas.
-    expect($html)->toMatch('/<button\s[^>]*type="button"[^>]*>\s*<span class="card-kicker block">Match promedio<\/span>/')
-        ->and(substr_count($html, '<span class="card-kicker block">'))->toBe(4);
-});
+    // Una abierta hace dos semanas sin ninguna postulación.
+    $vacia = Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Abierta)->create(['titulo' => 'Soporte TI', 'publicada_at' => now()->subDays(14)]);
 
-it('explica el match promedio como en el prototipo', function () {
+    $textos = collect(app(DashboardService::class)->resumen()->atencion)->pluck('texto')->all();
+
+    // La tercera postulación nunca cambió de etapa y llegó ahora: tampoco cuenta como atrasada.
+    expect($textos)->toContain('Desarrollador Backend: 1 postulación lleva más de 3 días sin revisar.')
+        ->and(collect($textos)->first(fn ($t) => str_contains($t, 'Soporte TI')))->toContain('más de 7 días abierta sin postulaciones');
+
     Livewire::test(Panel::class)
-        ->set('mostrarDetalleDelMatch', true)
-        ->assertSee('Match promedio · 86%')
-        ->assertSee('Calculado sobre 2 postulaciones con matching en los últimos 30 días.')
-        ->assertSee('La IA pondera competencias técnicas, experiencia y evidencia textual del CV.');
+        ->assertSee('Desarrollador Backend: 1 postulación lleva más de 3 días sin revisar.')
+        ->assertSeeHtml(route('seleccion.show', $this->backend))
+        ->assertSeeHtml(route('vacantes.show', $vacia));
 });
 
-it('abre la vista previa de una vacante reciente', function () {
+it('no cuenta como por revisar a quien retiró su postulación ni a las vacantes cerradas', function () {
+    $this->elena->forceFill(['retirada_at' => now()])->save();
+    $cerrada = Vacante::sinFiltroDeEmpresa()->where('titulo', 'DevOps Engineer')->firstOrFail();
+    Postulacion::factory()->paraVacante($cerrada)->create();
+
+    expect(app(DashboardService::class)->resumen()->porRevisar)->toBe(2);
+});
+
+it('dice que todo está al día cuando no hay nada pendiente', function () {
+    Entrevista::query()->delete();
+    Postulacion::query()->update(['etapa' => EtapaPostulacion::EnRevision]);
+
+    Livewire::test(Panel::class)->assertSee('Todo al día');
+});
+
+it('ordena las vacantes en curso por lo que tienen por revisar y muestra su mejor match', function () {
+    Postulacion::factory()->paraVacante($this->analyst)->enEtapa(EtapaPostulacion::EnRevision)->create(['match_score' => 55]);
+
+    $filas = app(DashboardService::class)->resumen()->vacantesConMovimiento;
+
+    expect($filas->pluck('titulo')->all())->toBe(['Desarrollador Backend', 'Data Analyst'])
+        ->and((int) $filas[0]->por_revisar)->toBe(3)
+        ->and((int) round((float) $filas[0]->mejor_match))->toBe(91)
+        ->and((int) $filas[1]->por_revisar)->toBe(0);
+
+    Livewire::test(Panel::class)->assertSeeInOrder(['Vacante', 'Postulantes', 'Por revisar', 'Mejor match', 'Estado'])->assertSee('91%');
+});
+
+it('la actividad reciente es un componente que se refresca solo y muestra solo lo de la empresa', function () {
+    $html = Livewire::test(ActividadReciente::class)
+        ->assertSee('Sofía Nieto avanzó a la etapa de entrevista.')
+        ->assertDontSee('Vela Studio creó la vacante')
+        ->html();
+
+    expect($html)->toContain('wire:poll.30s.visible');
+});
+
+it('muestra el plan de la empresa con su uso y, en la prueba, los días que quedan', function () {
+    $this->nimbus->forceFill(['plan' => 'gratis', 'prueba_hasta' => now()->addDays(5)])->save();
+
+    Livewire::test(Panel::class)
+        ->assertSee('Tu plan · Pro (prueba)')
+        ->assertSee('quedan 5 días de prueba del plan Pro')
+        ->assertSee('Vacantes activas')
+        ->assertSee('Ver planes y precios'); // un reclutador no gestiona el plan: ve la tabla pública
+});
+
+it('abre la vista previa de una vacante de la lista', function () {
     Livewire::test(Panel::class)
         ->call('verVistaPrevia', $this->backend->id)
         ->assertSet('mostrarVistaPrevia', true)
@@ -119,19 +184,12 @@ it('muestra al admin SaaS el panel de la plataforma, de lo general a lo particul
     $html = Livewire::test(Panel::class)
         ->assertSee('Panel de la plataforma')
         ->assertSee('Vela Studio creó la vacante Product Designer.')
+        ->assertDontSee('Tu plan ·')
         ->html();
 
     $orden = array_map(fn (string $texto) => mb_strpos($html, $texto), ['1 · Empresas cliente', '2 · Salud de la IA', '3 · Actividad de selección', 'Embudo de selección']);
     expect($orden)->not->toContain(false)->and($orden)->toBe(collect($orden)->sort()->values()->all());
     expect(app(DashboardService::class)->resumen()->vacantesActivas)->toBe(3);
-});
-
-it('muestra un guion cuando no hay matching reciente', function () {
-    Postulacion::query()->update(['match_score' => null]);
-
-    Livewire::test(Panel::class)->set('mostrarDetalleDelMatch', true)
-        ->assertSee('Match promedio · —')
-        ->assertSee('Todavía no hay postulaciones con matching en los últimos 30 días.');
 });
 
 it('no deja entrar al postulante', function () {

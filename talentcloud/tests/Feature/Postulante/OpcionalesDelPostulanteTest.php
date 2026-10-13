@@ -11,10 +11,10 @@ use App\Enums\TipoActividad;
 use App\Jobs\AvisarEstadoDePostulacion;
 use App\Livewire\Empleos\Detalle as EmpleoDetalle;
 use App\Livewire\Empleos\Listado as Empleos;
-use App\Livewire\Kanban\Tablero;
 use App\Livewire\Postulante\DetalleVacante as DetalleDelPostulante;
 use App\Livewire\Postulante\MisPostulaciones;
 use App\Livewire\Postulante\Vacantes as VacantesDelPostulante;
+use App\Livewire\Seleccion\Central;
 use App\Models\Actividad;
 use App\Models\Candidato;
 use App\Models\Competencia;
@@ -170,7 +170,7 @@ it('la empresa no puede devolver una retirada al proceso y la ve marcada en el K
     expect(fn () => app(MoverPostulacion::class)->ejecutar($this->postulacion->fresh(), EtapaPostulacion::EnRevision, 0, $this->marta))
         ->toThrow(OperacionNoPermitida::class, 'Marco Díaz retiró su postulación: no se puede volver a mover.');
 
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])
+    Livewire::test(Central::class, ['vacante' => $this->backend])
         ->assertSeeHtml('>Retirada</span>')
         ->call('abrir', $this->postulacion->id)
         ->assertSee('Retiró su postulación el')
@@ -361,7 +361,7 @@ it('una tarjeta retirada no se puede arrastrar en el Kanban', function () {
     app(RetirarPostulacion::class)->ejecutar($this->postulacion, $this->marco);
     actuarComo($this->marta);
 
-    $html = Livewire::test(Tablero::class, ['vacante' => $this->backend])->html();
+    $html = Livewire::test(Central::class, ['vacante' => $this->backend])->html();
 
     expect($html)->toMatch('/data-postulacion="'.$this->postulacion->id.'"\s+data-fija/')
         ->and($html)->not->toMatch('/data-postulacion="'.$otra->id.'"\s+data-fija/');

@@ -3,12 +3,20 @@
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Enums\MotorMatching;
+use App\Enums\NivelCoincidencia;
+use App\Enums\TipoRequisito;
 use App\Events\PostulacionCambioDeEtapa;
-use App\Livewire\Kanban\Tablero;
+use App\Livewire\Seleccion\Central;
+use App\Matching\CumplimientoDeRequisitos;
+use App\Matching\MatchResult;
+use App\Matching\RequisitoMatch;
 use App\Models\Candidato;
+use App\Models\Competencia;
 use App\Models\Empresa;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
+use App\Models\Requisito;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Services\Postulaciones\MoverPostulacion;
@@ -50,30 +58,31 @@ function columna(Vacante $vacante, EtapaPostulacion $etapa): array
         ->all();
 }
 
-it('muestra el Kanban del prototipo', function () {
+it('muestra el tablero con las seis columnas y el match de cada tarjeta', function () {
     $this->get(route('kanban.show', $this->backend))
         ->assertOk()
-        ->assertSee('Kanban · Desarrollador Backend')
+        ->assertSee('Selección · Desarrollador Backend')
         ->assertSee('Nimbus Corp — 3 postulaciones activas.')
         ->assertSeeInOrder(['Postulado', 'En revisión', 'Entrevista', 'Oferta', 'Contratado', 'Descartado'])
-        ->assertSee('88% match')
+        ->assertSee('88%')
         ->assertSee('Descartar a Elena Ruiz', false);
 });
 
 it('abre desde el menú la vacante activa más reciente', function () {
-    $this->get('/kanban')->assertOk()->assertSee('Kanban · Desarrollador Backend');
+    $this->get('/seleccion')->assertOk()->assertSee('Selección · Desarrollador Backend');
+    $this->get('/kanban')->assertOk()->assertSee('Selección · Desarrollador Backend');
 });
 
 it('muestra un estado vacío si no hay vacantes activas', function () {
     $this->backend->update(['estado' => EstadoVacante::Cerrada]);
 
-    $this->get('/kanban')->assertOk()->assertSee('No hay vacantes abiertas para mostrar su Kanban.');
+    $this->get('/kanban')->assertOk()->assertSee('No hay vacantes abiertas para mostrar su selección.');
 });
 
 it('mueve entre columnas y renumera ambas sin huecos', function () {
     Event::fake([PostulacionCambioDeEtapa::class]);
 
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])
+    Livewire::test(Central::class, ['vacante' => $this->backend])
         ->call('mover', $this->elena->id, 'en_revision', 0)
         ->assertHasNoErrors();
 
@@ -102,7 +111,7 @@ it('ajusta posiciones fuera de rango al final de la columna', function () {
 });
 
 it('descarta con la confirmación del prototipo, al final de Descartado', function () {
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])
+    Livewire::test(Central::class, ['vacante' => $this->backend])
         ->call('confirmarDescarte', $this->elena->id)
         ->assertSet('mostrarDescarte', true)
         ->assertSee('Descartar a Elena Ruiz')
@@ -114,7 +123,7 @@ it('descarta con la confirmación del prototipo, al final de Descartado', functi
 });
 
 it('mueve desde el diálogo con "Mover a…" (alternativa al arrastre)', function () {
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])
+    Livewire::test(Central::class, ['vacante' => $this->backend])
         ->call('abrir', $this->marco->id)
         ->assertSee('Columna: Postulado.')
         ->assertSee('64% de coincidencia con la vacante.')
@@ -128,8 +137,8 @@ it('mueve desde el diálogo con "Mover a…" (alternativa al arrastre)', functio
 it('no permite mover en una vacante cerrada', function () {
     $this->backend->update(['estado' => EstadoVacante::Cerrada]);
 
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])
-        ->assertSee('La vacante está cerrada: el Kanban es de solo lectura.')
+    Livewire::test(Central::class, ['vacante' => $this->backend])
+        ->assertSee('La vacante está cerrada: la selección es de solo lectura.')
         ->call('mover', $this->elena->id, 'oferta', 0)
         ->assertHasErrors(['tablero']);
 
@@ -137,7 +146,7 @@ it('no permite mover en una vacante cerrada', function () {
 });
 
 it('rechaza etapas inexistentes', function () {
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])
+    Livewire::test(Central::class, ['vacante' => $this->backend])
         ->call('mover', $this->elena->id, 'aprobado-por-ia', 0)
         ->assertNotFound();
 });
@@ -149,8 +158,8 @@ it('no deja mover postulaciones de otra vacante ni de otra empresa', function ()
     );
     $otraPropia = Postulacion::factory()->paraVacante(Vacante::factory()->deEmpresa($this->nimbus)->create())->create();
 
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])->call('mover', $ajena->id, 'oferta', 0)->assertNotFound();
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])->call('mover', $otraPropia->id, 'oferta', 0)->assertNotFound();
+    Livewire::test(Central::class, ['vacante' => $this->backend])->call('mover', $ajena->id, 'oferta', 0)->assertNotFound();
+    Livewire::test(Central::class, ['vacante' => $this->backend])->call('mover', $otraPropia->id, 'oferta', 0)->assertNotFound();
 
     $this->get(route('kanban.show', $ajena->vacante_id))->assertNotFound();
 });
@@ -170,7 +179,7 @@ it('bloquea movimientos en una vacante cerrada también desde el servicio', func
 it('no descarta a quien tiene entrevistas por realizar y explica qué hacer', function () {
     Entrevista::factory()->create(['postulacion_id' => $this->sofia->id, 'estado' => EstadoEntrevista::Confirmada]);
 
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])
+    Livewire::test(Central::class, ['vacante' => $this->backend])
         ->call('confirmarDescarte', $this->sofia->id)
         ->call('descartar')
         ->assertHasErrors('tablero')
@@ -190,7 +199,7 @@ it('descarta cuando sus entrevistas ya están realizadas o canceladas', function
 });
 
 it('ofrece "Evaluar" solo a quien ya tuvo una entrevista realizada', function () {
-    $tablero = Livewire::test(Tablero::class, ['vacante' => $this->backend]);
+    $tablero = Livewire::test(Central::class, ['vacante' => $this->backend]);
 
     $tablero->call('abrir', $this->sofia->id)->assertDontSee('Evaluar');
 
@@ -200,6 +209,70 @@ it('ofrece "Evaluar" solo a quien ya tuvo una entrevista realizada', function ()
 });
 
 it('abre la tarjeta con el teclado: el nombre es un botón', function () {
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])
+    Livewire::test(Central::class, ['vacante' => $this->backend])
         ->assertSeeHtml('wire:click.stop="abrir('.$this->sofia->id.')"');
+});
+
+it('ordena el ranking por coincidencia y oculta a los descartados salvo que se pida', function () {
+    $pantalla = Livewire::test(Central::class, ['vacante' => $this->backend])->set('vista', 'ranking');
+    $html = $pantalla->html();
+
+    $posicion = fn (string $nombre) => mb_strpos($html, $nombre);
+
+    expect($posicion('Sofía Nieto'))->toBeLessThan($posicion('Elena Ruiz'))
+        ->and($posicion('Elena Ruiz'))->toBeLessThan($posicion('Marco Díaz'))
+        ->and($posicion('Pablo Vega'))->toBeFalse();
+
+    $pantalla->set('verDescartados', true)->assertSee('Pablo Vega');
+});
+
+it('el ranking solo ordena: no mueve ni descarta a nadie', function () {
+    $antes = Postulacion::where('vacante_id', $this->backend->id)->pluck('etapa', 'id')->all();
+
+    Livewire::test(Central::class, ['vacante' => $this->backend])->set('vista', 'ranking')->set('soloObligatorios', true);
+
+    expect(Postulacion::where('vacante_id', $this->backend->id)->pluck('etapa', 'id')->all())->toEqual($antes);
+});
+
+it('muestra qué requisitos de la vacante cubre cada CV y filtra por los obligatorios', function () {
+    $java = Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Java')->id, 'tipo' => TipoRequisito::Obligatorio]);
+    $docker = Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Docker')->id, 'tipo' => TipoRequisito::Deseable]);
+
+    $detalle = fn (NivelCoincidencia $nivelJava, NivelCoincidencia $nivelDocker) => (new MatchResult(80, [
+        new RequisitoMatch($java->id, 'Java', 80, $nivelJava, 'Java 5 años', 'ok'),
+        new RequisitoMatch($docker->id, 'Docker', 50, $nivelDocker, null, 'ok'),
+    ], MotorMatching::Fake))->aArreglo();
+
+    $this->elena->update(['match_detalle' => $detalle(NivelCoincidencia::Coincide, NivelCoincidencia::NoEncontrado)]);
+    $this->sofia->update(['match_detalle' => $detalle(NivelCoincidencia::NoEncontrado, NivelCoincidencia::Coincide)]);
+
+    $pantalla = Livewire::test(Central::class, ['vacante' => $this->backend])
+        ->assertSee('1 de 2 requisitos')
+        ->assertSee('falta 1 obligatorio');
+
+    // Solo Elena cubre el obligatorio (Java): Sofía y quienes no tienen análisis quedan fuera.
+    $pantalla->set('soloObligatorios', true)
+        ->assertSee('Elena Ruiz')
+        ->assertDontSee('Sofía Nieto')
+        ->assertDontSee('Marco Díaz')
+        ->assertSee('postulaciones ocultas por el filtro');
+});
+
+it('cuenta como «sin calcular» el requisito que se agregó después del cálculo', function () {
+    $java = Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Java')->id, 'tipo' => TipoRequisito::Obligatorio]);
+    $detalle = (new MatchResult(70, [new RequisitoMatch($java->id, 'Java', 70, NivelCoincidencia::Coincide, 'x', 'ok')], MotorMatching::Fake))->aArreglo();
+
+    Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Terraform')->id, 'tipo' => TipoRequisito::Deseable]);
+
+    $cumplimiento = CumplimientoDeRequisitos::de($detalle, $this->backend->requisitos()->with('competencia')->get());
+
+    expect($cumplimiento->total())->toBe(2)
+        ->and($cumplimiento->cumplidos())->toBe(1)
+        ->and($cumplimiento->cubreLosObligatorios())->toBeTrue()
+        ->and(CumplimientoDeRequisitos::de(null, $this->backend->requisitos()->with('competencia')->get())->hayCalculo())->toBeFalse();
+});
+
+it('la vista del ranking se abre desde la dirección y /matching lleva a ella', function () {
+    $this->get('/seleccion?vista=ranking')->assertOk()->assertSee('Ordenado por coincidencia');
+    $this->get('/matching')->assertRedirect('/seleccion?vista=ranking');
 });

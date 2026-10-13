@@ -64,7 +64,7 @@ new class extends Component
         return [
             ...$enlace,
             'href' => Route::has($enlace['ruta']) ? route($enlace['ruta']) : null,
-            'activo' => Str::is($enlace['patron'], $this->rutaActual),
+            'activo' => Str::is(explode('|', $enlace['patron']), $this->rutaActual),
         ];
     }
 

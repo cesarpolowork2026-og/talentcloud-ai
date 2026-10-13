@@ -114,51 +114,104 @@
         </div>
     @endif
 
+    {{-- Indicadores: lo que hay que mirar primero. --}}
     <div class="mb-6 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <x-ui.stat label="Vacantes activas" :value="$resumen->vacantesActivas" />
-        <x-ui.stat label="Candidatos evaluados" :value="$resumen->candidatosEvaluados" />
-        <x-ui.stat
-            label="Match promedio"
-            :value="$resumen->matchPromedio === null ? '—' : $resumen->matchPromedio.'%'"
-            highlight
-            wire:click="$set('mostrarDetalleDelMatch', true)"
-        />
+        <x-ui.stat label="Postulantes" :value="$resumen->postulantes" />
+        <x-ui.stat label="Por revisar" :value="$resumen->porRevisar" highlight />
         <x-ui.stat label="Entrevistas hoy" :value="$resumen->entrevistasHoy" />
     </div>
+    <p class="-mt-3 mb-6 text-13 text-neutral-700">
+        {{ $resumen->postulacionesNuevas }} {{ $resumen->postulacionesNuevas === 1 ? 'postulación nueva' : 'postulaciones nuevas' }} en los últimos {{ App\Services\Dashboard\DashboardService::DIAS_NUEVAS }} días
+        · {{ $resumen->entrevistasProximas }} {{ $resumen->entrevistasProximas === 1 ? 'entrevista' : 'entrevistas' }} en los próximos 7 días.
+        «Por revisar» son las postulaciones que siguen en «Postulado».
+    </p>
 
-    <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <section>
-            <h2 class="mb-3 text-16">Vacantes recientes</h2>
-            @if ($resumen->vacantesRecientes->isEmpty())
-                <x-ui.empty-state icon="briefcase" message="Todavía no hay vacantes." />
+    <div class="mb-8 grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        {{-- Qué pide una acción hoy --}}
+        <section aria-labelledby="atencion-titulo">
+            <h2 id="atencion-titulo" class="mb-3 text-16">Requiere tu atención</h2>
+            @if ($resumen->atencion === [])
+                <x-ui.card>
+                    <p class="m-0 flex items-center gap-2 text-14 text-neutral-800"><x-ui.icon name="seal-check" :size="18" class="text-accent-700" /> Todo al día: no hay entrevistas por confirmar ni postulaciones esperando más de {{ $diasSinRevisar }} días.</p>
+                </x-ui.card>
             @else
-                <x-ui.table>
-                    <x-slot:head>
-                        <th>Vacante</th><th>Empresa</th><th>Candidatos</th><th>Estado</th>
-                    </x-slot:head>
-                    @foreach ($resumen->vacantesRecientes as $vacante)
-                        <tr class="tc-row" wire:key="reciente-{{ $vacante->id }}" wire:click="verVistaPrevia({{ $vacante->id }})">
-                            <td><x-ui.boton-fila wire:click.stop="verVistaPrevia({{ $vacante->id }})">{{ $vacante->titulo }}</x-ui.boton-fila></td>
-                            <td>{{ $vacante->empresa?->nombre }}</td>
-                            <td>{{ $vacante->postulaciones_count }}</td>
-                            <td><x-ui.estado :valor="$vacante->estado" /></td>
-                        </tr>
-                    @endforeach
-                </x-ui.table>
+                <x-ui.card class="!gap-0 !p-0">
+                    <ul class="m-0 list-none p-0">
+                        @foreach ($resumen->atencion as $aviso)
+                            <li class="border-b border-divider last:border-b-0" wire:key="atencion-{{ $loop->index }}">
+                                <a href="{{ route($aviso['ruta'], $aviso['parametros']) }}" wire:navigate class="flex items-center gap-3 px-4 py-3 text-14 no-underline hover:bg-neutral-100">
+                                    <x-ui.icon :name="$aviso['icono']" :size="20" :class="$aviso['urgente'] ? 'text-accent-2-700' : 'text-accent-700'" />
+                                    <span @class(['flex-1 text-neutral-800', 'font-semibold' => $aviso['urgente']])>{{ $aviso['texto'] }}</span>
+                                    <span class="text-13 text-accent-700">Ver</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </x-ui.card>
             @endif
         </section>
 
-        <section>
-            <h2 class="mb-3 text-16">Actividad reciente</h2>
-            @forelse ($resumen->actividad as $actividad)
-                <div class="mb-3 flex gap-2 text-14" wire:key="actividad-{{ $actividad->id }}">
-                    <x-ui.icon name="star-four" :size="15" class="mt-[3px] text-accent" />
-                    <span class="text-neutral-800">{{ $actividad->descripcion }}</span>
-                </div>
-            @empty
-                <p class="m-0 text-14 text-neutral-600">Aún no hay actividad.</p>
-            @endforelse
+        <div class="grid gap-4">
+            {{-- Ahorro de tiempo: un cálculo con el supuesto a la vista, no una promesa. --}}
+            <x-ui.card kicker="Tiempo ahorrado con IA">
+                @if ($resumen->analizadasConIa === 0)
+                    <p class="m-0 text-14 text-neutral-800">Aún no hay postulaciones analizadas con IA en los últimos {{ $diasDelAhorro }} días. Cuando lleguen, aquí verás cuánto tiempo de lectura de CV te ahorran.</p>
+                @else
+                    <p class="m-0 font-heading text-32 font-semibold text-accent-700">≈ {{ str_replace('.', ',', (string) $resumen->horasAhorradas()) }} h</p>
+                    <p class="m-0 text-13 text-neutral-700">{{ $resumen->analizadasConIa }} {{ $resumen->analizadasConIa === 1 ? 'postulación analizada' : 'postulaciones analizadas' }} con IA en {{ $diasDelAhorro }} días, a {{ $resumen->minutosPorCv }} min de lectura por CV (supuesto). La IA ordena y explica; tú decides.</p>
+                @endif
+            </x-ui.card>
+
+            {{-- Plan: dónde está la empresa y cuánto le queda (el momento natural de pensar en un plan mayor). --}}
+            @if ($uso && $empresa)
+                <x-ui.card :kicker="'Tu plan · '.$empresa->etiquetaDelPlan()">
+                    @if ($empresa->enPrueba())
+                        <p class="m-0 text-13 text-neutral-800">Te {{ $empresa->diasDePrueba() === 1 ? 'queda 1 día' : 'quedan '.$empresa->diasDePrueba().' días' }} de prueba del plan {{ App\Enums\PlanEmpresa::PLAN_DE_PRUEBA->etiqueta() }}.</p>
+                    @endif
+                    <x-empresas.uso-del-plan :uso="$uso" />
+                    <div class="flex flex-wrap gap-2">
+                        @can('solicitarPlan', $empresa)
+                            <x-ui.button size="sm" :href="route('mi-empresa')" wire:navigate>Ver planes y gestionar</x-ui.button>
+                        @else
+                            <x-ui.button size="sm" :href="route('planes')" wire:navigate>Ver planes y precios</x-ui.button>
+                        @endcan
+                    </div>
+                </x-ui.card>
+            @endif
+        </div>
+    </div>
+
+    <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <section aria-labelledby="vacantes-titulo">
+            <h2 id="vacantes-titulo" class="mb-3 text-16">Vacantes en curso</h2>
+            @if ($resumen->vacantesConMovimiento->isEmpty())
+                <x-ui.empty-state icon="briefcase" message="Todavía no hay vacantes activas.">
+                    @can('create', App\Models\Vacante::class)
+                        <x-ui.button variant="primary" :href="route('vacantes.index', ['nueva' => 1])" wire:navigate class="mt-3">Crear una vacante</x-ui.button>
+                    @endcan
+                </x-ui.empty-state>
+            @else
+                <x-ui.table>
+                    <x-slot:head>
+                        <th>Vacante</th>@if ($plataforma)<th>Empresa</th>@endif<th>Postulantes</th><th>Por revisar</th><th>Mejor match</th><th>Estado</th>
+                    </x-slot:head>
+                    @foreach ($resumen->vacantesConMovimiento as $vacante)
+                        <tr class="tc-row" wire:key="reciente-{{ $vacante->id }}" wire:click="verVistaPrevia({{ $vacante->id }})">
+                            <td><x-ui.boton-fila wire:click.stop="verVistaPrevia({{ $vacante->id }})">{{ $vacante->titulo }}</x-ui.boton-fila></td>
+                            @if ($plataforma)<td>{{ $vacante->empresa?->nombre }}</td>@endif
+                            <td>{{ $vacante->postulaciones_count }}</td>
+                            <td @class(['font-semibold text-accent-700' => $vacante->por_revisar > 0])>{{ $vacante->por_revisar }}</td>
+                            <td>{{ $vacante->mejor_match === null ? '—' : (int) round((float) $vacante->mejor_match).'%' }}</td>
+                            <td class="whitespace-nowrap"><x-ui.estado :valor="$vacante->estado" /></td>
+                        </tr>
+                    @endforeach
+                </x-ui.table>
+                <p class="mt-2 text-13 text-neutral-700">Ordenadas por las que más postulaciones tienen por revisar. El mejor match es una referencia para empezar por ahí; no reemplaza leer el CV.</p>
+            @endif
         </section>
+
+        <livewire:dashboard.actividad-reciente />
     </div>
 
     {{-- Embudo de selección (ampliación: no está en el prototipo) --}}
@@ -218,17 +271,6 @@
             </div>
         @endif
     </section>
-
-    {{-- Detalle del match promedio (prototipo: openKpiDialog) --}}
-    <x-ui.dialog wire:model="mostrarDetalleDelMatch" :title="'Match promedio · '.($resumen->matchPromedio === null ? '—' : $resumen->matchPromedio.'%')" max-width="440px">
-        <p class="m-0 whitespace-pre-line">@if ($resumen->postulacionesConMatch > 0)Calculado sobre {{ $resumen->postulacionesConMatch }} {{ $resumen->postulacionesConMatch === 1 ? 'postulación' : 'postulaciones' }} con matching en los últimos {{ $diasDelMatch }} días.@else Todavía no hay postulaciones con matching en los últimos {{ $diasDelMatch }} días.@endif
-
-La IA pondera competencias técnicas, experiencia y evidencia textual del CV.</p>
-        <x-slot:actions>
-            <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
-            <x-ui.button variant="primary" :href="route('matching.index')" wire:navigate>Ver matching</x-ui.button>
-        </x-slot:actions>
-    </x-ui.dialog>
 
     <x-vacantes.vista-previa wire:model="mostrarVistaPrevia" :vacante="$seleccionada" />
 </div>

@@ -7,8 +7,8 @@ use App\Livewire\Candidatos\Detalle as FichaCandidato;
 use App\Livewire\Candidatos\Listado as Candidatos;
 use App\Livewire\Entrevistas\Listado as Entrevistas;
 use App\Livewire\Evaluaciones\Listado as Evaluaciones;
-use App\Livewire\Kanban\Tablero;
 use App\Livewire\Matching\Detalle as Matching;
+use App\Livewire\Seleccion\Central;
 use App\Models\Candidato;
 use App\Models\Competencia;
 use App\Models\Empresa;
@@ -94,7 +94,7 @@ it('añade la empresa al nombre de la vacante solo en la vista global', function
 
 it('agrupa por empresa los selectores del admin y deja planos los del reclutador', function () {
     actuarComo($this->admin);
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])
+    Livewire::test(Central::class, ['vacante' => $this->backend])
         ->assertSeeHtml('<optgroup label="Vela Studio">')
         ->assertSeeHtml('>Product Designer</option>');
     Livewire::test(Entrevistas::class)->call('abrirFormulario')

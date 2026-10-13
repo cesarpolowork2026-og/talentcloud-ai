@@ -18,4 +18,19 @@ enum TipoActividad: string
     case PlanCambiado = 'empresa.plan';
     case PlanSolicitado = 'empresa.plan_solicitado';
     case PostulacionRetirada = 'postulacion.retirada';
+
+    /** Icono Phosphor del tipo de actividad (para reconocerla de un vistazo). */
+    public function icono(): string
+    {
+        return match ($this) {
+            self::EtapaCambiada => 'arrows-left-right',
+            self::CvAnalizado => 'file-text',
+            self::EvaluacionAprobada => 'seal-check',
+            self::EntrevistaProgramada, self::EntrevistaCancelada, self::EntrevistaReprogramada => 'calendar-blank',
+            self::NotaAgregada => 'note',
+            self::VacanteCreada => 'briefcase',
+            self::CandidatoSePostulo, self::PostulacionRegistrada, self::PostulacionRetirada => 'user-plus',
+            self::PlanCambiado, self::PlanSolicitado => 'credit-card',
+        };
+    }
 }

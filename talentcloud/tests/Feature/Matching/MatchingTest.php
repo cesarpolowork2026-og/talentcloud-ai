@@ -6,6 +6,8 @@ use App\Enums\TipoRequisito;
 use App\Jobs\CalcularMatch;
 use App\Jobs\ExtraerTextoCv;
 use App\Livewire\Matching\Detalle;
+use App\Matching\ExplicacionDelPuntaje;
+use App\Matching\MatchResult;
 use App\Models\Candidato;
 use App\Models\Competencia;
 use App\Models\Cv;
@@ -21,6 +23,7 @@ use App\Services\Vacantes\GestionarRequisitos;
 use App\Tenancy\TenantContext;
 use Database\Seeders\Demo\DocumentosDePrueba;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -74,14 +77,9 @@ it('muestra la pantalla Matching inteligente del prototipo', function () {
         ->assertSee('la decisión final permanece bajo control humano');
 });
 
-it('abre en /matching la postulación calculada más reciente', function () {
-    $this->get('/matching')->assertOk()->assertSee('Elena Ruiz — Desarrollador Backend');
-});
-
-it('muestra un estado vacío sin postulaciones calculadas', function () {
-    $this->postulacion->update(['match_score' => null, 'match_detalle' => null]);
-
-    $this->get('/matching')->assertOk()->assertSee('Todavía no hay postulaciones con matching calculado.');
+it('/matching sin postulación lleva al ranking de la selección y con ella abre su detalle', function () {
+    $this->get('/matching')->assertRedirect('/seleccion?vista=ranking');
+    $this->get('/matching/'.$this->postulacion->id)->assertOk()->assertSee('Elena Ruiz — Desarrollador Backend');
 });
 
 it('marca y desmarca un resultado como incorrecto sin cambiar el matching', function () {
@@ -127,6 +125,85 @@ it('recalcula al cambiar los requisitos, al postular y al procesar un CV', funct
     Queue::fakeExcept(ExtraerTextoCv::class);
     app(SubirCv::class)->ejecutar($this->elena, UploadedFile::fake()->createWithContent('CV.docx', DocumentosDePrueba::docx('Java y Kubernetes en producción.')), null);
     Queue::assertPushed(CalcularMatch::class, fn (CalcularMatch $job) => $job->postulacionId === $this->postulacion->id);
+});
+
+it('explica el puntaje requisito por requisito: lo que aporta cada uno suma el total', function () {
+    $resultado = MatchResult::desdeArreglo($this->postulacion->fresh()->match_detalle);
+    $explicacion = ExplicacionDelPuntaje::de($resultado, $this->backend->requisitos()->with('competencia')->get());
+
+    expect($explicacion->total())->toBe(3)
+        ->and(array_sum(array_column($explicacion->filas, 'aporta')))->toEqualWithDelta($resultado->score, 0.3)
+        ->and(array_sum(array_column($explicacion->filas, 'maximo')))->toEqualWithDelta(100, 0.3)
+        ->and($explicacion->obligatoriosFaltantes())->toBe(['Certificación AWS'])
+        // Primero lo obligatorio que no aparece; después lo dudoso.
+        ->and(array_column($explicacion->brechas(), 'competencia'))->toBe(['Certificación AWS', 'Kubernetes'])
+        ->and(array_column($explicacion->fortalezas(), 'competencia'))->toBe(['Java']);
+});
+
+it('sugiere preguntas para la entrevista a partir de las brechas, sin usar la IA', function () {
+    $resultado = MatchResult::desdeArreglo($this->postulacion->fresh()->match_detalle);
+    $preguntas = ExplicacionDelPuntaje::de($resultado, $this->backend->requisitos()->with('competencia')->get())->preguntasSugeridas();
+
+    expect($preguntas)->toHaveCount(2)
+        ->and($preguntas[0])->toContain('Certificación AWS es obligatorio')
+        ->and($preguntas[1])->toContain('Kubernetes solo de forma parcial');
+});
+
+it('muestra el resumen, cómo se llega al porcentaje, las brechas y las preguntas', function () {
+    $this->get('/matching/'.$this->postulacion->id)
+        ->assertOk()
+        ->assertSee('1 de 3 requisitos respaldados por el CV')
+        ->assertSee('Falta un requisito obligatorio: Certificación AWS.')
+        ->assertSee('Puesto 1 de 1 candidato calculado en esta vacante.')
+        ->assertSee('Cómo se llega al')
+        ->assertSee('Lo que falta o conviene comprobar')
+        ->assertSee('Preguntas sugeridas para la entrevista')
+        ->assertSee('Evidencia por requisito')
+        ->assertSee('role="img"', false);
+});
+
+it('«Recalcular» pasa a «Recalculando…», avisa cuánto cambió y deja de esperar', function () {
+    Queue::fake();
+    // El cálculo de beforeEach es anterior al pedido: el recálculo se pide después.
+    Carbon::setTestNow(now()->addMinutes(10));
+    $pedido = now();
+
+    $pantalla = Livewire::test(Detalle::class, ['postulacion' => $this->postulacion])
+        ->call('recalcular')
+        ->assertSee('Recalculando con la IA')
+        ->assertSeeHtml('wire:poll.2s');
+
+    Queue::assertPushed(CalcularMatch::class, fn (CalcularMatch $job) => $job->postulacionId === $this->postulacion->id);
+
+    // El requisito que faltaba ya no se pide: el resultado nuevo es más alto.
+    Requisito::where('vacante_id', $this->backend->id)->where('id', $this->aws->id)->delete();
+    Carbon::setTestNow($pedido->copy()->addSeconds(5));
+    // Con Queue::fake() el job no corre solo: se ejecuta como lo haría el worker.
+    app()->call([new CalcularMatch($this->nimbus->id, $this->postulacion->id), 'handle']);
+
+    $pantalla->call('$refresh')
+        ->assertSee('Coincidencia actualizada: de ')
+        ->assertDontSee('Recalculando con la IA')
+        ->assertDontSeeHtml('wire:poll.2s')
+        ->assertSee('Último cálculo:');
+
+    Carbon::setTestNow();
+});
+
+it('si el cálculo no llega a tiempo avisa que sigue en curso', function () {
+    Queue::fake();
+    Carbon::setTestNow(now()->addMinutes(10));
+    $pedido = now();
+
+    $pantalla = Livewire::test(Detalle::class, ['postulacion' => $this->postulacion])->call('recalcular');
+
+    Carbon::setTestNow($pedido->copy()->addMinutes(2));
+
+    $pantalla->call('$refresh')
+        ->assertSee('El cálculo sigue en curso')
+        ->assertDontSeeHtml('wire:poll.2s');
+
+    Carbon::setTestNow();
 });
 
 it('deja la coincidencia vacía si la vacante se queda sin requisitos', function () {

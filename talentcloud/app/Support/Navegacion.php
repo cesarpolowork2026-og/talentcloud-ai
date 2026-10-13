@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
  * Dashboard…Evaluaciones, y la empresa añade "Mi empresa".
  *
  * El admin SaaS (cambio sobre el prototipo) ve primero lo suyo —Panel,
- * Empresas, Calidad de la IA— y las seis pantallas de selección agrupadas en
+ * Empresas, Calidad de la IA— y las pantallas de selección agrupadas en
  * "Procesos de selección", porque para él son supervisión, no su trabajo diario.
  */
 class Navegacion
@@ -111,9 +111,10 @@ class Navegacion
     }
 
     /**
-     * Las pantallas del proceso de selección, en el orden del flujo: lo que
-     * entra al proceso (vacantes y candidatos) y lo que se hace con cada
-     * candidato (Kanban, matching, entrevistas y evaluaciones).
+     * Las pantallas del proceso de selección, en el orden del flujo: la vacante, la
+     * selección de sus postulaciones (tablero y ranking por coincidencia; el matching es
+     * su detalle), el banco de candidatos y, después, entrevistas y evaluaciones.
+     * Un patrón puede reunir varias rutas separadas por «|».
      *
      * @return list<array{etiqueta: string, ruta: string, patron: string}>
      */
@@ -121,9 +122,8 @@ class Navegacion
     {
         return [
             self::enlace('Vacantes', 'vacantes.index', 'vacantes.*'),
+            self::enlace('Selección', 'seleccion.index', 'seleccion.*|kanban.*|matching.*'),
             self::enlace('Candidatos', 'candidatos.index', 'candidatos.*'),
-            self::enlace('Kanban', 'kanban.index', 'kanban.*'),
-            self::enlace('Matching', 'matching.index', 'matching.*'),
             self::enlace('Entrevistas', 'entrevistas.index', 'entrevistas.*'),
             self::enlace('Evaluaciones', 'evaluaciones.index', 'evaluaciones.*'),
         ];

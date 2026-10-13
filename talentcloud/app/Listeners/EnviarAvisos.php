@@ -142,7 +142,7 @@ class EnviarAvisos
         $aviso = AvisoPostulacionRetirada::de(
             (string) $postulacion->candidato?->nombre,
             $vacante->titulo,
-            route('kanban.show', $vacante),
+            route('seleccion.show', $vacante),
             $postulacion->candidato_id,
         );
 

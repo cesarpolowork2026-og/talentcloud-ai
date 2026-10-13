@@ -15,6 +15,7 @@ use App\Repositories\Contracts\EquipoRepository;
 use App\Services\Entrevistas\CambiarEstadoEntrevista;
 use App\Services\Entrevistas\ProgramarEntrevista;
 use App\Services\Entrevistas\ReprogramarEntrevista;
+use App\Services\Entrevistas\ResumenDeAgenda;
 use App\Services\Vacantes\OperacionNoPermitida;
 use App\Support\OpcionesPorEmpresa;
 use App\Tenancy\TenantContext;
@@ -213,11 +214,12 @@ class Listado extends Component
         $this->mostrarReprogramacion = false;
     }
 
-    public function render(EntrevistaRepository $entrevistas): View
+    public function render(EntrevistaRepository $entrevistas, ResumenDeAgenda $agenda): View
     {
         $seleccionada = $this->entrevistaSeleccionada ? $entrevistas->buscar($this->entrevistaSeleccionada) : null;
 
         return view('livewire.entrevistas.listado', [
+            'resumen' => $agenda->calcular(),
             'filas' => $this->listar($entrevistas->consultaListado()->orderBy('inicia_at')),
             // Admin SaaS: columna "Empresa" (ve las entrevistas de todas).
             'vistaGlobal' => app(TenantContext::class)->esGlobal(),

@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $match_score
  * @property array<string, mixed>|null $match_detalle
  * @property MotorMatching|null $match_motor
+ * @property Carbon|null $match_calculado_at
  * @property Carbon|null $etapa_cambiada_at
  * @property OrigenPostulacion $origen
  * @property Carbon|null $retirada_at La retiró el propio postulante (no asignable en masa).

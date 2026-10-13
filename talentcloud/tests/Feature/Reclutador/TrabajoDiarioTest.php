@@ -8,9 +8,9 @@ use App\Enums\FuenteCompetencia;
 use App\Enums\ModalidadEntrevista;
 use App\Livewire\Candidatos\Listado as Candidatos;
 use App\Livewire\Entrevistas\Listado as Entrevistas;
-use App\Livewire\Kanban\Tablero;
 use App\Livewire\Postulaciones\Notas;
 use App\Livewire\Postulante\MisPostulaciones;
+use App\Livewire\Seleccion\Central;
 use App\Models\Actividad;
 use App\Models\Candidato;
 use App\Models\Competencia;
@@ -117,7 +117,7 @@ it('las notas se ven en el matching, en la ficha del candidato y se cuentan en e
     $this->get(route('candidatos.show', $this->marco))->assertOk()->assertSee(['Notas del equipo', 'Desarrollador Backend', 'Revisar Kubernetes']);
     $this->get(route('kanban.show', $this->backend))->assertOk();
 
-    Livewire::test(Tablero::class, ['vacante' => $this->backend])
+    Livewire::test(Central::class, ['vacante' => $this->backend])
         ->call('abrir', $this->postulacion->id)
         ->assertSee('Notas del equipo (1)');
 });

@@ -3,9 +3,9 @@
 namespace App\Livewire\Matching;
 
 use App\Enums\EstadoProcesamientoCv;
-use App\Enums\EstadoVacante;
 use App\Enums\TipoRequisito;
 use App\Jobs\CalcularMatch;
+use App\Matching\ExplicacionDelPuntaje;
 use App\Matching\MatchResult;
 use App\Models\MatchFeedback;
 use App\Models\Postulacion;
@@ -15,6 +15,7 @@ use App\Models\Vacante;
 use App\Services\Postulaciones\MarcarResultadoIncorrecto;
 use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Carbon;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -24,25 +25,29 @@ use Livewire\Component;
  */
 class Detalle extends Component
 {
-    #[Locked]
-    public ?int $postulacionId = null;
+    /** Segundos que se espera el resultado de «Recalcular» antes de avisar que sigue en curso. */
+    public const ESPERA_MAXIMA = 90;
 
-    public function mount(?Postulacion $postulacion = null): void
+    #[Locked]
+    public int $postulacionId;
+
+    /** Momento (ISO 8601) en que se pidió recalcular; null si no hay un cálculo esperándose. */
+    #[Locked]
+    public ?string $recalculoDesde = null;
+
+    /** Porcentaje que tenía la postulación al pedir el recálculo, para decir cuánto cambió. */
+    #[Locked]
+    public ?int $porcentajeAnterior = null;
+
+    /** @var array{tono: string, texto: string}|null */
+    public ?array $aviso = null;
+
+    public function mount(Postulacion $postulacion): void
     {
         $this->authorize('viewAny', Vacante::class);
+        $this->authorize('view', $postulacion);
 
-        // /matching sin postulación: la de mayor coincidencia de la vacante activa más reciente.
-        $postulacion ??= Postulacion::query()
-            ->whereNotNull('match_score')
-            ->whereHas('vacante', fn ($q) => $q->whereIn('estado', [EstadoVacante::Abierta, EstadoVacante::EnRevision]))
-            ->orderByDesc('match_calculado_at')
-            ->orderByDesc('match_score')
-            ->first();
-
-        if ($postulacion !== null) {
-            $this->authorize('view', $postulacion);
-            $this->postulacionId = $postulacion->id;
-        }
+        $this->postulacionId = $postulacion->id;
     }
 
     /** $marcar: lo que dice el botón pulsado (marcar o quitar la marca), no un "alternar". */
@@ -65,37 +70,81 @@ class Detalle extends Component
         $postulacion = $this->postulacion();
         $this->authorize('update', $postulacion);
 
+        $this->porcentajeAnterior = $postulacion->matchPorcentaje();
+        $this->recalculoDesde = now()->toIso8601String();
+        $this->aviso = null;
+
         CalcularMatch::para($postulacion);
+    }
+
+    /**
+     * Mientras se espera un recálculo: si ya hay un resultado posterior al pedido se avisa
+     * cuánto cambió; si pasa demasiado tiempo se avisa que sigue en curso y se deja de esperar.
+     */
+    private function revisarRecalculo(Postulacion $postulacion): void
+    {
+        if ($this->recalculoDesde === null) {
+            return;
+        }
+
+        $pedido = Carbon::parse($this->recalculoDesde);
+        $calculado = $postulacion->match_calculado_at;
+
+        if ($calculado !== null && $calculado->greaterThanOrEqualTo($pedido)) {
+            $nuevo = $postulacion->matchPorcentaje();
+            $antes = $this->porcentajeAnterior;
+
+            $this->aviso = match (true) {
+                $nuevo === null => ['tono' => 'aviso', 'texto' => 'No se pudo calcular la coincidencia: falta un CV con texto o la vacante no tiene requisitos.'],
+                $antes === null => ['tono' => 'ok', 'texto' => "Coincidencia calculada: {$nuevo} %."],
+                $antes === $nuevo => ['tono' => 'ok', 'texto' => "Coincidencia actualizada: sigue en {$nuevo} %."],
+                default => ['tono' => 'ok', 'texto' => "Coincidencia actualizada: de {$antes} % a {$nuevo} %."],
+            };
+            $this->recalculoDesde = null;
+
+            return;
+        }
+
+        if ($pedido->diffInSeconds(now(), true) > self::ESPERA_MAXIMA) {
+            $this->aviso = ['tono' => 'aviso', 'texto' => 'El cálculo sigue en curso: el servicio de análisis está ocupado. Vuelve a abrir esta pantalla en unos minutos; el resultado se guarda solo.'];
+            $this->recalculoDesde = null;
+        }
     }
 
     public function render(): View
     {
-        if ($this->postulacionId === null) {
-            return view('livewire.matching.detalle', ['postulacion' => null])->title('Matching inteligente');
-        }
-
-        $postulacion = $this->postulacion()->load(['candidato.cvActual', 'vacante.empresa', 'vacante.requisitos']);
+        $postulacion = $this->postulacion()->load(['candidato.cvActual', 'vacante.empresa', 'vacante.requisitos.competencia']);
+        $this->revisarRecalculo($postulacion);
         $resultado = $postulacion->match_detalle ? MatchResult::desdeArreglo($postulacion->match_detalle) : null;
 
         /** @var User $user */
         $user = auth()->user();
 
+        $explicacion = $resultado && $postulacion->vacante ? ExplicacionDelPuntaje::de($resultado, $postulacion->vacante->requisitos) : null;
         $tipos = $postulacion->vacante?->requisitos->mapWithKeys(fn (Requisito $r) => [$r->id => $r->tipo]) ?? collect();
         $cv = $postulacion->candidato?->cvActual;
+
+        // Las postulaciones de la vacante con matching, de mayor a menor: también dan la posición de esta.
+        $otras = Postulacion::query()
+            ->where('vacante_id', $postulacion->vacante_id)
+            ->whereNotNull('match_score')
+            ->with('candidato')
+            ->orderByDesc('match_score')
+            ->get();
+        $posicion = $otras->search(fn (Postulacion $p) => $p->id === $postulacion->id);
 
         return view('livewire.matching.detalle', [
             'postulacion' => $postulacion,
             'resultado' => $resultado,
+            'explicacion' => $explicacion,
+            'posicion' => $posicion === false ? null : $posicion + 1,
+            'totalDeLaVacante' => $otras->count(),
             'obligatorios' => $tipos->filter(fn (TipoRequisito $t) => $t === TipoRequisito::Obligatorio)->keys()->all(),
             'marcados' => MatchFeedback::where('postulacion_id', $postulacion->id)->where('user_id', $user->id)->pluck('requisito_id')->all(),
             'procesando' => $resultado === null && in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true),
+            'recalculando' => $this->recalculoDesde !== null,
             'puedeEditar' => $user->can('update', $postulacion),
-            'otras' => Postulacion::query()
-                ->where('vacante_id', $postulacion->vacante_id)
-                ->whereNotNull('match_score')
-                ->with('candidato')
-                ->orderByDesc('match_score')
-                ->get()
+            'otras' => $otras
                 ->mapWithKeys(fn (Postulacion $p) => [$p->id => $p->candidato?->nombre.' · '.$p->matchPorcentaje().'%'])
                 ->all(),
             // Vista global (admin SaaS): los procesos del mismo candidato en otras vacantes, de cualquier empresa.

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AvisoDePagoController;
+use App\Http\Controllers\DescargarCalendarioDeEntrevistaController;
 use App\Http\Controllers\DescargarCvController;
 use App\Http\Controllers\DescargarMisDatosController;
 use App\Http\Controllers\PostularDesdeEmpleosController;
@@ -10,7 +11,6 @@ use App\Livewire\Empleos;
 use App\Livewire\Empresas;
 use App\Livewire\Entrevistas;
 use App\Livewire\Evaluaciones;
-use App\Livewire\Kanban;
 use App\Livewire\Legal;
 use App\Livewire\Matching;
 use App\Livewire\MiEmpresa;
@@ -19,6 +19,7 @@ use App\Livewire\Planes;
 use App\Livewire\Plataforma;
 use App\Livewire\Postulante;
 use App\Livewire\Reclamaciones;
+use App\Livewire\Seleccion;
 use App\Livewire\Vacantes;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Session\Middleware\AuthenticateSession;
@@ -67,13 +68,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('vacantes', Vacantes\Listado::class)->name('vacantes.index');
         Route::get('vacantes/{vacante}', Vacantes\Detalle::class)->name('vacantes.show');
 
-        Route::get('matching', Matching\Detalle::class)->name('matching.index');
+        // «Selección»: el tablero (Kanban) y el ranking por match de las postulaciones de una vacante.
+        Route::get('seleccion', Seleccion\Central::class)->name('seleccion.index');
+        Route::get('seleccion/{vacante}', Seleccion\Central::class)->name('seleccion.show');
+
+        // El matching es el detalle explicable de una postulación; sin ella, lleva al ranking.
+        Route::redirect('matching', '/seleccion?vista=ranking')->name('matching.index');
         Route::get('matching/{postulacion}', Matching\Detalle::class)->name('matching.show');
 
-        Route::get('kanban', Kanban\Tablero::class)->name('kanban.index');
-        Route::get('vacantes/{vacante}/kanban', Kanban\Tablero::class)->name('kanban.show');
+        // Direcciones anteriores del Kanban: siguen funcionando (enlaces guardados, correos ya enviados).
+        Route::get('kanban', Seleccion\Central::class)->name('kanban.index');
+        Route::get('vacantes/{vacante}/kanban', Seleccion\Central::class)->name('kanban.show');
 
         Route::get('entrevistas', Entrevistas\Listado::class)->name('entrevistas.index');
+        Route::get('entrevistas/{entrevista}/calendario', DescargarCalendarioDeEntrevistaController::class)->name('entrevistas.calendario');
         Route::get('evaluaciones', Evaluaciones\Listado::class)->name('evaluaciones.index');
 
         Route::get('candidatos', Candidatos\Listado::class)->name('candidatos.index');

@@ -11,6 +11,13 @@
         </x-slot:actions>
     </x-ui.page-header>
 
+    {{-- Un vistazo a la agenda antes de la lista. --}}
+    <div class="mb-6 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));">
+        <x-ui.stat label="Hoy" :value="$resumen->hoy" highlight />
+        <x-ui.stat label="Próximos {{ App\Services\Entrevistas\ResumenDeAgenda::DIAS_PROXIMOS }} días" :value="$resumen->proximas" />
+        <x-ui.stat label="Por confirmar" :value="$resumen->sin_confirmar" />
+    </div>
+
     <x-ui.listado-controles placeholder="Buscar candidato o vacante…" />
 
     @error('entrevista')
@@ -82,6 +89,10 @@ Notas: {{ $seleccionada->notas }}@endif</p>
             <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
             @if ($seleccionada)
                 <x-ui.button :href="route('candidatos.show', $seleccionada->postulacion?->candidato_id)" wire:navigate>Ver candidato</x-ui.button>
+                @if ($seleccionada->estado->puedeReprogramarse())
+                    {{-- Archivo .ics para Google Calendar, Outlook o Apple Calendar (descarga, sin wire:navigate). --}}
+                    <x-ui.button :href="route('entrevistas.calendario', $seleccionada)">Agregar al calendario</x-ui.button>
+                @endif
                 @can('update', $seleccionada)
                     @if ($seleccionada->estado->puedeCompletarse() && ! $seleccionada->inicia_at->isFuture())
                         <x-ui.button wire:click="completar({{ $seleccionada->id }})">Marcar como completada</x-ui.button>

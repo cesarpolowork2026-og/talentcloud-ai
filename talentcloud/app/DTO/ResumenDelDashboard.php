@@ -2,7 +2,6 @@
 
 namespace App\DTO;
 
-use App\Models\Actividad;
 use App\Models\Vacante;
 use Illuminate\Support\Collection;
 
@@ -10,16 +9,25 @@ use Illuminate\Support\Collection;
 final readonly class ResumenDelDashboard
 {
     /**
-     * @param  Collection<int, Vacante>  $vacantesRecientes
-     * @param  Collection<int, Actividad>  $actividad
+     * @param  Collection<int, Vacante>  $vacantesConMovimiento  Activas, con `postulaciones_count`, `por_revisar` y `mejor_match`.
+     * @param  list<array{icono: string, texto: string, ruta: string, parametros: array<string, mixed>, urgente: bool}>  $atencion  Lo que pide una acción hoy, de lo más urgente a lo menos.
      */
     public function __construct(
         public int $vacantesActivas,
-        public int $candidatosEvaluados,
-        public ?int $matchPromedio,
-        public int $postulacionesConMatch,
+        public int $postulantes,
+        public int $postulacionesNuevas,
+        public int $porRevisar,
         public int $entrevistasHoy,
-        public Collection $vacantesRecientes,
-        public Collection $actividad,
+        public int $entrevistasProximas,
+        public int $analizadasConIa,
+        public int $minutosPorCv,
+        public array $atencion,
+        public Collection $vacantesConMovimiento,
     ) {}
+
+    /** Horas de lectura de CV que se ahorraron, con el supuesto de `minutosPorCv` por CV. */
+    public function horasAhorradas(): float
+    {
+        return round($this->analizadasConIa * $this->minutosPorCv / 60, 1);
+    }
 }
