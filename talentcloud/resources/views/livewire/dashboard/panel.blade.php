@@ -182,6 +182,63 @@
         </div>
     </div>
 
+    {{-- Evolución de postulaciones: el periodo elegido frente al anterior de la misma duración. --}}
+    <section class="mb-8" aria-labelledby="tendencia-titulo">
+        <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
+            <div>
+                <h2 id="tendencia-titulo" class="m-0 text-16">Evolución de postulaciones</h2>
+                <p class="m-0 mt-1 max-w-[70ch] text-13 text-neutral-700">
+                    Postulaciones recibidas {{ $tendencia->diasPorCubeta === 1 ? 'por día' : 'cada '.$tendencia->diasPorCubeta.' días' }}, del {{ App\Support\Formato::fechaCorta($tendencia->desde) }} al {{ App\Support\Formato::fechaCorta($tendencia->hasta) }},
+                    frente a los {{ $tendencia->dias }} días anteriores. Cuenta postulaciones, no personas. El periodo también define el embudo.
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="periodo-rotulo" class="text-13 text-neutral-700">Periodo</span>
+                <x-ui.seg labelledby="periodo-rotulo">
+                    @foreach (App\Services\Dashboard\TendenciaDePostulaciones::PERIODOS as $dias)
+                        <x-ui.seg-option name="periodo" :value="$dias" wire:model.live="periodo" wire:key="periodo-{{ $dias }}">{{ $dias }} días</x-ui.seg-option>
+                    @endforeach
+                </x-ui.seg>
+            </div>
+        </div>
+
+        <x-ui.card>
+            @if (! $tendencia->hayDatos())
+                <x-ui.empty-state icon="chart-line-up" :message="'No hay postulaciones en estos '.$tendencia->dias.' días ni en los '.$tendencia->dias.' anteriores. Cuando lleguen, aquí verás cómo evolucionan.'" />
+            @else
+                <div class="flex flex-wrap items-baseline gap-x-8 gap-y-2">
+                    <p class="m-0">
+                        <span class="font-heading text-32 font-semibold text-accent-700">{{ number_format($tendencia->totalActual(), 0, ',', ' ') }}</span>
+                        <span class="text-14 text-neutral-800">{{ $tendencia->totalActual() === 1 ? 'postulación' : 'postulaciones' }} en los últimos {{ $tendencia->dias }} días</span>
+                    </p>
+                    <p class="m-0 text-14 text-neutral-800" role="status">
+                        @if ($tendencia->variacion() === null)
+                            Sin postulaciones en los {{ $tendencia->dias }} días anteriores: no hay con qué comparar.
+                        @else
+                            <span class="font-semibold">{{ $tendencia->variacion() > 0 ? '▲ +' : ($tendencia->variacion() < 0 ? '▼ ' : '= ') }}{{ str_replace('.', ',', (string) $tendencia->variacion()) }} %</span>
+                            frente a las {{ number_format($tendencia->totalAnterior(), 0, ',', ' ') }} del periodo anterior
+                        @endif
+                    </p>
+                </div>
+
+                <ul class="m-0 flex list-none flex-wrap gap-x-5 gap-y-1 p-0 text-13 text-neutral-800" aria-hidden="true">
+                    <li class="flex items-center gap-2"><span class="inline-block h-[3px] w-6 rounded bg-accent-700"></span> {{ App\Support\Formato::fechaCorta($tendencia->desde) }} – {{ App\Support\Formato::fechaCorta($tendencia->hasta) }}</li>
+                    <li class="flex items-center gap-2"><span class="inline-block w-6 border-t-2 border-dashed border-neutral-600"></span> {{ App\Support\Formato::fechaCorta($tendencia->desdeAnterior) }} – {{ App\Support\Formato::fechaCorta($tendencia->hastaAnterior) }} (anterior)</li>
+                </ul>
+
+                <x-grafico.lineas
+                    id="tendencia"
+                    :etiquetas="array_map(fn (array $c) => $c['desde']->equalTo($c['hasta']) ? App\Support\Formato::fechaCorta($c['desde']) : App\Support\Formato::fechaCorta($c['desde']).'–'.App\Support\Formato::fechaCorta($c['hasta']), $tendencia->cubetas)"
+                    :series="[
+                        ['nombre' => 'Periodo actual', 'valores' => array_column($tendencia->cubetas, 'actual'), 'principal' => true],
+                        ['nombre' => 'Periodo anterior', 'valores' => array_column($tendencia->cubetas, 'anterior')],
+                    ]"
+                    :descripcion="'Postulaciones recibidas en los últimos '.$tendencia->dias.' días: '.$tendencia->totalActual().', frente a '.$tendencia->totalAnterior().' en los '.$tendencia->dias.' anteriores'"
+                />
+            @endif
+        </x-ui.card>
+    </section>
+
     <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <section aria-labelledby="vacantes-titulo">
             <h2 id="vacantes-titulo" class="mb-3 text-16">Vacantes en curso</h2>
@@ -219,7 +276,10 @@
         <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
             <div>
                 <h2 id="embudo-titulo" class="m-0 text-16">Embudo de selección</h2>
-                <p class="m-0 mt-1 text-13 text-neutral-700">Postulaciones de los últimos {{ $embudo->dias }} días y la etapa más avanzada a la que llegaron.</p>
+                <p class="m-0 mt-1 max-w-[70ch] text-13 text-neutral-700">
+                    Postulaciones recibidas del {{ App\Support\Formato::fechaCorta($embudo->desde) }} al {{ App\Support\Formato::fechaCorta($embudo->hasta) }} ({{ $embudo->dias }} días) y la etapa más avanzada a la que llegó cada una.
+                    El porcentaje junto a cada etapa es qué parte de quienes llegaron a la anterior pasó a esta.
+                </p>
             </div>
             <div>
                 <label for="embudo-vacante" class="sr-only">Filtrar el embudo por vacante</label>
@@ -236,13 +296,21 @@
                         @foreach ($embudo->etapas as $fila)
                             <li class="grid gap-1" wire:key="embudo-{{ $fila['etapa']->value }}">
                                 <div class="flex items-baseline justify-between gap-2 text-14">
-                                    <span class="text-neutral-800">{{ $fila['etapa']->etiqueta() }}</span>
-                                    <span class="font-semibold">{{ $fila['total'] }} <span class="font-normal text-neutral-700">· {{ $fila['porcentaje'] }}%</span></span>
+                                    <span class="text-neutral-800">
+                                        {{ $fila['etapa']->etiqueta() }}
+                                        @if ($fila['conversion'] !== null)
+                                            <span class="ml-1 text-12 text-neutral-700">· {{ $fila['conversion'] }} % de la etapa anterior</span>
+                                        @endif
+                                    </span>
+                                    <span class="font-semibold">{{ $fila['total'] }} <span class="font-normal text-neutral-700">· {{ $fila['porcentaje'] }}% del total</span></span>
                                 </div>
                                 <x-ui.progress :value="$fila['porcentaje']" :label="$fila['etapa']->etiqueta().': '.$fila['total'].' de '.$embudo->total.' postulaciones'" />
                             </li>
                         @endforeach
                     </ol>
+                    @if ($embudo->conversionTotal() !== null)
+                        <p class="m-0 text-14 text-neutral-800">De cada 100 postulaciones del periodo, <span class="font-semibold">{{ $embudo->conversionTotal() }}</span> {{ $embudo->conversionTotal() === 1 ? 'llegó' : 'llegaron' }} a {{ $embudo->etapas[array_key_last($embudo->etapas)]['etapa']->etiqueta() }}.</p>
+                    @endif
                     <p class="m-0 text-13 text-neutral-700">
                         {{ $embudo->descartadas }} {{ $embudo->descartadas === 1 ? 'descartada' : 'descartadas' }} por la empresa y {{ $embudo->retiradas }} {{ $embudo->retiradas === 1 ? 'retirada' : 'retiradas' }} por el candidato: cuentan en las etapas a las que llegaron antes.
                     </p>

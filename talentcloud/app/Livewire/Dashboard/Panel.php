@@ -8,6 +8,7 @@ use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
 use App\Services\Dashboard\DashboardService;
 use App\Services\Dashboard\EmbudoDeSeleccion;
+use App\Services\Dashboard\TendenciaDePostulaciones;
 use App\Services\Empresas\LimitesDelPlan;
 use App\Services\Plataforma\PanelDePlataforma;
 use App\Services\Vacantes\BuscadorDeVacantes;
@@ -15,6 +16,7 @@ use App\Support\Formato;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
@@ -37,6 +39,20 @@ class Panel extends Component
 
     /** Filtro del embudo: id de una vacante visible, o '' para todas. */
     public string $vacanteDelEmbudo = '';
+
+    /** Periodo en días de la evolución de postulaciones y del embudo (uno de TendenciaDePostulaciones::PERIODOS). */
+    #[Url(as: 'periodo', except: 30)]
+    public int $periodo = 30;
+
+    public function updatedPeriodo(): void
+    {
+        $this->periodo = $this->periodoValido();
+    }
+
+    private function periodoValido(): int
+    {
+        return in_array($this->periodo, TendenciaDePostulaciones::PERIODOS, true) ? $this->periodo : 30;
+    }
 
     public function mount(): void
     {
@@ -65,8 +81,11 @@ class Panel extends Component
         $this->mostrarVistaPrevia = true;
     }
 
-    public function render(DashboardService $dashboard, EmbudoDeSeleccion $embudo, VacanteRepository $vacantes, PanelDePlataforma $panel, LimitesDelPlan $limites): View
+    public function render(DashboardService $dashboard, EmbudoDeSeleccion $embudo, VacanteRepository $vacantes, PanelDePlataforma $panel, LimitesDelPlan $limites, TendenciaDePostulaciones $tendencia): View
     {
+        // Un periodo que llegue por la dirección y no sea uno de los ofrecidos se trata como el de 30 días.
+        $periodo = $this->periodoValido();
+
         /** @var User $usuario */
         $usuario = auth()->user();
         $esAdmin = $usuario->tieneRol(Rol::Admin);
@@ -77,7 +96,9 @@ class Panel extends Component
         return view('livewire.dashboard.panel', [
             'plataforma' => $esAdmin ? $panel->resumen() : null,
             'resumen' => $dashboard->resumen(),
-            'embudo' => $embudo->calcular($vacanteDelEmbudo?->id),
+            'periodo' => $periodo,
+            'tendencia' => $tendencia->calcular($periodo),
+            'embudo' => $embudo->calcular($vacanteDelEmbudo?->id, $periodo),
             'etiquetaDeLaVacanteDelEmbudo' => $vacanteDelEmbudo ? Formato::vacante($vacanteDelEmbudo->loadMissing('empresa:id,nombre')) : '',
             // El plan es de la empresa: el admin SaaS ve la plataforma entera y no tiene uno propio.
             'uso' => $esAdmin || $usuario->empresa === null ? null : $limites->uso($usuario->empresa),

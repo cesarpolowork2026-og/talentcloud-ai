@@ -25,14 +25,17 @@ class EmbudoDeSeleccion
 {
     public const DIAS = 90;
 
-    public function calcular(?int $vacanteId = null): EmbudoDeSeleccionData
+    /**
+     * @param  int  $dias  Periodo: los últimos `$dias` días completos, hoy incluido (el mismo que la evolución de postulaciones).
+     */
+    public function calcular(?int $vacanteId = null, int $dias = self::DIAS): EmbudoDeSeleccionData
     {
-        return CacheDeResumenes::recordar('embudo-'.($vacanteId ?? 'todas'), fn () => $this->leer($vacanteId));
+        return CacheDeResumenes::recordar("embudo-{$dias}-".($vacanteId ?? 'todas'), fn () => $this->leer($vacanteId, $dias));
     }
 
-    private function leer(?int $vacanteId): EmbudoDeSeleccionData
+    private function leer(?int $vacanteId, int $dias): EmbudoDeSeleccionData
     {
-        $desde = now()->subDays(self::DIAS);
+        $desde = Carbon::today()->subDays($dias - 1);
 
         $postulaciones = Postulacion::query()
             ->where('postulaciones.created_at', '>=', $desde)
@@ -44,19 +47,25 @@ class EmbudoDeSeleccion
         $porRango = $this->postulacionesPorRangoAlcanzado(clone $postulaciones);
 
         $filas = [];
+        $anterior = null;
         foreach ($etapas as $rango => $etapa) {
             $alcanzaron = (int) $porRango->filter(fn (int $n, int $r) => $r >= $rango)->sum();
             $filas[] = [
                 'etapa' => $etapa,
                 'total' => $alcanzaron,
                 'porcentaje' => $total > 0 ? (int) round($alcanzaron * 100 / $total) : 0,
+                // Qué parte de quienes llegaron a la etapa anterior llegó a esta (null en la primera o sin base).
+                'conversion' => $anterior === null || $anterior === 0 ? null : (int) round($alcanzaron * 100 / $anterior),
             ];
+            $anterior = $alcanzaron;
         }
 
         [$contrataciones, $diasHastaContratar] = $this->tiempoHastaContratar($desde, $vacanteId);
 
         return new EmbudoDeSeleccionData(
-            dias: self::DIAS,
+            dias: $dias,
+            desde: $desde,
+            hasta: Carbon::today(),
             total: $total,
             etapas: $filas,
             descartadas: $conteos['descartadas'],
