@@ -2,6 +2,7 @@
 
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
+use App\Enums\Modalidad;
 use App\Enums\TipoRequisito;
 use App\Livewire\Vacantes\Detalle;
 use App\Livewire\Vacantes\Listado;
@@ -94,8 +95,9 @@ it('crea una vacante en borrador con las competencias como requisitos', function
     Livewire::test(Listado::class)
         ->call('abrirFormulario')
         ->set('titulo', 'QA Engineer')
+        ->set('modalidad', 'hibrido')
         ->set('ubicacion', 'Lima')
-        ->set('competencias', 'Selenium, cypress , Selenium, Testing de APIs')
+        ->set('competencias', ['Selenium', 'cypress ', 'selenium', 'Testing de APIs'])
         ->call('crear')
         ->assertHasNoErrors()
         ->assertRedirect();
@@ -108,19 +110,96 @@ it('crea una vacante en borrador con las competencias como requisitos', function
         ->and($vacante->requisitos()->with('competencia')->get()->pluck('competencia.nombre')->all())->toBe(['Selenium', 'cypress', 'Testing de APIs']);
 });
 
+it('exige ubicación en una vacante presencial o híbrida, pero no en una remota', function () {
+    Livewire::test(Listado::class)
+        ->call('abrirFormulario')
+        ->set('titulo', 'QA Presencial')
+        ->set('modalidad', 'presencial')
+        ->set('competencias', ['Selenium'])
+        ->call('crear')
+        ->assertHasErrors(['ubicacion']);
+
+    Livewire::test(Listado::class)
+        ->call('abrirFormulario')
+        ->set('titulo', 'QA Remoto')
+        ->set('modalidad', 'remoto')
+        ->set('competencias', ['Selenium'])
+        ->call('crear')
+        ->assertHasNoErrors();
+
+    expect(Vacante::where('titulo', 'QA Presencial')->exists())->toBeFalse()
+        ->and(Vacante::where('titulo', 'QA Remoto')->firstOrFail()->ubicacion)->toBeNull();
+});
+
+it('en una vacante remota la ubicación es una cobertura opcional y se muestra junto a la modalidad', function () {
+    Livewire::test(Listado::class)
+        ->call('abrirFormulario')
+        ->set('titulo', 'Soporte')
+        ->set('modalidad', 'remoto')
+        ->set('ubicacion', ' Perú ')
+        ->set('competencias', ['Soporte técnico'])
+        ->call('crear')
+        ->assertHasNoErrors();
+
+    $soporte = Vacante::where('titulo', 'Soporte')->firstOrFail();
+    $presencial = Vacante::factory()->make(['modalidad' => Modalidad::Presencial, 'ubicacion' => 'Lima']);
+    $remota = Vacante::factory()->make(['modalidad' => Modalidad::Remoto, 'ubicacion' => 'Remoto']);
+
+    expect($soporte->lugarYModalidad())->toBe('Remoto · Perú')
+        ->and($presencial->lugarYModalidad())->toBe('Lima · Presencial')
+        ->and($remota->lugarYModalidad())->toBe('Remoto');
+});
+
+it('al cambiar a remoto en el formulario se descarta la ubicación escrita', function () {
+    Livewire::test(Listado::class)
+        ->call('abrirFormulario')
+        ->set('modalidad', 'presencial')
+        ->set('ubicacion', 'Lima')
+        ->set('modalidad', 'remoto')
+        ->assertSet('ubicacion', '')
+        ->set('modalidad', 'hibrido')
+        ->set('ubicacion', 'Cusco')
+        ->set('modalidad', 'presencial')
+        ->assertSet('ubicacion', 'Cusco');
+});
+
+it('exige al menos una competencia y reconoce sinónimos del catálogo sin duplicarlas', function () {
+    Livewire::test(Listado::class)
+        ->call('abrirFormulario')
+        ->set('titulo', 'Analista BI')
+        ->set('competencias', [])
+        ->call('crear')
+        ->assertHasErrors(['competencias']);
+
+    $powerBi = Competencia::obtenerOCrear('Power BI');
+    $powerBi->update(['sinonimos' => ['PowerBI']]);
+
+    Livewire::test(Listado::class)
+        ->call('abrirFormulario')
+        ->set('titulo', 'Analista BI')
+        ->set('competencias', ['PowerBI', 'power bi', 'SQL'])
+        ->call('crear')
+        ->assertHasNoErrors();
+
+    $vacante = Vacante::where('titulo', 'Analista BI')->firstOrFail();
+
+    expect($vacante->requisitos()->with('competencia')->get()->pluck('competencia.nombre')->all())->toBe(['Power BI', 'SQL'])
+        ->and(Competencia::where('nombre_normalizado', 'powerbi')->exists())->toBeFalse();
+});
+
 it('exige empresa al admin al crear una vacante', function () {
     actuarComo(User::factory()->admin()->create());
 
     Livewire::test(Listado::class)
         ->set('titulo', 'QA')
-        ->set('competencias', 'Selenium')
+        ->set('competencias', ['Selenium'])
         ->call('crear')
         ->assertHasErrors(['empresaId']);
 
     Livewire::test(Listado::class)
         ->set('titulo', 'QA')
         ->set('empresaId', (string) $this->vela->id)
-        ->set('competencias', 'Selenium')
+        ->set('competencias', ['Selenium'])
         ->call('crear')
         ->assertHasNoErrors();
 

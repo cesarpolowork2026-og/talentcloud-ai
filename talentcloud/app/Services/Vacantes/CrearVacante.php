@@ -27,10 +27,16 @@ class CrearVacante
             throw new OperacionNoPermitida('La empresa está suspendida.');
         }
 
-        $vacante = DB::transaction(function () use ($empresa, $datos, $autor): Vacante {
+        $ubicacion = $datos->modalidad->normalizarUbicacion($datos->ubicacion);
+
+        if ($ubicacion === null && $datos->modalidad->requiereUbicacion()) {
+            throw new OperacionNoPermitida('Indica dónde se trabajará: una vacante '.mb_strtolower($datos->modalidad->etiqueta()).' necesita ubicación.', 'ubicacion');
+        }
+
+        $vacante = DB::transaction(function () use ($empresa, $datos, $autor, $ubicacion): Vacante {
             $vacante = $this->vacantes->crear($empresa, [
                 'titulo' => $datos->titulo,
-                'ubicacion' => $datos->ubicacion,
+                'ubicacion' => $ubicacion,
                 'modalidad' => $datos->modalidad,
                 'estado' => EstadoVacante::Borrador,
             ], $autor);

@@ -8,7 +8,7 @@
 
 <x-ui.dialog {{ $attributes }} :title="$vacante?->titulo" max-width="480px">
     @if ($vacante)
-        <p class="m-0 whitespace-pre-line">{{ $vacante->empresa?->nombre }} · {{ $vacante->ubicacion ?? $vacante->modalidad->etiqueta() }}
+        <p class="m-0 whitespace-pre-line">{{ $vacante->empresa?->nombre }} · {{ $vacante->lugarYModalidad() }}
 {{ $vacante->postulaciones_count }} {{ $vacante->postulaciones_count === 1 ? 'candidato' : 'candidatos' }} · Estado: {{ $vacante->estado->etiqueta() }}
 {{ $vacante->publicada_at ? 'Publicada el '.Formato::fechaCorta($vacante->publicada_at).'.' : 'Sin publicar (borrador).' }}</p>
     @endif

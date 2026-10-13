@@ -18,16 +18,17 @@ final readonly class NuevaVacanteData
     ) {}
 
     /**
-     * "Java, Spring Boot, PostgreSQL" → ['Java', 'Spring Boot', 'PostgreSQL'] (sin vacíos ni repetidos).
+     * La lista que envía el selector de competencias, sin vacíos ni repetidos (sin importar mayúsculas).
      *
+     * @param  list<string>  $nombres
      * @return list<string>
      */
-    public static function separarCompetencias(string $texto): array
+    public static function depurarCompetencias(array $nombres): array
     {
         $vistas = [];
         $resultado = [];
 
-        foreach (preg_split('/[,;\n]+/', $texto) ?: [] as $parte) {
+        foreach ($nombres as $parte) {
             $nombre = trim((string) preg_replace('/\s+/', ' ', $parte));
             $clave = mb_strtolower($nombre);
 

@@ -50,10 +50,25 @@ class Competencia extends Model
         return Str::of($nombre)->ascii()->lower()->squish()->toString();
     }
 
-    /** Busca por nombre normalizado o la crea ("alta rápida" del editor de requisitos). */
+    /**
+     * La competencia del catálogo que corresponde a ese texto: por nombre o por uno de
+     * sus sinónimos ("PowerBI" → Power BI). Sin tildes ni diferencia de mayúsculas.
+     */
+    public static function resolver(string $nombre): ?self
+    {
+        $clave = self::normalizar($nombre);
+
+        return self::where('nombre_normalizado', $clave)->first()
+            ?? self::whereRaw(
+                'exists (select 1 from jsonb_array_elements_text(sinonimos) as s(valor) where lower(unaccent(s.valor)) = ?)',
+                [$clave],
+            )->first();
+    }
+
+    /** Busca por nombre o sinónimo, o la crea ("alta rápida" del editor de requisitos). */
     public static function obtenerOCrear(string $nombre, ?string $categoria = null): self
     {
-        return self::firstOrCreate(
+        return self::resolver($nombre) ?? self::firstOrCreate(
             ['nombre_normalizado' => self::normalizar($nombre)],
             ['nombre' => $nombre, 'categoria' => $categoria],
         );

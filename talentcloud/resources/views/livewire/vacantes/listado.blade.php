@@ -37,7 +37,7 @@
                 <tr class="tc-row" wire:key="vacante-{{ $vacante->id }}" wire:click="verVistaPrevia({{ $vacante->id }})">
                     <td><x-ui.boton-fila wire:click.stop="verVistaPrevia({{ $vacante->id }})">{{ $vacante->titulo }}</x-ui.boton-fila></td>
                     <td>{{ $vacante->empresa?->nombre }}</td>
-                    <td>{{ $vacante->ubicacion ?? $vacante->modalidad->etiqueta() }}</td>
+                    <td>{{ $vacante->lugarYModalidad() }}</td>
                     <td>{{ $vacante->postulaciones_count }}</td>
                     <td><x-ui.estado :valor="$vacante->estado" /></td>
                     <td class="text-neutral-600">{{ Formato::fechaCorta($vacante->created_at) }}</td>
@@ -52,7 +52,7 @@
     <x-vacantes.vista-previa wire:model="mostrarVistaPrevia" :vacante="$seleccionada" />
 
     {{-- "Nueva vacante" (campos del prototipo + ubicación y modalidad) --}}
-    <x-ui.dialog wire:model="mostrarFormulario" title="Nueva vacante" max-width="460px">
+    <x-ui.dialog wire:model="mostrarFormulario" title="Nueva vacante" max-width="520px">
         <form wire:submit="crear" id="form-nueva-vacante" class="grid gap-3">
             <x-ui.field label="Título del puesto" for="vacante-titulo" error="titulo">
                 <x-ui.input wire:model="titulo" id="vacante-titulo" placeholder="Desarrollador Backend" error="titulo" />
@@ -63,15 +63,21 @@
                 </x-ui.field>
             @endif
             <div class="grid gap-3 sm:grid-cols-2">
-                <x-ui.field label="Ubicación" for="vacante-ubicacion" error="ubicacion">
-                    <x-ui.input wire:model="ubicacion" id="vacante-ubicacion" placeholder="Remoto" error="ubicacion" />
-                </x-ui.field>
                 <x-ui.field label="Modalidad" for="vacante-modalidad" error="modalidad">
-                    <x-ui.select wire:model="modalidad" id="vacante-modalidad" :options="$modalidades" class="w-full" />
+                    <x-ui.select wire:model.live="modalidad" id="vacante-modalidad" :options="$modalidades" class="w-full" />
                 </x-ui.field>
+                @if ($modalidad === 'remoto')
+                    <x-ui.field label="Cobertura (opcional)" for="vacante-ubicacion" error="ubicacion" hint="Dónde puede vivir quien postule. Vacío = desde cualquier lugar.">
+                        <x-ui.input wire:model="ubicacion" id="vacante-ubicacion" placeholder="Perú, LATAM…" error="ubicacion" />
+                    </x-ui.field>
+                @else
+                    <x-ui.field label="Ubicación" for="vacante-ubicacion" error="ubicacion">
+                        <x-ui.input wire:model="ubicacion" id="vacante-ubicacion" placeholder="Lima" error="ubicacion" />
+                    </x-ui.field>
+                @endif
             </div>
-            <x-ui.field label="Competencias requeridas" for="vacante-competencias" error="competencias" hint="Separadas por comas. Podrás ajustar tipo y peso de cada una antes de publicar.">
-                <x-ui.input wire:model="competencias" id="vacante-competencias" placeholder="Java, Spring Boot, PostgreSQL" error="competencias" />
+            <x-ui.field label="Competencias requeridas" for="vacante-competencias" error="competencias">
+                <x-vacantes.selector-competencias modelo="competencias" :catalogo="$catalogo" error="competencias" />
             </x-ui.field>
         </form>
         <x-slot:actions>

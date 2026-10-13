@@ -58,6 +58,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
+            "@php artisan view:cache",
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74,#86efac\" \"php artisan serve\" \"php artisan queue:listen --queue=ia,default --tries=1 --timeout=0\" \"npm run dev\" \"cd ../talentcloud-ai && uv run --extra ml uvicorn talentcloud_ai.main:app --app-dir src --port 8001\" --names=server,queue,vite,ia --kill-others"
         ],
         "test": [

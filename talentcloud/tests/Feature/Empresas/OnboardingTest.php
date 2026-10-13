@@ -68,7 +68,7 @@ it('marca cada paso cuando ocurre de verdad', function () {
     Livewire::test(ListadoVacantes::class)
         ->call('abrirFormulario')
         ->set('titulo', 'Backend')
-        ->set('competencias', 'Java')
+        ->set('competencias', ['Java'])
         ->call('crear');
 
     expect($this->empresa->fresh()->onboarding['vacante'])->toBeTrue();

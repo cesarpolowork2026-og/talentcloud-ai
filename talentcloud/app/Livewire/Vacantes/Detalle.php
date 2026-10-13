@@ -73,9 +73,11 @@ class Detalle extends Component
 
         $datos = $this->validate([
             'titulo' => ['required', 'string', 'max:255'],
-            'ubicacion' => ['nullable', 'string', 'max:120'],
+            'ubicacion' => ['nullable', 'string', 'max:120', Rule::requiredIf($this->modalidad !== Modalidad::Remoto->value)],
             'modalidad' => ['required', Rule::enum(Modalidad::class)],
             'descripcion' => ['nullable', 'string', 'max:5000'],
+        ], messages: [
+            'ubicacion.required' => 'Indica dónde se trabajará: una vacante presencial o híbrida necesita ubicación.',
         ], attributes: ['titulo' => 'título del puesto']);
 
         try {
@@ -86,12 +88,23 @@ class Detalle extends Component
                 modalidad: Modalidad::from($datos['modalidad']),
             ));
         } catch (OperacionNoPermitida $e) {
-            $this->addError('titulo', $e->getMessage());
+            $this->addError($e->campo ?? 'titulo', $e->getMessage());
 
             return;
         }
 
         $this->dispatch('vacante-guardada');
+        $this->llenarDatos($this->vacante());
+    }
+
+    /** Al pasar a remoto el lugar deja de ser una ubicación: se limpia para no arrastrar «Lima». */
+    public function updatedModalidad(string $valor): void
+    {
+        if (Modalidad::tryFrom($valor) === Modalidad::Remoto) {
+            $this->reset('ubicacion');
+        }
+
+        $this->resetValidation('ubicacion');
     }
 
     public function cambiarEstado(string $destino, CambiarEstadoVacante $cambiar): void

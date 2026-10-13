@@ -6,8 +6,8 @@
             <x-ui.breadcrumb :items="[['label' => 'Vacantes', 'href' => route('vacantes.index')], ['label' => $vacante->titulo]]" />
         </x-slot:breadcrumbs>
         <x-slot:actions>
-            @if (Route::has('kanban.show'))
-                <x-ui.button :href="route('kanban.show', $vacante)" wire:navigate>Ver Kanban</x-ui.button>
+            @if (Route::has('seleccion.show'))
+                <x-ui.button :href="route('seleccion.show', $vacante)" wire:navigate>Ver selección</x-ui.button>
             @endif
             @can('cambiarEstado', $vacante)
                 @foreach ($transiciones as $destino)
@@ -25,7 +25,7 @@
 
     <div class="mb-6 flex flex-wrap items-center gap-2 text-15 text-neutral-700">
         <x-ui.estado :valor="$vacante->estado" />
-        <span>{{ $vacante->empresa?->nombre }} · {{ $vacante->ubicacion ?? $vacante->modalidad->etiqueta() }} · {{ $vacante->postulaciones_count }} {{ $vacante->postulaciones_count === 1 ? 'candidato' : 'candidatos' }}</span>
+        <span>{{ $vacante->empresa?->nombre }} · {{ $vacante->lugarYModalidad() }} · {{ $vacante->postulaciones_count }} {{ $vacante->postulaciones_count === 1 ? 'candidato' : 'candidatos' }}</span>
     </div>
 
     @error('estado')
@@ -101,12 +101,18 @@
                     <x-ui.input wire:model="titulo" id="vacante-titulo" error="titulo" :disabled="! $editable" />
                 </x-ui.field>
                 <div class="grid gap-3 sm:grid-cols-2">
-                    <x-ui.field label="Ubicación" for="vacante-ubicacion" error="ubicacion">
-                        <x-ui.input wire:model="ubicacion" id="vacante-ubicacion" placeholder="Remoto" error="ubicacion" :disabled="! $editable" />
-                    </x-ui.field>
                     <x-ui.field label="Modalidad" for="vacante-modalidad">
-                        <x-ui.select wire:model="modalidad" id="vacante-modalidad" :options="$modalidades" class="w-full" :disabled="! $editable" />
+                        <x-ui.select wire:model.live="modalidad" id="vacante-modalidad" :options="$modalidades" class="w-full" :disabled="! $editable" />
                     </x-ui.field>
+                    @if ($modalidad === 'remoto')
+                        <x-ui.field label="Cobertura (opcional)" for="vacante-ubicacion" error="ubicacion" hint="Dónde puede vivir quien postule. Vacío = desde cualquier lugar.">
+                            <x-ui.input wire:model="ubicacion" id="vacante-ubicacion" placeholder="Perú, LATAM…" error="ubicacion" :disabled="! $editable" />
+                        </x-ui.field>
+                    @else
+                        <x-ui.field label="Ubicación" for="vacante-ubicacion" error="ubicacion">
+                            <x-ui.input wire:model="ubicacion" id="vacante-ubicacion" placeholder="Lima" error="ubicacion" :disabled="! $editable" />
+                        </x-ui.field>
+                    @endif
                 </div>
                 <x-ui.field label="Descripción" for="vacante-descripcion" error="descripcion">
                     <x-ui.textarea wire:model="descripcion" id="vacante-descripcion" rows="6" placeholder="Responsabilidades, contexto del equipo, condiciones…" error="descripcion" :disabled="! $editable" />

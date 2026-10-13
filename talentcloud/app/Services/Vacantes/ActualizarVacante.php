@@ -16,10 +16,16 @@ class ActualizarVacante
             throw new OperacionNoPermitida('Una vacante cerrada no se puede modificar.');
         }
 
+        $ubicacion = $datos->modalidad->normalizarUbicacion($datos->ubicacion);
+
+        if ($ubicacion === null && $datos->modalidad->requiereUbicacion()) {
+            throw new OperacionNoPermitida('Indica dónde se trabajará: una vacante '.mb_strtolower($datos->modalidad->etiqueta()).' necesita ubicación.', 'ubicacion');
+        }
+
         return $this->vacantes->actualizar($vacante, [
             'titulo' => $datos->titulo,
             'descripcion' => $datos->descripcion,
-            'ubicacion' => $datos->ubicacion,
+            'ubicacion' => $ubicacion,
             'modalidad' => $datos->modalidad,
         ]);
     }

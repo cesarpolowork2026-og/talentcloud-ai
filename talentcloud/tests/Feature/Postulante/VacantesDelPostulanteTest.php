@@ -269,12 +269,12 @@ it('invita a ver vacantes cuando todavía no tiene postulaciones', function () {
         ->assertSee('Ver vacantes abiertas');
 });
 
-it('no repite la ubicación cuando coincide con la modalidad', function (?string $ubicacion, string $esperado) {
+it('en una vacante remota muestra la cobertura después de la modalidad y no repite «Remoto»', function (?string $ubicacion, string $esperado) {
     $vacante = new Vacante(['ubicacion' => $ubicacion, 'modalidad' => Modalidad::Remoto]);
 
     expect($vacante->lugarYModalidad())->toBe($esperado);
 })->with([
-    'ciudad' => ['Madrid', 'Madrid · Remoto'],
+    'cobertura' => ['Perú', 'Remoto · Perú'],
     'repetida' => ['remoto', 'Remoto'],
     'sin ubicación' => [null, 'Remoto'],
 ]);

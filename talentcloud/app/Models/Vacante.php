@@ -56,17 +56,19 @@ class Vacante extends Model
     }
 
     /**
-     * "Madrid · Presencial". Si la ubicación repite la modalidad ("Remoto · Remoto"),
-     * se muestra una sola vez.
+     * "Madrid · Presencial", "Remoto" o "Remoto · Perú" (la cobertura de una vacante
+     * remota). Si el lugar repite la modalidad ("Remoto · Remoto"), se muestra una sola vez.
      */
     public function lugarYModalidad(): string
     {
         $modalidad = $this->modalidad->etiqueta();
-        $ubicacion = trim((string) $this->ubicacion);
+        $lugar = $this->modalidad->normalizarUbicacion($this->ubicacion);
 
-        return $ubicacion === '' || mb_strtolower($ubicacion) === mb_strtolower($modalidad)
-            ? $modalidad
-            : "{$ubicacion} · {$modalidad}";
+        if ($lugar === null) {
+            return $modalidad;
+        }
+
+        return $this->modalidad->requiereUbicacion() ? "{$lugar} · {$modalidad}" : "{$modalidad} · {$lugar}";
     }
 
     /**

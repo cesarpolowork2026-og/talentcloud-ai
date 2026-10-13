@@ -8,6 +8,7 @@ use App\Enums\Modalidad;
 use App\Enums\Rol;
 use App\Exports\VacantesExport;
 use App\Livewire\Concerns\WithListado;
+use App\Models\Competencia;
 use App\Models\Empresa;
 use App\Models\User;
 use App\Models\Vacante;
@@ -39,7 +40,8 @@ class Listado extends Component
 
     public string $modalidad = 'remoto';
 
-    public string $competencias = '';
+    /** @var list<string> */
+    public array $competencias = [];
 
     // Vista previa (diálogo del prototipo al pulsar una fila).
     public bool $mostrarVistaPrevia = false;
@@ -111,6 +113,16 @@ class Listado extends Component
         $this->mostrarFormulario = true;
     }
 
+    /** Al pasar a remoto el lugar deja de ser una ubicación: se limpia para no arrastrar «Lima». */
+    public function updatedModalidad(string $valor): void
+    {
+        if (Modalidad::tryFrom($valor) === Modalidad::Remoto) {
+            $this->reset('ubicacion');
+        }
+
+        $this->resetValidation('ubicacion');
+    }
+
     public function crear(CrearVacante $crear, VacanteRepository $vacantes): void
     {
         $this->authorize('create', Vacante::class);
@@ -120,9 +132,14 @@ class Listado extends Component
         $datos = $this->validate([
             'titulo' => ['required', 'string', 'max:255'],
             'empresaId' => [$esAdmin ? 'required' : 'nullable', 'integer', Rule::exists('empresas', 'id')],
-            'ubicacion' => ['nullable', 'string', 'max:120'],
+            'ubicacion' => ['nullable', 'string', 'max:120', Rule::requiredIf($this->modalidad !== Modalidad::Remoto->value)],
             'modalidad' => ['required', Rule::enum(Modalidad::class)],
-            'competencias' => ['required', 'string', 'max:1000'],
+            'competencias' => ['required', 'array', 'min:1', 'max:20'],
+            'competencias.*' => ['string', 'max:80'],
+        ], messages: [
+            'ubicacion.required' => 'Indica dónde se trabajará: una vacante presencial o híbrida necesita ubicación.',
+            'competencias.required' => 'Agrega al menos una competencia.',
+            'competencias.min' => 'Agrega al menos una competencia.',
         ], attributes: [
             'titulo' => 'título del puesto',
             'empresaId' => 'empresa',
@@ -139,10 +156,10 @@ class Listado extends Component
             return;
         }
 
-        $listaCompetencias = NuevaVacanteData::separarCompetencias($datos['competencias']);
+        $listaCompetencias = NuevaVacanteData::depurarCompetencias($datos['competencias']);
 
         if ($listaCompetencias === []) {
-            $this->addError('competencias', 'Indica al menos una competencia.');
+            $this->addError('competencias', 'Agrega al menos una competencia.');
 
             return;
         }
@@ -155,7 +172,7 @@ class Listado extends Component
                 competencias: $listaCompetencias,
             ), $this->usuario());
         } catch (OperacionNoPermitida $e) {
-            $this->addError('titulo', $e->getMessage());
+            $this->addError($e->campo ?? 'titulo', $e->getMessage());
 
             return;
         }
@@ -185,6 +202,14 @@ class Listado extends Component
                 : 'Vacantes publicadas por '.$this->usuario()->empresa?->nombre.'.',
             'empresas' => $esAdmin ? $vacantes->empresasDisponibles()->pluck('nombre', 'id')->all() : [],
             'modalidades' => Modalidad::opciones(),
+            // El selector de competencias busca en el navegador: el catálogo viaja solo con el formulario abierto.
+            'catalogo' => $this->mostrarFormulario
+                ? Competencia::orderBy('nombre')->get(['nombre', 'categoria', 'sinonimos'])->map(fn (Competencia $c) => [
+                    'nombre' => $c->nombre,
+                    'categoria' => $c->categoria,
+                    'sinonimos' => $c->sinonimos,
+                ])->all()
+                : [],
         ]);
     }
 
