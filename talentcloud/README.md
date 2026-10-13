@@ -65,6 +65,34 @@ El postulante ve las vacantes abiertas de las empresas activas en «Vacantes» y
 
 La empresa ve en el dashboard el embudo de selección de los últimos 90 días, y en «Mi empresa» el uso de su plan: vacantes activas, usuarios y postulaciones evaluadas con IA en el mes (Gratis: 1, 2 y 30; Starter: 3, 3 y 300; Pro: 15, 10 y 2 000; Enterprise: sin límite). Toda empresa nueva entra en Gratis con 14 días del plan Pro. Los precios están en `/planes`. Con la pasarela configurada (`PAGOS_PASARELA=stripe`, ver «Pagos con Stripe»), Starter y Pro se pagan con tarjeta desde «Mi empresa»; sin ella, y para Enterprise, la empresa solicita el plan y el admin SaaS lo aplica desde «Empresas».
 
+### Volumen de demostración (opcional)
+
+La demo base tiene pocas postulaciones por vacante. Para ver el producto «lleno» (dashboard, ranking, Kanban con
+«Ver más», Excel con datos), después de `migrate:fresh --seed`:
+
+```bash
+php artisan db:seed --class=VolumenDeDemostracionSeeder     # unos 15 min; DEMO_ESCALA_DE_VOLUMEN=0.1 para una prueba rápida
+```
+
+Lleva cada empresa a unas diez vacantes (las antiguas cerradas con su contratación, las recientes abiertas, respetando el
+límite de vacantes activas de cada plan) y siembra ~3 500 postulaciones de personas con un CV como el de César Polo
+(perfil, experiencia con fechas, proyectos, educación, habilidades). El volumen depende del tipo de puesto: cientos en
+contratación masiva (cajeros, operarios, mozos), decenas en perfiles técnicos y pocas en jefaturas. Reproduce la historia
+con los servicios de la aplicación (registro, CV, postulación, Kanban, entrevistas, evaluaciones, cierre), así que el
+historial y la actividad son los de un uso real. El matching es el análisis básico (no gasta el cupo de IA); después:
+`php artisan talentcloud:reindexar-embeddings --sync` y `talentcloud:recalcular-matching` para lo que quieras mostrar con IA.
+No es parte de `DatabaseSeeder` (los tests no lo necesitan). Orbita Labs, que está suspendida, no recibe vacantes.
+
+### Escala
+
+Medido sobre una copia con una sola empresa de 10 000 vacantes, ~120 000 postulaciones y una vacante con 15 000
+(`database/rendimiento/carga_empresa_grande.sql`): Selección 0,45 s y 36 MB (antes 20 s y caída por memoria), matching
+0,4 s, «Programar entrevista» y «Evaluar» 20 ms (antes caída y 3,4 s). Lo que lo permite: el tablero trae las primeras 25
+tarjetas de cada columna («Ver más»), el ranking se pagina en SQL con el resumen de cumplimiento en columnas indexadas
+(`postulaciones.requisitos_total/_cubiertos/obligatorios_faltantes`, que escribe `CalcularMatch`), mover una tarjeta
+renumera en SQL con un candado sobre la vacante, los desplegables enormes son buscadores (`<x-ui.buscador>`: 20 resultados
+por consulta) y las cifras agregadas del dashboard se guardan 60 s por empresa (`DASHBOARD_CACHE_SEGUNDOS`).
+
 `docker compose` toma `DB_PASSWORD` del `.env`. Crea las bases `talentcloud` y `talentcloud_testing`, ambas con la extensión `vector`.
 
 ## Pagos con Stripe
