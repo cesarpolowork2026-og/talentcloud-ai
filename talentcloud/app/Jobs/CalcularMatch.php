@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Enums\MotorMatching;
 use App\Enums\ReservaDeCupoIa;
 use App\Matching\ConstructorDeMatchInput;
+use App\Matching\CumplimientoDeRequisitos;
 use App\Matching\FakeMatchingEngine;
 use App\Matching\MatchingEngineInterface;
 use App\Models\Postulacion;
@@ -55,7 +56,7 @@ class CalcularMatch implements ShouldBeUnique, ShouldQueue
 
         if ($entrada === null) {
             // Sin CV procesado o sin requisitos: no hay nada que comparar todavía.
-            $postulacion->forceFill(['ia_sin_cupo' => false])->update(['match_score' => null, 'match_detalle' => null, 'match_motor' => null, 'match_calculado_at' => null]);
+            $postulacion->forceFill(['ia_sin_cupo' => false])->update(['match_score' => null, 'match_detalle' => null, 'match_motor' => null, 'match_calculado_at' => null, 'requisitos_total' => null, 'requisitos_cubiertos' => null, 'obligatorios_faltantes' => null]);
 
             return;
         }
@@ -75,6 +76,8 @@ class CalcularMatch implements ShouldBeUnique, ShouldQueue
             'match_detalle' => $resultado->aArreglo(),
             'match_motor' => $resultado->motor,
             'match_calculado_at' => now(),
+            // El resumen para ordenar y filtrar en SQL (ranking de Selección), sobre los requisitos vigentes.
+            ...CumplimientoDeRequisitos::de($resultado->aArreglo(), $postulacion->vacante->requisitos()->with('competencia')->get())->columnas(),
         ]);
     }
 

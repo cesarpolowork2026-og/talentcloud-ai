@@ -7,6 +7,7 @@ use App\Enums\EtapaPostulacion;
 use App\Enums\OrigenPostulacion;
 use App\Models\Postulacion;
 use App\Models\PostulacionEtapa;
+use App\Support\CacheDeResumenes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -25,6 +26,11 @@ class EmbudoDeSeleccion
     public const DIAS = 90;
 
     public function calcular(?int $vacanteId = null): EmbudoDeSeleccionData
+    {
+        return CacheDeResumenes::recordar('embudo-'.($vacanteId ?? 'todas'), fn () => $this->leer($vacanteId));
+    }
+
+    private function leer(?int $vacanteId): EmbudoDeSeleccionData
     {
         $desde = now()->subDays(self::DIAS);
 

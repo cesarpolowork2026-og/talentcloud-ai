@@ -214,4 +214,93 @@ document.addEventListener('alpine:init', () => {
             },
         };
     });
+
+    /**
+     * Buscador con resultados del servidor: para elegir una vacante o una postulación entre miles sin
+     * enviar todas al navegador. Cada vez que se escribe (con una pausa) llama a un método del
+     * componente de Livewire que devuelve hasta 20 coincidencias [{ id, etiqueta, detalle }].
+     * `modelo`: propiedad de Livewire que guarda el id elegido (opcional). Al elegir lanza el
+     * evento `elegido` con { id, etiqueta }; con `vacio` se puede volver a «ninguna».
+     */
+    window.Alpine.data('buscadorRemoto', ({ metodo, modelo = null, etiqueta = '', vacio = null }) => ({
+        texto: etiqueta,
+        elegida: etiqueta,
+        opciones: [],
+        abierto: false,
+        activa: -1,
+        cargando: false,
+        pedido: 0,
+        pausa: null,
+
+        init() {
+            // El servidor puede vaciar la elección (por ejemplo, al reiniciar un formulario).
+            if (modelo) {
+                this.$watch(() => this.$wire.get(modelo), (valor) => {
+                    if ((valor === '' || valor === null) && this.elegida !== '') {
+                        this.elegida = '';
+                        this.texto = '';
+                    }
+                });
+            }
+        },
+
+        escribir() {
+            this.abierto = true;
+            this.activa = -1;
+            clearTimeout(this.pausa);
+            this.pausa = setTimeout(() => this.buscar(), 250);
+        },
+
+        abrir() {
+            this.abierto = true;
+            if (this.opciones.length === 0) {
+                this.buscar();
+            }
+        },
+
+        async buscar() {
+            const numero = ++this.pedido;
+            this.cargando = true;
+
+            // Con la etiqueta ya elegida en el campo se muestran las sugerencias iniciales, no un filtro por ella.
+            const consulta = this.texto === this.elegida ? '' : this.texto;
+            const resultado = await this.$wire.call(metodo, consulta);
+
+            if (numero === this.pedido) {
+                this.opciones = vacio !== null && consulta === '' ? [{ id: '', etiqueta: vacio, detalle: null }, ...resultado] : resultado;
+                this.cargando = false;
+            }
+        },
+
+        elegir(opcion) {
+            if (! opcion) {
+                return;
+            }
+
+            this.elegida = opcion.id === '' ? '' : opcion.etiqueta;
+            this.texto = this.elegida;
+            this.abierto = false;
+
+            if (modelo) {
+                this.$wire.$set(modelo, String(opcion.id));
+            }
+
+            this.$dispatch('elegido', { id: opcion.id, etiqueta: opcion.etiqueta });
+        },
+
+        mover(paso) {
+            const total = this.opciones.length;
+
+            if (total === 0) {
+                return;
+            }
+
+            this.abierto = true;
+            this.activa = (this.activa + paso + total) % total;
+        },
+
+        confirmar() {
+            this.elegir(this.opciones[this.activa >= 0 ? this.activa : 0]);
+        },
+    }));
 });

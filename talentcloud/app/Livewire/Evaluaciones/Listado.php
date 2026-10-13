@@ -14,7 +14,9 @@ use App\Models\Vacante;
 use App\Repositories\Contracts\EvaluacionRepository;
 use App\Services\Evaluaciones\ComparativaDeFinalistas;
 use App\Services\Evaluaciones\GuardarEvaluacion;
+use App\Services\Vacantes\BuscadorDeVacantes;
 use App\Services\Vacantes\OperacionNoPermitida;
+use App\Support\Formato;
 use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
@@ -188,29 +190,58 @@ class Listado extends Component
         }
     }
 
+    /**
+     * Buscador de «Candidato y vacante» al evaluar: hasta 20 postulaciones con entrevista realizada y sin evaluar por mí..
+     *
+     * @return list<array{id: int, etiqueta: string, detalle: string|null}>
+     */
+    public function buscarPostulacionesPorEvaluar(string $texto, EvaluacionRepository $evaluaciones): array
+    {
+        $this->authorize('create', Evaluacion::class);
+
+        return $evaluaciones->postulacionesPorEvaluar($this->usuario(), $texto)
+            ->map(fn (Postulacion $p) => ['id' => $p->id, 'etiqueta' => $this->etiquetaDePostulacion($p), 'detalle' => $p->etapa->etiqueta()])
+            ->all();
+    }
+
+    /**
+     * Buscador de la vacante a comparar: solo vacantes que tienen evaluaciones..
+     *
+     * @return list<array{id: int, etiqueta: string, detalle: string|null}>
+     */
+    public function buscarVacantesEvaluadas(string $texto, BuscadorDeVacantes $buscador): array
+    {
+        $this->authorize('viewAny', Evaluacion::class);
+
+        return $buscador->buscar($texto, base: Vacante::query()->whereHas('postulaciones.evaluaciones'));
+    }
+
+    private function etiquetaDePostulacion(?Postulacion $p): string
+    {
+        return $p === null ? '' : $p->candidato?->nombre.' — '.Formato::vacante($p->vacante);
+    }
+
     public function render(EvaluacionRepository $evaluaciones, ComparativaDeFinalistas $comparativa): View
     {
         $comparando = $this->vista === 'comparar';
-        $conEvaluaciones = $comparando
-            ? Vacante::query()->whereHas('postulaciones.evaluaciones')->orderBy('titulo')->get(['id', 'titulo'])
-            : collect();
-        // Una vacante que no es visible (otra empresa) no se compara: se usa la primera que sí.
-        $vacanteElegida = $conEvaluaciones->firstWhere('id', (int) $this->vacanteComparada) ?? $conEvaluaciones->first();
+        $conEvaluaciones = fn () => Vacante::query()->with('empresa:id,nombre')->whereHas('postulaciones.evaluaciones');
+        // Una vacante que no es visible (otra empresa) o sin evaluaciones no se compara: se usa la primera que sí.
+        $vacanteElegida = $comparando
+            ? (ctype_digit($this->vacanteComparada) ? $conEvaluaciones()->find((int) $this->vacanteComparada) : null) ?? $conEvaluaciones()->orderBy('titulo')->first()
+            : null;
 
         $seleccionada = $this->evaluacionSeleccionada ? $evaluaciones->buscar($this->evaluacionSeleccionada) : null;
-        $porEvaluar = $this->mostrarFormulario && $this->editando === null
-            ? $evaluaciones->postulacionesPorEvaluar($this->usuario())
-            : collect();
 
         return view('livewire.evaluaciones.listado', [
             'filas' => $comparando ? null : $this->listar($evaluaciones->consultaListado()->latest()),
-            'vacantesConEvaluaciones' => $conEvaluaciones->mapWithKeys(fn (Vacante $v) => [$v->id => $v->titulo])->all(),
             'vacanteElegida' => $vacanteElegida,
             'comparativa' => $vacanteElegida ? $comparativa->para($vacanteElegida) : [],
             // Admin SaaS: columna "Empresa" (ve las evaluaciones de todas).
             'vistaGlobal' => app(TenantContext::class)->esGlobal(),
             'seleccionada' => $seleccionada,
-            'postulaciones' => $porEvaluar->mapWithKeys(fn (Postulacion $p) => [$p->id => $p->candidato?->nombre.' — '.$p->vacante?->titulo])->all(),
+            'etiquetaDePostulacion' => $this->mostrarFormulario && $this->editando === null && ctype_digit($this->postulacionId)
+                ? $this->etiquetaDePostulacion(Postulacion::with(['candidato:id,nombre', 'vacante.empresa:id,nombre'])->find((int) $this->postulacionId))
+                : '',
             'enEdicion' => $this->editando ? $evaluaciones->buscar($this->editando) : null,
             'criterios' => CriterioEvaluacion::cases(),
             'estados' => EstadoEvaluacion::opciones(),

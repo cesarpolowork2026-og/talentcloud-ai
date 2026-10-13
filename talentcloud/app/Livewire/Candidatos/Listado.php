@@ -14,6 +14,7 @@ use App\Repositories\Contracts\CandidatoRepository;
 use App\Services\Candidatos\RegistrarCandidato;
 use App\Services\Cvs\SubirCv;
 use App\Services\Postulaciones\PostularCandidato;
+use App\Services\Vacantes\BuscadorDeVacantes;
 use App\Services\Vacantes\OperacionNoPermitida;
 use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
@@ -182,6 +183,18 @@ class Listado extends Component
         return Excel::download(new CandidatosExport($this->filtrar($candidatos->consultaListado())), 'candidatos-'.now()->format('Y-m-d').'.xlsx');
     }
 
+    /**
+     * Buscador de «Postular a»: hasta 20 vacantes abiertas, no todas las de la empresa..
+     *
+     * @return list<array{id: int, etiqueta: string, detalle: string|null}>
+     */
+    public function buscarVacantesAbiertas(string $texto, BuscadorDeVacantes $buscador): array
+    {
+        $this->authorize('create', Candidato::class);
+
+        return $buscador->buscar($texto, base: Vacante::query()->where('estado', EstadoVacante::Abierta));
+    }
+
     public function render(CandidatoRepository $candidatos): View
     {
         $seleccionado = $this->candidatoSeleccionado
@@ -193,7 +206,6 @@ class Listado extends Component
             'seleccionado' => $seleccionado,
             // Admin SaaS: cada candidato con sus procesos agrupados por empresa.
             'vistaGlobal' => app(TenantContext::class)->esGlobal(),
-            'vacantesAbiertas' => Vacante::where('estado', EstadoVacante::Abierta)->orderBy('titulo')->pluck('titulo', 'id')->all(),
             'puedeRegistrar' => auth()->user()?->can('create', Candidato::class) ?? false,
         ]);
     }

@@ -93,20 +93,19 @@ it('añade la empresa al nombre de la vacante solo en la vista global', function
 // — Selectores agrupados —
 
 it('agrupa por empresa los selectores del admin y deja planos los del reclutador', function () {
+    // Los buscadores traen pocas coincidencias, con la empresa en la etiqueta cuando la vista abarca varias.
     actuarComo($this->admin);
-    Livewire::test(Central::class, ['vacante' => $this->backend])
-        ->assertSeeHtml('<optgroup label="Vela Studio">')
-        ->assertSeeHtml('>Product Designer</option>');
-    Livewire::test(Entrevistas::class)->call('abrirFormulario')
-        ->assertSeeHtml('<optgroup label="Nimbus Corp">')
-        ->assertSeeHtml('>Iván Torres — Desarrollador Backend</option>')
-        ->assertSeeHtml('>Iván Torres — Product Designer</option>');
+    $vacantes = app()->call([Livewire::test(Central::class, ['vacante' => $this->backend])->instance(), 'buscarVacantes'], ['texto' => '']);
+    expect(array_column($vacantes, 'etiqueta'))->toContain('Product Designer · Vela Studio');
+
+    $postulaciones = app()->call([Livewire::test(Entrevistas::class)->instance(), 'buscarPostulaciones'], ['texto' => 'iván']);
+    expect(array_column($postulaciones, 'etiqueta'))->toContain('Iván Torres — Desarrollador Backend · Nimbus Corp')
+        ->toContain('Iván Torres — Product Designer · Vela Studio');
 
     actuarComo($this->marta);
-    Livewire::test(Entrevistas::class)->call('abrirFormulario')
-        ->assertDontSeeHtml('<optgroup')
-        ->assertSeeHtml('>Sofía Nieto — Desarrollador Backend</option>')
-        ->assertDontSee('Product Designer');
+    $propias = app()->call([Livewire::test(Entrevistas::class)->instance(), 'buscarPostulaciones'], ['texto' => '']);
+    expect(array_column($propias, 'etiqueta'))->toContain('Sofía Nieto — Desarrollador Backend')
+        ->and(implode(' ', array_column($propias, 'etiqueta')))->not->toContain('Product Designer');
 });
 
 it('agrupa por empresa las vacantes a las que el admin puede postular al candidato', function () {

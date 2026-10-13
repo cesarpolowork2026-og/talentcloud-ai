@@ -26,7 +26,13 @@ interface EntrevistaRepository
      *
      * @return Collection<int, Postulacion>
      */
-    public function postulacionesAgendables(): Collection;
+    /**
+     * Postulaciones en las que se puede agendar una entrevista, las más recientes primero; con `$texto`, las que
+     * coinciden por candidato o vacante. Siempre acotado: una empresa puede tener decenas de miles.
+     *
+     * @return Collection<int, Postulacion>
+     */
+    public function postulacionesAgendables(string $texto = '', int $limite = 20): Collection;
 
     /**
      * Entrevistas de un candidato en todas las empresas, para su portal. Única

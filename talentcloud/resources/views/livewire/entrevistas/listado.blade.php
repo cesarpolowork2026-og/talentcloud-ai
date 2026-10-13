@@ -148,7 +148,7 @@ Notas: {{ $seleccionada->notas }}@endif</p>
     <x-ui.dialog wire:model="mostrarFormulario" title="Programar entrevista" max-width="480px">
         <form wire:submit="programar" id="form-programar-entrevista" class="grid gap-3">
             <x-ui.field label="Candidato y vacante" for="entrevista-postulacion" error="postulacionId">
-                <x-ui.select wire:model.live="postulacionId" id="entrevista-postulacion" :options="$postulaciones" placeholder="Elige un candidato" class="w-full" error="postulacionId" />
+                <x-ui.buscador id="entrevista-postulacion" metodo="buscarPostulaciones" modelo="postulacionId" :etiqueta="$etiquetaDePostulacion" placeholder="Busca por candidato o vacante…" error="postulacionId" />
             </x-ui.field>
             <x-ui.field label="Entrevistador" for="entrevista-entrevistador" error="entrevistadorId"
                 :hint="$this->esAdmin() && $postulacionId === '' ? 'Elige primero el candidato: el entrevistador es de su empresa.' : null">

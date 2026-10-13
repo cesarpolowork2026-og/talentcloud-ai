@@ -222,10 +222,15 @@ it('ofrece para evaluar solo a quien tuvo una entrevista realizada y no se retir
         ->create(['candidato_id' => Candidato::factory()->create(['nombre' => 'Lucía Prat'])->id]);
     Entrevista::factory()->create(['postulacion_id' => $lucia->id, 'inicia_at' => now()->subDay(), 'estado' => EstadoEntrevista::Completada]);
 
-    $opciones = Livewire::test(Listado::class)->call('abrirFormulario')->viewData('postulaciones');
+    $opciones = app()->call([Livewire::test(Listado::class)->instance(), 'buscarPostulacionesPorEvaluar'], ['texto' => '']);
 
     // Elena ya la evaluó Marta; Pablo solo tiene una entrevista pendiente; Marco se retiró.
-    expect(array_keys($opciones))->toBe([$lucia->id]);
+    expect(array_column($opciones, 'id'))->toBe([$lucia->id])
+        ->and($opciones[0]['etiqueta'])->toBe('Lucía Prat — Desarrollador Backend');
+
+    // Busca sin importar tildes ni mayúsculas; sin coincidencias, vacío.
+    expect(array_column(app()->call([Livewire::test(Listado::class)->instance(), 'buscarPostulacionesPorEvaluar'], ['texto' => 'lucia']), 'id'))->toBe([$lucia->id])
+        ->and(app()->call([Livewire::test(Listado::class)->instance(), 'buscarPostulacionesPorEvaluar'], ['texto' => 'zzz']))->toBe([]);
 });
 
 it('no registra una evaluación sin entrevista realizada, ni de una postulación retirada', function () {

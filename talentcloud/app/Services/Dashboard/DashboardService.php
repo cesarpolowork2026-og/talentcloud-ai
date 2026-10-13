@@ -9,6 +9,7 @@ use App\Enums\MotorMatching;
 use App\Models\Postulacion;
 use App\Models\Vacante;
 use App\Services\Entrevistas\ResumenDeAgenda;
+use App\Support\CacheDeResumenes;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -71,6 +72,11 @@ class DashboardService
 
     /** Todas las cifras de postulaciones en una sola lectura. */
     private function cifrasDePostulaciones(): object
+    {
+        return CacheDeResumenes::recordar('postulaciones', fn () => $this->leerCifrasDePostulaciones());
+    }
+
+    private function leerCifrasDePostulaciones(): object
     {
         $activas = implode(',', array_map(fn (EstadoVacante $e) => "'{$e->value}'", EstadoVacante::activos()));
 

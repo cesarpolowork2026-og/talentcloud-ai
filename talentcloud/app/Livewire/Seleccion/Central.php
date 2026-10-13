@@ -12,13 +12,17 @@ use App\Models\User;
 use App\Models\Vacante;
 use App\Services\Evaluaciones\GuardarEvaluacion;
 use App\Services\Postulaciones\MoverPostulacion;
+use App\Services\Vacantes\BuscadorDeVacantes;
 use App\Services\Vacantes\OperacionNoPermitida;
-use App\Support\OpcionesPorEmpresa;
+use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 /**
  * «Selección»: el trabajo del reclutador sobre las postulaciones de una vacante, en dos
@@ -29,7 +33,22 @@ use Livewire\Component;
  */
 class Central extends Component
 {
+    use WithPagination;
+
     public const VISTAS = ['tablero', 'ranking'];
+
+    /** Tarjetas que muestra cada columna al abrir, y las que suma cada «Ver más». Una vacante masiva tiene miles. */
+    public const TARJETAS_POR_COLUMNA = 25;
+
+    /** Filas por página del ranking. */
+    public const FILAS_DEL_RANKING = 25;
+
+    /**
+     * Columnas del tablero que se desplegaron: etapa → cuántas tarjetas se muestran.
+     *
+     * @var array<string, int>
+     */
+    public array $mostrando = [];
 
     #[Locked]
     public ?int $vacanteId = null;
@@ -69,6 +88,37 @@ class Central extends Component
             $this->authorize('view', $vacante);
             $this->vacanteId = $vacante->id;
         }
+    }
+
+    /** «Ver más» de una columna: suma otro bloque de tarjetas (el servidor decide el tope: lo que existe). */
+    public function verMas(string $etapa): void
+    {
+        $destino = EtapaPostulacion::tryFrom($etapa);
+        abort_if($destino === null, 404);
+
+        $this->mostrando[$destino->value] = ($this->mostrando[$destino->value] ?? self::TARJETAS_POR_COLUMNA) + self::TARJETAS_POR_COLUMNA;
+    }
+
+    public function updatedSoloObligatorios(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedVerDescartados(): void
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Buscador de vacantes (cambiar de vacante): hasta 20 coincidencias, no todas las de la empresa..
+     *
+     * @return list<array{id: int, etiqueta: string, detalle: string|null}>
+     */
+    public function buscarVacantes(string $texto): array
+    {
+        $this->authorize('viewAny', Vacante::class);
+
+        return app(BuscadorDeVacantes::class)->buscar($texto, soloActivas: true);
     }
 
     public function updatedVista(string $valor): void
@@ -160,64 +210,141 @@ class Central extends Component
             return view('livewire.seleccion.central', ['vacante' => null])->title('Selección');
         }
 
-        $todas = Postulacion::query()
-            ->with('candidato')
-            ->withCount('notas')
-            ->withMin(['entrevistas as proxima_entrevista' => fn ($q) => $q
-                ->whereIn('estado', [EstadoEntrevista::Pendiente, EstadoEntrevista::Confirmada])
-                ->where('inicia_at', '>=', now())], 'inicia_at')
+        // Cada consulta pide solo lo que se ve: el tablero, las primeras tarjetas de cada columna; el
+        // ranking, una página. Con miles de postulaciones nada recorre ni hidrata la vacante entera.
+        $filtrar = fn (Builder $q) => $this->soloObligatorios
+            ? $q->whereNotNull('match_calculado_at')->where('obligatorios_faltantes', 0)
+            : $q;
+
+        $totales = Postulacion::query()
             ->where('vacante_id', $vacante->id)
-            ->orderBy('orden')
-            ->orderBy('id')
-            ->get();
+            ->toBase()
+            ->selectRaw('etapa, COUNT(*) AS total, COUNT(*) FILTER (WHERE match_calculado_at IS NOT NULL AND obligatorios_faltantes = 0) AS cubren')
+            ->groupBy('etapa')
+            ->get()
+            ->keyBy('etapa');
 
-        // Cuánto de lo que pide la vacante cubre cada CV, según el matching guardado.
-        $requisitos = $vacante->requisitos()->with('competencia')->get();
-        $cumplimiento = $todas->mapWithKeys(fn (Postulacion $p) => [$p->id => CumplimientoDeRequisitos::de($p->match_detalle, $requisitos)]);
+        $enEtapa = fn (EtapaPostulacion $e): int => (int) ($this->soloObligatorios ? ($totales[$e->value]->cubren ?? 0) : ($totales[$e->value]->total ?? 0));
+        $todas = (int) $totales->sum('total');
+        $visibles = array_sum(array_map($enEtapa, EtapaPostulacion::cases()));
 
-        $postulaciones = $this->soloObligatorios
-            ? $todas->filter(fn (Postulacion $p) => $cumplimiento[$p->id]->cubreLosObligatorios())->values()
-            : $todas;
+        // Las tarjetas de todas las columnas en dos consultas: los ids de las primeras N de cada etapa (una
+        // función de ventana) y esas postulaciones con sus relaciones.
+        $porEtapa = $this->vista === 'tablero' ? $this->tarjetasPorEtapa($vacante->id, $filtrar) : [];
 
         $columnas = [];
         foreach (EtapaPostulacion::cases() as $etapa) {
+            $mostradas = $this->mostrando[$etapa->value] ?? self::TARJETAS_POR_COLUMNA;
+            $total = $enEtapa($etapa);
+
             $columnas[] = [
                 'etapa' => $etapa,
-                'postulaciones' => $postulaciones->filter(fn (Postulacion $p) => $p->etapa === $etapa)->values(),
+                'total' => $total,
+                'restantes' => max(0, $total - $mostradas),
+                'postulaciones' => collect($porEtapa[$etapa->value] ?? []),
             ];
         }
 
-        // Ranking: de mayor a menor coincidencia; sin cálculo, al final y por orden de llegada.
-        $ranking = $postulaciones
-            ->reject(fn (Postulacion $p) => ! $this->verDescartados && $p->etapa === EtapaPostulacion::Descartado)
-            ->sort(fn (Postulacion $a, Postulacion $b) => [$b->match_score ?? -1, $a->id] <=> [$a->match_score ?? -1, $b->id])
-            ->values();
+        // Ranking: de mayor a menor coincidencia (sin cálculo, al final), una página a la vez.
+        $ranking = null;
+        $cumplimiento = collect();
+        $requisitos = null;
+        if ($this->vista === 'ranking') {
+            $ranking = $filtrar($this->tarjetas($vacante->id, conDetalle: true))
+                ->when(! $this->verDescartados, fn (Builder $q) => $q->where('etapa', '!=', EtapaPostulacion::Descartado))
+                ->orderByRaw('match_score DESC NULLS LAST')
+                ->orderBy('id')
+                ->paginate(self::FILAS_DEL_RANKING);
 
-        $seleccionada = $this->postulacionSeleccionada ? $todas->firstWhere('id', $this->postulacionSeleccionada) : null;
+            $requisitos = $vacante->requisitos()->with('competencia')->get();
+            foreach ($ranking->items() as $fila) {
+                if ($fila instanceof Postulacion) {
+                    $cumplimiento->put($fila->id, CumplimientoDeRequisitos::de($fila->match_detalle, $requisitos));
+                }
+            }
+        }
 
-        $vacantesActivas = Vacante::query()
-            ->with('empresa:id,nombre')
-            ->whereIn('estado', [EstadoVacante::Abierta, EstadoVacante::EnRevision])
-            ->orderBy('titulo')
-            ->get(['id', 'titulo', 'empresa_id']);
+        // La postulación abierta se lee completa (con su matching) solo cuando hay una abierta.
+        $seleccionada = $this->postulacionSeleccionada
+            ? Postulacion::with('candidato')->withCount('notas')->where('vacante_id', $vacante->id)->find($this->postulacionSeleccionada)
+            : null;
+        if ($seleccionada !== null) {
+            $requisitos ??= $vacante->requisitos()->with('competencia')->get();
+            $cumplimiento = $cumplimiento->put($seleccionada->id, CumplimientoDeRequisitos::de($seleccionada->match_detalle, $requisitos));
+        }
 
         return view('livewire.seleccion.central', [
             'vacante' => $vacante,
             'columnas' => $columnas,
             'ranking' => $ranking,
             'cumplimiento' => $cumplimiento,
-            'ocultas' => $todas->count() - $postulaciones->count(),
-            'activas' => $todas->filter(fn (Postulacion $p) => $p->etapa !== EtapaPostulacion::Descartado)->count(),
+            'ocultas' => $todas - $visibles,
+            'activas' => $todas - (int) ($totales[EtapaPostulacion::Descartado->value]->total ?? 0),
             // Mismo criterio que PostulacionPolicy@update: personal de la empresa de la vacante.
             'editable' => $vacante->estado !== EstadoVacante::Cerrada && $this->usuario()->can('update', $vacante),
             'seleccionada' => $seleccionada,
             // "Evaluar" solo cuando se puede (entrevista realizada, no retirada, aún sin evaluar por mí).
             'puedeEvaluar' => $seleccionada !== null && $this->puedeEvaluar($seleccionada),
             'etapas' => EtapaPostulacion::opciones(),
-            // El selector solo aparece si hay a qué otra vacante cambiar; en la vista global, agrupado por empresa.
-            'hayOtrasVacantes' => $vacantesActivas->count() > 1,
-            'otrasVacantes' => OpcionesPorEmpresa::de($vacantesActivas, fn (Vacante $v) => $v, fn (Vacante $v) => $v->titulo),
+            // El buscador de vacantes solo aparece si hay a qué otra vacante cambiar.
+            'hayOtrasVacantes' => Vacante::query()->whereIn('estado', EstadoVacante::activos())->whereKeyNot($vacante->id)->exists(),
         ])->title('Selección · '.$vacante->titulo);
+    }
+
+    /**
+     * Las primeras tarjetas de cada columna (`$mostrando`), agrupadas por etapa.
+     *
+     * @param  Closure(Builder<Postulacion>): Builder<Postulacion>  $filtrar
+     * @return array<string, list<Postulacion>>
+     */
+    private function tarjetasPorEtapa(int $vacanteId, Closure $filtrar): array
+    {
+        $limites = [];
+        foreach (EtapaPostulacion::cases() as $etapa) {
+            $limites[$etapa->value] = $this->mostrando[$etapa->value] ?? self::TARJETAS_POR_COLUMNA;
+        }
+
+        $numeradas = $filtrar(Postulacion::query()->where('vacante_id', $vacanteId))
+            ->toBase()
+            ->selectRaw('id, etapa, ROW_NUMBER() OVER (PARTITION BY etapa ORDER BY orden, id) AS fila');
+
+        $casos = implode(' ', array_fill(0, count($limites), 'WHEN ? THEN ?'));
+        $ids = DB::query()
+            ->fromSub($numeradas, 'numeradas')
+            ->whereRaw("fila <= CASE etapa {$casos} ELSE 0 END", collect($limites)->flatMap(fn (int $n, string $e) => [$e, $n])->all())
+            ->pluck('id');
+
+        if ($ids->isEmpty()) {
+            return [];
+        }
+
+        return $this->tarjetas($vacanteId)
+            ->whereIn('id', $ids)
+            ->orderBy('orden')
+            ->orderBy('id')
+            ->get()
+            ->groupBy(fn (Postulacion $p) => $p->etapa->value)
+            ->map(fn ($grupo) => $grupo->values()->all())
+            ->all();
+    }
+
+    /**
+     * Las postulaciones de la vacante sin el JSON del matching (pesa kilobytes por fila): para el tablero
+     * basta el resumen indexado. El ranking sí lo pide, pero solo de su página.
+     *
+     * @return Builder<Postulacion>
+     */
+    private function tarjetas(int $vacanteId, bool $conDetalle = false): Builder
+    {
+        return Postulacion::query()
+            ->select(['id', 'empresa_id', 'vacante_id', 'candidato_id', 'etapa', 'orden', 'etapa_cambiada_at', 'match_score', 'match_motor', 'match_calculado_at', 'created_at', 'retirada_at', 'requisitos_total', 'requisitos_cubiertos', 'obligatorios_faltantes'])
+            ->when($conDetalle, fn (Builder $q) => $q->addSelect('match_detalle'))
+            ->with('candidato:id,nombre,titular')
+            ->withCount('notas')
+            ->withMin(['entrevistas as proxima_entrevista' => fn ($q) => $q
+                ->whereIn('estado', [EstadoEntrevista::Pendiente, EstadoEntrevista::Confirmada])
+                ->where('inicia_at', '>=', now())], 'inicia_at')
+            ->where('vacante_id', $vacanteId);
     }
 
     /** Solo postulaciones de la vacante del tablero (y, por el filtro, de la propia empresa). */

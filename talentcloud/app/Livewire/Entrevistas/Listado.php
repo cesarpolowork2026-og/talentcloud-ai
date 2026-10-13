@@ -17,12 +17,11 @@ use App\Services\Entrevistas\ProgramarEntrevista;
 use App\Services\Entrevistas\ReprogramarEntrevista;
 use App\Services\Entrevistas\ResumenDeAgenda;
 use App\Services\Vacantes\OperacionNoPermitida;
-use App\Support\OpcionesPorEmpresa;
+use App\Support\Formato;
 use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -214,6 +213,25 @@ class Listado extends Component
         $this->mostrarReprogramacion = false;
     }
 
+    /**
+     * Buscador de «Candidato y vacante»: hasta 20 postulaciones donde se puede agendar..
+     *
+     * @return list<array{id: int, etiqueta: string, detalle: string|null}>
+     */
+    public function buscarPostulaciones(string $texto, EntrevistaRepository $entrevistas): array
+    {
+        $this->authorize('create', Entrevista::class);
+
+        return $entrevistas->postulacionesAgendables($texto)
+            ->map(fn (Postulacion $p) => ['id' => $p->id, 'etiqueta' => $this->etiquetaDePostulacion($p), 'detalle' => $p->etapa->etiqueta()])
+            ->all();
+    }
+
+    private function etiquetaDePostulacion(?Postulacion $p): string
+    {
+        return $p === null ? '' : $p->candidato?->nombre.' — '.Formato::vacante($p->vacante);
+    }
+
     public function render(EntrevistaRepository $entrevistas, ResumenDeAgenda $agenda): View
     {
         $seleccionada = $this->entrevistaSeleccionada ? $entrevistas->buscar($this->entrevistaSeleccionada) : null;
@@ -224,7 +242,10 @@ class Listado extends Component
             // Admin SaaS: columna "Empresa" (ve las entrevistas de todas).
             'vistaGlobal' => app(TenantContext::class)->esGlobal(),
             'seleccionada' => $seleccionada,
-            'postulaciones' => $this->mostrarFormulario ? $this->opcionesDePostulacion($entrevistas->postulacionesAgendables()) : [],
+            // El texto del buscador cuando ya hay una postulación elegida (por ejemplo, desde «Programar entrevista» del Kanban).
+            'etiquetaDePostulacion' => $this->mostrarFormulario && ctype_digit($this->postulacionId)
+                ? $this->etiquetaDePostulacion(Postulacion::with(['candidato:id,nombre', 'vacante.empresa:id,nombre'])->find((int) $this->postulacionId))
+                : '',
             // La casilla "Mover a Entrevista" solo aparece si el candidato elegido aún no llegó a esa etapa.
             'puedeMoverAEntrevista' => $this->mostrarFormulario && ctype_digit($this->postulacionId)
                 && (Postulacion::query()->find((int) $this->postulacionId)?->etapa->antesDeEntrevista() ?? false),
@@ -232,20 +253,6 @@ class Listado extends Component
             'modalidades' => ModalidadEntrevista::opciones(),
             'duraciones' => self::DURACIONES,
         ]);
-    }
-
-    /**
-     * @param  Collection<int, Postulacion>  $postulaciones
-     * @return array<int, string>
-     */
-    private function opcionesDePostulacion(Collection $postulaciones): array
-    {
-        // En la vista global (admin SaaS), agrupados por empresa: un candidato puede estar en varias.
-        return OpcionesPorEmpresa::de(
-            $postulaciones,
-            fn (Postulacion $p) => $p->vacante,
-            fn (Postulacion $p) => $p->candidato?->nombre.' — '.$p->vacante?->titulo,
-        );
     }
 
     /**

@@ -24,7 +24,7 @@
         @else
             <div class="mb-4 flex flex-wrap items-end gap-3">
                 <x-ui.field label="Vacante" for="comparar-vacante">
-                    <x-ui.select wire:model.live="vacanteComparada" id="comparar-vacante" :options="$vacantesConEvaluaciones" :selected="$vacanteElegida->id" />
+                    <x-ui.buscador id="comparar-vacante" metodo="buscarVacantesEvaluadas" modelo="vacanteComparada" :etiqueta="App\Support\Formato::vacante($vacanteElegida)" placeholder="Busca una vacante evaluada…" class="w-[320px] max-w-full" />
                 </x-ui.field>
             </div>
             @php($mejor = collect($comparativa)->max('promedio'))
@@ -126,7 +126,7 @@ Estado: {{ $seleccionada->estado->etiqueta() }}</p>
         <form wire:submit="guardar" id="form-evaluacion" class="grid gap-3">
             @if (! $editando)
                 <x-ui.field label="Candidato y vacante" for="evaluacion-postulacion" error="postulacionId" hint="Aparecen los candidatos con una entrevista realizada que aún no evaluaste.">
-                    <x-ui.select wire:model="postulacionId" id="evaluacion-postulacion" :options="$postulaciones" placeholder="Elige un candidato" class="w-full" error="postulacionId" />
+                    <x-ui.buscador id="evaluacion-postulacion" metodo="buscarPostulacionesPorEvaluar" modelo="postulacionId" :etiqueta="$etiquetaDePostulacion" placeholder="Busca por candidato o vacante…" error="postulacionId" />
                 </x-ui.field>
             @endif
 

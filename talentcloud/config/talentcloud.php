@@ -36,6 +36,16 @@ return [
     | (minutos que lleva leer y comparar un CV con los requisitos), visible en la
     | pantalla y ajustable por despliegue.
     */
+    'dashboard' => [
+        // Segundos que se guardan las cifras agregadas (postulantes, embudo) por empresa; 0 = sin caché.
+        'cache_segundos' => (int) env('DASHBOARD_CACHE_SEGUNDOS', 60),
+    ],
+
+    'demo' => [
+        // Multiplica el volumen de postulaciones de VolumenDeDemostracionSeeder (1 = completo; 0.05 = prueba rápida).
+        'escala_de_volumen' => (float) env('DEMO_ESCALA_DE_VOLUMEN', 1),
+    ],
+
     'ahorro' => [
         'minutos_por_cv' => (int) env('AHORRO_MINUTOS_POR_CV', 6),
     ],

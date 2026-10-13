@@ -24,7 +24,7 @@ interface EvaluacionRepository
      *
      * @return Collection<int, Postulacion>
      */
-    public function postulacionesPorEvaluar(User $evaluador): Collection;
+    public function postulacionesPorEvaluar(User $evaluador, string $texto = '', int $limite = 20): Collection;
 
     public function existe(int $postulacionId, int $evaluadorId): bool;
 

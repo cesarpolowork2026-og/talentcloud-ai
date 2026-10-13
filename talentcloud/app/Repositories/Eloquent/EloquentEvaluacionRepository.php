@@ -22,17 +22,19 @@ class EloquentEvaluacionRepository implements EvaluacionRepository
         return $this->consultaListado()->find($id);
     }
 
-    public function postulacionesPorEvaluar(User $evaluador): Collection
+    public function postulacionesPorEvaluar(User $evaluador, string $texto = '', int $limite = 20): Collection
     {
         return Postulacion::query()
-            ->with(['candidato', 'vacante'])
+            ->select(['id', 'empresa_id', 'vacante_id', 'candidato_id', 'etapa', 'retirada_at'])
+            ->with(['candidato:id,nombre', 'vacante:id,titulo,empresa_id', 'vacante.empresa:id,nombre'])
             // La misma regla que GuardarEvaluacion::verificarEvaluable().
             ->whereNull('retirada_at')
             ->whereHas('entrevistas', fn (Builder $q) => $q->where('estado', EstadoEntrevista::Completada))
             ->whereDoesntHave('evaluaciones', fn (Builder $q) => $q->where('evaluador_id', $evaluador->id))
-            ->get()
-            ->sortBy(fn (Postulacion $p) => $p->candidato?->nombre)
-            ->values();
+            ->when(trim($texto) !== '', fn (Builder $q) => $q->buscar($texto))
+            ->orderByDesc('id')
+            ->limit($limite)
+            ->get();
     }
 
     public function existe(int $postulacionId, int $evaluadorId): bool

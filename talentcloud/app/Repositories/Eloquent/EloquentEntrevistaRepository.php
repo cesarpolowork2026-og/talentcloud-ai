@@ -34,15 +34,17 @@ class EloquentEntrevistaRepository implements EntrevistaRepository
             ->get();
     }
 
-    public function postulacionesAgendables(): Collection
+    public function postulacionesAgendables(string $texto = '', int $limite = 20): Collection
     {
         return Postulacion::query()
-            ->with(['candidato', 'vacante.empresa:id,nombre'])
+            ->select(['id', 'empresa_id', 'vacante_id', 'candidato_id', 'etapa', 'retirada_at'])
+            ->with(['candidato:id,nombre', 'vacante:id,titulo,empresa_id', 'vacante.empresa:id,nombre'])
             ->where('etapa', '!=', EtapaPostulacion::Descartado)
             ->whereHas('vacante', fn (Builder $q) => $q->whereIn('estado', [EstadoVacante::Abierta, EstadoVacante::EnRevision]))
-            ->get()
-            ->sortBy(fn (Postulacion $p) => $p->candidato?->nombre)
-            ->values();
+            ->when(trim($texto) !== '', fn (Builder $q) => $q->buscar($texto))
+            ->orderByDesc('id')
+            ->limit($limite)
+            ->get();
     }
 
     public function haySolapamiento(int $entrevistadorId, CarbonInterface $inicio, CarbonInterface $fin, ?int $salvoId = null): bool

@@ -7,6 +7,7 @@ use App\Enums\EtapaPostulacion;
 use App\Events\PostulacionCambioDeEtapa;
 use App\Models\Postulacion;
 use App\Models\User;
+use App\Models\Vacante;
 use App\Services\Entrevistas\EntrevistasPorRealizar;
 use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Mueve una postulación en el Kanban: a otra columna o a otra posición en
  * la misma. Reordena ambas columnas para que "orden" quede 0, 1, 2… sin
- * huecos. La IA no mueve postulaciones: esto solo lo hace una persona.
+ * huecos, en SQL (escala a miles de postulaciones por columna). La IA no mueve postulaciones: esto solo lo hace una persona.
  */
 class MoverPostulacion
 {
@@ -34,31 +35,39 @@ class MoverPostulacion
         }
 
         DB::transaction(function () use ($postulacion, $origen, $destino, $posicion): void {
-            // Bloquea las postulaciones de la vacante para que dos movimientos simultáneos no mezclen el orden.
-            $columnas = Postulacion::query()
-                ->where('vacante_id', $postulacion->vacante_id)
-                ->whereIn('etapa', array_unique([$origen->value, $destino->value]))
-                ->orderBy('orden')
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get();
+            // Un candado sobre la vacante basta para que dos movimientos simultáneos no mezclen el orden:
+            // no se leen ni se bloquean las postulaciones (una vacante puede tener miles en una columna).
+            Vacante::query()->whereKey($postulacion->vacante_id)->lockForUpdate()->first();
 
             $this->verificarDescarte($postulacion, $origen, $destino);
 
-            $restoOrigen = $columnas->where('etapa', $origen)->reject(fn (Postulacion $p) => $p->id === $postulacion->id)->values();
-            $restoDestino = $columnas->where('etapa', $destino)->reject(fn (Postulacion $p) => $p->id === $postulacion->id)->values();
+            // Se saca de su columna y se deja el resto numerado 0, 1, 2… sin huecos (en SQL, solo se escriben
+            // las filas que cambian de número); lo mismo en la columna destino si es otra.
+            $this->numerar($postulacion, $origen);
+            if ($destino !== $origen) {
+                $this->numerar($postulacion, $destino);
+            }
 
-            $posicion = max(0, min($posicion, $restoDestino->count()));
-            $nuevoDestino = $restoDestino->all();
-            array_splice($nuevoDestino, $posicion, 0, [$postulacion]);
+            $enDestino = Postulacion::query()
+                ->where('vacante_id', $postulacion->vacante_id)
+                ->where('etapa', $destino)
+                ->whereKeyNot($postulacion->id)
+                ->count();
+            $posicion = max(0, min($posicion, $enDestino));
+
+            // Hace lugar en la posición elegida y coloca la postulación con save(): el historial de etapas
+            // lo escribe el observador al cambiar `etapa`.
+            DB::update(
+                'UPDATE postulaciones SET orden = orden + 1 WHERE empresa_id = ? AND vacante_id = ? AND etapa = ? AND id <> ? AND orden >= ?',
+                [$postulacion->empresa_id, $postulacion->vacante_id, $destino->value, $postulacion->id, $posicion],
+            );
 
             if ($origen !== $destino) {
-                $this->numerar($restoOrigen->all());
                 $postulacion->etapa = $destino;
                 $postulacion->etapa_cambiada_at = now();
             }
-
-            $this->numerar($nuevoDestino);
+            $postulacion->orden = $posicion;
+            $postulacion->save();
         });
 
         if ($origen !== $destino) {
@@ -102,15 +111,17 @@ class MoverPostulacion
     }
 
     /**
-     * @param  list<Postulacion>  $postulaciones
+     * Numera 0, 1, 2… la columna `$etapa` de la vacante sin contar la postulación que se mueve.
+     * Una sola sentencia: solo actualiza las filas cuyo número cambia.
      */
-    private function numerar(array $postulaciones): void
+    private function numerar(Postulacion $movida, EtapaPostulacion $etapa): void
     {
-        foreach ($postulaciones as $indice => $p) {
-            if ($p->orden !== $indice || $p->isDirty()) {
-                $p->orden = $indice;
-                $p->save();
-            }
-        }
+        DB::update(
+            'UPDATE postulaciones p SET orden = n.nuevo
+             FROM (SELECT id, row_number() OVER (ORDER BY orden, id) - 1 AS nuevo
+                   FROM postulaciones WHERE empresa_id = ? AND vacante_id = ? AND etapa = ? AND id <> ?) n
+             WHERE p.id = n.id AND p.orden <> n.nuevo',
+            [$movida->empresa_id, $movida->vacante_id, $etapa->value, $movida->id],
+        );
     }
 }

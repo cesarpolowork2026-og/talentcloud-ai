@@ -223,7 +223,7 @@
             </div>
             <div>
                 <label for="embudo-vacante" class="sr-only">Filtrar el embudo por vacante</label>
-                <x-ui.select wire:model.live="vacanteDelEmbudo" id="embudo-vacante" :options="$vacantesDelEmbudo" placeholder="Todas las vacantes" class="max-w-full" />
+                <x-ui.buscador id="embudo-vacante" metodo="buscarVacantes" modelo="vacanteDelEmbudo" :etiqueta="$etiquetaDeLaVacanteDelEmbudo" vacio="Todas las vacantes" placeholder="Todas las vacantes" class="w-[280px] max-w-full" />
             </div>
         </div>
 

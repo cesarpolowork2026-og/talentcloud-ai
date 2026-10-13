@@ -42,6 +42,20 @@ final readonly class CumplimientoDeRequisitos
         ])->values()->all());
     }
 
+    /**
+     * El resumen que se guarda en `postulaciones` para ordenar y filtrar en SQL sin leer el JSON.
+     *
+     * @return array{requisitos_total: int, requisitos_cubiertos: int, obligatorios_faltantes: int}
+     */
+    public function columnas(): array
+    {
+        return [
+            'requisitos_total' => $this->total(),
+            'requisitos_cubiertos' => $this->cumplidos(),
+            'obligatorios_faltantes' => $this->obligatoriosFaltantes(),
+        ];
+    }
+
     public function total(): int
     {
         return count($this->requisitos);

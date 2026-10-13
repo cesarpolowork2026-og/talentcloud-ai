@@ -129,7 +129,7 @@ Extracto del CV: "{{ \Illuminate\Support\Str::limit(\Illuminate\Support\Str::squ
                 </x-ui.field>
             </div>
             <x-ui.field label="Postular a (opcional)" for="candidato-vacante" error="vacanteId">
-                <x-ui.select wire:model="vacanteId" id="candidato-vacante" :options="$vacantesAbiertas" placeholder="Sin postular por ahora" class="w-full" error="vacanteId" />
+                <x-ui.buscador id="candidato-vacante" metodo="buscarVacantesAbiertas" modelo="vacanteId" vacio="Sin postular por ahora" placeholder="Sin postular por ahora" error="vacanteId" />
             </x-ui.field>
             <x-ui.field label="CV (PDF o Word, hasta 5 MB)" for="candidato-cv" error="archivoCv">
                 <input type="file" wire:model="archivoCv" id="candidato-cv" accept=".pdf,.docx" class="input">

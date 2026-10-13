@@ -28,6 +28,9 @@ class Detalle extends Component
     /** Segundos que se espera el resultado de «Recalcular» antes de avisar que sigue en curso. */
     public const ESPERA_MAXIMA = 90;
 
+    /** Candidatos que lista el selector de arriba (los de mejor coincidencia); el resto, desde el ranking. */
+    public const OTRAS_EN_EL_SELECTOR = 20;
+
     #[Locked]
     public int $postulacionId;
 
@@ -124,21 +127,23 @@ class Detalle extends Component
         $tipos = $postulacion->vacante?->requisitos->mapWithKeys(fn (Requisito $r) => [$r->id => $r->tipo]) ?? collect();
         $cv = $postulacion->candidato?->cvActual;
 
-        // Las postulaciones de la vacante con matching, de mayor a menor: también dan la posición de esta.
-        $otras = Postulacion::query()
-            ->where('vacante_id', $postulacion->vacante_id)
-            ->whereNotNull('match_score')
-            ->with('candidato')
-            ->orderByDesc('match_score')
-            ->get();
-        $posicion = $otras->search(fn (Postulacion $p) => $p->id === $postulacion->id);
+        // La posición y el total salen de dos conteos; el selector trae solo las mejores (no las miles de una vacante masiva).
+        $conMatch = Postulacion::query()->where('vacante_id', $postulacion->vacante_id)->whereNotNull('match_score');
+        $totalDeLaVacante = (clone $conMatch)->count();
+        $posicion = $postulacion->match_score === null ? null : 1 + (clone $conMatch)->where('match_score', '>', $postulacion->match_score)->count();
+        $otras = (clone $conMatch)->with('candidato:id,nombre')->orderByDesc('match_score')->orderBy('id')->limit(self::OTRAS_EN_EL_SELECTOR)->get(['id', 'candidato_id', 'match_score']);
+
+        // La postulación que se está viendo siempre figura en el selector, aunque no sea de las mejores.
+        if ($postulacion->match_score !== null && ! $otras->contains('id', $postulacion->id)) {
+            $otras->push($postulacion->loadMissing('candidato:id,nombre'));
+        }
 
         return view('livewire.matching.detalle', [
             'postulacion' => $postulacion,
             'resultado' => $resultado,
             'explicacion' => $explicacion,
-            'posicion' => $posicion === false ? null : $posicion + 1,
-            'totalDeLaVacante' => $otras->count(),
+            'posicion' => $posicion,
+            'totalDeLaVacante' => $totalDeLaVacante,
             'obligatorios' => $tipos->filter(fn (TipoRequisito $t) => $t === TipoRequisito::Obligatorio)->keys()->all(),
             'marcados' => MatchFeedback::where('postulacion_id', $postulacion->id)->where('user_id', $user->id)->pluck('requisito_id')->all(),
             'procesando' => $resultado === null && in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true),

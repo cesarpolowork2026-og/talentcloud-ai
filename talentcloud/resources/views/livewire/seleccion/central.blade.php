@@ -15,12 +15,13 @@
             @if ($hayOtrasVacantes)
                 <x-slot:actions>
                     <label for="seleccion-vacante" class="sr-only">Cambiar de vacante</label>
-                    <x-ui.select
+                    <x-ui.buscador
                         id="seleccion-vacante"
-                        :options="$otrasVacantes"
-                        :selected="$vacante->id"
-                        x-data
-                        x-on:change="Livewire.navigate('{{ url('seleccion') }}/' + $event.target.value + '?vista={{ $vista }}')"
+                        metodo="buscarVacantes"
+                        :etiqueta="App\Support\Formato::vacante($vacante)"
+                        placeholder="Buscar otra vacante…"
+                        class="w-[280px] max-w-full"
+                        x-on:elegido="Livewire.navigate('{{ url('seleccion') }}/' + $event.detail.id + '?vista={{ $vista }}')"
                     />
 
                 </x-slot:actions>
@@ -71,7 +72,7 @@
                     @foreach ($ranking as $posicion => $postulacion)
                         @php($cumple = $cumplimiento[$postulacion->id])
                         <tr wire:key="ranking-{{ $postulacion->id }}">
-                            <td class="text-neutral-700">{{ $posicion + 1 }}</td>
+                            <td class="text-neutral-700">{{ $ranking->firstItem() + $loop->index }}</td>
                             <td>
                                 <a href="{{ $postulacion->match_detalle ? route('matching.show', $postulacion) : route('candidatos.show', $postulacion->candidato_id) }}" wire:navigate class="font-semibold">{{ $postulacion->candidato?->nombre }}</a>
                                 <div class="text-13 text-neutral-700">{{ $postulacion->candidato?->titular }}</div>
@@ -119,6 +120,7 @@
                         </tr>
                     @endforeach
                 </x-ui.table>
+                {{ $ranking->links() }}
             @endif
         @else
         <div class="flex gap-4 overflow-x-auto pb-2">
@@ -126,7 +128,7 @@
                 @php($etapa = $columna['etapa'])
                 <section class="flex min-w-[190px] flex-1 basis-0 flex-col gap-3" aria-label="{{ $etapa->etiqueta() }}" wire:key="columna-{{ $etapa->value }}">
                     <div class="flex justify-between text-12 uppercase tracking-[0.06em] text-neutral-600">
-                        <span>{{ $etapa->etiqueta() }}</span><span>{{ $columna['postulaciones']->count() }}</span>
+                        <span>{{ $etapa->etiqueta() }}</span><span>{{ number_format($columna['total'], 0, ',', ' ') }}</span>
                     </div>
 
                     <div
@@ -136,7 +138,6 @@
                     >
                         @foreach ($columna['postulaciones'] as $postulacion)
                             @php($arrastrable = $editable && ! $postulacion->estaRetirada())
-                            @php($cumple = $cumplimiento[$postulacion->id])
                             @php($enCurso = ! in_array($etapa, [EtapaPostulacion::Contratado, EtapaPostulacion::Descartado], true))
                             @php($dias = (int) ($postulacion->etapa_cambiada_at ?? $postulacion->created_at)->diffInDays(now()))
                             @php($proxima = $postulacion->proxima_entrevista ? \Illuminate\Support\Carbon::parse($postulacion->proxima_entrevista) : null)
@@ -174,11 +175,11 @@
                                         <x-ui.progress :value="$postulacion->matchPorcentaje()" :label="'Coincidencia: '.$postulacion->matchPorcentaje().'%'" class="flex-1" />
                                         <span class="text-13 font-semibold">{{ $postulacion->matchPorcentaje() }}%</span>
                                     </div>
-                                    @if ($cumple->hayCalculo())
+                                    @if ($postulacion->tieneResumenDeCumplimiento())
                                         <div class="text-12 text-neutral-700">
-                                            {{ $cumple->resumen() }}
-                                            @if ($cumple->obligatoriosFaltantes() > 0)
-                                                · <span class="font-semibold text-accent-2-700">falta{{ $cumple->obligatoriosFaltantes() === 1 ? '' : 'n' }} {{ $cumple->obligatoriosFaltantes() }} obligatorio{{ $cumple->obligatoriosFaltantes() === 1 ? '' : 's' }}</span>
+                                            {{ $postulacion->resumenDeCumplimiento() }}
+                                            @if ($postulacion->obligatorios_faltantes > 0)
+                                                · <span class="font-semibold text-accent-2-700">falta{{ $postulacion->obligatorios_faltantes === 1 ? '' : 'n' }} {{ $postulacion->obligatorios_faltantes }} obligatorio{{ $postulacion->obligatorios_faltantes === 1 ? '' : 's' }}</span>
                                             @endif
                                         </div>
                                     @endif
@@ -193,6 +194,12 @@
                             </div>
                         @endforeach
                     </div>
+                    @if ($columna['restantes'] > 0)
+                        {{-- Una vacante masiva tiene miles por columna: se cargan de a 25. --}}
+                        <x-ui.button size="sm" wire:click="verMas('{{ $etapa->value }}')" wire:loading.attr="disabled" wire:target="verMas('{{ $etapa->value }}')">
+                            Ver más ({{ number_format(min($columna['restantes'], App\Livewire\Seleccion\Central::TARJETAS_POR_COLUMNA), 0, ',', ' ') }} de {{ number_format($columna['restantes'], 0, ',', ' ') }} restantes)
+                        </x-ui.button>
+                    @endif
                 </section>
             @endforeach
         </div>

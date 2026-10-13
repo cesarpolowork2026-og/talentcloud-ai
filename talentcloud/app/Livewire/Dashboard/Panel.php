@@ -10,6 +10,8 @@ use App\Services\Dashboard\DashboardService;
 use App\Services\Dashboard\EmbudoDeSeleccion;
 use App\Services\Empresas\LimitesDelPlan;
 use App\Services\Plataforma\PanelDePlataforma;
+use App\Services\Vacantes\BuscadorDeVacantes;
+use App\Support\Formato;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -41,6 +43,18 @@ class Panel extends Component
         $this->authorize('viewAny', Vacante::class);
     }
 
+    /**
+     * Buscador del embudo: hasta 20 vacantes (no todas las de la empresa en un desplegable)..
+     *
+     * @return list<array{id: int, etiqueta: string, detalle: string|null}>
+     */
+    public function buscarVacantes(string $texto, BuscadorDeVacantes $buscador): array
+    {
+        $this->authorize('viewAny', Vacante::class);
+
+        return $buscador->buscar($texto);
+    }
+
     public function verVistaPrevia(int $id, VacanteRepository $vacantes): void
     {
         $vacante = $vacantes->buscar($id);
@@ -64,12 +78,7 @@ class Panel extends Component
             'plataforma' => $esAdmin ? $panel->resumen() : null,
             'resumen' => $dashboard->resumen(),
             'embudo' => $embudo->calcular($vacanteDelEmbudo?->id),
-            'vacantesDelEmbudo' => Vacante::query()
-                ->with('empresa:id,nombre')
-                ->orderBy('titulo')
-                ->get(['id', 'titulo', 'empresa_id'])
-                ->mapWithKeys(fn (Vacante $v) => [$v->id => $esAdmin ? $v->titulo.' · '.$v->empresa?->nombre : $v->titulo])
-                ->all(),
+            'etiquetaDeLaVacanteDelEmbudo' => $vacanteDelEmbudo ? Formato::vacante($vacanteDelEmbudo->loadMissing('empresa:id,nombre')) : '',
             // El plan es de la empresa: el admin SaaS ve la plataforma entera y no tiene uno propio.
             'uso' => $esAdmin || $usuario->empresa === null ? null : $limites->uso($usuario->empresa),
             'empresa' => $esAdmin ? null : $usuario->empresa,

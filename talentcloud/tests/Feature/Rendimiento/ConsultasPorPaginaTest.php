@@ -52,7 +52,7 @@ it('no supera el presupuesto de consultas de cada página', function () {
             // Dashboard: atención, ahorro, plan y actividad suman consultas fijas (ninguna por fila).
             '/dashboard' => 21, '/vacantes' => 7, '/candidatos' => 12,
             // Selección lee además los requisitos de la vacante y sus competencias (2 consultas fijas, no una por tarjeta).
-            "/seleccion/{$ids['backend']}" => 13, "/seleccion/{$ids['backend']}?vista=ranking" => 13,
+            "/seleccion/{$ids['backend']}" => 13, "/seleccion/{$ids['backend']}?vista=ranking" => 14,
             '/entrevistas' => 12, // + el resumen de la agenda (una lectura)
             '/evaluaciones' => 11,
         ],

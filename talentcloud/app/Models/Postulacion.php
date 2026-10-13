@@ -10,6 +10,7 @@ use App\Observers\PostulacionObserver;
 use App\Tenancy\BelongsToEmpresa;
 use Database\Factories\PostulacionFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,6 +32,9 @@ use Illuminate\Support\Carbon;
  * @property array<string, mixed>|null $match_detalle
  * @property MotorMatching|null $match_motor
  * @property Carbon|null $match_calculado_at
+ * @property int|null $requisitos_total Requisitos de la vacante al calcular el matching (resumen indexado; lo escribe CalcularMatch).
+ * @property int|null $requisitos_cubiertos Los que el CV respalda («Coincide»).
+ * @property int|null $obligatorios_faltantes Obligatorios que el CV no menciona.
  * @property Carbon|null $etapa_cambiada_at
  * @property OrigenPostulacion $origen
  * @property Carbon|null $retirada_at La retiró el propio postulante (no asignable en masa).
@@ -59,6 +63,9 @@ class Postulacion extends Model
         'match_detalle',
         'match_motor',
         'match_calculado_at',
+        'requisitos_total',
+        'requisitos_cubiertos',
+        'obligatorios_faltantes',
     ];
 
     /** @var array<string, mixed> */
@@ -147,6 +154,35 @@ class Postulacion extends Model
     }
 
     /** La retiró el propio postulante (está en Descartado, pero no la descartó la empresa). */
+    /**
+     * Por nombre del candidato o título de la vacante (sin importar tildes ni mayúsculas): para los
+     * buscadores, que no pueden listar todas las postulaciones de una empresa.
+     *
+     * @param  Builder<static>  $consulta
+     */
+    public function scopeBuscar(Builder $consulta, string $texto): void
+    {
+        $patron = '%'.addcslashes(trim($texto), '%_\\').'%';
+
+        $consulta->where(fn (Builder $q) => $q
+            ->whereHas('candidato', fn (Builder $c) => $c->whereRaw('unaccent(candidatos.nombre) ilike unaccent(?)', [$patron]))
+            ->orWhereHas('vacante', fn (Builder $v) => $v->whereRaw('unaccent(vacantes.titulo) ilike unaccent(?)', [$patron])));
+    }
+
+    /** ¿Hay un resumen de cumplimiento guardado (se calculó el matching sobre los requisitos)? */
+    public function tieneResumenDeCumplimiento(): bool
+    {
+        return $this->match_calculado_at !== null && $this->requisitos_total !== null;
+    }
+
+    /** «4 de 6 requisitos»: lo que el CV respalda sobre lo que pide la vacante, sin leer el JSON del matching. */
+    public function resumenDeCumplimiento(): string
+    {
+        $total = (int) $this->requisitos_total;
+
+        return (int) $this->requisitos_cubiertos.' de '.$total.' '.($total === 1 ? 'requisito' : 'requisitos');
+    }
+
     public function estaRetirada(): bool
     {
         return $this->retirada_at !== null;
