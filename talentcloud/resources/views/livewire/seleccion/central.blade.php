@@ -194,7 +194,9 @@
                             </div>
                         @endforeach
                     </div>
-                    @if ($columna['restantes'] > 0)
+                    @if ($columna['restantes'] > 0 && $columna['enElTope'])
+                        <p class="m-0 text-13 text-neutral-700">Se muestran las primeras {{ number_format(App\Livewire\Seleccion\Central::MAXIMO_POR_COLUMNA, 0, ',', ' ') }}. Para ver el resto, usa los filtros o el ranking.</p>
+                    @elseif ($columna['restantes'] > 0)
                         {{-- Una vacante masiva tiene miles por columna: se cargan de a 25. --}}
                         <x-ui.button size="sm" wire:click="verMas('{{ $etapa->value }}')" wire:loading.attr="disabled" wire:target="verMas('{{ $etapa->value }}')">
                             Ver más ({{ number_format(min($columna['restantes'], App\Livewire\Seleccion\Central::TARJETAS_POR_COLUMNA), 0, ',', ' ') }} de {{ number_format($columna['restantes'], 0, ',', ' ') }} restantes)

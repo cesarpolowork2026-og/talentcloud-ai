@@ -25,6 +25,7 @@ use Database\Seeders\Demo\DocumentosDePrueba;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -188,6 +189,23 @@ it('«Recalcular» pasa a «Recalculando…», avisa cuánto cambió y deja de e
         ->assertSee('Último cálculo:');
 
     Carbon::setTestNow();
+});
+
+it('«Recalcular» tiene un límite por persona y postulación: pasado, avisa y deja de contar', function () {
+    Queue::fake();
+    $clave = 'recalcular-matching:'.auth()->id().':'.$this->postulacion->id;
+    RateLimiter::clear($clave);
+
+    $pantalla = Livewire::test(Detalle::class, ['postulacion' => $this->postulacion]);
+
+    foreach (range(1, Detalle::RECALCULOS_POR_POSTULACION) as $_) {
+        $pantalla->call('recalcular')->assertDontSee('Ya pediste varios recálculos seguidos');
+    }
+
+    $pantalla->call('recalcular')->assertSee('Ya pediste varios recálculos seguidos')->assertDontSeeHtml('wire:poll.2s');
+
+    expect(RateLimiter::attempts($clave))->toBe(Detalle::RECALCULOS_POR_POSTULACION); // la sexta no se cuenta ni se pide
+    Queue::assertPushed(CalcularMatch::class); // y el trabajo es único por postulación: no se acumula
 });
 
 it('si el cálculo no llega a tiempo avisa que sigue en curso', function () {

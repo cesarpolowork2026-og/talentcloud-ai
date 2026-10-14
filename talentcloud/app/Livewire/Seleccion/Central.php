@@ -44,6 +44,12 @@ class Central extends Component
     public const FILAS_DEL_RANKING = 25;
 
     /**
+     * Tope de tarjetas por columna. `$mostrando` es una propiedad pública: un cliente podría enviar un valor
+     * enorme para que el servidor cargue y pinte miles de tarjetas. Pasado el tope, se filtra o se usa el ranking.
+     */
+    public const MAXIMO_POR_COLUMNA = 500;
+
+    /**
      * Columnas del tablero que se desplegaron: etapa → cuántas tarjetas se muestran.
      *
      * @var array<string, int>
@@ -96,7 +102,15 @@ class Central extends Component
         $destino = EtapaPostulacion::tryFrom($etapa);
         abort_if($destino === null, 404);
 
-        $this->mostrando[$destino->value] = ($this->mostrando[$destino->value] ?? self::TARJETAS_POR_COLUMNA) + self::TARJETAS_POR_COLUMNA;
+        $this->mostrando[$destino->value] = min(self::MAXIMO_POR_COLUMNA, $this->tarjetasMostradas($destino) + self::TARJETAS_POR_COLUMNA);
+    }
+
+    /** Cuántas tarjetas de la columna se pintan: lo pedido por la persona, entre un bloque y el tope. */
+    private function tarjetasMostradas(EtapaPostulacion $etapa): int
+    {
+        $pedidas = (int) ($this->mostrando[$etapa->value] ?? self::TARJETAS_POR_COLUMNA);
+
+        return max(self::TARJETAS_POR_COLUMNA, min(self::MAXIMO_POR_COLUMNA, $pedidas));
     }
 
     public function updatedSoloObligatorios(): void
@@ -234,13 +248,14 @@ class Central extends Component
 
         $columnas = [];
         foreach (EtapaPostulacion::cases() as $etapa) {
-            $mostradas = $this->mostrando[$etapa->value] ?? self::TARJETAS_POR_COLUMNA;
+            $mostradas = $this->tarjetasMostradas($etapa);
             $total = $enEtapa($etapa);
 
             $columnas[] = [
                 'etapa' => $etapa,
                 'total' => $total,
                 'restantes' => max(0, $total - $mostradas),
+                'enElTope' => $mostradas >= self::MAXIMO_POR_COLUMNA,
                 'postulaciones' => collect($porEtapa[$etapa->value] ?? []),
             ];
         }
@@ -301,7 +316,7 @@ class Central extends Component
     {
         $limites = [];
         foreach (EtapaPostulacion::cases() as $etapa) {
-            $limites[$etapa->value] = $this->mostrando[$etapa->value] ?? self::TARJETAS_POR_COLUMNA;
+            $limites[$etapa->value] = $this->tarjetasMostradas($etapa);
         }
 
         $numeradas = $filtrar(Postulacion::query()->where('vacante_id', $vacanteId))

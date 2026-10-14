@@ -16,6 +16,7 @@ use App\Services\Postulaciones\MarcarResultadoIncorrecto;
 use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -27,6 +28,11 @@ class Detalle extends Component
 {
     /** Segundos que se espera el resultado de «Recalcular» antes de avisar que sigue en curso. */
     public const ESPERA_MAXIMA = 90;
+
+    /** «Recalcular» manda trabajo al servicio de IA: se limita por persona y postulación, y por persona en total. */
+    public const RECALCULOS_POR_POSTULACION = 5;
+
+    public const RECALCULOS_POR_HORA = 60;
 
     /** Candidatos que lista el selector de arriba (los de mejor coincidencia); el resto, desde el ranking. */
     public const OTRAS_EN_EL_SELECTOR = 20;
@@ -72,6 +78,19 @@ class Detalle extends Component
     {
         $postulacion = $this->postulacion();
         $this->authorize('update', $postulacion);
+
+        $porPostulacion = 'recalcular-matching:'.auth()->id().':'.$postulacion->id;
+        $porPersona = 'recalcular-matching:'.auth()->id();
+
+        if (RateLimiter::tooManyAttempts($porPostulacion, self::RECALCULOS_POR_POSTULACION) || RateLimiter::tooManyAttempts($porPersona, self::RECALCULOS_POR_HORA)) {
+            $this->recalculoDesde = null;
+            $this->aviso = ['tono' => 'aviso', 'texto' => 'Ya pediste varios recálculos seguidos. Espera unos minutos: el resultado más reciente se mantiene.'];
+
+            return;
+        }
+
+        RateLimiter::hit($porPostulacion, 600);
+        RateLimiter::hit($porPersona, 3600);
 
         $this->porcentajeAnterior = $postulacion->matchPorcentaje();
         $this->recalculoDesde = now()->toIso8601String();

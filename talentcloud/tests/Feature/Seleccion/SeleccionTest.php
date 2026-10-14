@@ -298,6 +298,23 @@ it('una vacante masiva muestra de a 25 tarjetas por columna y cuenta todas', fun
         ->and($pantalla->html())->toContain('Ver más (11 de 11 restantes)');
 });
 
+it('un cliente no puede pedir más tarjetas de las permitidas manipulando la propiedad', function () {
+    Postulacion::factory()->count(30)->paraVacante($this->backend)->enEtapa(EtapaPostulacion::EnRevision)->create();
+
+    $pantalla = Livewire::test(Central::class, ['vacante' => $this->backend])
+        ->set('mostrando', ['en_revision' => 100000000, 'postulado' => -5, 'entrevista' => 'muchas']);
+
+    // En revisión hay 31 (30 + Sofía): se pintan las 31 (tope 500, no 100 millones); los valores absurdos vuelven a un bloque.
+    expect(substr_count($pantalla->html(), 'wire:key="postulacion-'))->toBe(31 + 2 + 1);
+
+    // Ni siquiera repitiendo «Ver más» se pasa del tope.
+    foreach (range(1, 30) as $_) {
+        $pantalla->call('verMas', 'en_revision');
+    }
+
+    expect($pantalla->get('mostrando')['en_revision'])->toBe(Central::MAXIMO_POR_COLUMNA);
+});
+
 it('el ranking se pagina en SQL y ordena por coincidencia sin leer a toda la vacante', function () {
     Postulacion::factory()->count(40)->paraVacante($this->backend)->create(['match_score' => 5]);
 
