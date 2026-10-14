@@ -120,6 +120,20 @@ Tarjetas de prueba: `4242 4242 4242 4242` (aprobada), `4000 0000 0000 9995` (fon
 `https://<dominio>/stripe/webhook` en el panel de Stripe con esos mismos eventos y su secreto va en
 `STRIPE_WEBHOOK_SECRET`. Los recibos de Stripe no son comprobantes electrónicos de SUNAT.
 
+### Probar los pagos
+
+- **Automáticas (`composer check`):** `PagosEnLineaTest` y `PasarelaStripeTest` cubren el pago confirmado, el cobro fallido y sus
+  reintentos, la cancelación, los avisos repetidos o tardíos y la firma alterada o vencida, con una pasarela falsa.
+- **Contra el entorno de pruebas real de Stripe (opt-in, con red):** `STRIPE_LIVE_TESTS=1 php artisan test --filter=StripeEnModoDePrueba`.
+  Usa las claves de prueba del `.env`, se niega a correr con una que no sea `sk_test_`, crea clientes y suscripciones sintéticos
+  (`example.com`) y los borra al terminar. El aviso se firma localmente con `STRIPE_WEBHOOK_SECRET` y se envía a `/stripe/webhook`:
+  no hace falta túnel. Si una ejecución se interrumpe, los clientes huérfanos llevan `metadata.origen = auditoria-talentcloud`.
+- **A mano, de extremo a extremo** (lo único que no cubre lo anterior: la página de Checkout de Stripe y la entrega real del aviso):
+  1. `stripe login` y `stripe listen --forward-to localhost:8000/stripe/webhook` (la CLI imprime el `whsec_…` que va en `.env`).
+  2. En «Mi empresa» → «Pagar» con `4242 4242 4242 4242`: debe volver a «Mi empresa», confirmar el pago y cambiar el plan.
+  3. Repetir con `4000 0000 0000 0341` (se adjunta pero el cobro falla) y `4000 0025 0000 3155` (3D Secure).
+  4. `stripe trigger invoice.payment_failed` y `stripe trigger customer.subscription.deleted` para ver el aviso de cobro fallido y el paso a Gratis.
+
 ## Calidad
 
 ```bash
