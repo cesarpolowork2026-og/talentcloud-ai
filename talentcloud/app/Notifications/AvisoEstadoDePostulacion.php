@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Enums\EstadoDeMiPostulacion;
 use App\Notifications\Concerns\CanalesSegunPreferencia;
+use App\Support\TextoDeCorreo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -65,7 +66,7 @@ class AvisoEstadoDePostulacion extends Notification implements ShouldQueue
         $mensaje = (new MailMessage)
             ->subject($this->asunto)
             ->greeting('¡Hola!')
-            ->line($this->texto);
+            ->line(TextoDeCorreo::literal($this->texto));
 
         return $this->url === null ? $mensaje : $mensaje->action('Ver mis postulaciones', $this->url);
     }

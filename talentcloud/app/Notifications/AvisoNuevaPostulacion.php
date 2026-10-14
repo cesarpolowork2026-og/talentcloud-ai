@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Notifications\Concerns\CanalesSegunPreferencia;
+use App\Support\TextoDeCorreo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -43,7 +44,7 @@ class AvisoNuevaPostulacion extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Nueva postulación en TalentCloud AI')
             ->greeting('¡Hola!')
-            ->line($this->texto)
+            ->line(TextoDeCorreo::literal($this->texto))
             ->line('La IA ya está analizando su CV frente a los requisitos de la vacante.')
             ->action('Ver el matching', $this->url);
     }

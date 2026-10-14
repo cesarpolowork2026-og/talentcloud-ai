@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Notifications\Concerns\CanalesSegunPreferencia;
+use App\Support\TextoDeCorreo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -38,7 +39,7 @@ class AvisoSolicitudDePlan extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Solicitud de cambio de plan')
             ->greeting('¡Hola!')
-            ->line($this->texto)
+            ->line(TextoDeCorreo::literal($this->texto))
             ->line('Coordina el pago con la empresa y aplica el plan con «Cambiar plan» en Empresas.')
             ->action('Ver empresas', $this->url);
     }

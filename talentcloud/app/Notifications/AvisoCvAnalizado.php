@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Notifications\Concerns\CanalesSegunPreferencia;
+use App\Support\TextoDeCorreo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -48,7 +49,7 @@ class AvisoCvAnalizado extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('CV analizado por la IA')
             ->greeting('¡Hola!')
-            ->line($this->texto)
+            ->line(TextoDeCorreo::literal($this->texto))
             ->action('Ver el detalle', $this->url);
     }
 

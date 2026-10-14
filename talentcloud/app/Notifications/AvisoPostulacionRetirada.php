@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Notifications\Concerns\CanalesSegunPreferencia;
+use App\Support\TextoDeCorreo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -43,7 +44,7 @@ class AvisoPostulacionRetirada extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Una postulación se retiró en TalentCloud AI')
             ->greeting('¡Hola!')
-            ->line($this->texto)
+            ->line(TextoDeCorreo::literal($this->texto))
             ->line('Sigue en la columna Descartado del Kanban, marcada como retirada.')
             ->action('Ver el Kanban', $this->url);
     }

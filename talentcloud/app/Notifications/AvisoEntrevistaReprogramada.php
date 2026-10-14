@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\DTO\DatosDeEntrevista;
 use App\Notifications\Concerns\CanalesSegunPreferencia;
 use App\Support\EnlaceExterno;
+use App\Support\TextoDeCorreo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -60,7 +61,7 @@ class AvisoEntrevistaReprogramada extends Notification implements ShouldQueue
         $mensaje = (new MailMessage)
             ->subject('Entrevista reprogramada: '.$this->datos->vacante)
             ->greeting('¡Hola!')
-            ->line($this->texto())
+            ->line(TextoDeCorreo::literal($this->texto()))
             ->line("Duración: {$this->datos->duracionMin} min · {$this->datos->modalidad}.");
 
         if (($enlace = EnlaceExterno::seguro($this->datos->enlace)) !== null) {

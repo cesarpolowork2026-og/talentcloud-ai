@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Notifications\Concerns\CanalesSegunPreferencia;
+use App\Support\TextoDeCorreo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -39,8 +40,8 @@ class AvisoCambioDePlan extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Tu plan de TalentCloud AI cambió')
             ->greeting('¡Hola!')
-            ->line($this->texto)
-            ->line($this->limites)
+            ->line(TextoDeCorreo::literal($this->texto))
+            ->line(TextoDeCorreo::literal($this->limites))
             ->action('Ver mi empresa', $this->url);
     }
 }

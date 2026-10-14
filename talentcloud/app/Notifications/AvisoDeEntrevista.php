@@ -4,6 +4,8 @@ namespace App\Notifications;
 
 use App\DTO\DatosDeEntrevista;
 use App\Notifications\Concerns\CanalesSegunPreferencia;
+use App\Support\EnlaceExterno;
+use App\Support\TextoDeCorreo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -69,14 +71,14 @@ class AvisoDeEntrevista extends Notification implements ShouldQueue
         $mensaje = (new MailMessage)
             ->subject(($this->cancelada ? 'Entrevista cancelada: ' : 'Entrevista programada: ').$this->datos->vacante)
             ->greeting('¡Hola!')
-            ->line($this->texto());
+            ->line(TextoDeCorreo::literal($this->texto()));
 
         if (! $this->cancelada) {
             $mensaje->line("Duración: {$this->datos->duracionMin} min · {$this->datos->modalidad}.");
         }
 
-        if (! $this->cancelada && $this->datos->enlace !== null) {
-            return $mensaje->action('Unirse a la videollamada', $this->datos->enlace);
+        if (! $this->cancelada && ($enlace = EnlaceExterno::seguro($this->datos->enlace)) !== null) {
+            return $mensaje->action('Unirse a la videollamada', $enlace);
         }
 
         // Un candidato sin cuenta no tiene a dónde entrar.

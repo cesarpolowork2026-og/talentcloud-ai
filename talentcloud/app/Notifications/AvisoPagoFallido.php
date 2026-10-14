@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Support\TextoDeCorreo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -49,7 +50,7 @@ class AvisoPagoFallido extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('No pudimos cobrar tu plan de TalentCloud AI')
             ->greeting('¡Hola!')
-            ->line($this->texto)
+            ->line(TextoDeCorreo::literal($this->texto))
             ->line('Volveremos a intentar el cobro en los próximos días. Si no se completa, tu empresa pasará al plan Gratis: conservarás todo lo que tengas, pero no podrás sumar por encima de sus límites.')
             ->action('Ir a Mi empresa', $this->url);
     }

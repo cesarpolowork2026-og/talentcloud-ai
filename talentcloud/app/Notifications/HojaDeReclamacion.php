@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Reclamacion;
+use App\Support\TextoDeCorreo;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -90,6 +91,6 @@ class HojaDeReclamacion extends Notification implements ShouldQueue
      */
     public static function literal(string $texto): string
     {
-        return (string) preg_replace('/([\\\\`*_{}\[\]()#+\-.!|])/', '\\\\$1', $texto);
+        return TextoDeCorreo::literal($texto);
     }
 }
