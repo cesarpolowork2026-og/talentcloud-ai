@@ -255,7 +255,12 @@
                     </x-slot:head>
                     @foreach ($resumen->vacantesConMovimiento as $vacante)
                         <tr class="tc-row" wire:key="reciente-{{ $vacante->id }}" wire:click="verVistaPrevia({{ $vacante->id }})">
-                            <td><x-ui.boton-fila wire:click.stop="verVistaPrevia({{ $vacante->id }})">{{ $vacante->titulo }}</x-ui.boton-fila></td>
+                            <td>
+                                <x-ui.boton-fila wire:click.stop="verVistaPrevia({{ $vacante->id }})">{{ $vacante->titulo }}</x-ui.boton-fila>
+                                @if (isset($resumen->estancadas[$vacante->id]))
+                                    <x-ui.tag tone="accent-2" class="ml-2">Sin avances · {{ $resumen->estancadas[$vacante->id] }} d</x-ui.tag>
+                                @endif
+                            </td>
                             @if ($plataforma)<td>{{ $vacante->empresa?->nombre }}</td>@endif
                             <td>{{ $vacante->postulaciones_count }}</td>
                             <td @class(['font-semibold text-accent-700' => $vacante->por_revisar > 0])>{{ $vacante->por_revisar }}</td>

@@ -11,6 +11,7 @@ final readonly class ResumenDelDashboard
     /**
      * @param  Collection<int, Vacante>  $vacantesConMovimiento  Activas, con `postulaciones_count`, `por_revisar` y `mejor_match`.
      * @param  list<array{icono: string, texto: string, ruta: string, parametros: array<string, mixed>, urgente: bool}>  $atencion  Lo que pide una acción hoy, de lo más urgente a lo menos.
+     * @param  array<int, int>  $estancadas  Días sin movimiento de cada vacante estancada, por id.
      */
     public function __construct(
         public int $vacantesActivas,
@@ -23,6 +24,7 @@ final readonly class ResumenDelDashboard
         public int $minutosPorCv,
         public array $atencion,
         public Collection $vacantesConMovimiento,
+        public array $estancadas = [],
     ) {}
 
     /** Horas de lectura de CV que se ahorraron, con el supuesto de `minutosPorCv` por CV. */
