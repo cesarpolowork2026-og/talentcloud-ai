@@ -122,7 +122,7 @@ it('avisa de las postulaciones que llevan días sin revisarse y de las vacantes 
 });
 
 it('no cuenta como por revisar a quien retiró su postulación ni a las vacantes cerradas', function () {
-    $this->elena->forceFill(['retirada_at' => now()])->save();
+    $this->elena->forceFill(['retirada_at' => now(), 'etapa' => 'descartado'])->save();
     $cerrada = Vacante::sinFiltroDeEmpresa()->where('titulo', 'DevOps Engineer')->firstOrFail();
     Postulacion::factory()->paraVacante($cerrada)->create();
 

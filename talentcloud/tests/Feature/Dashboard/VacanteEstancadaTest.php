@@ -97,7 +97,7 @@ it('una entrevista reciente o próxima cuenta como movimiento', function () {
 it('sin candidatos en curso no hay nada que mover: contratados, descartados y retirados no cuentan', function () {
     postulacionHace($this->backend, 30, EtapaPostulacion::Contratado);
     postulacionHace($this->backend, 30, EtapaPostulacion::Descartado);
-    postulacionHace($this->backend, 30, EtapaPostulacion::EnRevision, ['retirada_at' => Carbon::now()->subDays(20)]);
+    postulacionHace($this->backend, 30, EtapaPostulacion::Descartado, ['retirada_at' => Carbon::now()->subDays(20)]);
 
     expect(estancadasHoy())->toBe([]);
 });

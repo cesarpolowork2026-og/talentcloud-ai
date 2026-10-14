@@ -144,7 +144,7 @@ it('no deja retirar un proceso terminado ni una vacante cerrada', function (stri
             'contratado' => $this->postulacion->update(['etapa' => EtapaPostulacion::Contratado]),
             'descartado' => $this->postulacion->update(['etapa' => EtapaPostulacion::Descartado]),
             'vacante cerrada' => $this->backend->update(['estado' => EstadoVacante::Cerrada]),
-            'ya retirada' => $this->postulacion->forceFill(['retirada_at' => now()])->save(),
+            'ya retirada' => $this->postulacion->forceFill(['retirada_at' => now(), 'etapa' => 'descartado'])->save(),
         };
     });
 

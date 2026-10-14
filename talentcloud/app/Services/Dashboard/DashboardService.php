@@ -2,6 +2,7 @@
 
 namespace App\Services\Dashboard;
 
+use App\DTO\CifrasPorVacanteData;
 use App\DTO\ResumenDelDashboard;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
@@ -13,7 +14,7 @@ use App\Support\CacheDeResumenes;
 use App\Support\Formato;
 use App\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 /**
  * Indicadores del dashboard. Cada consulta pasa por el filtro por empresa: una
@@ -21,6 +22,9 @@ use Illuminate\Support\Carbon;
  *
  * Responde, en orden: qué pide una acción hoy, cómo van las vacantes y cuánto
  * trabajo de lectura de CV ahorró la IA (con el supuesto a la vista).
+ *
+ * Las cifras por vacante salen de una sola lectura agregada ({@see CifrasPorVacante}); aquí solo se
+ * cargan los datos de las pocas vacantes que se muestran.
  */
 class DashboardService
 {
@@ -42,20 +46,18 @@ class DashboardService
      */
     public const DIAS_ESTANCADA = 14;
 
-    private const VACANTES_CON_MOVIMIENTO = 7;
-
     public function __construct(
         private readonly ResumenDeAgenda $agenda,
+        private readonly CifrasPorVacante $porVacante,
         private readonly TenantContext $tenant,
     ) {}
-
-    private const AVISOS_POR_TIPO = 3;
 
     public function resumen(): ResumenDelDashboard
     {
         $postulaciones = $this->cifrasDePostulaciones();
         $entrevistas = $this->agenda->calcular();
-        $estancadas = $this->estancadas();
+        $cifras = $this->porVacante->calcular();
+        $vacantes = $this->vacantesMostradas($cifras);
 
         return new ResumenDelDashboard(
             vacantesActivas: Vacante::query()->whereIn('estado', EstadoVacante::activos())->count(),
@@ -66,21 +68,9 @@ class DashboardService
             entrevistasProximas: $entrevistas->proximas,
             analizadasConIa: (int) $postulaciones->con_ia,
             minutosPorCv: (int) config('talentcloud.ahorro.minutos_por_cv'),
-            atencion: $this->atencion($entrevistas->hoy, $entrevistas->sin_confirmar, $estancadas),
-            estancadas: array_map(fn (array $v) => $v['dias'], $estancadas),
-            vacantesConMovimiento: Vacante::query()
-                ->with('empresa')
-                ->whereIn('estado', EstadoVacante::activos())
-                ->withCount([
-                    'postulaciones',
-                    'postulaciones as por_revisar' => fn (Builder $q) => $this->sinRevisar($q),
-                ])
-                ->withMax('postulaciones as mejor_match', 'match_score')
-                ->orderByDesc('por_revisar')
-                ->orderByDesc('postulaciones_count')
-                ->orderBy('id')
-                ->limit(self::VACANTES_CON_MOVIMIENTO)
-                ->get(),
+            atencion: $this->atencion($entrevistas->hoy, $entrevistas->sin_confirmar, $cifras, $vacantes),
+            estancadas: $cifras->estancadas,
+            vacantesConMovimiento: $this->vacantesConMovimiento($cifras, $vacantes),
         );
     }
 
@@ -112,51 +102,76 @@ class DashboardService
     }
 
     /**
-     * Vacantes abiertas con candidatos en curso y sin movimiento hace {@see self::DIAS_ESTANCADA} días o más,
-     * las más antiguas primero, indexadas por id. Movimiento = postulación recibida, cambio de etapa o entrevista.
+     * Las vacantes que el dashboard nombra (las de «Vacantes en curso» y las de los avisos), en una sola lectura.
      *
-     * @return array<int, array{titulo: string, dias: int}>
+     * @return Collection<int, Vacante>
      */
-    private function estancadas(): array
+    private function vacantesMostradas(CifrasPorVacanteData $cifras): Collection
     {
-        $corte = now()->subDays(self::DIAS_ESTANCADA);
-        $enCurso = [EtapaPostulacion::Contratado, EtapaPostulacion::Descartado];
+        $ids = array_unique([
+            ...array_column($cifras->movimiento, 'id'),
+            ...array_column($cifras->esperando, 'id'),
+            ...array_keys($cifras->estancadas),
+        ]);
 
-        $vacantes = Vacante::query()
-            ->where('estado', EstadoVacante::Abierta)
-            ->whereHas('postulaciones', fn (Builder $q) => $q->whereNotIn('etapa', $enCurso)->whereNull('retirada_at'))
-            ->whereDoesntHave('postulaciones', fn (Builder $q) => $q->where(
-                fn (Builder $q) => $q->where('created_at', '>', $corte)->orWhere('etapa_cambiada_at', '>', $corte),
-            ))
-            ->whereDoesntHave('postulaciones.entrevistas', fn (Builder $q) => $q->where('inicia_at', '>', $corte))
-            ->withMax('postulaciones as ultima_recibida', 'created_at')
-            ->withMax('postulaciones as ultimo_cambio', 'etapa_cambiada_at')
-            ->tap($this->conEmpresaSiEsGlobal(...))
-            ->get(['id', 'titulo', 'empresa_id']);
-
-        $estancadas = [];
-        foreach ($vacantes as $vacante) {
-            $ultimo = collect([$vacante->getAttribute('ultima_recibida'), $vacante->getAttribute('ultimo_cambio')])
-                ->filter()
-                ->map(fn ($f) => Carbon::parse($f))
-                ->max();
-
-            $estancadas[$vacante->id] = ['titulo' => Formato::vacante($vacante), 'dias' => (int) $ultimo->diffInDays(now())];
+        if ($ids === []) {
+            return new Collection;
         }
 
-        uasort($estancadas, fn (array $a, array $b) => $b['dias'] <=> $a['dias']);
+        return Vacante::query()
+            ->whereIn('id', $ids)
+            ->tap($this->conEmpresaSiEsGlobal(...))
+            ->get()
+            ->keyBy('id');
+    }
 
-        return $estancadas;
+    /**
+     * «Vacantes en curso»: las que más postulaciones por revisar tienen. Si hay menos de las que caben, se
+     * completa con vacantes activas aún sin postulaciones (lo último en el orden de siempre).
+     *
+     * @param  Collection<int, Vacante>  $vacantes
+     * @return Collection<int, Vacante>
+     */
+    private function vacantesConMovimiento(CifrasPorVacanteData $cifras, Collection $vacantes): Collection
+    {
+        $lista = collect($cifras->movimiento)
+            ->map(function (array $fila) use ($vacantes): ?Vacante {
+                $vacante = $vacantes->get($fila['id']);
+                $vacante?->setAttribute('postulaciones_count', $fila['total']);
+                $vacante?->setAttribute('por_revisar', $fila['por_revisar']);
+                $vacante?->setAttribute('mejor_match', $fila['mejor_match']);
+
+                return $vacante;
+            })
+            ->filter()
+            ->values();
+
+        $faltan = CifrasPorVacante::VACANTES_CON_MOVIMIENTO - $lista->count();
+
+        if ($faltan > 0 && count($cifras->movimiento) < CifrasPorVacante::VACANTES_CON_MOVIMIENTO) {
+            $sinPostulaciones = Vacante::query()
+                ->whereIn('estado', EstadoVacante::activos())
+                ->whereDoesntHave('postulaciones')
+                ->orderBy('id')
+                ->limit($faltan)
+                ->tap($this->conEmpresaSiEsGlobal(...))
+                ->get()
+                ->each(fn (Vacante $v) => $v->setAttribute('postulaciones_count', 0)->setAttribute('por_revisar', 0)->setAttribute('mejor_match', null));
+
+            $lista = $lista->concat($sinPostulaciones)->values();
+        }
+
+        return $lista;
     }
 
     /**
      * Lo que pide una acción: primero lo de hoy y lo que otra persona espera
      * (entrevistas, postulaciones que llevan días sin mirarse) y después lo que se puede mejorar.
      *
-     * @param  array<int, array{titulo: string, dias: int}>  $estancadas
+     * @param  Collection<int, Vacante>  $vacantes
      * @return list<array{icono: string, texto: string, ruta: string, parametros: array<string, mixed>, urgente: bool}>
      */
-    private function atencion(int $entrevistasHoy, int $entrevistasSinConfirmar, array $estancadas): array
+    private function atencion(int $entrevistasHoy, int $entrevistasSinConfirmar, CifrasPorVacanteData $cifras, Collection $vacantes): array
     {
         $avisos = [];
 
@@ -180,24 +195,16 @@ class DashboardService
             ];
         }
 
-        $esperando = Vacante::query()
-            ->whereIn('estado', EstadoVacante::activos())
-            ->whereHas('postulaciones', fn (Builder $q) => $this->sinRevisar($q, self::DIAS_SIN_REVISAR))
-            ->withCount(['postulaciones as esperando' => fn (Builder $q) => $this->sinRevisar($q, self::DIAS_SIN_REVISAR)])
-            ->orderByDesc('esperando')
-            ->limit(self::AVISOS_POR_TIPO)
-            ->tap($this->conEmpresaSiEsGlobal(...))
-            ->get(['id', 'titulo', 'empresa_id']);
-
-        foreach ($esperando as $vacante) {
-            $n = (int) $vacante->getAttribute('esperando');
-            $avisos[] = [
-                'icono' => 'hourglass',
-                'texto' => Formato::vacante($vacante).': '.($n === 1 ? '1 postulación lleva' : "{$n} postulaciones llevan").' más de '.self::DIAS_SIN_REVISAR.' días sin revisar.',
-                'ruta' => 'seleccion.show',
-                'parametros' => ['vacante' => $vacante->id],
-                'urgente' => false,
-            ];
+        foreach ($cifras->esperando as $fila) {
+            if ($vacante = $vacantes->get($fila['id'])) {
+                $avisos[] = [
+                    'icono' => 'hourglass',
+                    'texto' => Formato::vacante($vacante).': '.($fila['n'] === 1 ? '1 postulación lleva' : "{$fila['n']} postulaciones llevan").' más de '.self::DIAS_SIN_REVISAR.' días sin revisar.',
+                    'ruta' => 'seleccion.show',
+                    'parametros' => ['vacante' => $vacante->id],
+                    'urgente' => false,
+                ];
+            }
         }
 
         $sinPostulaciones = Vacante::query()
@@ -205,7 +212,7 @@ class DashboardService
             ->where('publicada_at', '<=', now()->subDays(self::DIAS_SIN_POSTULACIONES))
             ->whereDoesntHave('postulaciones')
             ->orderBy('publicada_at')
-            ->limit(self::AVISOS_POR_TIPO)
+            ->limit(CifrasPorVacante::AVISOS_POR_TIPO)
             ->tap($this->conEmpresaSiEsGlobal(...))
             ->get(['id', 'titulo', 'empresa_id']);
 
@@ -219,14 +226,16 @@ class DashboardService
             ];
         }
 
-        foreach (array_slice($estancadas, 0, self::AVISOS_POR_TIPO, true) as $id => $vacante) {
-            $avisos[] = [
-                'icono' => 'pause-circle',
-                'texto' => "{$vacante['titulo']} lleva {$vacante['dias']} días sin avances: hay candidatos en proceso pero nadie se movió. Revisa el tablero.",
-                'ruta' => 'seleccion.show',
-                'parametros' => ['vacante' => $id],
-                'urgente' => false,
-            ];
+        foreach (array_slice($cifras->estancadas, 0, CifrasPorVacante::AVISOS_POR_TIPO, true) as $id => $dias) {
+            if ($vacante = $vacantes->get($id)) {
+                $avisos[] = [
+                    'icono' => 'pause-circle',
+                    'texto' => Formato::vacante($vacante)." lleva {$dias} días sin avances: hay candidatos en proceso pero nadie se movió. Revisa el tablero.",
+                    'ruta' => 'seleccion.show',
+                    'parametros' => ['vacante' => $id],
+                    'urgente' => false,
+                ];
+            }
         }
 
         return $avisos;
@@ -242,22 +251,6 @@ class DashboardService
     {
         if ($this->tenant->esGlobal()) {
             $consulta->with('empresa:id,nombre');
-        }
-    }
-
-    /**
-     * Postulaciones que esperan una primera mirada: en «Postulado» y sin retirar;
-     * con $dias, solo las que llevan al menos ese tiempo así.
-     *
-     * @param  Builder<Postulacion>  $consulta
-     */
-    private function sinRevisar(Builder $consulta, ?int $dias = null): void
-    {
-        $consulta->where('etapa', EtapaPostulacion::Postulado)->whereNull('retirada_at');
-
-        if ($dias !== null) {
-            // Una postulación que nunca cambió de etapa lleva el tiempo que tiene desde que llegó.
-            $consulta->whereRaw('COALESCE(etapa_cambiada_at, created_at) <= ?', [now()->subDays($dias)]);
         }
     }
 }

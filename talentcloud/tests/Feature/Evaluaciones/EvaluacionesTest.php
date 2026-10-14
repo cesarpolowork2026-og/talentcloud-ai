@@ -217,7 +217,7 @@ it('ofrece para evaluar solo a quien tuvo una entrevista realizada y no se retir
     $sinEntrevista = Postulacion::factory()->paraVacante($this->backend)
         ->create(['candidato_id' => Candidato::factory()->create(['nombre' => 'Pablo Vega'])->id]);
     Entrevista::factory()->create(['postulacion_id' => $sinEntrevista->id, 'estado' => EstadoEntrevista::Pendiente]);
-    $this->marco->forceFill(['retirada_at' => now()])->save();
+    $this->marco->forceFill(['retirada_at' => now(), 'etapa' => 'descartado'])->save();
     $lucia = Postulacion::factory()->paraVacante($this->backend)
         ->create(['candidato_id' => Candidato::factory()->create(['nombre' => 'Lucía Prat'])->id]);
     Entrevista::factory()->create(['postulacion_id' => $lucia->id, 'inicia_at' => now()->subDay(), 'estado' => EstadoEntrevista::Completada]);
@@ -241,7 +241,7 @@ it('no registra una evaluación sin entrevista realizada, ni de una postulación
     expect(fn () => app(GuardarEvaluacion::class)->registrar($sinEntrevista->id, $this->diego, $datos))
         ->toThrow(OperacionNoPermitida::class, 'Pablo Vega todavía no tiene una entrevista realizada para Desarrollador Backend.');
 
-    $this->marco->forceFill(['retirada_at' => now()])->save();
+    $this->marco->forceFill(['retirada_at' => now(), 'etapa' => 'descartado'])->save();
 
     expect(fn () => app(GuardarEvaluacion::class)->registrar($this->marco->id, $this->diego, $datos))
         ->toThrow(OperacionNoPermitida::class, 'Marco Díaz retiró su postulación a Desarrollador Backend');

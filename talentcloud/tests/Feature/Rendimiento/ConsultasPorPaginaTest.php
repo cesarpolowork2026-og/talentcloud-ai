@@ -56,8 +56,7 @@ it('no supera el presupuesto de consultas de cada página', function () {
             '/entrevistas' => 12, // + el resumen de la agenda (una lectura)
             '/evaluaciones' => 11,
         ],
-        // Dashboard del admin: + la empresa de las vacantes de los avisos de atención (una lectura por lista).
-        'admin@talentcloud.ai' => ['/dashboard' => 26, '/calidad-ia' => 9, '/candidatos' => 14],
+        'admin@talentcloud.ai' => ['/dashboard' => 24, '/calidad-ia' => 9, '/candidatos' => 14],
         'marco@correo.com' => ['/postulante/postulaciones' => 10, "/postulante/vacantes/{$ids['abierta']}" => 11],
     ];
 
