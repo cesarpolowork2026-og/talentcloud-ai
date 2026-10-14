@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"   # solo desde esta máquina: es una base de desarrollo con clave simple
     volumes:
       - pgsql-data:/var/lib/postgresql/data
       - ./docker/pgsql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -24,8 +24,8 @@ services:
     container_name: talentcloud-mailpit
     restart: unless-stopped
     ports:
-      - "1025:1025"   # SMTP
-      - "8025:8025"   # Interfaz web: http://localhost:8025
+      - "127.0.0.1:1025:1025"   # SMTP (solo local)
+      - "127.0.0.1:8025:8025"   # Interfaz web: http://localhost:8025 (muestra todos los correos: solo local)
 
 volumes:
   pgsql-data:
