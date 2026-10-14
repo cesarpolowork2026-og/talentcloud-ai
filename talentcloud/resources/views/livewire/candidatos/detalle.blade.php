@@ -60,7 +60,7 @@
                         <x-ui.field label="Postular a una vacante" for="postular-vacante" error="vacanteId" class="min-w-[240px] flex-1">
                             <x-ui.select wire:model="vacanteId" id="postular-vacante" :options="$vacantesDisponibles" placeholder="Elige una vacante abierta" class="w-full" error="vacanteId" />
                         </x-ui.field>
-                        <x-ui.button type="submit">Postular</x-ui.button>
+                        <x-ui.button type="submit" wire:loading.attr="disabled" wire:target="postular">Postular</x-ui.button>
                     </form>
                 @endif
             </section>
@@ -158,7 +158,7 @@
                                 <x-ui.select wire:model="empresaCompetencia" :options="$empresasDelCandidato" placeholder="¿Para qué empresa?" aria-label="Empresa para la que se anota" error="empresaCompetencia" class="w-full" />
                             </x-ui.field>
                         @endif
-                        <x-ui.button type="submit">Agregar</x-ui.button>
+                        <x-ui.button type="submit" wire:loading.attr="disabled" wire:target="agregarCompetencia">Agregar</x-ui.button>
                     </form>
                     <datalist id="catalogo-competencias">
                         @foreach ($catalogo as $nombre)

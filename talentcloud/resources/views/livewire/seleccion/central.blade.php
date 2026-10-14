@@ -259,7 +259,7 @@ Retiró su postulación el {{ App\Support\Formato::fechaCorta($seleccionada->ret
                         <x-ui.button :href="route('evaluaciones.index', ['evaluar' => $seleccionada->id])" wire:navigate>Evaluar</x-ui.button>
                     @endif
                     @if ($editable && ! $seleccionada->estaRetirada())
-                        <x-ui.button type="submit" form="form-mover" variant="primary">Mover</x-ui.button>
+                        <x-ui.button type="submit" form="form-mover" variant="primary" wire:loading.attr="disabled" wire:target="moverA">Mover</x-ui.button>
                     @endif
                 @endif
             </x-slot:actions>
