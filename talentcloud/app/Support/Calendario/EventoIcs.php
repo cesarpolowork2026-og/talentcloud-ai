@@ -16,23 +16,48 @@ use Illuminate\Support\Carbon;
  */
 final class EventoIcs
 {
+    /** Para el equipo de selección: con el candidato, el entrevistador y las notas internas. */
     public static function de(Entrevista $entrevista): string
     {
         $postulacion = $entrevista->postulacion;
         $candidato = (string) $postulacion?->candidato?->nombre;
         $vacante = Formato::vacante($postulacion?->vacante);
         $enlace = EnlaceExterno::seguro($entrevista->enlace);
-        $inicio = Carbon::instance($entrevista->inicia_at)->utc();
-        $fin = $inicio->copy()->addMinutes($entrevista->duracion_min);
 
-        $descripcion = array_filter([
+        return self::armar($entrevista, "Entrevista: {$candidato} · {$vacante}", array_filter([
             "Vacante: {$vacante}",
             'Entrevistador: '.$entrevista->entrevistador?->name,
             'Modalidad: '.$entrevista->modalidad->etiqueta(),
             $enlace ? "Enlace: {$enlace}" : null,
             $entrevista->notas ? 'Notas: '.$entrevista->notas : null,
             'Generado por TalentCloud AI.',
-        ]);
+        ]), $enlace);
+    }
+
+    /**
+     * Para el propio candidato: solo lo que ya ve en «Mis postulaciones» (vacante, empresa, modalidad
+     * y enlace). Nunca las notas internas ni el nombre del entrevistador.
+     */
+    public static function paraCandidato(Entrevista $entrevista, string $vacante, string $empresa): string
+    {
+        $enlace = EnlaceExterno::seguro($entrevista->enlace);
+
+        return self::armar($entrevista, "Entrevista: {$vacante} · {$empresa}", array_filter([
+            "Vacante: {$vacante}",
+            "Empresa: {$empresa}",
+            'Modalidad: '.$entrevista->modalidad->etiqueta(),
+            $enlace ? "Enlace: {$enlace}" : null,
+            'Generado por TalentCloud AI.',
+        ]), $enlace);
+    }
+
+    /**
+     * @param  array<int, string>  $descripcion
+     */
+    private static function armar(Entrevista $entrevista, string $resumen, array $descripcion, ?string $enlace): string
+    {
+        $inicio = Carbon::instance($entrevista->inicia_at)->utc();
+        $fin = $inicio->copy()->addMinutes($entrevista->duracion_min);
 
         $lineas = [
             'BEGIN:VCALENDAR',
@@ -45,7 +70,7 @@ final class EventoIcs
             'DTSTAMP:'.self::fecha(now()),
             'DTSTART:'.self::fecha($inicio),
             'DTEND:'.self::fecha($fin),
-            'SUMMARY:'.self::escapar("Entrevista: {$candidato} · {$vacante}"),
+            'SUMMARY:'.self::escapar($resumen),
             'DESCRIPTION:'.self::escapar(implode("\n", $descripcion)),
             'LOCATION:'.self::escapar($enlace ?? $entrevista->modalidad->etiqueta()),
             'STATUS:'.match ($entrevista->estado) {

@@ -43,6 +43,9 @@ interface EntrevistaRepository
      */
     public function delCandidato(Candidato $candidato): Collection;
 
+    /** Una entrevista del candidato (misma lectura, sin notas internas); null si no es suya o no existe. */
+    public function delCandidatoPorId(Candidato $candidato, int $id): ?Entrevista;
+
     /**
      * El entrevistador ya tiene otra entrevista (no cancelada) que se cruza con
      * ese intervalo. $salvoId: la entrevista que se reprograma no choca consigo misma.

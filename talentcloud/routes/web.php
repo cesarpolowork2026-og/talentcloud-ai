@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AvisoDePagoController;
 use App\Http\Controllers\DescargarCalendarioDeEntrevistaController;
+use App\Http\Controllers\DescargarCalendarioDeMiEntrevistaController;
 use App\Http\Controllers\DescargarCvController;
 use App\Http\Controllers\DescargarMisDatosController;
 use App\Http\Controllers\PostularDesdeEmpleosController;
@@ -110,6 +111,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('vacantes/{id}', Postulante\DetalleVacante::class)->whereNumber('id')->name('vacantes.show');
         // Derecho de acceso: JSON con sus propios datos, nunca los internos de las empresas.
         Route::get('mis-datos', DescargarMisDatosController::class)->middleware('throttle:10,1')->name('mis-datos');
+        // «Agregar al calendario» de sus propias entrevistas; sin model binding, por lo mismo que las vacantes.
+        Route::get('entrevistas/{id}/calendario', DescargarCalendarioDeMiEntrevistaController::class)->whereNumber('id')->name('entrevistas.calendario');
     });
 });
 

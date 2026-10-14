@@ -27,11 +27,24 @@ class EloquentEntrevistaRepository implements EntrevistaRepository
 
     public function delCandidato(Candidato $candidato): Collection
     {
+        return $this->consultaDelCandidato($candidato)->orderBy('inicia_at')->get();
+    }
+
+    public function delCandidatoPorId(Candidato $candidato, int $id): ?Entrevista
+    {
+        return $this->consultaDelCandidato($candidato)->whereKey($id)->first();
+    }
+
+    /**
+     * Entrevistas de todas las postulaciones del candidato, sin notas ni entrevistador: nunca lo interno.
+     *
+     * @return Builder<Entrevista>
+     */
+    private function consultaDelCandidato(Candidato $candidato): Builder
+    {
         return Entrevista::sinFiltroDeEmpresa()
             ->select(['id', 'empresa_id', 'postulacion_id', 'inicia_at', 'duracion_min', 'modalidad', 'enlace', 'estado'])
-            ->whereIn('postulacion_id', $candidato->postulacionesEnTodasLasEmpresas()->select('postulaciones.id'))
-            ->orderBy('inicia_at')
-            ->get();
+            ->whereIn('postulacion_id', $candidato->postulacionesEnTodasLasEmpresas()->select('postulaciones.id'));
     }
 
     public function postulacionesAgendables(string $texto = '', int $limite = 20): Collection

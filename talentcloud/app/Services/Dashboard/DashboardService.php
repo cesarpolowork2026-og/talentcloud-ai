@@ -10,6 +10,8 @@ use App\Models\Postulacion;
 use App\Models\Vacante;
 use App\Services\Entrevistas\ResumenDeAgenda;
 use App\Support\CacheDeResumenes;
+use App\Support\Formato;
+use App\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
@@ -42,7 +44,10 @@ class DashboardService
 
     private const VACANTES_CON_MOVIMIENTO = 5;
 
-    public function __construct(private readonly ResumenDeAgenda $agenda) {}
+    public function __construct(
+        private readonly ResumenDeAgenda $agenda,
+        private readonly TenantContext $tenant,
+    ) {}
 
     private const AVISOS_POR_TIPO = 3;
 
@@ -126,7 +131,8 @@ class DashboardService
             ->whereDoesntHave('postulaciones.entrevistas', fn (Builder $q) => $q->where('inicia_at', '>', $corte))
             ->withMax('postulaciones as ultima_recibida', 'created_at')
             ->withMax('postulaciones as ultimo_cambio', 'etapa_cambiada_at')
-            ->get(['id', 'titulo']);
+            ->tap($this->conEmpresaSiEsGlobal(...))
+            ->get(['id', 'titulo', 'empresa_id']);
 
         $estancadas = [];
         foreach ($vacantes as $vacante) {
@@ -135,7 +141,7 @@ class DashboardService
                 ->map(fn ($f) => Carbon::parse($f))
                 ->max();
 
-            $estancadas[$vacante->id] = ['titulo' => $vacante->titulo, 'dias' => (int) $ultimo->diffInDays(now())];
+            $estancadas[$vacante->id] = ['titulo' => Formato::vacante($vacante), 'dias' => (int) $ultimo->diffInDays(now())];
         }
 
         uasort($estancadas, fn (array $a, array $b) => $b['dias'] <=> $a['dias']);
@@ -180,13 +186,14 @@ class DashboardService
             ->withCount(['postulaciones as esperando' => fn (Builder $q) => $this->sinRevisar($q, self::DIAS_SIN_REVISAR)])
             ->orderByDesc('esperando')
             ->limit(self::AVISOS_POR_TIPO)
-            ->get(['id', 'titulo']);
+            ->tap($this->conEmpresaSiEsGlobal(...))
+            ->get(['id', 'titulo', 'empresa_id']);
 
         foreach ($esperando as $vacante) {
             $n = (int) $vacante->getAttribute('esperando');
             $avisos[] = [
                 'icono' => 'hourglass',
-                'texto' => "{$vacante->titulo}: ".($n === 1 ? '1 postulación lleva' : "{$n} postulaciones llevan").' más de '.self::DIAS_SIN_REVISAR.' días sin revisar.',
+                'texto' => Formato::vacante($vacante).': '.($n === 1 ? '1 postulación lleva' : "{$n} postulaciones llevan").' más de '.self::DIAS_SIN_REVISAR.' días sin revisar.',
                 'ruta' => 'seleccion.show',
                 'parametros' => ['vacante' => $vacante->id],
                 'urgente' => false,
@@ -199,12 +206,13 @@ class DashboardService
             ->whereDoesntHave('postulaciones')
             ->orderBy('publicada_at')
             ->limit(self::AVISOS_POR_TIPO)
-            ->get(['id', 'titulo']);
+            ->tap($this->conEmpresaSiEsGlobal(...))
+            ->get(['id', 'titulo', 'empresa_id']);
 
         foreach ($sinPostulaciones as $vacante) {
             $avisos[] = [
                 'icono' => 'lightning',
-                'texto' => "{$vacante->titulo} lleva más de ".self::DIAS_SIN_POSTULACIONES.' días abierta sin postulaciones: revisa el título y los requisitos.',
+                'texto' => Formato::vacante($vacante).' lleva más de '.self::DIAS_SIN_POSTULACIONES.' días abierta sin postulaciones: revisa el título y los requisitos.',
                 'ruta' => 'vacantes.show',
                 'parametros' => ['vacante' => $vacante->id],
                 'urgente' => false,
@@ -222,6 +230,19 @@ class DashboardService
         }
 
         return $avisos;
+    }
+
+    /**
+     * El nombre de la empresa solo se muestra (y se lee) en la vista global del admin SaaS: para el
+     * personal de una empresa sería una consulta de más por cada lista.
+     *
+     * @param  Builder<Vacante>  $consulta
+     */
+    private function conEmpresaSiEsGlobal(Builder $consulta): void
+    {
+        if ($this->tenant->esGlobal()) {
+            $consulta->with('empresa:id,nombre');
+        }
     }
 
     /**

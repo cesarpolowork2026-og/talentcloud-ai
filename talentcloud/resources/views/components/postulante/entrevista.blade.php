@@ -22,4 +22,7 @@
     @if ($enlace)
         <a href="{{ $enlace }}" target="_blank" rel="noopener noreferrer" class="text-13">Unirse a la videollamada</a>
     @endif
+    @if (in_array($entrevista->estado, [EstadoEntrevista::Pendiente, EstadoEntrevista::Confirmada], true) && $entrevista->inicia_at->isFuture())
+        <a href="{{ route('postulante.entrevistas.calendario', $entrevista->id) }}" class="text-13">Agregar al calendario</a>
+    @endif
 </li>

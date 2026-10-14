@@ -138,3 +138,23 @@ it('solo cuenta las vacantes de la empresa', function () {
     actuarComo(User::factory()->admin()->create());
     expect(estancadasHoy())->toHaveCount(1);
 });
+
+it('al admin SaaS le dice de qué empresa es cada aviso; a la empresa, no hace falta', function () {
+    postulacionHace($this->backend, 20);
+    $sin = Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Abierta)->create(['titulo' => 'Analista', 'publicada_at' => Carbon::now()->subDays(10)]);
+    $espera = Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Abierta)->create(['titulo' => 'Diseñador']);
+    postulacionHace($espera, 5, EtapaPostulacion::Postulado, ['etapa_cambiada_at' => null]);
+
+    $textos = fn () => collect(app(DashboardService::class)->resumen()->atencion)->pluck('texto')->implode("\n");
+
+    expect($textos())->toContain('Desarrollador Backend lleva 20 días sin avances')
+        ->and($textos())->toContain('Analista lleva más de 7 días abierta')
+        ->and($textos())->toContain('Diseñador: 1 postulación lleva')
+        ->and($textos())->not->toContain('Nimbus');
+
+    actuarComo(User::factory()->admin()->create());
+
+    expect($textos())->toContain($this->backend->titulo.' · '.$this->nimbus->nombre.' lleva 20 días sin avances')
+        ->and($textos())->toContain('Analista · '.$this->nimbus->nombre.' lleva más de 7 días abierta')
+        ->and($textos())->toContain('Diseñador · '.$this->nimbus->nombre.': 1 postulación lleva');
+});
