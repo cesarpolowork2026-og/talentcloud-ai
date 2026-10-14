@@ -110,8 +110,10 @@
 
     <p class="sr-only" role="status" aria-live="polite" x-text="activo === null ? '' : ({{ \Illuminate\Support\Js::from(array_map(fn ($i) => $etiquetas[$i].'. '.collect($series)->map(fn ($s) => $s['nombre'].': '.$s['valores'][$i].' '.$unidad)->implode('. '), range(0, $n - 1))) }})[activo]"></p>
 
-    {{-- Los mismos datos para lectores de pantalla --}}
-    <table class="sr-only">
+    {{-- Los mismos datos para lectores de pantalla. Va en un div: una <table> con `sr-only` ignora el 1 px y el recorte
+         (mide lo que su contenido) y ensancha la página, con desplazamiento horizontal en el móvil. --}}
+    <div class="sr-only">
+    <table>
         <caption>{{ $descripcion }}</caption>
         <thead>
             <tr>
@@ -132,4 +134,5 @@
             @endfor
         </tbody>
     </table>
+    </div>
 </div>
