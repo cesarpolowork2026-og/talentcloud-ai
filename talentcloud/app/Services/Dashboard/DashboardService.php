@@ -42,7 +42,7 @@ class DashboardService
      */
     public const DIAS_ESTANCADA = 14;
 
-    private const VACANTES_CON_MOVIMIENTO = 5;
+    private const VACANTES_CON_MOVIMIENTO = 7;
 
     public function __construct(
         private readonly ResumenDeAgenda $agenda,

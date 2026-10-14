@@ -127,16 +127,14 @@
         «Por revisar» son las postulaciones que siguen en «Postulado».
     </p>
 
-    <div class="mb-8 grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        {{-- Qué pide una acción hoy --}}
-        <section aria-labelledby="atencion-titulo">
+    <div class="mb-8 grid items-stretch gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        {{-- Qué pide una acción hoy: la tarjeta llena el alto de la columna de al lado y cierra con los accesos directos. --}}
+        <section aria-labelledby="atencion-titulo" class="flex flex-col">
             <h2 id="atencion-titulo" class="mb-3 text-16">Requiere tu atención</h2>
-            @if ($resumen->atencion === [])
-                <x-ui.card>
-                    <p class="m-0 flex items-center gap-2 text-14 text-neutral-800"><x-ui.icon name="seal-check" :size="18" class="text-accent-700" /> Todo al día: no hay entrevistas por confirmar ni postulaciones esperando más de {{ $diasSinRevisar }} días.</p>
-                </x-ui.card>
-            @else
-                <x-ui.card class="!gap-0 !p-0">
+            <x-ui.card class="flex-1 !gap-0 !p-0">
+                @if ($resumen->atencion === [])
+                    <p class="m-0 flex items-center gap-2 p-4 text-14 text-neutral-800"><x-ui.icon name="seal-check" :size="18" class="text-accent-700" /> Todo al día: no hay entrevistas por confirmar ni postulaciones esperando más de {{ $diasSinRevisar }} días.</p>
+                @else
                     <ul class="m-0 list-none p-0">
                         @foreach ($resumen->atencion as $aviso)
                             <li class="border-b border-divider last:border-b-0" wire:key="atencion-{{ $loop->index }}">
@@ -148,8 +146,15 @@
                             </li>
                         @endforeach
                     </ul>
-                </x-ui.card>
-            @endif
+                @endif
+
+                <div class="mt-auto flex flex-wrap items-center gap-2 border-t border-divider px-4 py-3">
+                    <span class="mr-auto text-13 text-neutral-700">Ir directo a:</span>
+                    <x-ui.button size="sm" :href="route('seleccion.index')" wire:navigate>Selección</x-ui.button>
+                    <x-ui.button size="sm" :href="route('entrevistas.index')" wire:navigate>Entrevistas</x-ui.button>
+                    <x-ui.button size="sm" :href="route('vacantes.index')" wire:navigate>Vacantes</x-ui.button>
+                </div>
+            </x-ui.card>
         </section>
 
         <div class="grid gap-4">
@@ -185,9 +190,9 @@
     {{-- Evolución de postulaciones: el periodo elegido frente al anterior de la misma duración. --}}
     <section class="mb-8" aria-labelledby="tendencia-titulo">
         <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
-            <div>
+            <div class="min-w-[min(100%,320px)] flex-1">
                 <h2 id="tendencia-titulo" class="m-0 text-16">Evolución de postulaciones</h2>
-                <p class="m-0 mt-1 max-w-[70ch] text-13 text-neutral-700">
+                <p class="m-0 mt-1 max-w-[90ch] text-13 text-neutral-700">
                     Postulaciones recibidas {{ $tendencia->diasPorCubeta === 1 ? 'por día' : 'cada '.$tendencia->diasPorCubeta.' días' }}, del {{ App\Support\Formato::fechaCorta($tendencia->desde) }} al {{ App\Support\Formato::fechaCorta($tendencia->hasta) }},
                     frente a los {{ $tendencia->dias }} días anteriores. Cuenta postulaciones, no personas. El periodo también define el embudo.
                 </p>
@@ -270,6 +275,7 @@
                     @endforeach
                 </x-ui.table>
                 <p class="mt-2 text-13 text-neutral-700">Ordenadas por las que más postulaciones tienen por revisar. El mejor match es una referencia para empezar por ahí; no reemplaza leer el CV.</p>
+                <a href="{{ route('vacantes.index') }}" wire:navigate class="mt-1 inline-block text-13">Ver todas las vacantes</a>
             @endif
         </section>
 
@@ -295,7 +301,7 @@
         @if ($embudo->total === 0)
             <x-ui.empty-state icon="funnel" :message="'No hay postulaciones en los últimos '.$embudo->dias.' días.'" />
         @else
-            <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+            <div class="grid items-stretch gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
                 <x-ui.card>
                     <ol class="m-0 grid list-none gap-3 p-0" aria-label="Postulaciones que alcanzaron cada etapa">
                         @foreach ($embudo->etapas as $fila)
@@ -321,7 +327,7 @@
                     </p>
                 </x-ui.card>
 
-                <div class="grid gap-4">
+                <div class="flex flex-col gap-4">
                     <x-ui.card kicker="Tiempo medio hasta contratar">
                         @if ($embudo->diasHastaContratar === null)
                             <p class="m-0 font-heading text-24 font-semibold">Sin contrataciones aún</p>
@@ -330,7 +336,7 @@
                             <p class="m-0 text-13 text-neutral-700">Desde la postulación, en {{ $embudo->contrataciones }} {{ $embudo->contrataciones === 1 ? 'contratación' : 'contrataciones' }} del periodo.</p>
                         @endif
                     </x-ui.card>
-                    <x-ui.card kicker="Origen de las postulaciones">
+                    <x-ui.card kicker="Origen de las postulaciones" class="flex-1">
                         <ul class="m-0 grid list-none gap-1 p-0 text-14">
                             @foreach (App\Enums\OrigenPostulacion::cases() as $origen)
                                 <li class="flex items-baseline justify-between gap-2">
@@ -339,6 +345,14 @@
                                 </li>
                             @endforeach
                         </ul>
+                        @php($propias = $embudo->postulacionesDe(App\Enums\OrigenPostulacion::Postulante))
+                        @if ($embudo->total > 0)
+                            @php($porcentajePropias = (int) round($propias * 100 / $embudo->total))
+                            <div class="mt-auto grid gap-1">
+                                <x-ui.progress :value="$porcentajePropias" :label="$porcentajePropias.' % de las postulaciones llegaron por cuenta del postulante'" />
+                                <p class="m-0 text-13 text-neutral-700">{{ $porcentajePropias }} % llegó por cuenta del postulante, sin que el equipo la registrara.</p>
+                            </div>
+                        @endif
                     </x-ui.card>
                 </div>
             </div>

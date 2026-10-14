@@ -2,6 +2,7 @@
 
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Enums\OrigenPostulacion;
 use App\Livewire\Dashboard\Panel;
 use App\Models\Empresa;
 use App\Models\Postulacion;
@@ -204,4 +205,16 @@ it('el componente de líneas se dibuja con una sola serie, ceros y un único pun
 
     // Escala entera hasta 15 (13 de máximo, pasos de 5): 0, 5, 10 y 15.
     expect($html)->toContain('>15</text>')->and($html)->toContain('stroke-dasharray="5 4"')->and(substr_count($html, 'x-show="activo ==='))->toBeGreaterThan(5);
+});
+
+it('da accesos directos junto a la atención y muestra qué parte de las postulaciones llegó por cuenta del postulante', function () {
+    recibidas($this->backend, 2, 3);
+    Postulacion::factory()->paraVacante($this->backend)->create(['origen' => OrigenPostulacion::Postulante, 'created_at' => Carbon::today()->subDay()->setTime(9, 0)]);
+
+    $html = Livewire::test(Panel::class)->html();
+
+    expect($html)->toContain('Ir directo a:')
+        ->and($html)->toContain(route('seleccion.index'))
+        ->and($html)->toContain(route('entrevistas.index'))
+        ->and(textoVisible($html))->toContain('25 % llegó por cuenta del postulante');
 });

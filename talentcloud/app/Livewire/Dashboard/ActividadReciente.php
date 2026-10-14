@@ -13,7 +13,7 @@ use Livewire\Component;
  */
 class ActividadReciente extends Component
 {
-    public const CANTIDAD = 8;
+    public const CANTIDAD = 7;
 
     public function render(): View
     {
