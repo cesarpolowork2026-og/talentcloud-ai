@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CabecerasDeSeguridad;
 use App\Support\Navegacion;
 use App\Tenancy\EstablecerContextoTenant;
 use App\Tenancy\VerificarAcceso;
@@ -17,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Cabeceras de seguridad en todas las respuestas, también las de error.
+        $middleware->append(CabecerasDeSeguridad::class);
+
         // En el grupo web (tras la sesión), así también cubren las peticiones de Livewire:
         // primero se expulsa a los usuarios de empresas suspendidas, luego se fija el tenant.
         $middleware->web(append: [
