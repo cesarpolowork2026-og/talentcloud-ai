@@ -4,7 +4,9 @@
     Las categorías tienen un orden natural (p. ej. los planes de menor a mayor), por eso usan la rampa ordinal de un
     solo tono, de claro a oscuro. Las de valor 0 no ocupan barra pero sí aparecen en la leyenda.
 
-    items: lista de ['clave', 'etiqueta', 'valor' (entero ≥ 0)], de la categoría menor a la mayor.
+    items: lista de ['clave', 'etiqueta', 'valor' (entero ≥ 0), 'detalle' (opcional: lista de ['texto', 'url'] con lo que
+           hay dentro de la categoría, p. ej. las empresas de un plan)], de la categoría menor a la mayor.
+    Con 'detalle' la leyenda enseña quiénes son (hasta 6; el resto, «y N más»): el porcentaje solo no dice cuáles.
 --}}
 @props(['items', 'rotulo' => 'Distribución'])
 
@@ -36,10 +38,23 @@
     <ul class="apilada-leyenda" aria-label="{{ $rotulo }}">
         @foreach ($items as $i => $item)
             <li wire:key="apilada-{{ $item['clave'] }}">
-                <span class="apilada-muestra" style="background: var(--viz-ord-{{ $pasos[$i] ?? 5 }})" aria-hidden="true"></span>
-                <span class="apilada-nombre">{{ $item['etiqueta'] }}</span>
-                <span class="apilada-cifra">{{ (int) $item['valor'] }}</span>
-                <span class="apilada-parte">{{ $porcentaje((int) $item['valor']) }} %</span>
+                <span class="apilada-cabecera">
+                    <span class="apilada-muestra" style="background: var(--viz-ord-{{ $pasos[$i] ?? 5 }})" aria-hidden="true"></span>
+                    <span class="apilada-nombre">{{ $item['etiqueta'] }}</span>
+                    <span class="apilada-cifra">{{ (int) $item['valor'] }}</span>
+                    <span class="apilada-parte">{{ $porcentaje((int) $item['valor']) }} %</span>
+                </span>
+                @php($detalle = $item['detalle'] ?? [])
+                @if ($detalle !== [])
+                    <ul class="apilada-detalle" aria-label="Empresas con el plan {{ $item['etiqueta'] }}">
+                        @foreach (array_slice($detalle, 0, 6) as $d)
+                            <li><a href="{{ $d['url'] }}" wire:navigate>{{ $d['texto'] }}</a></li>
+                        @endforeach
+                        @if (count($detalle) > 6)
+                            <li class="apilada-mas">y {{ count($detalle) - 6 }} más</li>
+                        @endif
+                    </ul>
+                @endif
             </li>
         @endforeach
     </ul>

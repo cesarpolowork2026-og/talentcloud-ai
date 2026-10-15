@@ -122,5 +122,12 @@ it('muestra la distribución de empresas por plan como una barra apilada con su 
         ->and(substr_count($html, 'apilada-muestra'))->toBe(count(PlanEmpresa::cases()))
         ->and($html)->toContain('33 %')
         // Las cifras por plan ya no son tarjetas sueltas: están en la leyenda.
-        ->and($html)->not->toContain('Plan Starter');
+        ->and($html)->not->toContain('Plan Starter')
+        // Y la leyenda dice quiénes son, no solo cuántos (con enlace al listado de Empresas).
+        ->and($html)->toContain('Empresas con el plan Starter')->toContain('Orbita Labs')
+        ->and($html)->toContain('Empresas con el plan Pro')->toContain('Vela Studio')
+        ->and($html)->toContain('Empresas con el plan Enterprise')->toContain('Nimbus Corp')
+        ->and($html)->toContain('q=Orbita');
+    // La empresa suspendida no figura en ningún plan.
+    expect($html)->not->toContain('Suspendida SA');
 });

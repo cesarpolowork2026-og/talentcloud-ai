@@ -141,12 +141,6 @@
   .radar-poligono { transition: none; }
 }
 
-/* — Minigráfico (tendencia dentro de un indicador) y variación — */
-.minilinea { display: block; width: 100%; max-width: 150px; height: auto; overflow: visible; }
-.variacion { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; }
-.variacion-sube { color: #006300; }
-.variacion-baja { color: #b3261e; }
-.variacion-igual { color: var(--viz-tinta-2); }
 
 /* — Barras horizontales con énfasis (una serie: la mayor en el color de acento, el resto en gris) — */
 .barras { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
@@ -177,8 +171,15 @@
 .apilada-segmento:first-child { border-radius: 4px 0 0 4px; }
 .apilada-segmento:last-child { border-radius: 0 4px 4px 0; }
 .apilada-segmento:only-child { border-radius: 4px; }
-.apilada-leyenda { display: grid; gap: 6px 24px; margin: 12px 0 0; padding: 0; list-style: none; grid-template-columns: repeat(auto-fit, minmax(170px, max-content)); }
-.apilada-leyenda li { display: flex; align-items: baseline; gap: 8px; font-size: 14px; color: var(--viz-tinta); }
+.apilada-leyenda { display: grid; gap: 14px 28px; margin: 14px 0 0; padding: 0; list-style: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.apilada-leyenda > li { min-width: 0; font-size: 14px; color: var(--viz-tinta); }
+.apilada-cabecera { display: flex; align-items: baseline; gap: 8px; }
+.apilada-detalle { margin: 6px 0 0 20px; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 13px; }
+.apilada-detalle { gap: 0; }
+.apilada-detalle li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* WCAG 2.2: el objetivo de un enlace mide al menos 24 px de alto. */
+.apilada-detalle a { display: inline-block; max-width: 100%; min-height: 24px; line-height: 24px; overflow: hidden; text-overflow: ellipsis; vertical-align: top; }
+.apilada-mas { color: var(--viz-tinta-2); }
 .apilada-muestra { flex: none; align-self: center; width: 12px; height: 12px; border-radius: 3px; }
 .apilada-cifra { font-weight: 600; }
 .apilada-parte { font-size: 13px; color: var(--viz-tinta-2); }

@@ -13,6 +13,7 @@ use App\Services\Empresas\CupoDeIa;
 use App\Services\Reclamaciones\PlazoDeRespuesta;
 use App\Tenancy\EmpresaScope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 /**
  * Panel del admin SaaS: el estado de las empresas cliente (planes y uso) y un
@@ -56,6 +57,9 @@ class PanelDePlataforma
             empresasActivas: $activas->count(),
             empresasSuspendidas: $empresas->count() - $activas->count(),
             porPlan: $activas->countBy(fn (Empresa $e) => $e->plan->value)->all(),
+            empresasPorPlan: $activas->groupBy(fn (Empresa $e) => $e->plan->value)
+                ->map(fn (Collection $grupo) => $grupo->map(fn (Empresa $e) => ['id' => $e->id, 'nombre' => $e->nombre])->values()->all())
+                ->all(),
             cercaDelLimite: $activas
                 ->map(fn (Empresa $e) => ['empresa' => $e, 'uso' => new UsoDelPlan(
                     plan: $e->planVigente(),

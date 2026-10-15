@@ -24,7 +24,12 @@
                 <div class="card-kicker">Empresas activas por plan contratado</div>
                 <x-grafico.barra-apilada
                     rotulo="Empresas activas por plan contratado"
-                    :items="collect(PlanEmpresa::cases())->map(fn (PlanEmpresa $plan) => ['clave' => $plan->value, 'etiqueta' => $plan->etiqueta(), 'valor' => $plataforma->empresasConPlan($plan)])->all()"
+                    :items="collect(PlanEmpresa::cases())->map(fn (PlanEmpresa $plan) => [
+                        'clave' => $plan->value,
+                        'etiqueta' => $plan->etiqueta(),
+                        'valor' => $plataforma->empresasConPlan($plan),
+                        'detalle' => collect($plataforma->nombresConPlan($plan))->map(fn (array $e) => ['texto' => $e['nombre'], 'url' => route('empresas.index', ['q' => $e['nombre']])])->all(),
+                    ])->all()"
                 />
             </x-ui.card>
 
@@ -123,15 +128,6 @@
     <div class="mb-6 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <x-ui.stat label="Vacantes activas" :value="$resumen->vacantesActivas" />
         <x-ui.stat label="Postulantes" :value="$resumen->postulantes" />
-        @if ($tendencia->hayDatos())
-            <x-ui.stat
-                :label="'Postulaciones · '.$tendencia->dias.' días'"
-                :value="number_format($tendencia->totalActual(), 0, ',', ' ')"
-                :variacion="$tendencia->variacion()"
-                :nota="$tendencia->variacion() === null ? 'Sin periodo anterior con qué comparar' : 'frente a los '.$tendencia->dias.' días anteriores'"
-                :serie="array_column($tendencia->cubetas, 'actual')"
-            />
-        @endif
         <x-ui.stat label="Por revisar" :value="$resumen->porRevisar" highlight />
         <x-ui.stat label="Entrevistas hoy" :value="$resumen->entrevistasHoy" />
     </div>

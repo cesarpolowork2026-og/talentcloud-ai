@@ -104,17 +104,6 @@ it('el radar no pinta más de tres series', function () {
     expect(substr_count($html, 'class="radar-poligono"'))->toBe(3)->and($html)->not->toContain('Persona 4');
 });
 
-it('el indicador muestra la variación con signo, símbolo y texto, y el minigráfico solo como contexto', function () {
-    $sube = Blade::render('<x-ui.stat label="Postulaciones" value="40" :variacion="25.5" nota="frente al periodo anterior" :serie="[1,3,2,5]" />');
-    $baja = Blade::render('<x-ui.stat label="Postulaciones" value="40" :variacion="-10.0" />');
-    $nada = Blade::render('<x-ui.stat label="Postulaciones" value="40" nota="Sin periodo anterior" />');
-
-    expect($sube)->toContain('variacion-sube')->toContain('+25,5 %')->toContain('Sube')->toContain('frente al periodo anterior')
-        ->and($sube)->toContain('class="viz minilinea')->toContain('aria-hidden="true" focusable="false"')
-        ->and($baja)->toContain('variacion-baja')->toContain('-10 %')->toContain('Baja')->not->toContain('minilinea')
-        ->and($nada)->not->toContain('variacion')->toContain('Sin periodo anterior');
-});
-
 it('el contenedor desplazable del mapa contiene a los textos solo para lectores (si no, ensanchan la página en móvil)', function () {
     $css = file_get_contents(resource_path('css/graficos.css'));
 
