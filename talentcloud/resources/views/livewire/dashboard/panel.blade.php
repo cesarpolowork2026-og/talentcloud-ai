@@ -17,11 +17,16 @@
             <div class="mb-4 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
                 <x-ui.stat label="Empresas activas" :value="$plataforma->empresasActivas" highlight />
                 <x-ui.stat label="Suspendidas" :value="$plataforma->empresasSuspendidas" />
-                @foreach (PlanEmpresa::cases() as $plan)
-                    <x-ui.stat :label="'Plan '.$plan->etiqueta()" :value="$plataforma->empresasConPlan($plan)" wire:key="plan-{{ $plan->value }}" />
-                @endforeach
                 <x-ui.stat :label="'En prueba '.PlanEmpresa::PLAN_DE_PRUEBA->etiqueta()" :value="$plataforma->enPrueba" />
             </div>
+
+            <x-ui.card class="mb-4 !bg-white">
+                <div class="card-kicker">Empresas activas por plan contratado</div>
+                <x-grafico.barra-apilada
+                    rotulo="Empresas activas por plan contratado"
+                    :items="collect(PlanEmpresa::cases())->map(fn (PlanEmpresa $plan) => ['clave' => $plan->value, 'etiqueta' => $plan->etiqueta(), 'valor' => $plataforma->empresasConPlan($plan)])->all()"
+                />
+            </x-ui.card>
 
             @if ($plataforma->solicitudesDePlan->isNotEmpty())
                 <x-ui.card class="mb-4">
@@ -343,6 +348,20 @@
                             <p class="m-0 text-13 text-neutral-700">Desde la postulación, en {{ $embudo->contrataciones }} {{ $embudo->contrataciones === 1 ? 'contratación' : 'contrataciones' }} del periodo.</p>
                         @endif
                     </x-ui.card>
+                    @if ($embudo->tiempoPorEtapa !== [])
+                        <x-ui.card kicker="Tiempo en cada etapa" class="!bg-white">
+                            <x-grafico.barras
+                                rotulo="Días medios en cada etapa"
+                                :items="collect($embudo->tiempoPorEtapa)->map(fn (array $t) => [
+                                    'clave' => $t['etapa']->value,
+                                    'etiqueta' => $t['etapa']->etiqueta(),
+                                    'valor' => $t['dias'],
+                                    'texto' => App\Support\Formato::dias($t['dias']),
+                                ])->all()"
+                            />
+                            <p class="m-0 text-13 text-neutral-700">Lo que tardaron en salir de cada etapa las postulaciones del periodo (solo etapas ya terminadas). La barra azul es la más lenta: la que más conviene mirar.</p>
+                        </x-ui.card>
+                    @endif
                     <x-ui.card kicker="Origen de las postulaciones" class="flex-1">
                         <ul class="m-0 grid list-none gap-1 p-0 text-14">
                             @foreach (App\Enums\OrigenPostulacion::cases() as $origen)

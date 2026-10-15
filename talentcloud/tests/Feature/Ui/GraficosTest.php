@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\EstadoDeMiPostulacion;
 use App\Enums\NivelCoincidencia;
 use Illuminate\Support\Facades\Blade;
 
@@ -118,4 +119,61 @@ it('el contenedor desplazable del mapa contiene a los textos solo para lectores 
     $css = file_get_contents(resource_path('css/graficos.css'));
 
     expect($css)->toMatch('/\.mapa\s*\{[^}]*position:\s*relative;[^}]*overflow-x:\s*auto/');
+});
+
+it('las barras con énfasis marcan solo la mayor y dejan el valor en texto', function () {
+    $html = Blade::render('<x-grafico.barras :items="$i" rotulo="Días en cada etapa" />', ['i' => [
+        ['clave' => 'a', 'etiqueta' => 'Postulado', 'valor' => 2.4, 'texto' => '2,4 días'],
+        ['clave' => 'b', 'etiqueta' => 'En revisión', 'valor' => 9.5, 'texto' => '9,5 días'],
+        ['clave' => 'c', 'etiqueta' => 'Entrevista', 'valor' => 6.2, 'texto' => '6,2 días'],
+    ]]);
+
+    expect(substr_count($html, 'barras-fila'))->toBe(3)
+        ->and(substr_count($html, 'barras-barra-mayor'))->toBe(1)
+        ->and($html)->toContain('aria-label="Días en cada etapa"')
+        ->and($html)->toContain('2,4 días')->toContain('9,5 días')->toContain('6,2 días')
+        // La mayor ocupa todo el ancho y las demás, su parte proporcional.
+        ->and($html)->toContain('width: 100%')->toContain('width: 25.3%');
+});
+
+it('la barra apilada lleva su leyenda con cantidad y porcentaje, y omite del dibujo a los de valor 0', function () {
+    $html = Blade::render('<x-grafico.barra-apilada :items="$i" />', ['i' => [
+        ['clave' => 'gratis', 'etiqueta' => 'Gratis', 'valor' => 1],
+        ['clave' => 'starter', 'etiqueta' => 'Starter', 'valor' => 0],
+        ['clave' => 'pro', 'etiqueta' => 'Pro', 'valor' => 3],
+        ['clave' => 'enterprise', 'etiqueta' => 'Enterprise', 'valor' => 0],
+    ]]);
+
+    expect(substr_count($html, 'class="apilada-segmento"'))->toBe(2)            // solo Gratis y Pro ocupan barra
+        ->and(substr_count($html, 'apilada-muestra'))->toBe(4)                  // la leyenda los lista a todos
+        ->and($html)->toContain('25 %')->toContain('75 %')->toContain('0 %')
+        ->and($html)->toContain('Starter');
+
+    // Sin ninguna empresa no se dibuja barra (solo la leyenda en cero).
+    $vacia = Blade::render('<x-grafico.barra-apilada :items="$i" />', ['i' => [['clave' => 'g', 'etiqueta' => 'Gratis', 'valor' => 0], ['clave' => 'p', 'etiqueta' => 'Pro', 'valor' => 0]]]);
+    expect($vacia)->not->toContain('apilada-barra');
+});
+
+it('el progreso del postulante marca el paso actual con texto y no muestra pasos cuando no se sabe hasta dónde llegó', function () {
+    $paso = fn ($estado, bool $compacto = false) => Blade::render('<x-postulante.progreso :estado="$e" :compacto="$c" />', ['e' => $estado, 'c' => $compacto]);
+
+    $enRevision = $paso(EstadoDeMiPostulacion::EnRevision);
+    expect($enRevision)->toContain('aria-label="Progreso de tu postulación"')
+        ->and($enRevision)->toContain('Postulado')->toContain('(completado)')
+        ->and($enRevision)->toContain('En revisión')->toContain('(etapa actual)')->toContain('aria-current="step"')
+        ->and($enRevision)->toContain('Entrevista')->toContain('Contratación')->toContain('(pendiente)')
+        ->and(substr_count($enRevision, 'data-situacion="hecho"'))->toBe(1);
+
+    // Contratado: los cuatro pasos completados y ninguno «actual».
+    $contratado = $paso(EstadoDeMiPostulacion::Contratado);
+    expect(substr_count($contratado, 'data-situacion="hecho"'))->toBe(4)->and($contratado)->not->toContain('aria-current');
+
+    // Los demás estados no inventan un recorrido.
+    foreach ([EstadoDeMiPostulacion::NoSeleccionado, EstadoDeMiPostulacion::Cerrada, EstadoDeMiPostulacion::Retirada] as $estado) {
+        expect(trim($paso($estado)))->toBe('');
+    }
+
+    // Compacto: solo las marcas, ocultas a los lectores de pantalla (la etiqueta de estado ya lo dice).
+    $compacto = $paso(EstadoDeMiPostulacion::Entrevista, true);
+    expect($compacto)->toContain('aria-hidden="true"')->not->toContain('progreso-texto')->not->toContain('(pendiente)');
 });

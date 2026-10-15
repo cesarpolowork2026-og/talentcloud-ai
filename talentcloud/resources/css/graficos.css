@@ -147,3 +147,61 @@
 .variacion-sube { color: #006300; }
 .variacion-baja { color: #b3261e; }
 .variacion-igual { color: var(--viz-tinta-2); }
+
+/* — Barras horizontales con énfasis (una serie: la mayor en el color de acento, el resto en gris) — */
+.barras { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.barras-fila { display: grid; align-items: center; gap: 4px 12px; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "etiqueta valor" "pista pista"; }
+@media (min-width: 640px) {
+  .barras-fila { grid-template-columns: minmax(96px, 0.9fr) minmax(0, 2fr) minmax(64px, auto); grid-template-areas: "etiqueta pista valor"; }
+}
+.barras-etiqueta { grid-area: etiqueta; font-size: 14px; color: var(--viz-tinta); }
+.barras-etiqueta small { display: block; font-size: 12px; color: var(--viz-tinta-2); }
+.barras-pista { grid-area: pista; display: block; height: 14px; }
+.barras-barra {
+  display: block; height: 100%; background: var(--viz-eje); border-radius: 0 4px 4px 0;
+  transition: width 450ms cubic-bezier(0.2, 0.7, 0.2, 1), background-color 160ms ease;
+}
+.barras-barra-mayor { background: var(--viz-s1); }
+.barras-valor { grid-area: valor; text-align: right; font-size: 14px; font-weight: 600; color: var(--viz-tinta); white-space: nowrap; }
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes barras-entrada { from { width: 0; } }
+  .barras-barra { animation: barras-entrada 600ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .barras-barra { transition: none; }
+}
+
+/* — Barra apilada (parte de un todo) con leyenda — */
+.apilada-barra { display: flex; gap: 2px; height: 20px; }
+.apilada-segmento { min-width: 6px; transition: flex-grow 450ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+.apilada-segmento:first-child { border-radius: 4px 0 0 4px; }
+.apilada-segmento:last-child { border-radius: 0 4px 4px 0; }
+.apilada-segmento:only-child { border-radius: 4px; }
+.apilada-leyenda { display: grid; gap: 6px 24px; margin: 12px 0 0; padding: 0; list-style: none; grid-template-columns: repeat(auto-fit, minmax(170px, max-content)); }
+.apilada-leyenda li { display: flex; align-items: baseline; gap: 8px; font-size: 14px; color: var(--viz-tinta); }
+.apilada-muestra { flex: none; align-self: center; width: 12px; height: 12px; border-radius: 3px; }
+.apilada-cifra { font-weight: 600; }
+.apilada-parte { font-size: 13px; color: var(--viz-tinta-2); }
+@media (prefers-reduced-motion: reduce) {
+  .apilada-segmento { transition: none; }
+}
+
+/* — Progreso de una postulación (postulante): cuatro pasos, el actual resaltado — */
+.progreso { display: flex; margin: 0; padding: 0; list-style: none; }
+.progreso-paso { position: relative; flex: 1 1 0; display: grid; justify-items: center; gap: 6px; min-width: 0; text-align: center; font-size: 12px; color: var(--viz-tinta-2); }
+.progreso-paso + .progreso-paso::before {
+  content: ''; position: absolute; top: 10px; right: 50%; width: 100%; height: 2px; background: var(--viz-eje);
+}
+.progreso-paso[data-situacion='hecho'] + .progreso-paso::before,
+.progreso-paso[data-situacion='hecho'] + .progreso-paso[data-situacion='actual']::before { background: var(--viz-ord-4); }
+.progreso-marca {
+  position: relative; z-index: 1; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid var(--viz-eje); background: var(--viz-superficie); color: #ffffff; font-size: 12px; font-weight: 700; line-height: 1;
+}
+.progreso-paso[data-situacion='hecho'] .progreso-marca { background: var(--viz-ord-4); border-color: var(--viz-ord-4); }
+.progreso-paso[data-situacion='actual'] .progreso-marca { border-color: var(--viz-ord-4); box-shadow: inset 0 0 0 4px var(--viz-ord-2); background: var(--viz-ord-2); }
+.progreso-paso[data-situacion='actual'] .progreso-texto { color: var(--viz-tinta); font-weight: 600; }
+.progreso-paso[data-situacion='hecho'] .progreso-texto { color: var(--viz-tinta); }
+.progreso-compacto { max-width: 150px; }
+.progreso-compacto .progreso-marca { width: 14px; height: 14px; border-width: 2px; font-size: 9px; }
+.progreso-compacto .progreso-paso + .progreso-paso::before { top: 6px; }

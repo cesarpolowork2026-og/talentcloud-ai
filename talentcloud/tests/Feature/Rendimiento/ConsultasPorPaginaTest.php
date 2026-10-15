@@ -49,14 +49,14 @@ it('no supera el presupuesto de consultas de cada página', function () {
     $presupuestos = [
         'invitado' => ['/empleos' => 5, "/empleos/{$ids['abierta']}" => 5],
         'marta@nimbus.com' => [
-            // Dashboard: atención, ahorro, plan y actividad suman consultas fijas (ninguna por fila).
-            '/dashboard' => 21, '/vacantes' => 7, '/candidatos' => 12,
+            // Dashboard: atención, ahorro, plan, actividad y el tiempo por etapa suman consultas fijas (ninguna por fila).
+            '/dashboard' => 22, '/vacantes' => 7, '/candidatos' => 12,
             // Selección lee además los requisitos de la vacante y sus competencias (2 consultas fijas, no una por tarjeta).
             "/seleccion/{$ids['backend']}" => 13, "/seleccion/{$ids['backend']}?vista=ranking" => 14,
             '/entrevistas' => 12, // + el resumen de la agenda (una lectura)
             '/evaluaciones' => 11,
         ],
-        'admin@talentcloud.ai' => ['/dashboard' => 24, '/calidad-ia' => 9, '/candidatos' => 14],
+        'admin@talentcloud.ai' => ['/dashboard' => 25, '/calidad-ia' => 9, '/candidatos' => 14],
         'marco@correo.com' => ['/postulante/postulaciones' => 10, "/postulante/vacantes/{$ids['abierta']}" => 11],
     ];
 

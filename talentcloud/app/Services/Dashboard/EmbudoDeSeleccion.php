@@ -11,6 +11,7 @@ use App\Support\CacheDeResumenes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Embudo de selección del dashboard. Cada consulta pasa por el filtro por
@@ -61,6 +62,7 @@ class EmbudoDeSeleccion
         }
 
         [$contrataciones, $diasHastaContratar] = $this->tiempoHastaContratar($desde, $vacanteId);
+        $tiempoPorEtapa = $this->tiempoPorEtapa($desde, $vacanteId);
 
         return new EmbudoDeSeleccionData(
             dias: $dias,
@@ -73,6 +75,7 @@ class EmbudoDeSeleccion
             diasHastaContratar: $diasHastaContratar,
             contrataciones: $contrataciones,
             porOrigen: $conteos['porOrigen'],
+            tiempoPorEtapa: $tiempoPorEtapa,
         );
     }
 
@@ -154,6 +157,41 @@ class EmbudoDeSeleccion
             ->groupByRaw('COALESCE(alcance.rango, 0)')
             ->pluck('total', 'rango')
             ->mapWithKeys(fn ($n, $r) => [(int) $r => (int) $n]);
+    }
+
+    /**
+     * Días medios que las postulaciones del periodo pasaron en cada etapa antes de salir de ella (avanzar, volver
+     * atrás o ser descartadas). Solo cuentan las estancias ya terminadas: quien sigue en una etapa aún no tiene
+     * duración. Contratado no se mide (no tiene salida). Las etapas sin ninguna estancia terminada no aparecen.
+     *
+     * @return list<array{etapa: EtapaPostulacion, dias: float, muestras: int}>
+     */
+    private function tiempoPorEtapa(Carbon $desde, ?int $vacanteId): array
+    {
+        $historial = PostulacionEtapa::query()
+            ->join('postulaciones', 'postulaciones.id', '=', 'postulacion_etapas.postulacion_id')
+            ->where('postulaciones.created_at', '>=', $desde)
+            ->when($vacanteId !== null, fn (Builder $q) => $q->where('postulaciones.vacante_id', $vacanteId))
+            ->toBase()
+            ->selectRaw('postulacion_etapas.etapa AS etapa, postulacion_etapas.desde AS desde, LEAD(postulacion_etapas.desde) OVER (PARTITION BY postulacion_etapas.postulacion_id ORDER BY postulacion_etapas.desde, postulacion_etapas.id) AS siguiente');
+
+        $filas = DB::query()->fromSub($historial, 'historial')
+            ->whereNotNull('siguiente')
+            ->selectRaw('etapa, AVG(EXTRACT(EPOCH FROM (siguiente - desde))) AS segundos, COUNT(*) AS muestras')
+            ->groupBy('etapa')
+            ->get()
+            ->keyBy('etapa');
+
+        $medidas = [];
+        foreach (array_slice(self::etapasDelEmbudo(), 0, -1) as $etapa) {
+            $fila = $filas->get($etapa->value);
+
+            if ($fila !== null) {
+                $medidas[] = ['etapa' => $etapa, 'dias' => round((float) $fila->segundos / 86400, 1), 'muestras' => (int) $fila->muestras];
+            }
+        }
+
+        return $medidas;
     }
 
     /**

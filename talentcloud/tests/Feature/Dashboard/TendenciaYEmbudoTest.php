@@ -236,3 +236,42 @@ it('el indicador de postulaciones trae la variación y el minigráfico, y el emb
     Postulacion::query()->where('created_at', '<', now()->subDays(31))->delete();
     expect(Livewire::test(Panel::class)->html())->toContain('Sin periodo anterior con qué comparar')->not->toContain('class="variacion');
 });
+
+it('mide los días medios en cada etapa ya terminada, sin contar a quien sigue en ella', function () {
+    // Se usa la fecha de hoy fija (13 oct). A: Postulado 2 d → En revisión 4 d → Entrevista (sigue ahí).
+    // B: Postulado 4 d → En revisión 6 d → Descartado (sin salida: no cuenta como etapa terminada del embudo).
+    $recorrido = function (array $pasos) {
+        [$primeraEtapa, $primerDia] = $pasos[0];
+        Carbon::setTestNow(Carbon::parse('2026-10-13 12:00')->subDays($primerDia));
+        $p = Postulacion::factory()->paraVacante($this->backend)->create(['etapa' => $primeraEtapa, 'created_at' => now()]);
+
+        foreach (array_slice($pasos, 1) as [$etapa, $dia]) {
+            Carbon::setTestNow(Carbon::parse('2026-10-13 12:00')->subDays($dia));
+            $p->etapa = $etapa;
+            $p->save();
+        }
+        Carbon::setTestNow('2026-10-13 12:00:00');
+    };
+
+    $recorrido([[EtapaPostulacion::Postulado, 12], [EtapaPostulacion::EnRevision, 10], [EtapaPostulacion::Entrevista, 6]]);
+    $recorrido([[EtapaPostulacion::Postulado, 14], [EtapaPostulacion::EnRevision, 10], [EtapaPostulacion::Descartado, 4]]);
+
+    $tiempo = collect(app(EmbudoDeSeleccion::class)->calcular(null, 30)->tiempoPorEtapa)->keyBy(fn (array $t) => $t['etapa']->value);
+
+    // Postulado: (2 + 4) / 2 = 3 d, con 2 estancias. En revisión: (4 + 6) / 2 = 5 d, con 2 estancias.
+    expect($tiempo['postulado']['dias'])->toBe(3.0)
+        ->and($tiempo['postulado']['muestras'])->toBe(2)
+        ->and($tiempo['en_revision']['dias'])->toBe(5.0)
+        // Entrevista: la única postulación sigue en ella, no hay estancia terminada. Contratado nunca se mide.
+        ->and($tiempo)->not->toHaveKey('entrevista')
+        ->and($tiempo)->not->toHaveKey('contratado');
+
+    $html = Livewire::test(Panel::class)->html();
+    expect($html)->toContain('Tiempo en cada etapa')->toContain('3 días')->toContain('5 días')
+        ->and(substr_count($html, 'class="barras-fila"'))->toBe(2)
+        ->and(substr_count($html, 'barras-barra-mayor'))->toBe(1);
+
+    // Filtrar por una vacante sin postulaciones: sin datos, la tarjeta no aparece.
+    $otra = Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Abierta)->create();
+    expect(app(EmbudoDeSeleccion::class)->calcular($otra->id, 30)->tiempoPorEtapa)->toBe([]);
+});

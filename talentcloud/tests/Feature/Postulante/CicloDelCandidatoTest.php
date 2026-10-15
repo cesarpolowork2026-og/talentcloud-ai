@@ -228,3 +228,19 @@ it('solo acepta enlaces http(s)', function (?string $url, ?string $esperado) {
     'sin esquema' => ['nimbus.example', null],
     'vacío' => [null, null],
 ]);
+
+it('«Mis postulaciones» muestra el progreso de cada proceso en marcha y nada donde no se sabe hasta dónde llegó', function () {
+    actuarComo($this->marcoUsuario);
+
+    // Elena sigue siendo de otra persona; Marco tiene dos: una En revisión y otra descartada.
+    $this->postulacion->etapa = EtapaPostulacion::EnRevision;
+    $this->postulacion->save();
+    $otra = Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Abierta)->create(['titulo' => 'Analista de Datos']);
+    app(TenantContext::class)->ejecutarGlobal(fn () => Postulacion::factory()->paraVacante($otra)->create(['candidato_id' => $this->marco->id, 'etapa' => EtapaPostulacion::Descartado]));
+
+    $html = Livewire::test(MisPostulaciones::class)->html();
+
+    // Una fila con progreso (compacto y oculto a lectores de pantalla) y la descartada sin inventar un recorrido.
+    expect(substr_count($html, 'class="viz progreso progreso-compacto'))->toBe(1)
+        ->and($html)->toContain('En revisión')->toContain('No seleccionado');
+});

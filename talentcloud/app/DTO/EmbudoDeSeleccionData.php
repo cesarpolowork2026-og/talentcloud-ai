@@ -15,6 +15,7 @@ final readonly class EmbudoDeSeleccionData
     /**
      * @param  list<array{etapa: EtapaPostulacion, total: int, porcentaje: int, conversion: int|null}>  $etapas  Postulaciones que alcanzaron cada etapa (sin Descartado); `conversion` es el % de la etapa anterior que llegó a esta.
      * @param  array<string, int>  $porOrigen  valor de OrigenPostulacion => postulaciones
+     * @param  list<array{etapa: EtapaPostulacion, dias: float, muestras: int}>  $tiempoPorEtapa  Días medios en cada etapa ya terminada (ver EmbudoDeSeleccion::tiempoPorEtapa).
      */
     public function __construct(
         public int $dias,
@@ -27,6 +28,7 @@ final readonly class EmbudoDeSeleccionData
         public ?float $diasHastaContratar,
         public int $contrataciones,
         public array $porOrigen,
+        public array $tiempoPorEtapa = [],
     ) {}
 
     /** De cada 100 postulaciones del periodo, cuántas llegaron a la última etapa del embudo (Contratado); null si no hubo ninguna. */

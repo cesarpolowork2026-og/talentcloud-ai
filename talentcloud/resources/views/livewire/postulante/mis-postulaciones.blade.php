@@ -19,7 +19,10 @@
                     <tr class="tc-row" wire:key="mi-postulacion-{{ $postulacion->id }}" wire:click="verDetalle({{ $postulacion->id }})">
                         <td><x-ui.boton-fila wire:click.stop="verDetalle({{ $postulacion->id }})">{{ $postulacion->vacante?->titulo }}</x-ui.boton-fila></td>
                         <td>{{ $postulacion->vacante?->empresa?->nombre }}</td>
-                        <td><x-ui.estado :valor="EstadoDeMiPostulacion::de($postulacion)" /></td>
+                        <td>
+                            <x-ui.estado :valor="EstadoDeMiPostulacion::de($postulacion)" />
+                            <x-postulante.progreso :estado="EstadoDeMiPostulacion::de($postulacion)" compacto class="mt-2" />
+                        </td>
                         <td class="text-neutral-600">{{ Formato::fechaCorta($postulacion->created_at) }}</td>
                     </tr>
                 @endforeach
@@ -54,6 +57,7 @@
     <x-ui.dialog wire:model="mostrarDetalle" :title="$seleccionada?->vacante?->titulo" max-width="460px">
         @if ($seleccionada)
             @php($competencias = MisPostulaciones::competenciasIdentificadas($seleccionada))
+            <x-postulante.progreso :estado="EstadoDeMiPostulacion::de($seleccionada)" class="mb-4" />
             <p class="m-0 whitespace-pre-line">{{ $seleccionada->vacante?->empresa?->nombre }}
 Estado: {{ EstadoDeMiPostulacion::de($seleccionada)->etiqueta() }} — {{ EstadoDeMiPostulacion::de($seleccionada)->explicacion() }}
 Postulación enviada el {{ Formato::fechaCorta($seleccionada->created_at) }}.@if ($competencias)

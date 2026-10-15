@@ -112,3 +112,15 @@ it('usa solo los indicadores de la IA, sin cargar listas que el panel no muestra
         ->and([$indicadores->calculadas, $indicadores->conIa, $indicadores->basicasPendientes, $indicadores->cvsConError, $indicadores->marcasDelPeriodo])
         ->toBe([$completo->calculadas, $completo->conIa, $completo->basicasPendientes, $completo->cvsConError, $completo->marcasDelPeriodo]);
 });
+
+it('muestra la distribución de empresas por plan como una barra apilada con su leyenda', function () {
+    $html = Livewire::test(Panel::class)->html();
+
+    // Gratis 0, Starter 1, Pro 1, Enterprise 1: tres segmentos en la barra y los cuatro planes en la leyenda.
+    expect($html)->toContain('Empresas activas por plan contratado')
+        ->and(substr_count($html, 'class="apilada-segmento"'))->toBe(3)
+        ->and(substr_count($html, 'apilada-muestra'))->toBe(count(PlanEmpresa::cases()))
+        ->and($html)->toContain('33 %')
+        // Las cifras por plan ya no son tarjetas sueltas: están en la leyenda.
+        ->and($html)->not->toContain('Plan Starter');
+});
