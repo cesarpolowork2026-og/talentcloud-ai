@@ -209,8 +209,9 @@ async function sinDesborde(pagina, url) {
   });
   await paso('A2 empresas, calidad de la IA y reclamaciones cargan', pagina, async () => {
     for (const u of ['/empresas', '/calidad-ia', '/reclamaciones']) {
-      const r = await pagina.goto(BASE + u, { waitUntil: 'load' });
-      afirmar(r.status() === 200, `${u} → ${r.status()}`);
+      // goto devuelve null si otra navegación en curso lo supera (p. ej. recién llegado del dashboard): se reintenta una vez.
+      const r = (await pagina.goto(BASE + u, { waitUntil: 'load' })) ?? (await pagina.goto(BASE + u, { waitUntil: 'load' }));
+      afirmar(r && r.status() === 200, `${u} → ${r ? r.status() : 'sin respuesta'}`);
     }
   });
   await paso('A3 el admin no entra al panel de postulante (403)', pagina, async () => {
