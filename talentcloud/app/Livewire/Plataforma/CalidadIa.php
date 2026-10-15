@@ -6,6 +6,8 @@ use App\Models\MatchFeedback;
 use App\Services\Plataforma\CalidadDeLaIa;
 use App\Services\Postulaciones\RecalculoDeMatching;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Queue;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -17,14 +19,19 @@ use Livewire\Component;
 #[Title('Calidad de la IA')]
 class CalidadIa extends Component
 {
+    private const CLAVE_DEL_LOTE = 'calidad-ia.lote';
+
     public bool $mostrarConfirmacion = false;
 
-    /** Cuántas postulaciones se encolaron en la última acción (para el mensaje). */
+    /** Cuántas postulaciones se encolaron en la última acción: el total del avance y del mensaje final. */
     public ?int $encoladas = null;
 
     public function mount(): void
     {
         $this->authorize('viewAny', MatchFeedback::class);
+
+        // Al volver a la pantalla (o recargarla) mientras el lote sigue en marcha, recupera su total para mostrar el avance.
+        $this->encoladas = Cache::get(self::CLAVE_DEL_LOTE);
     }
 
     public function confirmarRehacer(): void
@@ -47,14 +54,44 @@ class CalidadIa extends Component
             return;
         }
 
+        // Un segundo clic mientras hay trabajo en cola solo duplicaría las llamadas al modelo.
+        if ($this->enCola() > 0) {
+            $this->addError('rehacer', 'Ya hay análisis en curso. Espera a que terminen para volver a rehacer.');
+
+            return;
+        }
+
         $this->encoladas = $recalculo->encolarBasicos();
+        Cache::put(self::CLAVE_DEL_LOTE, $this->encoladas, now()->addHours(6));
+    }
+
+    /** Cierra el mensaje de «Listo» una vez leído. */
+    public function cerrarResultado(): void
+    {
+        $this->encoladas = null;
+        Cache::forget(self::CLAVE_DEL_LOTE);
+    }
+
+    /** Tareas de IA que siguen esperando al worker (la cola «ia» es la de los cálculos de matching). */
+    private function enCola(): int
+    {
+        return Queue::size('ia');
     }
 
     public function render(CalidadDeLaIa $calidad): View
     {
+        $enCola = $this->enCola();
+
+        // Lote terminado: ya no se recupera al recargar, para que unas tareas de IA posteriores y ajenas (un CV nuevo)
+        // no se muestren como si fueran el final de este lote. El mensaje «Listo» sigue en esta pantalla hasta cerrarlo.
+        if ($enCola === 0 && $this->encoladas !== null) {
+            Cache::forget(self::CLAVE_DEL_LOTE);
+        }
+
         return view('livewire.plataforma.calidad-ia', [
             'resumen' => $calidad->resumen(),
             'dias' => CalidadDeLaIa::DIAS,
+            'enCola' => $enCola,
         ]);
     }
 }

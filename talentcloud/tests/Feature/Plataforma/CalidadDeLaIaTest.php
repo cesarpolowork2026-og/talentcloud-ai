@@ -107,10 +107,73 @@ it('rehace con la IA los análisis básicos de todas las empresas', function () 
         ->call('rehacerBasicos')
         ->assertHasNoErrors()
         ->assertSet('encoladas', 2)
-        ->assertSee('Se encolaron 2 postulaciones');
+        ->assertSee('Rehaciendo con IA…')
+        ->assertSee('0 de 2');
 
     Queue::assertPushed(CalcularMatch::class, 2);
     Queue::assertPushed(CalcularMatch::class, fn (CalcularMatch $job) => $job->postulacionId === $this->basicaAntigua->id && $job->empresaId === $this->vela->id);
+});
+
+it('mientras hay trabajo en cola sondea la pantalla y no deja volver a encolar', function () {
+    config(['talentcloud.ia.habilitada' => true, 'talentcloud.matching.motor' => 'http']);
+    Queue::fake();
+
+    Livewire::test(CalidadIa::class)
+        ->call('rehacerBasicos')
+        ->assertSeeHtml('wire:poll.3s.visible')
+        ->assertDontSee('Entendido')
+        ->call('rehacerBasicos')
+        ->assertHasErrors('rehacer')
+        ->assertSet('encoladas', 2);
+
+    Queue::assertPushed(CalcularMatch::class, 2);
+});
+
+it('al terminar el trabajo avisa que quedó listo, deja de sondear y se puede cerrar', function () {
+    config(['talentcloud.ia.habilitada' => true, 'talentcloud.matching.motor' => 'http']);
+    Queue::fake();
+
+    // Sin nada en cola, con un lote ya encolado: el worker terminó.
+    Livewire::test(CalidadIa::class)
+        ->set('encoladas', 2)
+        ->assertSee('Listo.')
+        ->assertSee('Se procesaron 2 postulaciones')
+        ->assertDontSeeHtml('wire:poll')
+        ->assertSee('Reintentar con IA')
+        ->call('cerrarResultado')
+        ->assertSet('encoladas', null)
+        ->assertDontSee('Listo.');
+});
+
+it('al recargar la pantalla con el lote en marcha recupera su total y muestra el avance', function () {
+    config(['talentcloud.ia.habilitada' => true, 'talentcloud.matching.motor' => 'http']);
+    Queue::fake();
+
+    Livewire::test(CalidadIa::class)->call('rehacerBasicos');
+
+    // Otra carga de la pantalla (recarga o vuelta desde otra sección): sigue viendo «0 de 2», no solo «2 en cola».
+    Livewire::test(CalidadIa::class)
+        ->assertSet('encoladas', 2)
+        ->assertSee('0 de 2')
+        ->assertSeeHtml('role="progressbar"');
+});
+
+it('tras terminar el lote, unas tareas de IA ajenas no se muestran como su avance', function () {
+    config(['talentcloud.ia.habilitada' => true, 'talentcloud.matching.motor' => 'http']);
+    Queue::fake();
+
+    $pantalla = Livewire::test(CalidadIa::class)->call('rehacerBasicos');
+
+    // El worker terminó el lote: la pantalla lo ve y suelta el total recordado.
+    Queue::fake();
+    $pantalla->call('$refresh')->assertSee('Listo.');
+
+    // Después entra una tarea ajena (p. ej. el análisis de un CV nuevo): otra carga ya no hereda el lote.
+    dispatch(new CalcularMatch(1, 1));
+    Livewire::test(CalidadIa::class)
+        ->assertSet('encoladas', null)
+        ->assertSee('Análisis de IA en curso…')
+        ->assertDontSeeHtml('role="progressbar"');
 });
 
 it('no rehace nada si el servicio de IA no está habilitado', function () {

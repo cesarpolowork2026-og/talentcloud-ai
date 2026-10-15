@@ -49,22 +49,64 @@
         </section>
 
         <div class="grid gap-6">
+            @php
+                $enCurso = $enCola > 0;
+                // Con un total conocido (lo encolado desde esta pantalla) se muestra el avance; si no, solo cuántas esperan.
+                $conTotal = $enCurso && $encoladas !== null && $encoladas >= $enCola;
+                $hechas = $conTotal ? $encoladas - $enCola : 0;
+                $terminado = ! $enCurso && $encoladas !== null;
+            @endphp
             <x-ui.card elev="sm" class="!bg-white" kicker="Análisis básico pendiente">
-                <p class="m-0 text-14 text-neutral-800">
-                    @if ($resumen->basicasPendientes === 0)
-                        Todas las postulaciones tienen el análisis del servicio de IA.
-                    @else
-                        {{ $resumen->basicasPendientes }} {{ $resumen->basicasPendientes === 1 ? 'postulación tiene' : 'postulaciones tienen' }} el análisis básico porque el servicio de IA no respondió a tiempo.
-                    @endif
-                </p>
-                @if ($encoladas !== null)
-                    <p class="m-0 text-14 text-accent-700" role="status">Se encolaron {{ $encoladas }} {{ $encoladas === 1 ? 'postulación' : 'postulaciones' }} para analizarlas con la IA.</p>
+                @if ($enCurso)
+                    {{-- Mientras haya trabajo en cola, la pantalla se actualiza sola (el elemento desaparece al terminar y el sondeo se detiene). --}}
+                    <div class="grid gap-3" wire:poll.3s.visible>
+                        <div class="flex items-baseline justify-between gap-3">
+                            <p class="m-0 text-14 font-semibold text-ink">{{ $conTotal ? 'Rehaciendo con IA…' : 'Análisis de IA en curso…' }}</p>
+                            <p class="m-0 text-13 tabular-nums text-neutral-700">
+                                @if ($conTotal)
+                                    {{ number_format($hechas, 0, ',', ' ') }} de {{ number_format($encoladas, 0, ',', ' ') }}
+                                @else
+                                    {{ number_format($enCola, 0, ',', ' ') }} en cola
+                                @endif
+                            </p>
+                        </div>
+                        @if ($conTotal)
+                            <x-ui.progress :value="$hechas * 100 / max(1, $encoladas)" label="Avance de los análisis rehechos con IA" />
+                        @endif
+                        <p class="m-0 text-13 text-neutral-700">Sigue en segundo plano: puedes salir de esta pantalla. Los números de arriba se actualizan solos.</p>
+                    </div>
+                @elseif ($terminado)
+                    <div class="grid gap-3" role="status">
+                        <p class="m-0 flex items-start gap-2 text-14 text-ink">
+                            <x-ui.icon name="check-circle" class="mt-[2px] shrink-0 text-accent-700" />
+                            <span>
+                                <strong>Listo.</strong>
+                                Se procesaron {{ number_format($encoladas, 0, ',', ' ') }} {{ $encoladas === 1 ? 'postulación' : 'postulaciones' }}.
+                                @if ($resumen->basicasPendientes === 0)
+                                    Todas tienen ahora el análisis del servicio de IA.
+                                @else
+                                    {{ number_format($resumen->basicasPendientes, 0, ',', ' ') }} {{ $resumen->basicasPendientes === 1 ? 'sigue' : 'siguen' }} con el análisis básico porque el servicio no respondió; puedes reintentarlo.
+                                @endif
+                            </span>
+                        </p>
+                        <x-ui.button size="sm" wire:click="cerrarResultado">Entendido</x-ui.button>
+                    </div>
+                @else
+                    <p class="m-0 text-14 text-neutral-800">
+                        @if ($resumen->basicasPendientes === 0)
+                            Todas las postulaciones tienen el análisis del servicio de IA.
+                        @else
+                            {{ number_format($resumen->basicasPendientes, 0, ',', ' ') }} {{ $resumen->basicasPendientes === 1 ? 'postulación tiene' : 'postulaciones tienen' }} el análisis básico porque el servicio de IA no estaba disponible cuando se calcularon.
+                        @endif
+                    </p>
                 @endif
                 @error('rehacer')
                     <p class="field-error m-0" role="alert">{{ $message }}</p>
                 @enderror
-                @if ($resumen->basicasPendientes > 0)
-                    <x-ui.button variant="primary" block wire:click="confirmarRehacer">Rehacer con IA</x-ui.button>
+                @if ($enCurso)
+                    <x-ui.button variant="primary" block disabled data-cargando>Rehaciendo…</x-ui.button>
+                @elseif ($resumen->basicasPendientes > 0)
+                    <x-ui.button variant="primary" block wire:click="confirmarRehacer">{{ $terminado ? 'Reintentar con IA' : 'Rehacer con IA' }}</x-ui.button>
                 @endif
             </x-ui.card>
 
@@ -87,7 +129,7 @@
     </div>
 
     <x-ui.dialog wire:model="mostrarConfirmacion" title="Rehacer los análisis básicos" max-width="440px">
-        <p class="m-0">Se volverá a calcular con el servicio de IA el matching de {{ $resumen->basicasPendientes }} {{ $resumen->basicasPendientes === 1 ? 'postulación' : 'postulaciones' }}. Los resultados se actualizan en segundo plano.</p>
+        <p class="m-0">Se volverá a calcular con el servicio de IA el matching de {{ $resumen->basicasPendientes }} {{ $resumen->basicasPendientes === 1 ? 'postulación' : 'postulaciones' }}. Verás el avance en esta pantalla; puede tardar varios minutos si son muchas.</p>
         <x-slot:actions>
             <x-ui.button x-on:click="open = false">Cancelar</x-ui.button>
             <x-ui.button variant="primary" wire:click="rehacerBasicos" wire:loading.attr="disabled" wire:target="rehacerBasicos">Rehacer con IA</x-ui.button>
