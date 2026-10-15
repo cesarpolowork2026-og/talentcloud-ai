@@ -78,7 +78,7 @@
 
         <h3 class="mb-3 text-16">Tarjetas</h3>
         <div class="grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
-            <x-ui.card kicker="Desarrolladora Backend" title="Elena Ruiz" class="cursor-pointer">
+            <x-ui.card kicker="Desarrolladora Backend" title="Elena Ruiz" class="tarjeta-clicable">
                 <p class="card-body">Postuló a Desarrollador Backend</p>
                 <div class="card-meta">
                     <x-ui.tag tone="accent">88% match</x-ui.tag>
@@ -172,7 +172,7 @@ Publicada el 2 sep.</p>
     <section class="mt-8" id="ilustraciones">
         <h2 class="mb-4 text-20">Ilustraciones</h2>
         <div class="grid gap-6" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));">
-            @foreach (['primera-vacante', 'sin-candidatos', 'agenda-libre', 'sin-postulaciones', 'pagina-no-encontrada', 'acceso-restringido', 'hoja-enviada'] as $nombre)
+            @foreach (['primera-vacante', 'sin-candidatos', 'agenda-libre', 'sin-evaluaciones', 'sin-postulaciones', 'pagina-no-encontrada', 'acceso-restringido', 'hoja-enviada'] as $nombre)
                 <figure class="m-0 grid gap-2 rounded border border-divider bg-white p-4">
                     <x-ilustracion :nombre="$nombre" class="mx-auto w-[200px]" />
                     <figcaption class="text-center text-13 text-neutral-700">{{ $nombre }}</figcaption>

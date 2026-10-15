@@ -66,9 +66,17 @@
     <x-ui.listado-controles placeholder="Buscar candidato o vacante…" />
 
     @if ($filas->isEmpty())
-        <x-ui.empty-state icon="clipboard-text" message="No se encontraron evaluaciones." />
+        @if ($this->hayFiltros())
+            <x-ui.empty-state icon="clipboard-text" message="No se encontraron evaluaciones." />
+        @else
+            <x-ui.empty-state ilustracion="sin-evaluaciones" titulo="Aún no hay evaluaciones" message="Se registran después de una entrevista realizada: puntúas cada criterio y aquí verás los resultados de todo el equipo.">
+                @can('create', App\Models\Evaluacion::class)
+                    <x-ui.button variant="primary" class="mt-4" wire:click="abrirFormulario">+ Nueva evaluación</x-ui.button>
+                @endcan
+            </x-ui.empty-state>
+        @endif
     @else
-        <x-ui.table>
+        <x-ui.actualizable><x-ui.table>
             <x-slot:head>
                 <th>Candidato</th><th>Vacante</th>@if ($vistaGlobal)<th>Empresa</th>@endif<th>Evaluador</th><th>Puntaje</th><th>Estado</th>
             </x-slot:head>
@@ -86,7 +94,7 @@
             @endforeach
         </x-ui.table>
 
-        {{ $filas->links() }}
+        {{ $filas->links() }}</x-ui.actualizable>
     @endif
     @endif
 

@@ -35,7 +35,7 @@
             </x-ui.empty-state>
         @endif
     @else
-        <x-ui.table>
+        <x-ui.actualizable><x-ui.table>
             <x-slot:head>
                 <th>Candidato</th><th>Vacante</th>@if ($vistaGlobal)<th>Empresa</th>@endif<th>Entrevistador</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
             </x-slot:head>
@@ -69,7 +69,7 @@
             @endforeach
         </x-ui.table>
 
-        {{ $filas->links() }}
+        {{ $filas->links() }}</x-ui.actualizable>
     @endif
 
     {{-- Detalle (prototipo: "Entrevista · {candidato}") + confirmar y completar --}}

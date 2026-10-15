@@ -29,7 +29,7 @@
             </x-ui.empty-state>
         @endif
     @else
-        <x-ui.table>
+        <x-ui.actualizable><x-ui.table>
             <x-slot:head>
                 <th>Vacante</th><th>Empresa</th><th>Ubicación</th><th>Candidatos</th><th>Estado</th><th>Creada</th>
             </x-slot:head>
@@ -45,7 +45,7 @@
             @endforeach
         </x-ui.table>
 
-        {{ $filas->links() }}
+        {{ $filas->links() }}</x-ui.actualizable>
     @endif
 
     {{-- Vista previa (diálogo del prototipo) --}}

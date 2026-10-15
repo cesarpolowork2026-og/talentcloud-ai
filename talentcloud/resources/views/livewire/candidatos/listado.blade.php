@@ -28,14 +28,14 @@
             </x-ui.empty-state>
         @endif
     @else
-        <div class="grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+        <x-ui.actualizable><div class="grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
             @foreach ($filas as $candidato)
                 @php
                     $postulacion = $candidato->ultimaPostulacion;
                     $cv = $candidato->cvActual;
                     $conError = $cv?->estado_procesamiento === EstadoProcesamientoCv::Error;
                 @endphp
-                <x-ui.card class="cursor-pointer" wire:key="candidato-{{ $candidato->id }}" wire:click="verDetalle({{ $candidato->id }})">
+                <x-ui.card class="tarjeta-clicable" wire:key="candidato-{{ $candidato->id }}" wire:click="verDetalle({{ $candidato->id }})">
                     <div class="card-kicker">{{ $candidato->titular ?? 'Candidato' }}</div>
                     <div class="card-title"><x-ui.boton-fila wire:click.stop="verDetalle({{ $candidato->id }})">{{ $candidato->nombre }}</x-ui.boton-fila></div>
                     @if ($vistaGlobal && $candidato->postulaciones->isNotEmpty())
@@ -71,7 +71,7 @@
             @endforeach
         </div>
 
-        {{ $filas->links() }}
+        {{ $filas->links() }}</x-ui.actualizable>
     @endif
 
     {{-- Diálogo del CV (prototipo: openCv) --}}

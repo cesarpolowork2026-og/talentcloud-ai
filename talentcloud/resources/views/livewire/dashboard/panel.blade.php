@@ -133,7 +133,11 @@
             <h2 id="atencion-titulo" class="mb-3 text-16">Requiere tu atención</h2>
             <x-ui.card class="flex-1 !gap-0 !p-0">
                 @if ($resumen->atencion === [])
-                    <p class="m-0 flex items-center gap-2 p-4 text-14 text-neutral-800"><x-ui.icon name="seal-check" :size="18" class="text-accent-700" /> Todo al día: no hay entrevistas por confirmar ni postulaciones esperando más de {{ $diasSinRevisar }} días.</p>
+                    <div class="grid flex-1 place-content-center justify-items-center gap-2 px-4 py-8 text-center">
+                        <x-ui.icon name="seal-check" :size="36" class="text-accent-700" />
+                        <p class="m-0 font-heading text-18 font-semibold">Todo al día</p>
+                        <p class="m-0 max-w-[44ch] text-14 text-neutral-700">No hay entrevistas por confirmar ni postulaciones esperando más de {{ $diasSinRevisar }} días.</p>
+                    </div>
                 @else
                     <ul class="m-0 list-none p-0">
                         @foreach ($resumen->atencion as $aviso)
@@ -207,6 +211,7 @@
             </div>
         </div>
 
+        <x-ui.actualizable target="periodo">
         <x-ui.card>
             @if (! $tendencia->hayDatos())
                 <x-ui.empty-state icon="chart-line-up" :message="'No hay postulaciones en estos '.$tendencia->dias.' días ni en los '.$tendencia->dias.' anteriores. Cuando lleguen, aquí verás cómo evolucionan.'" />
@@ -242,6 +247,7 @@
                 />
             @endif
         </x-ui.card>
+        </x-ui.actualizable>
     </section>
 
     <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
@@ -298,6 +304,7 @@
             </div>
         </div>
 
+        <x-ui.actualizable target="periodo,vacanteDelEmbudo">
         @if ($embudo->total === 0)
             <x-ui.empty-state icon="funnel" :message="'No hay postulaciones en los últimos '.$embudo->dias.' días.'" />
         @else
@@ -357,6 +364,7 @@
                 </div>
             </div>
         @endif
+        </x-ui.actualizable>
     </section>
 
     <x-vacantes.vista-previa wire:model="mostrarVistaPrevia" :vacante="$seleccionada" />

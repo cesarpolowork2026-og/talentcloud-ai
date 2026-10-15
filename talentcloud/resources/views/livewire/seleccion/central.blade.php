@@ -4,8 +4,12 @@
 <div>
     @if (! $vacante)
         <x-ui.page-header title="Selección" subtitle="Seguimiento de postulaciones por vacante." />
-        <x-ui.empty-state icon="kanban" message="No hay vacantes abiertas para mostrar su selección.">
-            <x-ui.button :href="route('vacantes.index')" wire:navigate class="mt-3">Ir a Vacantes</x-ui.button>
+        <x-ui.empty-state ilustracion="primera-vacante" titulo="Aún no hay nada que seleccionar" message="Cuando tengas una vacante abierta, aquí verás a sus postulantes en el tablero, de «Postulado» a «Contratado».">
+            @can('create', App\Models\Vacante::class)
+                <x-ui.button variant="primary" :href="route('vacantes.index', ['nueva' => 1])" wire:navigate class="mt-4">Crear una vacante</x-ui.button>
+            @else
+                <x-ui.button :href="route('vacantes.index')" wire:navigate class="mt-4">Ir a Vacantes</x-ui.button>
+            @endcan
         </x-ui.empty-state>
     @else
         <x-ui.page-header :title="'Selección · '.$vacante->titulo" :subtitle="$vacante->empresa?->nombre.' — '.$activas.' '.($activas === 1 ? 'postulación activa' : 'postulaciones activas').'.'">
@@ -65,7 +69,7 @@
                     o no aparece (<span aria-hidden="true">✗</span><span class="sr-only">no encontrada</span>); lo obligatorio va marcado con <span aria-hidden="true">*</span><span class="sr-only">asterisco</span>.
                     Es una ayuda para decidir a quién entrevistar primero: la decisión es tuya.
                 </p>
-                <x-ui.table>
+                <x-ui.actualizable target="vista,soloObligatorios,gotoPage,nextPage,previousPage,setPage"><x-ui.table>
                     <x-slot:head>
                         <th>#</th><th>Candidato</th><th>Coincidencia</th><th>Requisitos de la vacante</th><th>Etapa</th><th><span class="sr-only">Acciones</span></th>
                     </x-slot:head>
@@ -120,9 +124,10 @@
                         </tr>
                     @endforeach
                 </x-ui.table>
-                {{ $ranking->links() }}
+                {{ $ranking->links() }}</x-ui.actualizable>
             @endif
         @else
+        <x-ui.actualizable target="vista,soloObligatorios,verDescartados,verMas,mover">
         <div class="flex gap-4 overflow-x-auto pb-2">
             @foreach ($columnas as $columna)
                 @php($etapa = $columna['etapa'])
@@ -142,7 +147,7 @@
                             @php($dias = (int) ($postulacion->etapa_cambiada_at ?? $postulacion->created_at)->diffInDays(now()))
                             @php($proxima = $postulacion->proxima_entrevista ? \Illuminate\Support\Carbon::parse($postulacion->proxima_entrevista) : null)
                             <div
-                                class="card elev-sm relative !gap-1 !p-3 {{ $arrastrable ? 'cursor-grab' : 'cursor-pointer' }}"
+                                class="card elev-sm tarjeta-clicable relative !gap-1 !p-3 {{ $arrastrable ? 'tarjeta-arrastrable' : '' }}"
                                 data-postulacion="{{ $postulacion->id }}"
                                 @unless ($arrastrable) data-fija @endunless
                                 wire:key="postulacion-{{ $postulacion->id }}"
@@ -193,6 +198,10 @@
                                 @endif
                             </div>
                         @endforeach
+                        @if ($columna['postulaciones']->isEmpty())
+                            {{-- Se pinta solo sin tarjetas: no estorba al arrastrar (Sortable solo mueve las que llevan data-postulacion). --}}
+                            <div class="columna-vacia">{{ $editable ? 'Arrastra una tarjeta aquí' : 'Sin postulaciones' }}</div>
+                        @endif
                     </div>
                     @if ($columna['restantes'] > 0 && $columna['enElTope'])
                         <p class="m-0 text-13 text-neutral-700">Se muestran las primeras {{ number_format(App\Livewire\Seleccion\Central::MAXIMO_POR_COLUMNA, 0, ',', ' ') }}. Para ver el resto, usa los filtros o el ranking.</p>
@@ -205,6 +214,7 @@
                 </section>
             @endforeach
         </div>
+        </x-ui.actualizable>
         @endif
 
         {{-- Detalle de la tarjeta (prototipo: openCard) + "Mover a…" --}}

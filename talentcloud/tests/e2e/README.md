@@ -6,6 +6,9 @@ Son 30 pasos: empresa (dashboard, gráfico, Kanban, mover, matching, entrevistas
 móvil de 390 px (sin desplazamiento horizontal), postulante (calendario sin datos internos, retirar postulación),
 admin y bloqueo del iframe.
 
+Hay dos guiones: `recorrido.js` (flujos, 30 pasos) e `interaccion.js` (13 pasos: hover y presionado, estados de carga con la red
+ralentizada, «reducir movimiento» y estados vacíos). Los dos pasan contra una base recién sembrada.
+
 **No es parte de `composer check` ni del CI**: es una verificación manual antes de integrar o desplegar. No añade
 dependencias al proyecto.
 
@@ -29,6 +32,7 @@ php -S 127.0.0.1:8099 ../vendor/laravel/framework/src/Illuminate/Foundation/reso
 
 # 3. El recorrido (los assets los sirve Vite: `npm run dev` o `npm run build`)
 PLAYWRIGHT_CORE=/ruta/a/node_modules/playwright-core node tests/e2e/recorrido.js
+PLAYWRIGHT_CORE=/ruta/a/node_modules/playwright-core node tests/e2e/interaccion.js   # no modifica datos
 ```
 Variables: `E2E_BASE` (por defecto `http://127.0.0.1:8099`), `PLAYWRIGHT_CORE`, `E2E_CHROME` (ejecutable de Chromium si no
 quieres el Chrome del sistema) y `E2E_SALIDA` (capturas de los pasos que fallen y los `.ics` descargados).

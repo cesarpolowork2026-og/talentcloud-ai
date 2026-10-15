@@ -10,7 +10,7 @@
     />
 
     @if ($filas->isEmpty())
-        <x-ui.empty-state icon="briefcase" message="No hay vacantes abiertas con esos filtros." />
+        <x-ui.empty-state icon="briefcase" :message="$this->hayFiltros() ? 'No hay vacantes abiertas con esos filtros.' : 'Todavía no hay vacantes abiertas. Vuelve pronto.'" />
     @else
         <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
             @foreach ($filas as $vacante)

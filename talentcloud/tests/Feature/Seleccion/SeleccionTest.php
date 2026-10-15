@@ -78,7 +78,11 @@ it('abre desde el menú la vacante activa más reciente', function () {
 it('muestra un estado vacío si no hay vacantes activas', function () {
     $this->backend->update(['estado' => EstadoVacante::Cerrada]);
 
-    $this->get('/kanban')->assertOk()->assertSee('No hay vacantes abiertas para mostrar su selección.');
+    $this->get('/kanban')->assertOk()
+        ->assertSee('Aún no hay nada que seleccionar')
+        ->assertSee('Cuando tengas una vacante abierta')
+        ->assertSeeHtml('class="btn ')
+        ->assertDontSee('No hay vacantes abiertas para mostrar su selección.');
 });
 
 it('mueve entre columnas y renumera ambas sin huecos', function () {

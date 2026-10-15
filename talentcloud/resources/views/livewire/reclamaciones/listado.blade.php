@@ -17,9 +17,9 @@
     />
 
     @if ($filas->isEmpty())
-        <x-ui.empty-state icon="book-open-text" message="No hay hojas con esos filtros." />
+        <x-ui.empty-state icon="book-open-text" :message="$this->hayFiltros() ? 'No hay hojas con esos filtros.' : 'Aún no se registró ninguna hoja del Libro de Reclamaciones.'" />
     @else
-        <x-ui.table>
+        <x-ui.actualizable><x-ui.table>
             <x-slot:head>
                 <th>Hoja</th><th>Tipo</th><th>Consumidor</th><th>Presentada</th><th>Fecha límite</th><th>Estado</th>
             </x-slot:head>
@@ -43,7 +43,7 @@
             @endforeach
         </x-ui.table>
 
-        {{ $filas->links() }}
+        {{ $filas->links() }}</x-ui.actualizable>
     @endif
 
     {{-- Hoja completa y respuesta --}}

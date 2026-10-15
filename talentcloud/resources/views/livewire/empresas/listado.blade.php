@@ -17,7 +17,7 @@
     @if ($filas->isEmpty())
         <x-ui.empty-state message="No se encontraron empresas." />
     @else
-        <x-ui.table>
+        <x-ui.actualizable><x-ui.table>
             <x-slot:head>
                 <th>Empresa</th><th>Plan</th><th>Usuarios</th><th>Vacantes activas</th><th>Estado</th><th>Acciones</th>
             </x-slot:head>
@@ -45,7 +45,7 @@
             @endforeach
         </x-ui.table>
 
-        {{ $filas->links() }}
+        {{ $filas->links() }}</x-ui.actualizable>
     @endif
 
     {{-- Detalle (diálogo informativo del prototipo) --}}

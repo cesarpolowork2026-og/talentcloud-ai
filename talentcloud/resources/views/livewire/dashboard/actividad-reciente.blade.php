@@ -11,6 +11,6 @@
             </div>
         </div>
     @empty
-        <p class="m-0 text-14 text-neutral-700">Aún no hay actividad. Aquí verás cada movimiento de tus procesos.</p>
+        <x-ui.empty-state icon="clock-counter-clockwise" message="Aún no hay actividad. Aquí verás cada movimiento de tus procesos." class="!py-4" />
     @endforelse
 </section>

@@ -268,4 +268,63 @@
     border-radius: var(--radius-md); color: #fff; font-size: 14px; font-weight: 600; text-decoration: none;
   }
   .barra .barra-libro:hover, .barra .barra-libro[aria-current='page'] { background: color-mix(in srgb, #fff 12%, transparent); color: #fff; }
+
+  /* ───────────────────────────────────────────────────────────────────────────────────────────
+     TalentCloud: interacción — hover, presionado y carga.
+     El sistema es editorial: transiciones cortas, sin rebotes. Los realces de hover solo con puntero
+     (en una pantalla táctil el hover se queda «pegado»). Con «reducir movimiento» no hay transiciones ni
+     desplazamientos: el estado se ve igual, sin animar. La carga la marca resources/js/carga.js.
+     El segmento activo (.seg-opt con su radio marcado) NO transiciona: Livewire lo marca tras el primer pintado y se vería
+     un parpadeo en cada carga de página.
+     ─────────────────────────────────────────────────────────────────────────────────────────── */
+  .btn, .input, .seg-opt:not(:has(input:checked)), .tc-row, .table tbody tr, .tarjeta-clicable, .barra-enlace, .barra-control {
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease,
+                box-shadow 140ms ease, transform 140ms ease, opacity 140ms ease;
+  }
+  .btn:active:not(:disabled, [aria-disabled='true']) { transform: translateY(1px); }
+
+  /* Tarjeta que se abre al pulsarla (Kanban, candidatos, indicadores del dashboard). */
+  .tarjeta-clicable { cursor: pointer; box-shadow: var(--shadow-sm), 0 0 0 1px transparent; }
+  .tarjeta-clicable:active { box-shadow: var(--shadow-sm), 0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent); }
+  .tarjeta-arrastrable { cursor: grab; }
+  .tarjeta-arrastrable:active { cursor: grabbing; }
+  @media (hover: hover) {
+    .tarjeta-clicable:not(.sortable-chosen, .sortable-drag, .kanban-fantasma):hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md), 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
+    }
+  }
+
+  /* Botón que lanzó una acción y espera la respuesta. */
+  @keyframes tc-giro { to { transform: rotate(360deg); } }
+  .btn[data-cargando] { pointer-events: none; opacity: 0.75; cursor: progress; }
+  .btn[data-cargando]::before {
+    content: ''; flex: none; width: 12px; height: 12px; border-radius: 50%;
+    border: 2px solid currentColor; border-right-color: transparent;
+    animation: tc-giro 700ms linear infinite;
+  }
+
+  /* Zona que se está volviendo a pintar (búsqueda, filtro, página, periodo): se atenúa, sin saltos de diseño. */
+  .tc-actualizando { opacity: 0.55; pointer-events: none; transition: opacity 150ms ease; }
+
+  /* Barra fina arriba mientras hay una petición larga (resources/js/carga.js la enciende pasados 250 ms). */
+  @keyframes tc-barra { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+  html[data-ocupado]::before {
+    content: ''; position: fixed; top: 0; left: 0; z-index: 70; width: 40%; height: 2px;
+    background: var(--color-accent); pointer-events: none; animation: tc-barra 1.1s ease-in-out infinite;
+  }
+
+  /* Columna del Kanban sin tarjetas: se ve que existe y, si se puede, que admite una. */
+  .columna-vacia {
+    display: grid; place-items: center; min-height: 90px; padding: var(--space-3);
+    border: 1px dashed color-mix(in srgb, var(--color-text) 25%, transparent); border-radius: var(--radius-md);
+    font-size: 13px; text-align: center; color: var(--color-neutral-700);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn, .input, .seg-opt:not(:has(input:checked)), .tc-row, .table tbody tr, .tarjeta-clicable, .barra-enlace, .barra-control, .tc-actualizando { transition: none; }
+    .btn:active:not(:disabled, [aria-disabled='true']), .tarjeta-clicable:not(.sortable-chosen, .sortable-drag, .kanban-fantasma):hover { transform: none; }
+    .btn[data-cargando]::before { animation: none; border-right-color: currentColor; opacity: 0.5; }
+    html[data-ocupado]::before { animation: none; width: 100%; opacity: 0.6; }
+  }
 }

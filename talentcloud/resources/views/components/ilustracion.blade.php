@@ -14,6 +14,7 @@
         'primera-vacante' => '0 0 240 160',
         'sin-candidatos' => '0 0 240 160',
         'agenda-libre' => '0 0 240 160',
+        'sin-evaluaciones' => '0 0 240 160',
         'sin-postulaciones' => '0 0 240 160',
         'pagina-no-encontrada' => '0 0 240 160',
         'acceso-restringido' => '0 0 240 160',

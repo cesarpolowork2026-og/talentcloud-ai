@@ -8,7 +8,7 @@
 
 <{{ $accionable ? 'button' : 'div' }}
     @if ($accionable) type="button" @endif
-    {{ $attributes->class(['card', 'cursor-pointer text-left' => $accionable]) }}
+    {{ $attributes->class(['card', 'tarjeta-clicable text-left' => $accionable]) }}
 >
     <span class="card-kicker block">{{ $label }}</span>
     <span @class(['mt-1 block font-heading text-32 font-semibold', 'text-accent-700' => $highlight])>{{ $value }}</span>
