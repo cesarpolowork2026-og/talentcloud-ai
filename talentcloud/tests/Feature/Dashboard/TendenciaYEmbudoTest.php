@@ -218,3 +218,21 @@ it('da accesos directos junto a la atención y muestra qué parte de las postula
         ->and($html)->toContain(route('entrevistas.index'))
         ->and(textoVisible($html))->toContain('25 % llegó por cuenta del postulante');
 });
+
+it('el indicador de postulaciones trae la variación y el minigráfico, y el embudo dibuja una forma por etapa', function () {
+    recibidas($this->backend, 2, 4, EtapaPostulacion::Postulado);   // periodo actual: 4
+    recibidas($this->backend, 40, 2, EtapaPostulacion::Postulado);  // periodo anterior (31–60 días atrás): 2
+
+    $html = Livewire::test(Panel::class)->html();
+
+    expect($html)->toContain('Postulaciones · 30 días')
+        ->and($html)->toContain('+100 %')
+        ->and($html)->toContain('frente a los 30 días anteriores')
+        ->and($html)->toContain('class="viz minilinea')
+        ->and(substr_count($html, 'class="embudo-fila"'))->toBe(5)
+        ->and($html)->toContain('aria-label="Postulaciones que alcanzaron cada etapa"');
+
+    // Sin periodo anterior no se inventa una variación.
+    Postulacion::query()->where('created_at', '<', now()->subDays(31))->delete();
+    expect(Livewire::test(Panel::class)->html())->toContain('Sin periodo anterior con qué comparar')->not->toContain('class="variacion');
+});

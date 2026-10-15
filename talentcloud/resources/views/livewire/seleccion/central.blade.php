@@ -69,7 +69,33 @@
                     o no aparece (<span aria-hidden="true">✗</span><span class="sr-only">no encontrada</span>); lo obligatorio va marcado con <span aria-hidden="true">*</span><span class="sr-only">asterisco</span>.
                     Es una ayuda para decidir a quién entrevistar primero: la decisión es tuya.
                 </p>
-                <x-ui.actualizable target="vista,soloObligatorios,gotoPage,nextPage,previousPage,setPage"><x-ui.table>
+                @php
+                    // Mapa de calor de los primeros de la página: usa lo que el ranking ya calculó (sin consultas nuevas).
+                    $paraElMapa = collect($ranking->items())->take(10)->filter(fn ($p) => $cumplimiento[$p->id]->hayCalculo())->values();
+                    $columnasDelMapa = $paraElMapa->isEmpty() ? [] : array_map(fn (array $r) => ['competencia' => $r['competencia'], 'obligatorio' => $r['obligatorio']], $cumplimiento[$paraElMapa->first()->id]->requisitos);
+                @endphp
+                <x-ui.actualizable target="vista,soloObligatorios,gotoPage,nextPage,previousPage,setPage">
+                @if ($paraElMapa->count() >= 2 && $columnasDelMapa !== [])
+                    <x-ui.card class="mb-6 !bg-white">
+                        <div class="card-kicker">Cobertura de requisitos</div>
+                        <p class="m-0 max-w-[80ch] text-13 text-neutral-700">
+                            Los {{ $paraElMapa->count() }} primeros de esta página frente a lo que pide la vacante: de un vistazo se ve qué cubre cada persona y dónde falla.
+                            Lo obligatorio va marcado con <span aria-hidden="true">*</span><span class="sr-only">asterisco</span>. Ordena y explica; no descarta a nadie.
+                        </p>
+                        <x-grafico.mapa-de-calor
+                            :columnas="$columnasDelMapa"
+                            :filas="$paraElMapa->map(fn ($p) => [
+                                'clave' => $p->id,
+                                'titulo' => (string) $p->candidato?->nombre,
+                                'subtitulo' => $p->candidato?->titular,
+                                'url' => $p->match_detalle ? route('matching.show', $p) : route('candidatos.show', $p->candidato_id),
+                                'porcentaje' => $p->matchPorcentaje(),
+                                'niveles' => array_column($cumplimiento[$p->id]->requisitos, 'nivel'),
+                            ])->all()"
+                        />
+                    </x-ui.card>
+                @endif
+                <x-ui.table>
                     <x-slot:head>
                         <th>#</th><th>Candidato</th><th>Coincidencia</th><th>Requisitos de la vacante</th><th>Etapa</th><th><span class="sr-only">Acciones</span></th>
                     </x-slot:head>

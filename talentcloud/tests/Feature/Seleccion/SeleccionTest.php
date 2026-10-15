@@ -362,3 +362,34 @@ it('el resumen de cumplimiento se guarda al calcular el matching', function () {
         ->and($elena->tieneResumenDeCumplimiento())->toBeTrue()
         ->and($elena->resumenDeCumplimiento())->toBe('1 de 2 requisitos');
 });
+
+it('el ranking dibuja el mapa de calor de cobertura solo si hay dos o más análisis que comparar', function () {
+    $java = Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Java')->id, 'tipo' => TipoRequisito::Obligatorio]);
+    $docker = Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Docker')->id, 'tipo' => TipoRequisito::Deseable]);
+
+    $guardar = function (Postulacion $postulacion, NivelCoincidencia $nivelJava, NivelCoincidencia $nivelDocker) use ($java, $docker) {
+        $detalle = (new MatchResult(70, [
+            new RequisitoMatch($java->id, 'Java', 80, $nivelJava, 'Java 5 años', 'ok'),
+            new RequisitoMatch($docker->id, 'Docker', 50, $nivelDocker, null, 'ok'),
+        ], MotorMatching::Fake))->aArreglo();
+        $postulacion->update(['match_detalle' => $detalle, 'match_calculado_at' => now(), ...CumplimientoDeRequisitos::de($detalle, $this->backend->requisitos()->with('competencia')->get())->columnas()]);
+    };
+
+    // Un solo análisis: no hay con quién comparar, el mapa no aparece.
+    $guardar($this->elena, NivelCoincidencia::Coincide, NivelCoincidencia::NoEncontrado);
+    Livewire::test(Central::class, ['vacante' => $this->backend])->set('vista', 'ranking')
+        ->assertDontSee('Cobertura de requisitos')
+        ->assertDontSeeHtml('class="viz"');
+
+    // Con dos, aparece como tabla con las dos filas y los dos requisitos.
+    $guardar($this->sofia, NivelCoincidencia::Revisar, NivelCoincidencia::Coincide);
+    $html = Livewire::test(Central::class, ['vacante' => $this->backend])->set('vista', 'ranking')
+        ->assertSee('Cobertura de requisitos')
+        ->html();
+
+    expect(substr_count($html, 'wire:key="mapa-'))->toBe(2)
+        ->and($html)->toContain('Java: Coincide')->toContain('Java: Revisar')->toContain('Docker: No encontrado')->toContain('Docker: Coincide');
+
+    // Sin calcular a nadie más: Marco no aparece en el mapa (solo quienes tienen análisis).
+    expect($html)->not->toContain('mapa-'.$this->marco->id);
+});

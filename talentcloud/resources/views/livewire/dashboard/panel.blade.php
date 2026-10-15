@@ -118,6 +118,15 @@
     <div class="mb-6 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <x-ui.stat label="Vacantes activas" :value="$resumen->vacantesActivas" />
         <x-ui.stat label="Postulantes" :value="$resumen->postulantes" />
+        @if ($tendencia->hayDatos())
+            <x-ui.stat
+                :label="'Postulaciones · '.$tendencia->dias.' días'"
+                :value="number_format($tendencia->totalActual(), 0, ',', ' ')"
+                :variacion="$tendencia->variacion()"
+                :nota="$tendencia->variacion() === null ? 'Sin periodo anterior con qué comparar' : 'frente a los '.$tendencia->dias.' días anteriores'"
+                :serie="array_column($tendencia->cubetas, 'actual')"
+            />
+        @endif
         <x-ui.stat label="Por revisar" :value="$resumen->porRevisar" highlight />
         <x-ui.stat label="Entrevistas hoy" :value="$resumen->entrevistasHoy" />
     </div>
@@ -309,23 +318,14 @@
             <x-ui.empty-state icon="funnel" :message="'No hay postulaciones en los últimos '.$embudo->dias.' días.'" />
         @else
             <div class="grid items-stretch gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-                <x-ui.card>
-                    <ol class="m-0 grid list-none gap-3 p-0" aria-label="Postulaciones que alcanzaron cada etapa">
-                        @foreach ($embudo->etapas as $fila)
-                            <li class="grid gap-1" wire:key="embudo-{{ $fila['etapa']->value }}">
-                                <div class="flex items-baseline justify-between gap-2 text-14">
-                                    <span class="text-neutral-800">
-                                        {{ $fila['etapa']->etiqueta() }}
-                                        @if ($fila['conversion'] !== null)
-                                            <span class="ml-1 text-12 text-neutral-700">· {{ $fila['conversion'] }} % de la etapa anterior</span>
-                                        @endif
-                                    </span>
-                                    <span class="font-semibold">{{ $fila['total'] }} <span class="font-normal text-neutral-700">· {{ $fila['porcentaje'] }}% del total</span></span>
-                                </div>
-                                <x-ui.progress :value="$fila['porcentaje']" :label="$fila['etapa']->etiqueta().': '.$fila['total'].' de '.$embudo->total.' postulaciones'" />
-                            </li>
-                        @endforeach
-                    </ol>
+                <x-ui.card class="!bg-white">
+                    <x-grafico.embudo :etapas="collect($embudo->etapas)->map(fn (array $f) => [
+                        'clave' => $f['etapa']->value,
+                        'etiqueta' => $f['etapa']->etiqueta(),
+                        'total' => $f['total'],
+                        'porcentaje' => $f['porcentaje'],
+                        'conversion' => $f['conversion'],
+                    ])->all()" />
                     @if ($embudo->conversionTotal() !== null)
                         <p class="m-0 text-14 text-neutral-800">De cada 100 postulaciones del periodo, <span class="font-semibold">{{ $embudo->conversionTotal() }}</span> {{ $embudo->conversionTotal() === 1 ? 'llegó' : 'llegaron' }} a {{ $embudo->etapas[array_key_last($embudo->etapas)]['etapa']->etiqueta() }}.</p>
                     @endif

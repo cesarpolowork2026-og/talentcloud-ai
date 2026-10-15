@@ -8,9 +8,11 @@
     $diapositivas = [
         ['maqueta' => 'kanban', 'etiqueta' => 'Proceso de selección', 'titulo' => 'Cada vacante con su Kanban.', 'descripcion' => 'Mueve candidatos entre etapas arrastrando tarjetas; cada cambio queda registrado.'],
         ['maqueta' => 'matching', 'etiqueta' => 'Matching con IA explicable', 'titulo' => 'Coincidencias con evidencia.', 'descripcion' => 'Cada requisito muestra si el CV lo cumple y el fragmento que lo respalda.'],
+        ['maqueta' => 'cobertura', 'etiqueta' => 'Cobertura de requisitos', 'titulo' => 'Compara perfiles de un vistazo.', 'descripcion' => 'Un mapa de calor con cada candidato frente a los requisitos de la vacante: qué cubre cada uno y dónde falla.'],
         ['maqueta' => 'candidatos', 'etiqueta' => 'Candidatos y CV', 'titulo' => 'CVs analizados al subirlos.', 'descripcion' => 'La IA extrae competencias, años de experiencia y certificaciones de PDF y Word.'],
         ['maqueta' => 'entrevistas', 'etiqueta' => 'Entrevistas y evaluaciones', 'titulo' => 'Agenda y evaluación por criterios.', 'descripcion' => 'Entrevistas sin choques de horario y puntajes de 0 a 10 por criterio.'],
-        ['maqueta' => 'dashboard', 'etiqueta' => 'Dashboard', 'titulo' => 'El proceso de un vistazo.', 'descripcion' => 'Vacantes activas, match promedio, entrevistas del día y actividad reciente.'],
+        ['maqueta' => 'embudo', 'etiqueta' => 'Embudo de selección', 'titulo' => 'Dónde se queda cada postulación.', 'descripcion' => 'El embudo muestra cuántas llegan a cada etapa y qué parte pasa a la siguiente.'],
+        ['maqueta' => 'dashboard', 'etiqueta' => 'Dashboard', 'titulo' => 'El proceso de un vistazo.', 'descripcion' => 'Vacantes activas, entrevistas del día, tendencia de postulaciones y actividad reciente.'],
     ];
 
 @endphp
@@ -73,6 +75,16 @@
                             ],
                         ],
                         [
+                            'maqueta' => 'cobertura',
+                            'titulo' => 'Compara candidatos de un vistazo',
+                            'texto' => 'Un mapa de calor pone a los mejores de la vacante frente a sus requisitos, para ver en segundos qué cubre cada persona y dónde falla.',
+                            'puntos' => [
+                                'Cada celda indica si el CV respalda el requisito, si conviene revisarlo o si no aparece.',
+                                'Los requisitos obligatorios van marcados.',
+                                'Ordena y explica: la decisión de a quién entrevistar es tuya.',
+                            ],
+                        ],
+                        [
                             'maqueta' => 'entrevistas',
                             'titulo' => 'Del primer CV a la contratación',
                             'texto' => 'Cada vacante tiene su Kanban: mueve candidatos entre etapas, agenda entrevistas y evalúa con criterios claros.',
@@ -83,11 +95,11 @@
                             ],
                         ],
                         [
-                            'maqueta' => 'dashboard',
+                            'maqueta' => 'embudo',
                             'titulo' => 'El proceso de un vistazo',
-                            'texto' => 'Vacantes activas, match promedio, entrevistas del día y el embudo de selección, en una sola pantalla.',
+                            'texto' => 'Vacantes activas, entrevistas del día, tendencia de postulaciones y el embudo de selección, en una sola pantalla.',
                             'puntos' => [
-                                'Embudo de los últimos 90 días, por vacante.',
+                                'Embudo de 7, 30 o 90 días, por vacante, con la conversión entre etapas.',
                                 'Actividad reciente y avisos en la aplicación y por correo.',
                                 'Exportación a Excel de lo que ves en cada listado.',
                             ],

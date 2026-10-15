@@ -1,0 +1,149 @@
+/*
+ * TalentCloud: gráficos de datos (embudo, mapa de calor, radar comparativo y minigráfico).
+ *
+ * Paleta propia de los gráficos (no tiene que coincidir con la de la marca): validada con el validador del método
+ * de visualización sobre superficie blanca. Los gráficos van sobre una tarjeta blanca (`!bg-white`), no sobre el gris
+ * de las tarjetas normales, porque la rampa clara no llega a 2:1 contra ese gris.
+ *  - Ordinal (etapas del embudo, niveles del mapa de calor): una sola tonalidad azul, de claro a oscuro.
+ *  - Categórica (series del radar): azul, naranja y aguamarina, en ese orden fijo (las tres primeras de la paleta,
+ *    validadas entre todos los pares). El aguamarina queda bajo 3:1 contra el blanco: por eso el radar siempre lleva
+ *    leyenda visible y la tabla de al lado con los mismos números.
+ * El color nunca va solo: cada celda lleva su símbolo y cada serie su leyenda con trazo.
+ */
+
+.viz {
+  --viz-ord-1: #86b6ef;
+  --viz-ord-2: #5598e7;
+  --viz-ord-3: #2a78d6;
+  --viz-ord-4: #1c5cab;
+  --viz-ord-5: #104281;
+  --viz-s1: #2a78d6;
+  --viz-s2: #eb6834;
+  --viz-s3: #1baf7a;
+  --viz-rejilla: #e1e0d9;
+  --viz-eje: #c3c2b7;
+  --viz-vacio: #eeeeec;
+  --viz-tinta: #201e1d;
+  --viz-tinta-2: #605d5d;
+  --viz-superficie: #ffffff;
+}
+
+/* — Embudo: una fila por etapa, con la forma que se estrecha según cuántas postulaciones llegaron — */
+.embudo { display: grid; gap: 3px; margin: 0; padding: 0; list-style: none; }
+
+/* Móvil: la etapa y su cifra en una línea y la forma debajo; desde 640 px, etapa | forma | cifra. */
+.embudo-fila {
+  display: grid; align-items: center; column-gap: var(--space-3); row-gap: 4px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "etapa cifra" "forma forma";
+  padding-bottom: 8px;
+}
+@media (min-width: 640px) {
+  .embudo-fila {
+    grid-template-columns: minmax(170px, 1fr) minmax(0, 2.4fr) minmax(100px, 0.7fr);
+    grid-template-areas: "etapa forma cifra";
+    padding-bottom: 0;
+  }
+}
+
+.embudo-etapa { grid-area: etapa; font-size: 14px; color: var(--viz-tinta); }
+.embudo-conversion { display: block; font-size: 12px; color: var(--viz-tinta-2); }
+.embudo-cifra { grid-area: cifra; text-align: right; font-size: 14px; font-weight: 600; color: var(--viz-tinta); }
+.embudo-cifra small { display: block; font-size: 12px; font-weight: 400; color: var(--viz-tinta-2); }
+
+.embudo-forma {
+  grid-area: forma; height: 42px; background: var(--embudo-color); clip-path: var(--embudo-forma);
+  transition: clip-path 450ms cubic-bezier(0.2, 0.7, 0.2, 1), filter 140ms ease;
+}
+@media (hover: hover) {
+  .embudo-fila:hover .embudo-forma { filter: brightness(1.12); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes embudo-entrada {
+    from { clip-path: polygon(50% 0, 50% 0, 50% 100%, 50% 100%); opacity: 0; }
+  }
+  .embudo-forma { animation: embudo-entrada 600ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards; animation-delay: calc(var(--orden, 0) * 70ms); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .embudo-forma { transition: none; }
+}
+
+/* — Mapa de calor: candidatos en filas, requisitos en columnas, un nivel por celda — */
+.viz { min-width: 0; max-width: 100%; }
+/* position: relative contiene a los .sr-only (absolutos) dentro del scroll; si no, ensanchan toda la página en móvil. */
+.mapa { position: relative; width: 100%; overflow-x: auto; }
+.mapa table { border-collapse: separate; border-spacing: 2px; margin: 0; font-size: 13px; }
+.mapa th { font-weight: 400; text-align: left; color: var(--viz-tinta); }
+
+.mapa-columna {
+  vertical-align: bottom; padding: 0 0 6px; width: 40px; min-width: 40px; text-align: center;
+}
+.mapa-columna span {
+  display: inline-block; max-height: 132px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; color: var(--viz-tinta-2);
+}
+.mapa-columna[data-obligatorio] span { color: var(--viz-tinta); font-weight: 600; }
+
+.mapa-fila-titulo { padding: 4px 12px 4px 0; min-width: 150px; max-width: 220px; }
+.mapa-fila-titulo a { font-weight: 600; }
+.mapa-fila-titulo small { display: block; font-size: 12px; color: var(--viz-tinta-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mapa-porcentaje { padding: 4px 0 4px 10px; font-weight: 600; white-space: nowrap; text-align: right; }
+
+.mapa-celda {
+  width: 40px; height: 34px; min-width: 40px; padding: 0; text-align: center; vertical-align: middle;
+  border-radius: 4px; font-size: 14px; font-weight: 700; line-height: 1; cursor: default;
+  transition: outline-color 140ms ease, transform 140ms ease;
+  outline: 2px solid transparent; outline-offset: -1px;
+}
+.mapa-coincide { background: var(--viz-ord-4); color: #ffffff; }
+.mapa-revisar { background: var(--viz-ord-1); color: #0d366b; }
+.mapa-no { background: var(--viz-vacio); color: var(--viz-tinta-2); box-shadow: inset 0 0 0 1px var(--viz-rejilla); }
+.mapa-sin { background: transparent; color: var(--viz-tinta-2); box-shadow: inset 0 0 0 1px var(--viz-rejilla); font-weight: 400; }
+@media (hover: hover) {
+  .mapa-celda:hover { outline-color: var(--viz-tinta); }
+  .mapa tbody tr:hover .mapa-fila-titulo a { text-decoration: underline; }
+}
+
+.mapa-leyenda { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--viz-tinta); }
+.mapa-leyenda li { display: flex; align-items: center; gap: 8px; }
+.mapa-leyenda .mapa-celda { display: grid; place-items: center; width: 24px; height: 20px; min-width: 24px; font-size: 12px; }
+
+/* Tooltip compartido por el mapa de calor y el radar (solo con puntero; la misma información está en la tabla). */
+.viz-tip {
+  position: fixed; z-index: 60; pointer-events: none; max-width: 260px; padding: 8px 10px;
+  border-radius: 6px; background: #201e1d; color: #ffffff; font-size: 12px; line-height: 1.4;
+  box-shadow: 0 4px 14px rgba(32, 30, 29, 0.25);
+}
+.viz-tip strong { display: block; font-size: 14px; }
+.viz-tip span { color: #c3c2b7; }
+
+/* — Radar comparativo — */
+.radar-leyenda { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--viz-tinta); }
+.radar-leyenda li { display: flex; align-items: center; gap: 8px; }
+.radar-boton {
+  display: flex; align-items: center; gap: 8px; padding: 2px 4px; border: 0; border-radius: 4px; background: transparent;
+  font: inherit; color: inherit; cursor: pointer; text-align: left;
+}
+.radar-boton:focus-visible { outline: 2px solid var(--viz-tinta); outline-offset: 2px; }
+.radar-leyenda i { display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--serie); border-radius: 2px; }
+.radar-leyenda b { font-weight: 600; }
+.radar-leyenda span { color: var(--viz-tinta-2); }
+
+.radar-poligono { transition: opacity 160ms ease; }
+.radar-poligono[data-atenuada] { opacity: 0.18; }
+.radar-etiqueta { font-size: 12px; fill: var(--viz-tinta); }
+.radar-valor { font-size: 11px; fill: var(--viz-tinta-2); }
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes radar-entrada { from { transform: scale(0.6); opacity: 0; } }
+  .radar-poligono { transform-origin: var(--cx) var(--cy); animation: radar-entrada 600ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards; animation-delay: calc(var(--orden, 0) * 120ms); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .radar-poligono { transition: none; }
+}
+
+/* — Minigráfico (tendencia dentro de un indicador) y variación — */
+.minilinea { display: block; width: 100%; max-width: 150px; height: auto; overflow: visible; }
+.variacion { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; }
+.variacion-sube { color: #006300; }
+.variacion-baja { color: #b3261e; }
+.variacion-igual { color: var(--viz-tinta-2); }

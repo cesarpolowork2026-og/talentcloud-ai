@@ -317,3 +317,29 @@ it('no compara vacantes de otra empresa', function () {
         ->assertDontSee('Product Designer')
         ->assertSee('Elena Ruiz');
 });
+
+it('compara con un radar a quienes tienen notas en al menos tres criterios y mantiene la tabla', function () {
+    Livewire::test(Listado::class)->set('vista', 'comparar')
+        ->assertDontSee('Perfil por criterio'); // una sola persona evaluada: no hay con quién superponerla
+
+    Evaluacion::factory()->create([
+        'postulacion_id' => $this->marco->id,
+        'evaluador_id' => $this->marta->id,
+        'criterios' => [
+            ['nombre' => 'Conocimiento técnico', 'puntaje' => 6],
+            ['nombre' => 'Comunicación', 'puntaje' => 7],
+            ['nombre' => 'Resolución de problemas', 'puntaje' => 5],
+        ],
+        'puntaje' => 6,
+    ]);
+
+    $pantalla = Livewire::test(Listado::class)->set('vista', 'comparar')
+        ->assertSee('Perfil por criterio')
+        ->assertSee('Las personas evaluadas')
+        ->assertSee('Mayor puntaje'); // la tabla sigue estando
+
+    $html = $pantalla->html();
+    expect(substr_count($html, 'class="radar-poligono"'))->toBe(2)
+        ->and($html)->toContain('Elena Ruiz')->toContain('Marco Díaz')
+        ->and($html)->toContain('Sin evaluar en este criterio'); // Marco no tiene «Ajuste cultural»
+});

@@ -27,7 +27,30 @@
                     <x-ui.buscador id="comparar-vacante" metodo="buscarVacantesEvaluadas" modelo="vacanteComparada" :etiqueta="App\Support\Formato::vacante($vacanteElegida)" placeholder="Busca una vacante evaluada…" class="w-[320px] max-w-full" />
                 </x-ui.field>
             </div>
-            @php($mejor = collect($comparativa)->max('promedio'))
+            @php
+                $mejor = collect($comparativa)->max('promedio');
+                // Radar: hasta tres personas con notas en al menos tres criterios, en el orden de la tabla (por puntaje).
+                $paraElRadar = collect($comparativa)
+                    ->filter(fn (array $f) => collect($f['criterios'])->filter(fn ($v) => $v !== null)->count() >= 3)
+                    ->take(3)->values();
+            @endphp
+            @if ($paraElRadar->count() >= 2)
+                <x-ui.card class="mb-6 !bg-white">
+                    <div class="card-kicker">Perfil por criterio</div>
+                    <p class="m-0 max-w-[80ch] text-13 text-neutral-700">
+                        {{ $paraElRadar->count() === count($comparativa) ? 'Las personas evaluadas' : 'Las '.$paraElRadar->count().' con mayor puntaje' }}, superpuestas sobre los mismos criterios (de 0 a 10).
+                        Los números exactos están en la tabla de abajo; es un resumen visual de lo evaluado, no una recomendación.
+                    </p>
+                    <x-grafico.radar-comparativo
+                        :ejes="collect($criterios)->map(fn ($c) => ['etiqueta' => $c->etiqueta()])->all()"
+                        :series="$paraElRadar->map(fn (array $f) => [
+                            'nombre' => $f['candidato'],
+                            'promedio' => $f['promedio'],
+                            'valores' => collect($criterios)->map(fn ($c) => $f['criterios'][$c->value])->all(),
+                        ])->all()"
+                    />
+                </x-ui.card>
+            @endif
             <x-ui.table>
                 <x-slot:head>
                     <th>Candidato</th>
