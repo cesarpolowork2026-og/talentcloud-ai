@@ -2,6 +2,7 @@
 
 use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoProcesamientoCv;
+use App\Enums\EstadoVacante;
 use App\Livewire\Candidatos\Detalle;
 use App\Models\Candidato;
 use App\Models\Competencia;
@@ -12,6 +13,7 @@ use App\Models\User;
 use App\Models\Vacante;
 use App\Notifications\AvisoGeneral;
 use App\Repositories\Contracts\CandidatoRepository;
+use App\Repositories\Contracts\VacanteRepository;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Livewire;
 
@@ -91,4 +93,36 @@ it('la campana sabe si hay avisos sin leer con una sola consulta cuando alguno d
     $consultas = collect(DB::getQueryLog())->pluck('query')->filter(fn ($q) => str_contains($q, 'notifications'));
 
     expect($consultas)->toHaveCount(1);
+});
+
+it('las listas públicas no leen la descripción de la vacante, pero la ficha sí', function () {
+    $abierta = Vacante::factory()->deEmpresa($this->empresa)->create([
+        'estado' => EstadoVacante::Abierta,
+        'publicada_at' => now(),
+        'descripcion' => 'Texto largo de la descripción.',
+    ]);
+
+    $repo = app(VacanteRepository::class);
+    $fila = $repo->publicadasParaListado()->get()->firstWhere('id', $abierta->id);
+
+    expect($fila)->not->toBeNull()
+        ->and($fila->getAttributes())->not->toHaveKey('descripcion')
+        ->and($repo->buscarPublicada($abierta->id)->descripcion)->toBe('Texto largo de la descripción.');
+});
+
+it('la portada recuerda las vacantes abiertas y se actualiza al publicar o cerrar una', function () {
+    Cache::flush();
+    $primera = Vacante::factory()->deEmpresa($this->empresa)->create(['titulo' => 'Analista de Datos Uno', 'estado' => EstadoVacante::Abierta, 'publicada_at' => now()]);
+
+    auth()->logout();
+    $this->get('/')->assertOk()->assertSee('Analista de Datos Uno');
+    expect(Cache::has('bolsa-publica:portada'))->toBeTrue();
+
+    // Publicar otra: el modelo olvida la portada y la visita siguiente ya la incluye.
+    Vacante::factory()->deEmpresa($this->empresa)->create(['titulo' => 'Analista de Datos Dos', 'estado' => EstadoVacante::Abierta, 'publicada_at' => now()]);
+    $this->get('/')->assertSee('Analista de Datos Dos');
+
+    // Cerrar la primera: deja de aparecer.
+    $primera->update(['estado' => EstadoVacante::Cerrada]);
+    $this->get('/')->assertDontSee('Analista de Datos Uno')->assertSee('Analista de Datos Dos');
 });
