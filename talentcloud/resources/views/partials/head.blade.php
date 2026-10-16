@@ -29,6 +29,10 @@
     <meta name="twitter:card" content="summary_large_image">
 @endisset
 
-{{-- La fuente Source Serif 4 va empaquetada en app.css (@fontsource). --}}
+{{-- La fuente Source Serif 4 va empaquetada en app.css (@fontsource). Se precargan los dos pesos del texto
+     (normal y seminegrita) para que no se descubran recién al leer el CSS. --}}
+@foreach (['400', '600'] as $peso)
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ Vite::asset('node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-'.$peso.'-normal.woff2') }}">
+@endforeach
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @livewireStyles

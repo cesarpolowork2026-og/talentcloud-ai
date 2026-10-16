@@ -1,7 +1,5 @@
-import './bootstrap';
 import './presentacion';
 import './carga';
-import Sortable from 'sortablejs';
 
 document.addEventListener('alpine:init', () => {
     /**
@@ -11,10 +9,13 @@ document.addEventListener('alpine:init', () => {
      * orden y el tablero se vuelve a pintar con lo guardado.
      */
     window.Alpine.data('columnaKanban', (habilitado) => ({
-        init() {
+        async init() {
             if (! habilitado) {
                 return;
             }
+
+            // SortableJS (~45 KB) solo se descarga en el tablero editable, no en todas las páginas.
+            const { default: Sortable } = await import('sortablejs');
 
             Sortable.create(this.$el, {
                 group: 'kanban',
