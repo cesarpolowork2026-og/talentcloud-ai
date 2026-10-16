@@ -3,7 +3,7 @@
 namespace App\Matching;
 
 /**
- * Contrato de entrada del matching (congelado el día 11). Es lo que Laravel
+ * Contrato de entrada del matching. Es lo que Laravel
  * envía al motor: los requisitos de la vacante y el texto del CV. No lleva
  * datos personales que no hagan falta (ni nombre, ni correo, ni teléfono).
  */

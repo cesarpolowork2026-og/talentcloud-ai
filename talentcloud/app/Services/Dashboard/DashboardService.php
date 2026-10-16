@@ -18,13 +18,9 @@ use Illuminate\Support\Collection;
 
 /**
  * Indicadores del dashboard. Cada consulta pasa por el filtro por empresa: una
- * empresa ve lo suyo y el admin SaaS, toda la plataforma.
- *
- * Responde, en orden: qué pide una acción hoy, cómo van las vacantes y cuánto
- * trabajo de lectura de CV ahorró la IA (con el supuesto a la vista).
- *
- * Las cifras por vacante salen de una sola lectura agregada ({@see CifrasPorVacante}); aquí solo se
- * cargan los datos de las pocas vacantes que se muestran.
+ * empresa ve lo suyo y el admin SaaS toda la plataforma. Responde qué pide una
+ * acción hoy, cómo van las vacantes y cuánto trabajo ahorró la IA. Las cifras
+ * por vacante salen de {@see CifrasPorVacante}.
  */
 class DashboardService
 {

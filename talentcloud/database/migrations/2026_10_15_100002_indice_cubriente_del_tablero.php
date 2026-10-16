@@ -4,13 +4,10 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 /*
- * El índice del tablero (empresa, vacante, etapa, orden) pasa a «cubrir» las columnas que leen las cifras por
- * vacante del Dashboard (por revisar, esperando, estancadas, mejor match). Con ellas dentro del índice, PostgreSQL
- * resuelve esas agregaciones sin leer la tabla, que es ancha por el JSON del matching: con 120 000 postulaciones,
- * de 180 ms y 60 000 páginas leídas a 80 ms y unas 1 900.
- *
- * No suma un índice a una tabla que recibe muchas escrituras: sustituye al anterior, que tenía las mismas
- * columnas clave. Las columnas añadidas ya cambiaban junto con la etapa o el matching, que están indexados.
+ * El índice del tablero (empresa, vacante, etapa, orden) pasa a incluir las
+ * columnas que leen las cifras por vacante del Dashboard, así PostgreSQL resuelve
+ * esas agregaciones sin leer la tabla (con 120 000 postulaciones, de 180 ms a
+ * 80 ms). Sustituye al índice anterior, no suma uno nuevo.
  */
 return new class extends Migration
 {

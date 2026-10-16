@@ -90,7 +90,7 @@ class Competencia extends Model
 
     /**
      * La competencia del catálogo que corresponde a ese texto: por nombre o por uno de
-     * sus sinónimos ("PowerBI" → Power BI). Sin tildes ni diferencia de mayúsculas.
+     * sus sinónimos ("PowerBI" => Power BI). Sin tildes ni diferencia de mayúsculas.
      */
     public static function resolver(string $nombre): ?self
     {

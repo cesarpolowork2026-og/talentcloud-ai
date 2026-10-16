@@ -4,14 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 /*
- * Restricciones de dominio (CHECK): la base rechaza valores que la aplicación nunca escribe, de modo que
- * un error de código, un script o una carga masiva no pueden dejar estados inventados ni números fuera de rango.
- *
- * Las listas de valores son una copia fija de los enums de `app/Enums`: si se añade un caso a un enum hay que
- * añadir una migración que actualice su restricción (lo vigila `tests/Feature/Datos/RestriccionesDeDominioTest`).
- *
- * Cada restricción se crea NOT VALID y se valida después: la validación solo toma un bloqueo que no impide
- * leer ni escribir, así que también sirve sobre tablas grandes.
+ * Restricciones de dominio (CHECK): la base rechaza valores que la aplicación
+ * nunca escribe. Las listas copian los enums de `app/Enums`: si se añade un caso
+ * hay que añadir una migración que actualice su restricción (lo vigila
+ * `RestriccionesDeDominioTest`). Cada una se crea NOT VALID y se valida después,
+ * para no bloquear escrituras en tablas grandes.
  */
 return new class extends Migration
 {

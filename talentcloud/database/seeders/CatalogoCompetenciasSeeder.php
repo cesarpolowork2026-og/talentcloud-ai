@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * Catálogo base de competencias con sus sinónimos (la extracción de CV los
- * usa para normalizar: "Postgres" → PostgreSQL). Idempotente.
+ * usa para normalizar: "Postgres" => PostgreSQL). Idempotente.
  */
 class CatalogoCompetenciasSeeder extends Seeder
 {

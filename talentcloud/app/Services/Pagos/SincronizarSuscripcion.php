@@ -13,14 +13,12 @@ use Illuminate\Support\Facades\Log;
  * Copia en la empresa el estado de su suscripción, recién leído de la pasarela,
  * y le da el plan que corresponde. Es lo único que cambia un plan pagado:
  *
- * - suscripción vigente (al día o con un cobro en reintento) → su plan;
- * - deja de estar vigente (cancelada o sin pago tras los reintentos) → Gratis.
- *   Como cualquier bajada de plan, no borra nada (LimitesDelPlan).
+ * - suscripción vigente (al día o con un cobro en reintento): su plan;
+ * - ya no vigente (cancelada o sin pago): Gratis, sin borrar nada (LimitesDelPlan).
  *
- * Se puede repetir sin efectos: con el mismo estado no cambia nada ni avisa. Un
- * aviso tardío de una suscripción anterior no deshace la actual, y una
- * suscripción que nunca estuvo vigente no toca el plan (un Enterprise aplicado
- * por el admin, por ejemplo).
+ * Se puede repetir sin efectos. Un aviso tardío de una suscripción anterior no
+ * deshace la actual, y una que nunca estuvo vigente no toca el plan (por
+ * ejemplo, un Enterprise aplicado por el admin).
  */
 class SincronizarSuscripcion
 {

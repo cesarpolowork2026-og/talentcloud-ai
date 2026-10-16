@@ -5,13 +5,11 @@ namespace Database\Seeders\Demo\Volumen;
 use Illuminate\Support\Carbon;
 
 /**
- * Personas ficticias con un CV al estilo del de César Polo (perfil, experiencia con fechas y logros,
- * proyectos, educación, habilidades y herramientas), para sembrar cientos de postulaciones por vacante.
- *
- * Reproducible: la misma semilla da las mismas personas. Cada persona tiene un perfil de su familia
- * profesional (tecnología, comercial, logística…) con un conjunto de competencias del catálogo; el CV las
- * nombra en la experiencia, en «Habilidades técnicas» y en «Herramientas», así que el matching de cada
- * vacante da resultados distintos (coincide, por revisar, no aparece) sin porcentajes escritos a mano.
+ * Personas ficticias con un CV al estilo del de César Polo, para sembrar cientos
+ * de postulaciones por vacante. Es reproducible: la misma semilla da las mismas
+ * personas. Cada una tiene un perfil de su familia profesional con competencias
+ * del catálogo, así el matching da resultados distintos sin porcentajes escritos
+ * a mano.
  *
  * @phpstan-type Perfil array{titular: string, cargos: list<string>, carrera: string, skills: list<string>, herramientas: list<string>}
  */

@@ -22,7 +22,7 @@ enum EstadoEntrevista: string
         };
     }
 
-    /** Pendiente → Confirmada. */
+    /** Pendiente a Confirmada. */
     public function puedeConfirmarse(): bool
     {
         return $this === self::Pendiente;

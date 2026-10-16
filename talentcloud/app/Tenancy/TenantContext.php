@@ -7,18 +7,14 @@ use App\Models\User;
 use Closure;
 
 /**
- * Empresa (tenant) sobre la que opera la petición o el Job en curso.
+ * Empresa (tenant) sobre la que opera la petición o el Job en curso. En web la
+ * fija el middleware EstablecerContextoTenant con el usuario autenticado; en
+ * Jobs, EstablecerEmpresaEnJob con el empresa_id del payload. El admin SaaS
+ * opera en modo global.
  *
- * - En peticiones web lo fija el middleware EstablecerContextoTenant a partir
- *   del usuario autenticado.
- * - En Jobs lo fija el middleware de Job EstablecerEmpresaEnJob con el
- *   empresa_id que el Job lleva en su payload.
- * - El admin SaaS opera en modo global: ve todas las empresas.
- *
- * Sin contexto, las consultas de modelos con BelongsToEmpresa salen vacías
- * (falla cerrado) y no se pueden crear registros de empresa.
- *
- * Se registra como "scoped": se reinicia en cada petición y en cada Job.
+ * Sin contexto, las consultas de modelos con BelongsToEmpresa salen vacías y no
+ * se pueden crear registros de empresa. Se registra como "scoped": se reinicia
+ * en cada petición y en cada Job.
  */
 class TenantContext
 {

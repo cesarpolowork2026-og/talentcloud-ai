@@ -10,12 +10,9 @@ use Illuminate\Support\Collection;
 /**
  * Cómo se llega al porcentaje de una postulación, requisito por requisito.
  *
- * El puntaje global es el promedio de los porcentajes ponderado por el peso de cada requisito
- * (igual en el análisis básico y en el servicio de IA), así que cada requisito *aporta*
- * `porcentaje × peso / suma de pesos` puntos sobre un máximo de `100 × peso / suma de pesos`, y
- * lo que aportan todos suma el puntaje. Esta clase solo reordena y redacta lo que el matching ya
- * calculó, con reglas fijas (sin llamar a la IA): ayuda a decidir qué conversar en la entrevista;
- * no califica a la persona ni decide por nadie.
+ * El puntaje es el promedio de los porcentajes ponderado por el peso de cada
+ * requisito, y cada uno aporta `porcentaje × peso / suma de pesos` puntos. Solo
+ * reordena y redacta lo que el matching ya calculó, sin llamar a la IA.
  *
  * @phpstan-type Fila array{id: int, competencia: string, obligatorio: bool, peso: int, anios_minimos: int|null, porcentaje: int, nivel: NivelCoincidencia, aporta: float, maximo: float}
  */

@@ -44,10 +44,10 @@ class IndexarRequisitos
     /**
      * "Kubernetes (k8s). Operación de clústeres en producción."
      *
-     * Mismo texto que usa el servicio de IA para comparar el requisito con el CV
-     * (talentcloud_ai.matching.semantica.texto_de_consulta), así los vectores guardados
-     * son comparables con los de los fragmentos. Sin los años mínimos: los evalúa la
-     * coincidencia exacta y acercarían el requisito a cualquier frase con años.
+     * Mismo texto que usa el servicio de IA
+     * (talentcloud_ai.matching.semantica.texto_de_consulta), para que los vectores
+     * sean comparables con los de los fragmentos. Sin años mínimos: los evalúa la
+     * coincidencia exacta.
      */
     public static function textoParaEmbedding(Requisito $requisito): string
     {

@@ -11,16 +11,13 @@ use App\Support\CacheDeResumenes;
 use Illuminate\Support\Carbon;
 
 /**
- * Las cifras por vacante del dashboard —por revisar, esperando, estancadas, mejor match— en una sola lectura
- * agregada de las postulaciones (un índice que las cubre, sin leer la tabla) en lugar de una subconsulta por
- * vacante. Con 8 000 vacantes activas y 120 000 postulaciones pasa de ~1 s a ~0,1 s, y el resultado pequeño
- * se guarda unos segundos en `CacheDeResumenes`.
+ * Cifras por vacante del dashboard (por revisar, esperando, estancadas, mejor
+ * match) en una sola lectura agregada de las postulaciones, en vez de una
+ * subconsulta por vacante. Una postulación y su vacante son de la misma empresa
+ * (clave compuesta), así que basta filtrar por empresa en las postulaciones.
  *
- * Una postulación y su vacante son siempre de la misma empresa (clave foránea compuesta), así que basta con el
- * filtro por empresa de las postulaciones: no hace falta repetirlo en la vacante.
- *
- * El recorrido de las filas usa ordenación nativa y compara fechas como texto (ISO 8601 ordena igual): con
- * miles de vacantes, parsear una fecha o armar una colección por fila costaba más que la propia consulta.
+ * Las fechas se comparan como texto ISO 8601, que ordena igual y es más rápido
+ * que parsearlas por fila.
  */
 class CifrasPorVacante
 {

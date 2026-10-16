@@ -22,14 +22,9 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
- * "Dashboard": qué requiere atención hoy, cómo van las vacantes, cuánto ahorra la IA y
- * el embudo de selección; la actividad reciente se refresca sola (ActividadReciente).
- * Reemplaza los indicadores del prototipo (candidatos evaluados, match promedio), que
- * informaban pero no ayudaban a decidir qué hacer.
- *
- * Para el admin SaaS es el "Panel de la plataforma" (cambio sobre el
- * prototipo): primero sus empresas cliente y la salud de la IA, y después la
- * actividad de selección de toda la plataforma.
+ * Dashboard: qué requiere atención hoy, cómo van las vacantes, cuánto ahorra la
+ * IA y el embudo de selección. Para el admin SaaS es el "Panel de la
+ * plataforma": primero sus empresas cliente y la salud de la IA.
  */
 #[Title('Dashboard')]
 class Panel extends Component

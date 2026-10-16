@@ -84,10 +84,9 @@ class HojaDeReclamacion extends Notification implements ShouldQueue
     }
 
     /**
-     * Texto del consumidor como literal: las líneas del correo se interpretan como Markdown y
-     * "[Pulsa aquí](https://…)" llegaría como un enlace disfrazado, enviado desde nuestra
-     * cuenta a cualquier dirección que se escriba en la hoja. Se escapan los signos de
-     * Markdown (el HTML ya lo escapa la plantilla, por eso no se tocan <, > ni &).
+     * Texto del consumidor como literal: las líneas del correo se interpretan como
+     * Markdown y "[Pulsa aquí](https://...)" llegaría como un enlace camuflado. Se
+     * escapan los signos de Markdown; el HTML ya lo escapa la plantilla.
      */
     public static function literal(string $texto): string
     {

@@ -7,7 +7,7 @@ use App\Models\Postulacion;
 use App\Models\User;
 use Illuminate\Foundation\Events\Dispatchable;
 
-/** Una postulación pasó a otra columna del Kanban (actividad y notificaciones: día 18). */
+/** Una postulación pasó a otra columna del Kanban (actividad y notificaciones). */
 class PostulacionCambioDeEtapa
 {
     use Dispatchable;

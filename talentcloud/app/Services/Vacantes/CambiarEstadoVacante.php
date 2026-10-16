@@ -12,10 +12,10 @@ use App\Services\Entrevistas\EntrevistasPorRealizar;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Transiciones de estado de una vacante: Borrador → Abierta ⇄ En revisión → Cerrada.
- * Publicar un borrador es lo único que suma una vacante activa: ahí se aplica
- * el límite del plan (Abierta ⇄ En revisión no cambia el número y una cerrada
- * no se reabre).
+ * Transiciones de estado de una vacante: Borrador, Abierta, En revisión y
+ * Cerrada. Publicar un borrador es lo único que suma una vacante activa, y ahí
+ * se aplica el límite del plan (Abierta y En revisión no cambian el número y una
+ * cerrada no se reabre).
  */
 class CambiarEstadoVacante
 {

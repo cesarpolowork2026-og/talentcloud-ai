@@ -3,11 +3,12 @@
 namespace App\Support;
 
 /**
- * Texto escrito por una persona (título de una vacante, nombre de una empresa o de alguien) dentro de una línea
- * de un correo. Las líneas de un `MailMessage` se interpretan como Markdown, así que `[clic](https://sitio-malo)`
- * llegaría como un enlace camuflado en un correo que sale de TalentCloud. Con `literal()` se muestra tal cual.
+ * Texto escrito por una persona (título de vacante, nombre de empresa o de
+ * alguien) dentro de una línea de correo. Las líneas de un `MailMessage` se
+ * interpretan como Markdown, así que `[clic](https://sitio-malo)` llegaría como
+ * un enlace camuflado. `literal()` lo muestra tal cual.
  *
- * El HTML ya lo escapa la plantilla del correo, por eso no se tocan `<`, `>` ni `&`.
+ * El HTML ya lo escapa la plantilla, por eso no se tocan `<`, `>` ni `&`.
  */
 final class TextoDeCorreo
 {

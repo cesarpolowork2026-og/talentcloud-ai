@@ -45,7 +45,7 @@ class EliminarCuentaDePostulante
             }
 
             $usuario->notifications()->delete();
-            // Candidato → CV, fragmentos, competencias y postulaciones → entrevistas, evaluaciones: en cascada.
+            // Se borran en cascada: del candidato, su CV, fragmentos, competencias y postulaciones; de estas, entrevistas y evaluaciones.
             $usuario->delete();
         });
 

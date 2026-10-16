@@ -9,12 +9,12 @@ from talentcloud_ai.extraccion.secciones import BloqueDeSeccion
 from talentcloud_ai.extraccion.texto import normalizar, oraciones, recortar
 
 _SECCIONES_EXCLUIDAS = {SeccionCv.DATOS_PERSONALES, SeccionCv.REFERENCIAS}
-# "Obtuve la certificación AWS Solutions Architect – Associate." → "AWS Solutions Architect – Associate"
+# "Obtuve la certificación AWS Solutions Architect – Associate." -> "AWS Solutions Architect – Associate"
 _TRAS_LA_PALABRA = re.compile(
     r"(?:certificaci[oó]n(?:es)?|certificad[oa])\s+(?:(?:en|de|como)\s+)?(?P<nombre>[^.;,()\n]{2,120})",
     re.IGNORECASE,
 )
-# "AWS Certified Developer – Associate (2024)." → la frase completa es el nombre.
+# "AWS Certified Developer – Associate (2024)." -> la frase completa es el nombre.
 _EN_INGLES = re.compile(r"\b(?:certified|certification|certificate)\b", re.IGNORECASE)
 _ANIO_FINAL = re.compile(r"\s*[(\[]?\s*(?:19|20)\d{2}\s*[)\]]?\s*[.;]?\s*$")
 _BORDES = " \t.;:,-–—"

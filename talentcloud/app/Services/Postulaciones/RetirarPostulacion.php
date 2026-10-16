@@ -15,13 +15,11 @@ use App\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
 
 /**
- * El postulante retira su postulación. Primero se fija retirada_at y después
- * se mueve a Descartado con MoverPostulacion: así los listeners del cambio de
- * etapa ya saben que no es un descarte de la empresa. Sus entrevistas
- * pendientes o confirmadas se cancelan (con su aviso al entrevistador).
- *
- * El postulante no tiene contexto de empresa: todo se hace en el de la
- * empresa de la postulación, que ya se comprobó que es suya (Policy).
+ * El postulante retira su postulación. Primero se fija retirada_at y después se
+ * mueve a Descartado con MoverPostulacion, para que los listeners sepan que no
+ * es un descarte de la empresa. Sus entrevistas pendientes o confirmadas se
+ * cancelan. Todo se hace en el contexto de la empresa de la postulación, ya
+ * comprobada con la Policy.
  */
 class RetirarPostulacion
 {

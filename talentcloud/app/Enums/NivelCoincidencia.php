@@ -20,7 +20,7 @@ enum NivelCoincidencia: string
         };
     }
 
-    /** Tonos del prototipo: Coincide → accent, Revisar → neutral, No encontrado → accent-2. */
+    /** Tonos del prototipo: Coincide = accent, Revisar = neutral, No encontrado = accent-2. */
     public function tono(): string
     {
         return match ($this) {

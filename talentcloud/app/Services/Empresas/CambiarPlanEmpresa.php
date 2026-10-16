@@ -10,12 +10,11 @@ use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Support\Facades\DB;
 
 /**
- * "Cambiar plan" del admin SaaS. Una bajada de plan no toca lo existente: la
- * empresa conserva sus vacantes y usuarios aunque superen el nuevo límite, y
- * solo deja de poder sumar más (LimitesDelPlan). Cambiar el plan termina la
- * prueba y atiende la solicitud de la empresa, si la había. Si la empresa paga
- * en línea, su plan lo cambia la pasarela: el admin aplica los planes que no se
- * pagan con tarjeta (Enterprise, cortesía o sin pasarela configurada).
+ * "Cambiar plan" del admin SaaS. Una bajada no toca lo existente: la empresa
+ * conserva sus vacantes y usuarios aunque pase del nuevo límite y solo deja de
+ * poder sumar más (LimitesDelPlan). Cambiar el plan termina la prueba y atiende
+ * la solicitud, si la había. Si la empresa paga en línea, el plan lo cambia la
+ * pasarela.
  */
 class CambiarPlanEmpresa
 {

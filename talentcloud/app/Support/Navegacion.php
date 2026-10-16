@@ -7,14 +7,11 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 /**
- * Barra de navegación por rol, a partir de la del prototipo
- * (TalentCloud App.dc.html): el postulante ve "Mis postulaciones" (y "Vacantes",
- * ampliación sobre el prototipo); el reclutador y la empresa ven
- * Dashboard…Evaluaciones, y la empresa añade "Mi empresa".
- *
- * El admin SaaS (cambio sobre el prototipo) ve primero lo suyo —Panel,
- * Empresas, Calidad de la IA— y las pantallas de selección agrupadas en
- * "Procesos de selección", porque para él son supervisión, no su trabajo diario.
+ * Barra de navegación por rol, a partir de la del prototipo. El postulante ve
+ * "Mis postulaciones" y "Vacantes"; el reclutador y la empresa ven Dashboard a
+ * Evaluaciones, y la empresa añade "Mi empresa". El admin SaaS ve Panel,
+ * Empresas y Calidad de la IA, y las pantallas de selección agrupadas en
+ * "Procesos de selección".
  */
 class Navegacion
 {

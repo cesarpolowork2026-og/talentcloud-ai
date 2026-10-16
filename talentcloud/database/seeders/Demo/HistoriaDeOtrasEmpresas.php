@@ -32,14 +32,11 @@ use Illuminate\Support\Carbon;
 use LogicException;
 
 /**
- * Historia de las empresas que no son de tecnología (Brío Retail, Ruta Sur
- * Logística, Nuna Salud y Altura Café) y de la plataforma (Libro de
- * Reclamaciones). Sus pasos se agendan con su fecha y DemoSeeder los ejecuta
- * intercalados con su propia historia, en orden cronológico: el reloj nunca
- * retrocede y la actividad queda en el orden en que ocurrió.
- *
- * Las horas evitan las de la historia de Nimbus Corp, Vela Studio y Orbita
- * Labs (un paso que cayera dentro de otro moviría el reloj hacia atrás).
+ * Historia de las empresas que no son de tecnología y de la plataforma (Libro
+ * de Reclamaciones). Sus pasos se agendan con su fecha y DemoSeeder los ejecuta
+ * intercalados con los suyos, en orden cronológico. Las horas evitan las de la
+ * historia de Nimbus Corp, Vela Studio y Orbita Labs, porque el reloj nunca
+ * retrocede.
  */
 trait HistoriaDeOtrasEmpresas
 {

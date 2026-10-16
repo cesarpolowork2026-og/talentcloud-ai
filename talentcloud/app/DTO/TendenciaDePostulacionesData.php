@@ -5,10 +5,9 @@ namespace App\DTO;
 use Carbon\CarbonInterface;
 
 /**
- * Postulaciones recibidas en un periodo y en el anterior de la misma duración, por día (o por bloques de
- * varios días cuando el periodo es largo), alineadas por posición para compararlas: el bloque 5 de este
- * periodo con el bloque 5 del anterior. Cuenta postulaciones (filas), no personas: una persona que
- * postula a tres vacantes suma tres.
+ * Postulaciones recibidas por día (o por bloques de varios días si el periodo es
+ * largo) en un periodo y en el anterior de la misma duración, alineadas por
+ * posición para compararlas. Cuenta postulaciones, no personas.
  */
 final readonly class TendenciaDePostulacionesData
 {

@@ -54,26 +54,15 @@ use LogicException;
 use Throwable;
 
 /**
- * Datos de demostración: las personas y vacantes de Nimbus Corp, Vela Studio y
- * Orbita Labs, y otras cuatro empresas de sectores distintos (retail, logística,
- * salud y gastronomía; ver HistoriaDeOtrasEmpresas). Todas las cuentas usan la
- * contraseña "password".
+ * Datos de demostración: Nimbus Corp, Vela Studio, Orbita Labs y otras cuatro
+ * empresas (retail, logística, salud y gastronomía; ver HistoriaDeOtrasEmpresas).
+ * Todas las cuentas usan la contraseña "password".
  *
- * La demo no se escribe tabla a tabla: se REPRODUCE la historia de cada
- * postulación, en orden y en su fecha, con los mismos servicios que usan las
- * pantallas (registrar al candidato y su CV, postular, mover en el Kanban,
- * programar y completar entrevistas, evaluar, cerrar la vacante). Así la
- * trazabilidad es la que dejaría la aplicación en uso real: historial de
- * etapas, actividad con su autor y su postulación, avisos con su fecha,
- * estado comunicado al candidato y matching calculado al postular.
- *
- * Las fechas son relativas al día en que se siembra (el reloj se fija en cada
- * paso): lo pasado está completado y lo futuro, pendiente o confirmado.
- * Los trabajos corren en el momento (cola "sync") y el correo no sale
- * (mailer "array"). Si el servicio de IA no responde, se siembra con el
- * análisis básico y se avisa en consola.
- *
- * Es idempotente: si la historia ya se sembró, solo se actualizan las cuentas.
+ * No escribe tablas: reproduce la historia de cada postulación con los mismos
+ * servicios que usan las pantallas, así el historial, la actividad y los avisos
+ * salen como en uso real. Las fechas son relativas al día de la siembra. La cola
+ * es "sync" y el correo "array". Si el servicio de IA no responde, se siembra con
+ * el análisis básico. Es idempotente.
  */
 class DemoSeeder extends Seeder
 {

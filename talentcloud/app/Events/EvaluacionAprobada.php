@@ -5,7 +5,7 @@ namespace App\Events;
 use App\Models\Evaluacion;
 use Illuminate\Foundation\Events\Dispatchable;
 
-/** Una evaluación pasó a "Aprobado" (actividad reciente del día 17: "Marta Solís aprobó la evaluación de…"). */
+/** Una evaluación pasó a "Aprobado" (actividad reciente de ejemplo: "Marta Solís aprobó la evaluación de…"). */
 class EvaluacionAprobada
 {
     use Dispatchable;

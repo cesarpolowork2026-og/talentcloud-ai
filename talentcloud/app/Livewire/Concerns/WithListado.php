@@ -9,13 +9,9 @@ use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 
 /**
- * Listado con búsqueda, filtro por estado, orden y paginación: el equivalente
- * de buildList() del prototipo. La vista usa <x-ui.listado-controles> y
- * {{ $filas->links() }}.
- *
- * El componente define qué se busca, qué estados y órdenes existen y cuántas
- * filas por página; los valores que llegan por URL se validan contra esas
- * listas antes de tocar la consulta.
+ * Listado con búsqueda, filtro por estado, orden y paginación (el buildList()
+ * del prototipo). Lo que llega por URL se valida contra las listas del
+ * componente antes de tocar la consulta.
  */
 trait WithListado
 {

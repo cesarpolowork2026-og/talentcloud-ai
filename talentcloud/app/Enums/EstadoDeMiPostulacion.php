@@ -5,13 +5,10 @@ namespace App\Enums;
 use App\Models\Postulacion;
 
 /**
- * Estado de una postulación tal como lo ve el postulante ("Mis postulaciones").
- * Traduce la etapa interna y coincide siempre con lo que se le avisó
- * (aAvisar): un descarte es "No seleccionado" también si después cierra la
- * vacante; "Cerrada", para quien seguía en el proceso al cerrarse. La Oferta
- * es interna (la empresa la comunica en persona y puede cambiar): hasta que lo
- * contraten o lo descarten, el postulante sigue viendo "Entrevista", la etapa
- * en la que estuvo de verdad. Si la retiró él mismo, "Retirada" manda sobre todo.
+ * Estado de una postulación como lo ve el postulante. Coincide siempre con lo
+ * que se le avisó (aAvisar). La Oferta es interna, así que el postulante sigue
+ * viendo "Entrevista" hasta que lo contraten o lo descarten. Si la retiró él
+ * mismo, "Retirada" manda sobre todo.
  */
 enum EstadoDeMiPostulacion: string
 {

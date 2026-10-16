@@ -26,11 +26,10 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
- * «Selección»: el trabajo del reclutador sobre las postulaciones de una vacante, en dos
- * vistas de los mismos datos. El tablero (prototipo: isKanban) tiene seis columnas, arrastrar
- * y soltar, «Mover a…» accesible por teclado y «Descartar» con confirmación; el ranking las
- * ordena por coincidencia con lo que pide la vacante. El porcentaje ordena y explica: nunca
- * mueve ni descarta a nadie.
+ * «Selección»: el trabajo del reclutador sobre las postulaciones de una vacante,
+ * en dos vistas de los mismos datos: el tablero (seis columnas, arrastrar y
+ * soltar, «Mover a...» por teclado y «Descartar» con confirmación) y el ranking
+ * por coincidencia. El porcentaje ordena y explica, nunca mueve ni descarta.
  */
 class Central extends Component
 {
@@ -51,7 +50,7 @@ class Central extends Component
     public const MAXIMO_POR_COLUMNA = 500;
 
     /**
-     * Columnas del tablero que se desplegaron: etapa → cuántas tarjetas se muestran.
+     * Columnas del tablero que se desplegaron: etapa => cuántas tarjetas se muestran.
      *
      * @var array<string, int>
      */

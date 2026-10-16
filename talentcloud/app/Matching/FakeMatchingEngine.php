@@ -208,7 +208,7 @@ class FakeMatchingEngine implements MatchingEngineInterface
         return Str::limit($frase, 220);
     }
 
-    /** Minúsculas, sin tildes y con espacios simples ("Año" → "ano"). */
+    /** Minúsculas, sin tildes y con espacios simples ("Año" => "ano"). */
     public static function normalizar(string $texto): string
     {
         return Str::of($texto)->ascii()->lower()->squish()->toString();

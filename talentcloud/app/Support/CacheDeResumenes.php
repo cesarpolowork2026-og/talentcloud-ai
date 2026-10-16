@@ -7,10 +7,10 @@ use Closure;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Guarda unos segundos las cifras agregadas del dashboard (recorren miles de postulaciones) para que
- * recargar la página no las recalcule cada vez. La clave incluye la empresa (o «global» para el admin
- * SaaS): una empresa nunca lee las cifras de otra. Con `talentcloud.dashboard.cache_segundos` en 0
- * (así están los tests) se calcula siempre.
+ * Guarda unos segundos las cifras agregadas del dashboard para no recalcularlas
+ * al recargar. La clave incluye la empresa (o «global» para el admin SaaS), así
+ * que una empresa nunca lee las cifras de otra. Con
+ * `talentcloud.dashboard.cache_segundos` en 0 (los tests) se calcula siempre.
  */
 final class CacheDeResumenes
 {

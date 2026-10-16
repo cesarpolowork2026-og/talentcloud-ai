@@ -45,18 +45,13 @@ use Illuminate\Support\Facades\DB;
 use Throwable;
 
 /**
- * Volumen de demostración: lleva cada empresa a unas diez vacantes, con decenas o cientos de postulaciones
- * cada una (según el tipo de puesto), de personas con un CV como el de César Polo.
+ * Lleva cada empresa a unas diez vacantes con decenas o cientos de postulaciones:
  *
- *   php artisan db:seed --class=VolumenDeDemostracionSeeder      (después de la demo: migrate:fresh --seed)
+ *   php artisan db:seed --class=VolumenDeDemostracionSeeder   (después de migrate:fresh --seed)
  *
- * Igual que DemoSeeder, no escribe tablas: reproduce lo que haría la gente con los servicios de la
- * aplicación (registrarse, subir el CV, postular, mover en el Kanban, programar y completar entrevistas,
- * evaluar, cerrar la vacante), fijando el reloj en cada paso, así que el historial, la actividad, los
- * avisos y el matching salen como en uso real. El matching es el análisis básico (rápido y sin gastar el
- * cupo de IA de cada plan): después se puede recalcular con IA lo que se quiera mostrar.
- *
- * No es parte de DatabaseSeeder: tarda varios minutos y los tests no lo necesitan.
+ * Igual que DemoSeeder, reproduce el proceso con los servicios de la aplicación.
+ * El matching es el análisis básico, para no gastar el cupo de IA. No es parte
+ * de DatabaseSeeder porque tarda varios minutos.
  */
 class VolumenDeDemostracionSeeder extends Seeder
 {

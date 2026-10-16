@@ -3,15 +3,10 @@
 namespace Database\Seeders\Demo;
 
 /**
- * CV de demostración de Nimbus Corp y Vela Studio, escritos como CV reales
- * (contacto, perfil, puestos con mes y año, logros, formación, cursos e
- * idiomas) y con la evidencia que muestra el prototipo: por ejemplo, Elena
- * solo menciona Kubernetes como "interés en aprender" y no tiene
- * certificaciones cloud. Personas, empresas y teléfonos son ficticios.
- *
- * El servicio de IA evalúa y calibra sus umbrales con una versión anterior y
- * más breve de estos CV (talentcloud-ai/tests/datos/cvs), que se conserva sin
- * cambios como conjunto de evaluación.
+ * CV de demostración de Nimbus Corp y Vela Studio, escritos como CV reales.
+ * Personas, empresas y teléfonos son ficticios. El servicio de IA calibra sus
+ * umbrales con una versión anterior y más breve de estos CV
+ * (talentcloud-ai/tests/datos/cvs), que no se toca.
  */
 class CvsDeDemostracion
 {

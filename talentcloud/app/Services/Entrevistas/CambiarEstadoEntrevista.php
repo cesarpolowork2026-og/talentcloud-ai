@@ -10,7 +10,7 @@ use Closure;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Pendiente → Confirmada → Completada; se cancela desde Pendiente o Confirmada.
+ * Pendiente, Confirmada y Completada; se cancela desde Pendiente o Confirmada.
  * Las transiciones válidas las define EstadoEntrevista.
  */
 class CambiarEstadoEntrevista

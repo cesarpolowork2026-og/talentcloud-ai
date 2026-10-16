@@ -4,13 +4,13 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 /*
- * Aislamiento entre empresas garantizado por la base (defensa en profundidad): una fila hija solo puede
- * apuntar a un padre de su misma empresa. El filtro por empresa de la aplicación sigue siendo la primera
- * barrera; esto impide que un error de código o un script mezcle datos de dos empresas.
+ * Aislamiento entre empresas garantizado por la base: una fila hija solo puede
+ * apuntar a un padre de su misma empresa. El filtro de la aplicación sigue siendo
+ * la primera barrera.
  *
- * Cada clave foránea simple (`hija.col → padre.id`) se sustituye por una compuesta
- * (`hija.empresa_id, hija.col → padre.empresa_id, padre.id`) con la misma acción al borrar. Así no hay
- * dos comprobaciones por inserción: sigue siendo una sola búsqueda en un índice único.
+ * Cada clave foránea simple (hija.col -> padre.id) se sustituye por una
+ * compuesta (hija.empresa_id, hija.col -> padre.empresa_id, padre.id) con la
+ * misma acción al borrar.
  */
 return new class extends Migration
 {

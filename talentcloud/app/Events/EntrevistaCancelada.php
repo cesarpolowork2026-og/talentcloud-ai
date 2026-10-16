@@ -5,7 +5,7 @@ namespace App\Events;
 use App\Models\Entrevista;
 use Illuminate\Foundation\Events\Dispatchable;
 
-/** Se canceló una entrevista: el prototipo promete avisar al candidato y al entrevistador (día 17). */
+/** Se canceló una entrevista: el prototipo promete avisar al candidato y al entrevistador. */
 class EntrevistaCancelada
 {
     use Dispatchable;

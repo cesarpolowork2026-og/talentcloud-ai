@@ -9,10 +9,9 @@ use App\Support\Formato;
 use Illuminate\Support\Carbon;
 
 /**
- * Una entrevista como evento de calendario (iCalendar, RFC 5545) para guardarla en Google
- * Calendar, Outlook o Apple Calendar. Los textos escritos por personas (nombre del candidato,
- * título de la vacante, notas) se escapan y se pliegan según el estándar: nunca pueden abrir
- * una línea nueva del archivo.
+ * Una entrevista como evento de calendario (iCalendar, RFC 5545). Los textos
+ * escritos por personas se escapan y se pliegan según el estándar para que no
+ * puedan abrir una línea nueva del archivo.
  */
 final class EventoIcs
 {

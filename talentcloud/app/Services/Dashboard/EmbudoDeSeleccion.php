@@ -14,13 +14,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Embudo de selección del dashboard. Cada consulta pasa por el filtro por
- * empresa: una empresa ve lo suyo y el admin SaaS, toda la plataforma.
- *
- * Una postulación "alcanzó" una etapa si llegó a ella o a una posterior según
- * su historial (postulacion_etapas); un descarte no borra lo alcanzado. Las
- * postulaciones anteriores al historial solo tienen su etapa actual. Las que
- * retiró el propio postulante se cuentan aparte de los descartes.
+ * Embudo de selección del dashboard. Una postulación "alcanzó" una etapa si
+ * llegó a ella o a una posterior según su historial (postulacion_etapas); un
+ * descarte no borra lo alcanzado. Las anteriores al historial solo tienen su
+ * etapa actual, y las que retiró el postulante se cuentan aparte.
  */
 class EmbudoDeSeleccion
 {

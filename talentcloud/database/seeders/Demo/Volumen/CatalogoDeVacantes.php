@@ -7,16 +7,15 @@ use App\Enums\Modalidad;
 use App\Enums\TipoRequisito;
 
 /**
- * Las vacantes que se suman a cada empresa de la demostración para llegar a unas diez, con su volumen de
- * postulaciones según el tipo de puesto: en contratación masiva (cajeros, operarios, mozos) llegan
- * cientos; en perfiles técnicos de empresa, decenas; en cargos de especialidad o jefaturas, pocas.
+ * Vacantes que se suman a cada empresa de la demo hasta llegar a unas diez, con
+ * volumen de postulaciones según el puesto: cientos en contratación masiva,
+ * decenas en perfiles técnicos, pocas en jefaturas.
  *
- * Referencias de mercado (promedio de postulaciones por vacante): ~244 en general (Greenhouse, 2025),
- * ~370 en tecnología (Employinc) y ~43 por puesto en retail (iCIMS, 2025). La demostración queda por debajo
- * de esos promedios a propósito: se ve poblada y fluida sin pasar horas sembrando.
- *
- * Las vacantes antiguas están cerradas (con su contratación) y las recientes abiertas, para que cada plan
- * respete su límite de vacantes activas.
+ * Referencias de mercado por vacante: ~244 en general (Greenhouse, 2025), ~370 en
+ * tecnología (Employinc) y ~43 en retail (iCIMS, 2025). La demo queda por debajo a
+ * propósito para no tardar horas sembrando. Las vacantes antiguas están cerradas
+ * (con su contratación) y las recientes abiertas, para respetar el límite de
+ * cada plan.
  */
 final class CatalogoDeVacantes
 {

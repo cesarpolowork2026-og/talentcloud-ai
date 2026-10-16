@@ -46,12 +46,10 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 
 /**
- * Notificaciones (campana + correo según preferencia): entrevista programada o
- * cancelada al candidato y al entrevistador, CV analizado a quien lo subió,
- * postulación propia del candidato a la empresa, cambio de plan a la cuenta de
- * empresa, y cambios de estado y cierre
- * del proceso al candidato (diferidos: AvisarEstadoDePostulacion). Nadie recibe
- * aviso de lo que hizo él mismo.
+ * Notificaciones (campana y correo según preferencia): entrevistas programadas
+ * o canceladas, CV analizados, postulaciones del candidato, cambios de plan y
+ * cambios de estado o cierre del proceso. Los avisos al candidato salen
+ * diferidos (AvisarEstadoDePostulacion) y nadie recibe aviso de lo que hizo él.
  */
 class EnviarAvisos
 {

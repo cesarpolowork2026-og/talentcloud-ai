@@ -12,14 +12,10 @@ use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Límites de uso del plan vigente de la empresa (Empresa::planVigente(): el de
- * prueba mientras dure, después el contratado). Solo impiden crear más:
- * nunca bloquean lo existente, así que tras una bajada de plan la empresa
- * conserva sus vacantes y usuarios aunque pase del límite.
- *
- * Las verificaciones deben llamarse dentro de la transacción que crea lo
- * nuevo: bloquean la fila de la empresa, de modo que dos peticiones
- * simultáneas no pueden ocupar a la vez el último lugar libre.
+ * Límites de uso del plan vigente (Empresa::planVigente()). Solo impiden crear
+ * más, nunca bloquean lo existente. Las verificaciones se llaman dentro de la
+ * transacción que crea lo nuevo: bloquean la fila de la empresa para que dos
+ * peticiones simultáneas no ocupen a la vez el último lugar.
  */
 class LimitesDelPlan
 {
@@ -37,7 +33,7 @@ class LimitesDelPlan
         );
     }
 
-    /** Antes de publicar una vacante (Borrador → Abierta). */
+    /** Antes de publicar una vacante (Borrador a Abierta). */
     public function verificarVacanteActiva(int $empresaId): void
     {
         $empresa = $this->bloquear($empresaId);

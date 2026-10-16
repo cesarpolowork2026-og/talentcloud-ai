@@ -8,10 +8,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * La sección «Vacantes abiertas» de la portada se pinta en cada visita, también la de bots y personas sin
- * sesión, y lee datos que casi no cambian: se recuerda 30 s. Las vacantes, sus requisitos y las empresas
- * la olvidan al guardarse (ver `booted()` de esos modelos), así que publicar o cerrar una vacante se ve en
- * la visita siguiente; lo que cambie sin pasar por un modelo (una sentencia masiva) tarda como mucho 30 s.
+ * Guarda 30 s la sección «Vacantes abiertas» de la portada, que se pinta en cada
+ * visita y lee datos que casi no cambian. Las vacantes, sus requisitos y las
+ * empresas la olvidan al guardarse (ver `booted()` de esos modelos); un cambio
+ * masivo tarda como máximo 30 s en verse.
  */
 final class BolsaPublica
 {

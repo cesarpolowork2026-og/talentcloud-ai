@@ -7,15 +7,12 @@ use Illuminate\Support\Facades\Schema;
 /*
  * Índices de la auditoría de rendimiento (medidos con 300 000 postulaciones):
  *
- * - Claves foráneas que aún no tenían índice. Al borrar un usuario, un CV o un
- *   requisito, PostgreSQL busca las filas que lo referencian (cascade o set
- *   null): sin índice recorre la tabla entera.
- * - postulaciones (empresa_id, candidato_id): la regla de visibilidad de
- *   candidatos (CandidatoRepository) se resuelve solo con el índice.
- * - postulaciones (empresa_id, created_at): el embudo y los indicadores del
- *   dashboard de una empresa (últimos 90 días).
+ * - Claves foráneas sin índice: al borrar un usuario, un CV o un requisito,
+ *   PostgreSQL recorría la tabla entera.
+ * - postulaciones (empresa_id, candidato_id): regla de visibilidad de candidatos.
+ * - postulaciones (empresa_id, created_at): embudo e indicadores del dashboard.
  * - notifications (notifiable_type, notifiable_id, created_at): la campana lee
- *   las últimas de un usuario ya ordenadas; reemplaza al índice sin la fecha.
+ *   las últimas ya ordenadas.
  */
 return new class extends Migration
 {

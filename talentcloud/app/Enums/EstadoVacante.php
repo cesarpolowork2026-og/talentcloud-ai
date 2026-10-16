@@ -23,7 +23,7 @@ enum EstadoVacante: string
     }
 
     /**
-     * Ciclo de vida: Borrador → Abierta ⇄ En revisión → Cerrada.
+     * Ciclo de vida: Borrador, Abierta, En revisión y Cerrada.
      * Cerrada es final.
      *
      * @return list<self>

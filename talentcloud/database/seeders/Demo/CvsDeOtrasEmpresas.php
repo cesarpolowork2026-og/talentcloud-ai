@@ -3,16 +3,14 @@
 namespace Database\Seeders\Demo;
 
 /**
- * CV de demostración de las empresas que no son de tecnología (Brío Retail, Ruta Sur
- * Logística, Nuna Salud y Altura Café). Personas, empresas, teléfonos y textos son
- * ficticios. Están escritos como CV reales (contacto, perfil, puestos con mes y año,
- * logros con cifras, formación, cursos, idiomas y referencias) y cada vacante tiene
- * candidatos fuertes y débiles, para que el matching muestre de todo: coincidencias con
- * años, menciones dudosas ("interés en aprender", "nociones") y requisitos no encontrados.
+ * CV de demostración de las empresas que no son de tecnología (Brío Retail, Ruta
+ * Sur Logística, Nuna Salud y Altura Café). Todo es ficticio. Cada vacante tiene
+ * candidatos fuertes y débiles para que el matching muestre coincidencias,
+ * menciones dudosas y requisitos no encontrados.
  *
- * Convenciones que el lector de CV espera: el puesto y su periodo van en una sola línea
- * ("Cargo — Empresa | Mar 2021 – Actualidad"), los logros empiezan con "•" y los títulos
- * de sección son los habituales. Los años del perfil están calculados para 2026.
+ * Convenciones que espera el lector de CV: puesto y periodo en una sola línea
+ * ("Cargo — Empresa | Mar 2021 – Actualidad"), logros con "•" y títulos de
+ * sección habituales. Los años están calculados para 2026.
  */
 class CvsDeOtrasEmpresas
 {

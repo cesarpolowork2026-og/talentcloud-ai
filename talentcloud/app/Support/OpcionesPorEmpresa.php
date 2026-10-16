@@ -8,13 +8,10 @@ use Closure;
 use Illuminate\Support\Collection;
 
 /**
- * Opciones de un selector (<x-ui.select>) cuyas filas pertenecen a una
- * vacante: vacantes, postulaciones… En la vista global (admin SaaS) se
- * agrupan por empresa ([empresa => [id => etiqueta]], un <optgroup> por
- * empresa, ordenadas por nombre); para el personal de una empresa, que solo
- * ve lo suyo, la lista es plana ([id => etiqueta]).
- *
- * Cargar vacante.empresa con with() antes de llamar.
+ * Opciones de un selector (<x-ui.select>) cuyas filas pertenecen a una vacante.
+ * En la vista global (admin SaaS) se agrupan por empresa
+ * ([empresa => [id => etiqueta]]); para el personal de una empresa la lista es
+ * plana ([id => etiqueta]). Cargar vacante.empresa con with() antes de llamar.
  */
 final class OpcionesPorEmpresa
 {

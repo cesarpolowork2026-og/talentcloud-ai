@@ -27,14 +27,9 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
  * Exportación a Excel de un listado, con la misma consulta (filtros y orden)
  * que se ve en pantalla.
  *
- * Todo texto se escribe como texto literal: un valor como "=HYPERLINK(…)" en
- * el nombre de un candidato no se convierte en fórmula al abrir el archivo
- * (inyección de fórmulas). Las únicas fórmulas son las que escribe esta clase.
- *
- * Presentación común: título y fecha arriba, encabezado en el azul de la marca,
- * filas alternadas, bordes finos, encabezado fijo y filtros activos. Cada
- * exportación solo dice cómo se llama, qué columnas llevan texto largo y, si
- * quiere, qué hacer con sus datos (`alTerminar`).
+ * Todo texto se escribe como literal para que un valor como "=HYPERLINK(...)"
+ * no se convierta en fórmula al abrir el archivo. Cada exportación solo define
+ * su nombre, las columnas de texto largo y, si quiere, `alTerminar`.
  *
  * @template TModel of Model
  *

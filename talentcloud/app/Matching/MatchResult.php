@@ -6,10 +6,9 @@ use App\Enums\MotorMatching;
 use InvalidArgumentException;
 
 /**
- * Contrato de salida del matching (congelado el día 11). Lo produce el motor
- * (FakeMatchingEngine hoy; el servicio de IA desde el día 15) y se guarda en
- * postulaciones.match_detalle. Es una sugerencia explicada: no decide ni
- * mueve la postulación.
+ * Contrato de salida del matching. Lo produce el motor (FakeMatchingEngine o el
+ * servicio de IA) y se guarda en postulaciones.match_detalle. Es una sugerencia
+ * explicada: no decide ni mueve la postulación.
  */
 final readonly class MatchResult
 {

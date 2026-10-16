@@ -13,13 +13,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Competencias del candidato. Las manuales son anotaciones de la empresa en
- * curso: se agregan y quitan una a una y solo las ve esa empresa. Las
- * extraídas del CV por la IA (fuente = extraccion, sin empresa) no se editan
- * a mano: se reemplazan en bloque con cada análisis.
+ * curso: se agregan y quitan una a una y solo las ve esa empresa. Las extraídas
+ * del CV por la IA no se editan a mano, se reemplazan con cada análisis.
  *
- * El admin SaaS (contexto global) no tiene empresa propia: indica para qué
- * empresa anota o quita, y solo puede ser una en la que el candidato tiene un
- * proceso. El personal de una empresa siempre trabaja sobre la suya.
+ * El admin SaaS indica para qué empresa anota o quita, y debe ser una en la que
+ * el candidato tenga un proceso.
  */
 class CompetenciasDelCandidato
 {

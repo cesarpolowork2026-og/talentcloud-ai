@@ -10,12 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Cupo mensual de matching con IA del plan (PlanEmpresa::cupoIaMensual()).
- *
- * Cuenta postulaciones, no cálculos: cada postulación ocupa un lugar la primera
- * vez que se evalúa con IA (postulaciones.ia_cupo_at) y recalcularla después
- * (cambió el CV o un requisito) no consume más. El mes es el calendario de
- * APP_TIMEZONE. Agotado el cupo no se bloquea nada: CalcularMatch usa el
- * análisis básico y la postulación queda marcada (ia_sin_cupo).
+ * Cuenta postulaciones, no cálculos: cada una ocupa un lugar la primera vez que
+ * se evalúa con IA (postulaciones.ia_cupo_at) y recalcularla no consume más. El
+ * mes es el calendario de APP_TIMEZONE. Con el cupo agotado, CalcularMatch usa
+ * el análisis básico y marca la postulación (ia_sin_cupo).
  */
 class CupoDeIa
 {

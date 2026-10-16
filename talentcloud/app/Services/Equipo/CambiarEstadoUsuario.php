@@ -9,18 +9,13 @@ use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Desactiva o reactiva a un usuario interno. Desactivado, pierde el acceso en
- * su siguiente petición (VerificarAcceso) y no puede iniciar sesión; su
- * historial (vacantes, entrevistas, evaluaciones) se conserva. Reactivar
- * respeta el límite de usuarios del plan.
+ * Desactiva o reactiva a un usuario interno. Desactivado pierde el acceso en su
+ * siguiente petición y conserva su historial. Reactivar respeta el límite de
+ * usuarios del plan.
  *
- * No se desactiva a quien tiene entrevistas por realizar: quedarían a nombre de
- * alguien sin acceso y el candidato esperaría a un entrevistador que no va a
- * llegar. Primero se cancelan o se programan con otra persona.
- *
- * La intención es explícita (no un "alternar") y se decide con la fila
- * releída y bloqueada: una doble confirmación o una pantalla desactualizada
- * no deshacen lo que se pidió. Si ya está en el estado pedido, no hace nada.
+ * No se desactiva a quien tiene entrevistas por realizar: primero se cancelan o
+ * se programan con otra persona. La acción es explícita (no un "alternar") y se
+ * decide con la fila releída y bloqueada; si ya está en ese estado, no hace nada.
  */
 class CambiarEstadoUsuario
 {

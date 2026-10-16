@@ -8,12 +8,10 @@ use App\Repositories\Contracts\EmpresaRepository;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Suspender / Activar del admin SaaS. Suspendida, sus usuarios pierden el
- * acceso de inmediato (VerificarAcceso); sus datos se conservan.
- *
- * La intención es explícita (no un "alternar") y se decide con la fila
- * releída y bloqueada: una doble confirmación o una pantalla desactualizada
- * no deshacen lo que se pidió. Si ya está en ese estado, no hace nada.
+ * Suspender / Activar del admin SaaS. Suspendida, sus usuarios pierden el acceso
+ * de inmediato (VerificarAcceso) y sus datos se conservan. La acción es
+ * explícita (no un "alternar") y se decide con la fila releída y bloqueada; si
+ * ya está en ese estado, no hace nada.
  */
 class CambiarEstadoEmpresa
 {

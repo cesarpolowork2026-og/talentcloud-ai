@@ -8,7 +8,7 @@ use App\Models\User;
 
 /**
  * Postulaciones: las gestiona el personal de la empresa de la vacante (y el
- * admin SaaS). El postulante solo ve las suyas (día 17).
+ * admin SaaS). El postulante solo ve las suyas.
  */
 class PostulacionPolicy
 {

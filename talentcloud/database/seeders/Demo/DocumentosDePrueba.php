@@ -9,14 +9,9 @@ use PhpOffice\PhpWord\SimpleType\Jc;
 use RuntimeException;
 
 /**
- * Genera CVs reales (bytes de PDF o DOCX) para los datos de demostración y
- * los tests, sin archivos binarios en el repositorio.
- *
- * El texto se maqueta como un CV clásico de una columna: nombre destacado,
- * titular y contacto, títulos de sección con una línea debajo, puestos en
- * negrita y logros con viñetas. Cada línea del texto sigue siendo una línea
- * del documento (o varias, si no cabe en el ancho del PDF), así que el texto
- * que se extrae es el mismo que se escribió.
+ * Genera CV reales (bytes de PDF o DOCX) para la demo y los tests, sin binarios
+ * en el repositorio. Cada línea del texto es una línea del documento, así que el
+ * texto que se extrae es el mismo que se escribió.
  */
 class DocumentosDePrueba
 {

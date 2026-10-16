@@ -7,16 +7,12 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Cabeceras de seguridad de todas las respuestas (también las de error y las de Livewire).
+ * Cabeceras de seguridad de todas las respuestas (también las de error y las de
+ * Livewire): no incrustar la página en otro sitio, no adivinar el tipo de
+ * contenido, no enviar la URL completa a otros sitios, sin cámara ni micrófono
+ * y HSTS solo por HTTPS.
  *
- * - Ninguna página se puede incrustar en otro sitio (clickjacking): `X-Frame-Options` y `frame-ancestors`.
- * - El navegador respeta el tipo de contenido declarado (los CV se descargan como adjunto).
- * - La dirección completa no sale hacia otros sitios: hay enlaces con datos en la ruta.
- * - Cámara, micrófono y ubicación desactivados: la aplicación no los usa.
- * - Solo por HTTPS (detrás del balanceador, con `TRUSTED_PROXIES`): el navegador no vuelve a usar HTTP.
- *
- * No se fija `script-src`: Livewire y Alpine necesitan código en línea y `unsafe-eval`, y una política que lo permita
- * no protege. Las directivas que sí se envían no tienen ese problema.
+ * No se fija `script-src` porque Livewire y Alpine necesitan código en línea.
  */
 class CabecerasDeSeguridad
 {
