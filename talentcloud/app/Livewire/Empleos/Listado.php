@@ -46,7 +46,7 @@ class Listado extends Component
     public function render(VacanteRepository $vacantes): View
     {
         return view('livewire.empleos.listado', [
-            'filas' => $this->listar($vacantes->publicadas()->latest('publicada_at')),
+            'filas' => $this->listar($vacantes->publicadasParaListado()->latest('publicada_at')),
             'modalidades' => Modalidad::opciones(),
         ])->layoutData(['descripcion' => 'Vacantes abiertas de las empresas en TalentCloud AI. Regístrate, sube tu CV una vez y postula en un clic.']);
     }

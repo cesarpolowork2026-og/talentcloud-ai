@@ -30,6 +30,13 @@ interface VacanteRepository
      */
     public function publicadas(): Builder;
 
+    /**
+     * Lo mismo que publicadas() sin la descripción: para listas de tarjetas.
+     *
+     * @return Builder<Vacante>
+     */
+    public function publicadasParaListado(): Builder;
+
     /** Una vacante de publicadas(), o null si no existe o ya no es pública. */
     public function buscarPublicada(int $id): ?Vacante;
 

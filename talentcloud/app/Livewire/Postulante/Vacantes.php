@@ -59,7 +59,7 @@ class Vacantes extends Component
         $user = auth()->user();
 
         return view('livewire.postulante.vacantes', [
-            'filas' => $this->listar($vacantes->publicadas()->latest('publicada_at')),
+            'filas' => $this->listar($vacantes->publicadasParaListado()->latest('publicada_at')),
             'modalidades' => Modalidad::opciones(),
             // vacante_id => retirada (bool): "Ya postulaste" o "Retirada".
             'postuladas' => $user->candidato?->postulacionesEnTodasLasEmpresas()->get(['vacante_id', 'retirada_at'])

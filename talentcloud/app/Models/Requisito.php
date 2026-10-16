@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TipoRequisito;
+use App\Support\BolsaPublica;
 use App\Tenancy\BelongsToEmpresa;
 use Database\Factories\RequisitoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -49,6 +50,12 @@ class Requisito extends Model
         'tipo' => 'obligatorio',
         'peso' => 3,
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => BolsaPublica::olvidar());
+        static::deleted(fn () => BolsaPublica::olvidar());
+    }
 
     protected function casts(): array
     {

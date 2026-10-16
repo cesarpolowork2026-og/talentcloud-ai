@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\EstadoVacante;
 use App\Enums\Modalidad;
+use App\Support\BolsaPublica;
 use App\Tenancy\BelongsToEmpresa;
 use Database\Factories\VacanteFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -44,6 +45,12 @@ class Vacante extends Model
         'modalidad' => 'remoto',
         'estado' => 'borrador',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => BolsaPublica::olvidar());
+        static::deleted(fn () => BolsaPublica::olvidar());
+    }
 
     protected function casts(): array
     {

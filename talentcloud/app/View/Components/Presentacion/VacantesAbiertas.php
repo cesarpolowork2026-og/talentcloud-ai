@@ -4,6 +4,7 @@ namespace App\View\Components\Presentacion;
 
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
+use App\Support\BolsaPublica;
 use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 use Illuminate\View\View;
@@ -21,7 +22,7 @@ class VacantesAbiertas extends Component
 
     public function __construct(VacanteRepository $repositorio)
     {
-        $this->vacantes = $repositorio->publicadas()->latest('publicada_at')->limit(self::CANTIDAD)->get();
+        $this->vacantes = BolsaPublica::portada(fn () => $repositorio->publicadasParaListado()->latest('publicada_at')->limit(self::CANTIDAD)->get());
     }
 
     public function shouldRender(): bool

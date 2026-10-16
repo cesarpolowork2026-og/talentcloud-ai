@@ -41,6 +41,15 @@ class EloquentVacanteRepository implements VacanteRepository
             ]);
     }
 
+    public function publicadasParaListado(): Builder
+    {
+        // Las tarjetas muestran título, lugar, modalidad y fecha: la descripción (texto largo) no se lee.
+        return $this->publicadas()->select([
+            'vacantes.id', 'vacantes.empresa_id', 'vacantes.titulo', 'vacantes.ubicacion',
+            'vacantes.modalidad', 'vacantes.estado', 'vacantes.publicada_at', 'vacantes.created_at',
+        ]);
+    }
+
     public function buscarPublicada(int $id): ?Vacante
     {
         return $this->publicadas()->find($id);
