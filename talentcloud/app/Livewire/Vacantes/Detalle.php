@@ -217,7 +217,7 @@ class Detalle extends Component
             'vacante' => $vacante,
             'editable' => $vacante->estado->esEditable() && auth()->user()?->can('update', $vacante),
             'transiciones' => $vacante->estado->transiciones(),
-            'catalogo' => Competencia::orderBy('nombre')->pluck('nombre'),
+            'catalogo' => Competencia::nombres(),
             'tipos' => TipoRequisito::opciones(),
             'modalidades' => Modalidad::opciones(),
             'pesos' => [1 => '1 · bajo', 2 => '2', 3 => '3 · medio', 4 => '4', 5 => '5 · alto'],

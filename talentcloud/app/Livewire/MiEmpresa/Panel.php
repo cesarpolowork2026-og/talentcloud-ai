@@ -281,6 +281,17 @@ class Panel extends Component
         $this->mostrarDatos = false;
     }
 
+    /**
+     * Sondeo de la vuelta de la página de pago: una lectura de la empresa y, mientras la pasarela
+     * no haya confirmado, sin repintar (el render completo cuenta usuarios, invitaciones y uso del plan).
+     */
+    public function esperarPago(): void
+    {
+        if (! $this->empresa()->tieneSuscripcionVigente()) {
+            $this->skipRender();
+        }
+    }
+
     public function render(EquipoRepository $equipo, EmpresaRepository $empresas, LimitesDelPlan $limites): View
     {
         $empresa = $empresas->conConteos($this->empresa());

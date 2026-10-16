@@ -3,7 +3,9 @@
 namespace App\Livewire\Postulante;
 
 use App\Enums\FuenteCompetencia;
+use App\Livewire\Concerns\EsperaElAnalisisDelCv;
 use App\Models\Candidato;
+use App\Models\Cv;
 use App\Models\User;
 use App\Services\Cvs\SubirCv;
 use Illuminate\Contracts\View\View;
@@ -15,6 +17,7 @@ use Livewire\WithFileUploads;
 /** Tarjeta "Mi currículo" del postulante (prototipo: isPostulante). */
 class MiCurriculo extends Component
 {
+    use EsperaElAnalisisDelCv;
     use WithFileUploads;
 
     public bool $mostrarSubida = false;
@@ -64,7 +67,7 @@ class MiCurriculo extends Component
         $user = auth()->user();
 
         // El registro de postulante siempre crea su perfil; sin él, la tarjeta se muestra vacía.
-        $candidato = $user->candidato?->load(['cvActual', 'competencias']);
+        $candidato = $user->candidato?->load(['cvActual' => Cv::ligero(), 'competencias']);
 
         return view('livewire.postulante.mi-curriculo', [
             'cv' => $candidato?->cvActual,
@@ -73,6 +76,11 @@ class MiCurriculo extends Component
                 ->unique('id')
                 ->count() ?? 0,
         ]);
+    }
+
+    protected function candidatoDelCv(): ?int
+    {
+        return Candidato::where('user_id', auth()->id())->value('id');
     }
 
     private function candidato(): Candidato

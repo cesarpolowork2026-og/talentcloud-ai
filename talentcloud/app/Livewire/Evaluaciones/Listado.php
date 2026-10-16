@@ -22,6 +22,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -195,6 +196,7 @@ class Listado extends Component
      *
      * @return list<array{id: int, etiqueta: string, detalle: string|null}>
      */
+    #[Renderless]
     public function buscarPostulacionesPorEvaluar(string $texto, EvaluacionRepository $evaluaciones): array
     {
         $this->authorize('create', Evaluacion::class);
@@ -209,6 +211,7 @@ class Listado extends Component
      *
      * @return list<array{id: int, etiqueta: string, detalle: string|null}>
      */
+    #[Renderless]
     public function buscarVacantesEvaluadas(string $texto, BuscadorDeVacantes $buscador): array
     {
         $this->authorize('viewAny', Evaluacion::class);

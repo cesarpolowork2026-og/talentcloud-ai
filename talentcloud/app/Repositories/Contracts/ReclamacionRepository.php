@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Contracts;
 
+use App\DTO\ResumenDeReclamaciones;
 use App\Models\Reclamacion;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -15,6 +16,9 @@ interface ReclamacionRepository
      * @return Builder<Reclamacion>
      */
     public function consultaListado(): Builder;
+
+    /** Pendientes, vencidas y por vencer hasta $limite, en una sola lectura. */
+    public function resumen(\DateTimeInterface $limite): ResumenDeReclamaciones;
 
     /** Hojas pendientes de respuesta. */
     public function pendientes(): int;

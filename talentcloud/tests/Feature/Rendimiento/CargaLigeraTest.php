@@ -1,0 +1,72 @@
+<?php
+
+use App\Enums\EstadoProcesamientoCv;
+use App\Livewire\Candidatos\Detalle;
+use App\Models\Candidato;
+use App\Models\Competencia;
+use App\Models\Cv;
+use App\Models\Empresa;
+use App\Models\Postulacion;
+use App\Models\User;
+use App\Models\Vacante;
+use App\Repositories\Contracts\CandidatoRepository;
+use Illuminate\Support\Facades\Cache;
+use Livewire\Livewire;
+
+/*
+ * Cargas ligeras: lo que una pantalla no muestra no se lee. Cada comprobación fija una
+ * decisión de la auditoría de carga del 15-10-2026 (ver AUDITORIA.md).
+ */
+
+beforeEach(function () {
+    $this->empresa = Empresa::factory()->create();
+    $this->marta = User::factory()->deEmpresa($this->empresa)->reclutador()->create();
+    $this->vacante = Vacante::factory()->deEmpresa($this->empresa)->create();
+    $this->candidato = Candidato::factory()->create();
+    Postulacion::factory()->paraVacante($this->vacante)->create(['candidato_id' => $this->candidato->id]);
+    actuarComo($this->marta);
+});
+
+it('el listado de candidatos trae solo un extracto del CV, no el texto completo', function () {
+    Cv::factory()->procesado(str_repeat('Experiencia en backend. ', 2000))->create([
+        'candidato_id' => $this->candidato->id,
+        'datos_estructurados' => ['clave' => 'valor'],
+    ]);
+
+    $fila = app(CandidatoRepository::class)->consultaListado()->get()->firstWhere('id', $this->candidato->id);
+
+    expect($fila->cvActual)->not->toBeNull()
+        ->and(mb_strlen($fila->cvActual->texto_extraido))->toBe(1000)
+        ->and($fila->cvActual->getAttributes())->not->toHaveKey('datos_estructurados')
+        ->and($fila->cvActual->nombre_original)->toBe('CV.pdf');
+});
+
+it('esperarCv no repinta mientras el CV se analiza y repinta cuando termina', function () {
+    $cv = Cv::factory()->create(['candidato_id' => $this->candidato->id, 'estado_procesamiento' => EstadoProcesamientoCv::Procesando]);
+
+    // El texto de la tarjeta cambia al terminar: mientras se analiza, el sondeo no pinta nada nuevo.
+    $componente = Livewire::test(Detalle::class, ['candidato' => $this->candidato]);
+
+    $cv->update(['texto_extraido' => 'Texto nuevo del CV.']);
+    $componente->call('esperarCv')->assertDontSee('Texto nuevo del CV.');
+
+    $cv->update(['estado_procesamiento' => EstadoProcesamientoCv::Procesado, 'procesado_at' => now()]);
+    $componente->call('esperarCv')->assertSee('Texto nuevo del CV.');
+});
+
+it('el catálogo de competencias se recuerda y se olvida al guardar o borrar', function () {
+    Cache::flush();
+    Competencia::factory()->create(['nombre' => 'Zig']);
+
+    expect(Competencia::nombres())->toContain('Zig');
+
+    // Sin pasar por la base: la segunda lectura sale de la caché.
+    Competencia::query()->where('nombre', 'Zig')->toBase()->delete();
+    expect(Competencia::nombres())->toContain('Zig');
+
+    $nueva = Competencia::factory()->create(['nombre' => 'Nim']);
+    expect(Competencia::nombres())->toContain('Nim')->not->toContain('Zig');
+
+    $nueva->delete();
+    expect(Competencia::nombres())->not->toContain('Nim');
+});

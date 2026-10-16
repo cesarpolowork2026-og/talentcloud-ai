@@ -15,6 +15,7 @@ use App\Services\Vacantes\BuscadorDeVacantes;
 use App\Support\Formato;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -64,6 +65,7 @@ class Panel extends Component
      *
      * @return list<array{id: int, etiqueta: string, detalle: string|null}>
      */
+    #[Renderless]
     public function buscarVacantes(string $texto, BuscadorDeVacantes $buscador): array
     {
         $this->authorize('viewAny', Vacante::class);

@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Postulante;
 
+use App\Livewire\Concerns\EsperaElAnalisisDelCv;
+use App\Models\Candidato;
+use App\Models\Cv;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
@@ -19,6 +22,8 @@ use Livewire\Component;
  */
 class DetalleVacante extends Component
 {
+    use EsperaElAnalisisDelCv;
+
     #[Locked]
     public int $vacanteId;
 
@@ -75,10 +80,15 @@ class DetalleVacante extends Component
 
         return view('livewire.postulante.detalle-vacante', [
             'vacante' => $vacante,
-            'cv' => $candidato?->cvActual,
+            'cv' => $candidato?->load(['cvActual' => Cv::ligero()])->cvActual,
             'yaPostulo' => $suPostulacion !== null,
             'laRetiro' => $suPostulacion?->estaRetirada() ?? false,
         ])->title($vacante->titulo ?? 'Vacante');
+    }
+
+    protected function candidatoDelCv(): ?int
+    {
+        return Candidato::where('user_id', auth()->id())->value('id');
     }
 
     private function usuario(): User

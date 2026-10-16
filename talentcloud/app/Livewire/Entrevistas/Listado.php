@@ -24,6 +24,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -218,6 +219,7 @@ class Listado extends Component
      *
      * @return list<array{id: int, etiqueta: string, detalle: string|null}>
      */
+    #[Renderless]
     public function buscarPostulaciones(string $texto, EntrevistaRepository $entrevistas): array
     {
         $this->authorize('create', Entrevista::class);

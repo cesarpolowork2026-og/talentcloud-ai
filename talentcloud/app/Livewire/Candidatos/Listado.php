@@ -20,6 +20,7 @@ use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -188,6 +189,7 @@ class Listado extends Component
      *
      * @return list<array{id: int, etiqueta: string, detalle: string|null}>
      */
+    #[Renderless]
     public function buscarVacantesAbiertas(string $texto, BuscadorDeVacantes $buscador): array
     {
         $this->authorize('create', Candidato::class);

@@ -3,6 +3,7 @@
 namespace App\Repositories\Eloquent;
 
 use App\Models\Candidato;
+use App\Models\Cv;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Repositories\Contracts\CandidatoRepository;
@@ -64,7 +65,7 @@ class EloquentCandidatoRepository implements CandidatoRepository
         return $this->visibles()
             ->select('candidatos.*')
             ->selectRaw('coalesce(('.$matchDeOrden->toSql().'), -1) as match_de_orden', $matchDeOrden->getBindings())
-            ->with(['ultimaPostulacion.vacante.empresa:id,nombre', 'cvActual', 'competencias'])
+            ->with(['ultimaPostulacion.vacante.empresa:id,nombre', 'cvActual' => Cv::ligero(), 'competencias'])
             // Vista global (admin SaaS): todos sus procesos, agrupados por empresa en la tarjeta.
             ->when($global, fn (Builder $q) => $q->with(['postulaciones' => fn ($p) => $p->with('vacante.empresa:id,nombre')->latest()]));
     }

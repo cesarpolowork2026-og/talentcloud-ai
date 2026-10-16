@@ -4,6 +4,7 @@ namespace App\Livewire\Postulante;
 
 use App\Enums\EstadoEntrevista;
 use App\Enums\NivelCoincidencia;
+use App\Models\Candidato;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\User;
@@ -12,6 +13,7 @@ use App\Services\Postulaciones\RetirarPostulacion;
 use App\Services\Vacantes\OperacionNoPermitida;
 use App\Tenancy\EmpresaScope;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -34,7 +36,7 @@ class MisPostulaciones extends Component
 
     public function verDetalle(int $id): void
     {
-        abort_unless($this->postulaciones()->contains('id', $id), 404);
+        abort_unless($this->consulta()?->whereKey($id)->exists(), 404);
 
         $this->postulacionSeleccionada = $id;
         $this->mostrarDetalle = true;
@@ -81,7 +83,8 @@ class MisPostulaciones extends Component
 
         return view('livewire.postulante.mis-postulaciones', [
             'postulaciones' => $postulaciones,
-            'seleccionada' => $postulaciones->firstWhere('id', $this->postulacionSeleccionada),
+            // Solo la abierta en el detalle trae el análisis completo (match_detalle); la lista, no.
+            'seleccionada' => $this->postulacionSeleccionada !== null && ($this->mostrarDetalle || $this->mostrarRetiro) ? $this->seleccionada() : null,
             'entrevistasPorPostulacion' => $entrevistas->groupBy('postulacion_id'),
             // Próximas: pendientes o confirmadas y aún por celebrarse.
             'proximas' => $entrevistas
@@ -108,25 +111,36 @@ class MisPostulaciones extends Component
         return [$coinciden, count($requisitos)];
     }
 
-    /** La postulación abierta en el detalle; siempre una del propio postulante. */
+    /** La postulación abierta en el detalle, completa; siempre una del propio postulante. */
     private function seleccionada(): Postulacion
     {
-        $postulacion = $this->postulaciones()->firstWhere('id', $this->postulacionSeleccionada);
+        $postulacion = $this->consulta()?->find($this->postulacionSeleccionada);
 
         abort_if($postulacion === null, 404);
 
         return $postulacion;
     }
 
-    /** @return Collection<int, Postulacion> */
+    /**
+     * La lista, sin el análisis de matching (jsonb de ~2 KB por fila que solo usa el detalle).
+     *
+     * @return Collection<int, Postulacion>
+     */
     private function postulaciones(): Collection
+    {
+        return $this->consulta()
+            ?->select(['postulaciones.id', 'postulaciones.empresa_id', 'postulaciones.vacante_id', 'postulaciones.candidato_id', 'postulaciones.etapa', 'postulaciones.created_at', 'postulaciones.retirada_at', 'postulaciones.estado_avisado'])
+            ->latest()
+            ->get() ?? collect();
+    }
+
+    /** @return HasMany<Postulacion, Candidato>|null */
+    private function consulta(): ?HasMany
     {
         /** @var User $usuario */
         $usuario = auth()->user();
 
         return $usuario->candidato?->postulacionesEnTodasLasEmpresas()
-            ->with(['vacante' => fn ($q) => $q->withoutGlobalScope(EmpresaScope::class)->with('empresa')])
-            ->latest()
-            ->get() ?? collect();
+            ->with(['vacante' => fn ($q) => $q->withoutGlobalScope(EmpresaScope::class)->with('empresa')]);
     }
 }

@@ -189,7 +189,9 @@ class Listado extends Component
 
     public function render(EmpresaRepository $empresas, EquipoRepository $equipo, LimitesDelPlan $limites): View
     {
-        $seleccionada = $this->empresaSeleccionada ? $empresas->buscar($this->empresaSeleccionada) : null;
+        // La empresa abierta se relee solo mientras alguno de sus diálogos está abierto (no en cada búsqueda o página).
+        $hayDialogo = $this->mostrarDetalle || $this->mostrarConfirmacion || $this->mostrarCambioDePlan;
+        $seleccionada = $this->empresaSeleccionada && $hayDialogo ? $empresas->buscar($this->empresaSeleccionada) : null;
 
         return view('livewire.empresas.listado', [
             'filas' => $this->listar($empresas->consultaParaAdministracion()),

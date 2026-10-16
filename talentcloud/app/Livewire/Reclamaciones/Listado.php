@@ -125,12 +125,15 @@ class Listado extends Component
 
     public function render(ReclamacionRepository $repositorio, PlazoDeRespuesta $plazo): View
     {
+        $resumen = $repositorio->resumen(now());
+
         return view('livewire.reclamaciones.listado', [
             'filas' => $this->listar($repositorio->consultaListado()),
-            'detalle' => $this->seleccionada ? $repositorio->buscar($this->seleccionada)?->load('respondidaPor') : null,
+            // La hoja se lee solo con el diálogo abierto (antes se releía en cada búsqueda o cambio de página).
+            'detalle' => $this->seleccionada && $this->mostrarDetalle ? $repositorio->buscar($this->seleccionada)?->load('respondidaPor') : null,
             'plazo' => $plazo,
-            'pendientes' => $repositorio->pendientes(),
-            'vencidas' => $repositorio->vencidas(),
+            'pendientes' => $resumen->pendientes,
+            'vencidas' => $resumen->vencidas,
         ]);
     }
 

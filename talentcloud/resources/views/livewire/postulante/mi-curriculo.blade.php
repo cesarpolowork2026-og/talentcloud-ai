@@ -1,7 +1,7 @@
 {{-- "Mi currículo" del prototipo (card elev-sm en la vista del postulante). --}}
 @use('App\Enums\EstadoProcesamientoCv')
 @php($procesando = in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true))
-<div @if ($procesando) wire:poll.4s @endif @class(['contents' => $soloSubida])>
+<div @if ($procesando) wire:poll.4s="esperarCv" @endif @class(['contents' => $soloSubida])>
     @if ($soloSubida)
         <x-ui.button variant="primary" block wire:click="$set('mostrarSubida', true)">{{ $cv ? 'Subir otro CV' : 'Subir mi CV' }}</x-ui.button>
     @else

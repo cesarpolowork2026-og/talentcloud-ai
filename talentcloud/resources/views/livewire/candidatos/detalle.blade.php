@@ -172,7 +172,7 @@
         {{-- Currículo --}}
         @php($cv = $candidato->cvActual)
         {{-- Mientras el CV se procesa en la cola, se consulta su estado cada 4 s. --}}
-        <div @if (in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true)) wire:poll.4s @endif>
+        <div @if (in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true)) wire:poll.4s="esperarCv" @endif>
         <x-ui.card kicker="Currículo" :title="$cv?->nombre_original ?? 'Sin CV'" elev="sm">
             @if ($cv)
                 <div class="card-meta">

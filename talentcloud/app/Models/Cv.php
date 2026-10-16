@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Enums\EstadoProcesamientoCv;
+use Closure;
 use Database\Factories\CvFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Carbon;
 
 /**
@@ -59,6 +61,20 @@ class Cv extends Model
             'procesado_at' => 'datetime',
             'tamano' => 'integer',
         ];
+    }
+
+    /**
+     * Restricción para cargar el CV en pantallas y sondeos: sin el texto completo
+     * (decenas de KB) ni los datos estructurados, solo un extracto de 1 000 caracteres
+     * (las vistas muestran 180-220). Quien necesite el texto lee el modelo completo.
+     *
+     * @return Closure(Relation<*, *, *>): mixed
+     */
+    public static function ligero(): Closure
+    {
+        return fn (Relation $relacion) => $relacion
+            ->select(['cvs.id', 'cvs.candidato_id', 'cvs.nombre_original', 'cvs.estado_procesamiento', 'cvs.error', 'cvs.created_at', 'cvs.procesado_at'])
+            ->selectRaw('left(cvs.texto_extraido, 1000) as texto_extraido');
     }
 
     /**

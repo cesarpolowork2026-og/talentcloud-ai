@@ -7,6 +7,7 @@ use App\Enums\TipoRequisito;
 use App\Jobs\CalcularMatch;
 use App\Matching\ExplicacionDelPuntaje;
 use App\Matching\MatchResult;
+use App\Models\Cv;
 use App\Models\MatchFeedback;
 use App\Models\Postulacion;
 use App\Models\Requisito;
@@ -133,9 +134,47 @@ class Detalle extends Component
         }
     }
 
+    /**
+     * Sondeo de la pantalla mientras se espera un recálculo o el análisis del CV: una lectura
+     * mínima y, si todavía no hay novedad, sin repintar (el render completo suma ~10 consultas
+     * y relee el matching). Cuando hay resultado, o se agota la espera, se pinta una vez.
+     */
+    public function esperar(): void
+    {
+        $postulacion = Postulacion::query()
+            ->select(['id', 'candidato_id', 'match_calculado_at'])
+            ->selectRaw('(match_detalle IS NOT NULL) AS con_detalle')
+            ->whereKey($this->postulacionId)
+            ->first();
+
+        if ($postulacion === null) {
+            return;
+        }
+
+        if ($this->recalculoDesde !== null) {
+            $pedido = Carbon::parse($this->recalculoDesde);
+            $calculado = $postulacion->match_calculado_at;
+
+            if (($calculado === null || $calculado->lessThan($pedido)) && $pedido->diffInSeconds(now(), true) <= self::ESPERA_MAXIMA) {
+                $this->skipRender();
+            }
+
+            return;
+        }
+
+        if (! $postulacion->getAttribute('con_detalle')) {
+            $estado = Cv::query()->where('candidato_id', $postulacion->candidato_id)->orderByDesc('id')->value('estado_procesamiento');
+            $estado = $estado instanceof \BackedEnum ? $estado->value : $estado;
+
+            if (in_array($estado, [EstadoProcesamientoCv::Pendiente->value, EstadoProcesamientoCv::Procesando->value], true)) {
+                $this->skipRender();
+            }
+        }
+    }
+
     public function render(): View
     {
-        $postulacion = $this->postulacion()->load(['candidato.cvActual', 'vacante.empresa', 'vacante.requisitos.competencia']);
+        $postulacion = $this->postulacion()->load(['candidato.cvActual' => Cv::ligero(), 'vacante.empresa', 'vacante.requisitos.competencia']);
         $this->revisarRecalculo($postulacion);
         $resultado = $postulacion->match_detalle ? MatchResult::desdeArreglo($postulacion->match_detalle) : null;
 

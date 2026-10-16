@@ -66,7 +66,7 @@
             <x-ui.card kicker="Plan" :title="$empresa->etiquetaDelPlan()">
                 {{-- Vuelta de la página de pago: el plan cambia cuando Stripe confirma el pago (webhook). --}}
                 @if ($pago === 'confirmando' && ! $empresa->tieneSuscripcionVigente())
-                    <p class="card-body text-14" role="status" wire:poll.3s>Estamos confirmando tu pago con Stripe. Tu plan se actualizará en unos segundos.</p>
+                    <p class="card-body text-14" role="status" wire:poll.3s="esperarPago">Estamos confirmando tu pago con Stripe. Tu plan se actualizará en unos segundos.</p>
                 @elseif ($pago === 'confirmando')
                     <p class="card-body text-14" role="status">Pago confirmado: tu empresa ya tiene el plan {{ $empresa->plan->etiqueta() }}.</p>
                 @elseif ($pago === 'cancelado')

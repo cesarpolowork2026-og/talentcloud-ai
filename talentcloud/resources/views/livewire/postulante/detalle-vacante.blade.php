@@ -2,7 +2,7 @@
 @use('App\Enums\EstadoProcesamientoCv')
 @php($cvListo = $cv?->estado_procesamiento === EstadoProcesamientoCv::Procesado)
 @php($cvAnalizandose = in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true))
-<div @if ($cvAnalizandose) wire:poll.4s @endif>
+<div @if ($cvAnalizandose) wire:poll.4s="esperarCv" @endif>
     @if ($vacante === null)
         {{-- Se cerró (o su empresa se suspendió) mientras el postulante la miraba. --}}
         <x-ui.empty-state icon="briefcase" message="Esta vacante ya no recibe postulaciones.">

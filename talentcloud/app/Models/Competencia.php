@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\CompetenciaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 /**
@@ -13,12 +14,17 @@ use Illuminate\Support\Str;
  * @property int $id
  * @property string $nombre
  * @property string $nombre_normalizado
+ * @property string|null $categoria
  * @property list<string> $sinonimos
  */
 class Competencia extends Model
 {
     /** @use HasFactory<CompetenciaFactory> */
     use HasFactory;
+
+    private const CLAVE_NOMBRES = 'competencias:nombres';
+
+    private const CLAVE_CATALOGO = 'competencias:catalogo';
 
     protected $table = 'competencias';
 
@@ -42,6 +48,38 @@ class Competencia extends Model
             $competencia->nombre = trim($competencia->nombre);
             $competencia->nombre_normalizado = self::normalizar($competencia->nombre);
         });
+
+        static::saved(fn () => self::olvidarCatalogo());
+        static::deleted(fn () => self::olvidarCatalogo());
+    }
+
+    /**
+     * Nombres del catálogo, para los `<datalist>`. Cambia casi nunca y se pedía en cada
+     * render de Livewire: se recuerda una hora y se olvida al guardar o borrar una competencia.
+     *
+     * @return list<string>
+     */
+    public static function nombres(): array
+    {
+        return Cache::remember(self::CLAVE_NOMBRES, 3600, fn () => self::orderBy('nombre')->pluck('nombre')->all());
+    }
+
+    /**
+     * Catálogo completo (nombre, categoría y sinónimos) para el selector de competencias.
+     *
+     * @return list<array{nombre: string, categoria: string|null, sinonimos: list<string>}>
+     */
+    public static function catalogoCompleto(): array
+    {
+        return Cache::remember(self::CLAVE_CATALOGO, 3600, fn () => self::orderBy('nombre')->get(['nombre', 'categoria', 'sinonimos'])
+            ->map(fn (self $c) => ['nombre' => $c->nombre, 'categoria' => $c->categoria, 'sinonimos' => $c->sinonimos])
+            ->all());
+    }
+
+    public static function olvidarCatalogo(): void
+    {
+        Cache::forget(self::CLAVE_NOMBRES);
+        Cache::forget(self::CLAVE_CATALOGO);
     }
 
     /** Clave de unicidad: minúsculas, sin tildes ni espacios repetidos. */

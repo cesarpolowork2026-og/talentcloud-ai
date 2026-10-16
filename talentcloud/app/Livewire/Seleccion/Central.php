@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -128,6 +129,7 @@ class Central extends Component
      *
      * @return list<array{id: int, etiqueta: string, detalle: string|null}>
      */
+    #[Renderless]
     public function buscarVacantes(string $texto): array
     {
         $this->authorize('viewAny', Vacante::class);

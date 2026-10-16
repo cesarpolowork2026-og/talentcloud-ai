@@ -4,8 +4,10 @@ namespace App\Livewire\Candidatos;
 
 use App\Enums\EstadoVacante;
 use App\Enums\FuenteCompetencia;
+use App\Livewire\Concerns\EsperaElAnalisisDelCv;
 use App\Models\Candidato;
 use App\Models\Competencia;
+use App\Models\Cv;
 use App\Models\Empresa;
 use App\Models\Postulacion;
 use App\Models\User;
@@ -32,6 +34,7 @@ use Livewire\WithFileUploads;
  */
 class Detalle extends Component
 {
+    use EsperaElAnalisisDelCv;
     use WithFileUploads;
 
     #[Locked]
@@ -149,7 +152,7 @@ class Detalle extends Component
     public function render(): View
     {
         $candidato = $this->candidato()->load([
-            'cvActual',
+            'cvActual' => Cv::ligero(),
             'competencias' => fn ($q) => $q->orderBy('nombre'),
             // Solo las postulaciones de la empresa del contexto (admin: todas).
             'postulaciones' => fn ($q) => $q->with('vacante.empresa:id,nombre')->latest(),
@@ -178,7 +181,7 @@ class Detalle extends Component
                 fn (Vacante $v) => $v,
                 fn (Vacante $v) => $v->titulo,
             ),
-            'catalogo' => Competencia::orderBy('nombre')->pluck('nombre'),
+            'catalogo' => Competencia::nombres(),
             // "Notas del equipo": una por postulación de la empresa (nunca para el postulante).
             'conNotas' => $candidato->postulaciones
                 ->filter(fn (Postulacion $p) => auth()->user()?->can('gestionarNotas', $p) ?? false)
@@ -215,6 +218,11 @@ class Detalle extends Component
         }
 
         return collect($grupos)->sortBy('empresa')->values();
+    }
+
+    protected function candidatoDelCv(): ?int
+    {
+        return $this->candidatoId;
     }
 
     private function candidato(): Candidato

@@ -1,7 +1,7 @@
 {{-- "Matching inteligente" del prototipo (TalentCloud App.dc.html, isMatching). --}}
 @use('App\Enums\MotorMatching')
 @use('App\Enums\NivelCoincidencia')
-<div @if ($recalculando) wire:poll.2s @elseif ($procesando) wire:poll.5s @endif>
+<div @if ($recalculando) wire:poll.2s="esperar" @elseif ($procesando) wire:poll.5s="esperar" @endif>
     @php($candidato = $postulacion->candidato)
     @php($vacante = $postulacion->vacante)
     @php($subtitulo = $candidato?->nombre.' — '.$vacante?->titulo.' @ '.$vacante?->empresa?->nombre.($resultado ? ' · '.$resultado->scoreRedondeado().'% de coincidencia global.' : '.'))

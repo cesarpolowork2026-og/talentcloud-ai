@@ -18,15 +18,18 @@ final class CacheDeResumenes
      * @template T
      *
      * @param  Closure(): T  $calcular
+     * @param  int|null  $segundos  Vigencia propia (más corta que la general, p. ej. para pantallas con sondeo); null = la general.
      * @return T
      */
-    public static function recordar(string $clave, Closure $calcular): mixed
+    public static function recordar(string $clave, Closure $calcular, ?int $segundos = null): mixed
     {
-        $segundos = (int) config('talentcloud.dashboard.cache_segundos', 0);
+        $general = (int) config('talentcloud.dashboard.cache_segundos', 0);
 
-        if ($segundos <= 0) {
+        if ($general <= 0) {
             return $calcular();
         }
+
+        $segundos ??= $general;
 
         $contexto = app(TenantContext::class);
         $alcance = $contexto->esGlobal() ? 'global' : 'empresa-'.($contexto->id() ?? 'ninguna');

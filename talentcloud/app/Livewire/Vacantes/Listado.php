@@ -204,11 +204,7 @@ class Listado extends Component
             'modalidades' => Modalidad::opciones(),
             // El selector de competencias busca en el navegador: el catálogo viaja solo con el formulario abierto.
             'catalogo' => $this->mostrarFormulario
-                ? Competencia::orderBy('nombre')->get(['nombre', 'categoria', 'sinonimos'])->map(fn (Competencia $c) => [
-                    'nombre' => $c->nombre,
-                    'categoria' => $c->categoria,
-                    'sinonimos' => $c->sinonimos,
-                ])->all()
+                ? Competencia::catalogoCompleto()
                 : [],
         ]);
     }

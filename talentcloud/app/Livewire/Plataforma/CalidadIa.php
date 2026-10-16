@@ -5,6 +5,7 @@ namespace App\Livewire\Plataforma;
 use App\Models\MatchFeedback;
 use App\Services\Plataforma\CalidadDeLaIa;
 use App\Services\Postulaciones\RecalculoDeMatching;
+use App\Support\CacheDeResumenes;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Queue;
@@ -89,7 +90,8 @@ class CalidadIa extends Component
         }
 
         return view('livewire.plataforma.calidad-ia', [
-            'resumen' => $calidad->resumen(),
+            // Con el sondeo de 3 s, las cifras (conteos sobre todas las postulaciones) se recalculan cada 15 s; el avance sale de la cola, en vivo.
+            'resumen' => CacheDeResumenes::recordar('calidad-ia', fn () => $calidad->resumen(), 15),
             'dias' => CalidadDeLaIa::DIAS,
             'enCola' => $enCola,
         ]);

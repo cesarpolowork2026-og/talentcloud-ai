@@ -3,7 +3,6 @@
 namespace App\Services\Plataforma;
 
 use App\DTO\ResumenDePlataforma;
-use App\DTO\ResumenDeReclamaciones;
 use App\DTO\UsoDelPlan;
 use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoVacante;
@@ -77,11 +76,7 @@ class PanelDePlataforma
                 ->filter(fn (Empresa $e) => $e->plan_solicitado !== null)
                 ->sortBy(fn (Empresa $e) => $e->plan_solicitado_at)
                 ->values(),
-            reclamaciones: new ResumenDeReclamaciones(
-                pendientes: $this->reclamaciones->pendientes(),
-                vencidas: $this->reclamaciones->vencidas(),
-                porVencer: $this->reclamaciones->porVencerHasta($this->plazo->sumarDiasHabiles(now(), self::DIAS_POR_VENCER)),
-            ),
+            reclamaciones: $this->reclamaciones->resumen($this->plazo->sumarDiasHabiles(now(), self::DIAS_POR_VENCER)),
         );
     }
 }
