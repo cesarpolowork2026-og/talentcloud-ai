@@ -199,8 +199,9 @@ class Listado extends Component
 
     public function render(CandidatoRepository $candidatos): View
     {
-        $seleccionado = $this->candidatoSeleccionado
-            ? $candidatos->consultaListado()->whereKey($this->candidatoSeleccionado)->first()
+        // La ficha se lee solo con el diálogo abierto y sin la subconsulta de orden por match.
+        $seleccionado = $this->candidatoSeleccionado && $this->mostrarDetalle
+            ? $candidatos->consultaListado(conOrdenPorMatch: false)->whereKey($this->candidatoSeleccionado)->first()
             : null;
 
         return view('livewire.candidatos.listado', [

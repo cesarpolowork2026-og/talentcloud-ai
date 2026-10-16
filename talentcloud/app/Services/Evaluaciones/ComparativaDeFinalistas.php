@@ -20,7 +20,11 @@ class ComparativaDeFinalistas
     public function para(Vacante $vacante): array
     {
         return Evaluacion::query()
-            ->with('postulacion.candidato')
+            // Solo lo que la fila usa: sin el análisis de matching (match_detalle) de cada postulación.
+            ->with([
+                'postulacion' => fn ($q) => $q->select(['id', 'candidato_id', 'vacante_id', 'etapa', 'retirada_at', 'match_score']),
+                'postulacion.candidato:id,nombre',
+            ])
             ->whereHas('postulacion', fn ($q) => $q->where('vacante_id', $vacante->id))
             ->get()
             ->groupBy('postulacion_id')

@@ -238,6 +238,11 @@ class Listado extends Component
     {
         $seleccionada = $this->entrevistaSeleccionada ? $entrevistas->buscar($this->entrevistaSeleccionada) : null;
 
+        // La postulación elegida en el formulario se lee una sola vez (antes, tres veces por render).
+        $elegida = $this->mostrarFormulario && ctype_digit($this->postulacionId)
+            ? Postulacion::with(['candidato:id,nombre', 'vacante.empresa:id,nombre', 'empresa'])->find((int) $this->postulacionId)
+            : null;
+
         return view('livewire.entrevistas.listado', [
             'resumen' => $agenda->calcular(),
             'filas' => $this->listar($entrevistas->consultaListado()->orderBy('inicia_at')),
@@ -245,13 +250,10 @@ class Listado extends Component
             'vistaGlobal' => app(TenantContext::class)->esGlobal(),
             'seleccionada' => $seleccionada,
             // El texto del buscador cuando ya hay una postulación elegida (por ejemplo, desde «Programar entrevista» del Kanban).
-            'etiquetaDePostulacion' => $this->mostrarFormulario && ctype_digit($this->postulacionId)
-                ? $this->etiquetaDePostulacion(Postulacion::with(['candidato:id,nombre', 'vacante.empresa:id,nombre'])->find((int) $this->postulacionId))
-                : '',
+            'etiquetaDePostulacion' => $this->etiquetaDePostulacion($elegida),
             // La casilla "Mover a Entrevista" solo aparece si el candidato elegido aún no llegó a esa etapa.
-            'puedeMoverAEntrevista' => $this->mostrarFormulario && ctype_digit($this->postulacionId)
-                && (Postulacion::query()->find((int) $this->postulacionId)?->etapa->antesDeEntrevista() ?? false),
-            'entrevistadores' => $this->mostrarFormulario ? $this->opcionesDeEntrevistador() : [],
+            'puedeMoverAEntrevista' => $elegida?->etapa->antesDeEntrevista() ?? false,
+            'entrevistadores' => $this->mostrarFormulario ? $this->opcionesDeEntrevistador($elegida) : [],
             'modalidades' => ModalidadEntrevista::opciones(),
             'duraciones' => self::DURACIONES,
         ]);
@@ -262,10 +264,13 @@ class Listado extends Component
      *
      * @return array<int, string>
      */
-    private function opcionesDeEntrevistador(): array
+    private function opcionesDeEntrevistador(?Postulacion $elegida = null): array
     {
+        // Sin la postulación ya leída (al cambiar de candidato, fuera del render) se busca aquí.
+        $elegida ??= ctype_digit($this->postulacionId) ? Postulacion::with('empresa')->find((int) $this->postulacionId) : null;
+
         $empresa = $this->postulacionId !== ''
-            ? Postulacion::with('empresa')->find((int) $this->postulacionId)?->empresa
+            ? $elegida?->empresa
             : $this->usuario()->empresa;
 
         if ($empresa === null) {

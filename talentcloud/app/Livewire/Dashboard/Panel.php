@@ -12,6 +12,7 @@ use App\Services\Dashboard\TendenciaDePostulaciones;
 use App\Services\Empresas\LimitesDelPlan;
 use App\Services\Plataforma\PanelDePlataforma;
 use App\Services\Vacantes\BuscadorDeVacantes;
+use App\Support\CacheDeResumenes;
 use App\Support\Formato;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
@@ -96,14 +97,14 @@ class Panel extends Component
         $vacanteDelEmbudo = ctype_digit($this->vacanteDelEmbudo) ? $vacantes->buscar((int) $this->vacanteDelEmbudo) : null;
 
         return view('livewire.dashboard.panel', [
-            'plataforma' => $esAdmin ? $panel->resumen() : null,
+            'plataforma' => $esAdmin ? CacheDeResumenes::recordar('plataforma', fn () => $panel->resumen(), 30) : null,
             'resumen' => $dashboard->resumen(),
             'periodo' => $periodo,
             'tendencia' => $tendencia->calcular($periodo),
             'embudo' => $embudo->calcular($vacanteDelEmbudo?->id, $periodo),
             'etiquetaDeLaVacanteDelEmbudo' => $vacanteDelEmbudo ? Formato::vacante($vacanteDelEmbudo->loadMissing('empresa:id,nombre')) : '',
             // El plan es de la empresa: el admin SaaS ve la plataforma entera y no tiene uno propio.
-            'uso' => $esAdmin || $usuario->empresa === null ? null : $limites->uso($usuario->empresa),
+            'uso' => $esAdmin || $usuario->empresa === null ? null : CacheDeResumenes::recordar('uso-del-plan', fn () => $limites->uso($usuario->empresa), 30),
             'empresa' => $esAdmin ? null : $usuario->empresa,
             'diasDelAhorro' => DashboardService::DIAS_DEL_AHORRO,
             'diasSinRevisar' => DashboardService::DIAS_SIN_REVISAR,
@@ -111,7 +112,7 @@ class Panel extends Component
             'subtitulo' => $esAdmin
                 ? 'Tus empresas cliente, la salud de la IA y la actividad de selección de toda la plataforma.'
                 : 'Resumen de la actividad de selección de '.$usuario->empresa?->nombre.'.',
-            'seleccionada' => $this->vacanteSeleccionada
+            'seleccionada' => $this->vacanteSeleccionada && $this->mostrarVistaPrevia
                 ? $vacantes->buscar($this->vacanteSeleccionada)?->load('empresa')->loadCount('postulaciones')
                 : null,
         ])->title($esAdmin ? 'Panel' : 'Dashboard');

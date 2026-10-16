@@ -37,7 +37,7 @@ interface CandidatoRepository
      *
      * @return Builder<Candidato>
      */
-    public function consultaListado(): Builder;
+    public function consultaListado(bool $conOrdenPorMatch = true): Builder;
 
     public function buscarVisible(int $id): ?Candidato;
 

@@ -52,7 +52,16 @@ class DashboardService
         private readonly TenantContext $tenant,
     ) {}
 
+    /**
+     * Todo el resumen se recuerda 30 s por empresa: cambiar el periodo, el filtro del embudo o abrir una
+     * vista previa vuelve a pintar la pantalla, y no hace falta repetir por eso la veintena de consultas.
+     */
     public function resumen(): ResumenDelDashboard
+    {
+        return CacheDeResumenes::recordar('resumen', fn () => $this->calcularResumen(), 30);
+    }
+
+    private function calcularResumen(): ResumenDelDashboard
     {
         $postulaciones = $this->cifrasDePostulaciones();
         $entrevistas = $this->agenda->calcular();

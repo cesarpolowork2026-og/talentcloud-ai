@@ -42,7 +42,7 @@ class EloquentCandidatoRepository implements CandidatoRepository
         return $consulta->where(fn (Builder $q) => $this->condicionDeVisibilidad($q, $empresaId));
     }
 
-    public function consultaListado(): Builder
+    public function consultaListado(bool $conOrdenPorMatch = true): Builder
     {
         $global = $this->contexto->esGlobal();
 
@@ -63,8 +63,10 @@ class EloquentCandidatoRepository implements CandidatoRepository
         // coalesce por fuera: sin postulaciones la subconsulta no devuelve filas (NULL)
         // y quedaría primera al ordenar de mayor a menor.
         return $this->visibles()
-            ->select('candidatos.*')
-            ->selectRaw('coalesce(('.$matchDeOrden->toSql().'), -1) as match_de_orden', $matchDeOrden->getBindings())
+            // Quien abre una sola ficha no ordena: se ahorra la subconsulta de match.
+            ->when($conOrdenPorMatch, fn (Builder $q) => $q
+                ->select('candidatos.*')
+                ->selectRaw('coalesce(('.$matchDeOrden->toSql().'), -1) as match_de_orden', $matchDeOrden->getBindings()))
             ->with(['ultimaPostulacion.vacante.empresa:id,nombre', 'cvActual' => Cv::ligero(), 'competencias'])
             // Vista global (admin SaaS): todos sus procesos, agrupados por empresa en la tarjeta.
             ->when($global, fn (Builder $q) => $q->with(['postulaciones' => fn ($p) => $p->with('vacante.empresa:id,nombre')->latest()]));
