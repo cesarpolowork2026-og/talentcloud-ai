@@ -16,6 +16,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use LogicException;
@@ -68,8 +69,14 @@ class AppServiceProvider extends ServiceProvider
             return $this->app->isProduction() ? $regla->uncompromised() : $regla;
         });
 
-        // Detecta consultas N+1 fuera de producción.
-        Model::preventLazyLoading(! $this->app->isProduction());
+        // Detecta consultas N+1: fuera de producción lanzan una excepción; en producción no rompen la
+        // página, pero quedan en el registro para encontrarlas.
+        Model::preventLazyLoading();
+        if ($this->app->isProduction()) {
+            Model::handleLazyLoadingViolationUsing(function (Model $modelo, string $relacion): void {
+                Log::warning('Carga perezosa (N+1) de la relación «'.$relacion.'» en '.$modelo::class);
+            });
+        }
 
         // Fechas en español ("23 sep", "30 de septiembre").
         Carbon::setLocale(config('app.locale'));

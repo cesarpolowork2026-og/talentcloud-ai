@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoProcesamientoCv;
 use App\Livewire\Candidatos\Detalle;
 use App\Models\Candidato;
@@ -9,6 +10,7 @@ use App\Models\Empresa;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Notifications\AvisoGeneral;
 use App\Repositories\Contracts\CandidatoRepository;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Livewire;
@@ -69,4 +71,24 @@ it('el catálogo de competencias se recuerda y se olvida al guardar o borrar', f
 
     $nueva->delete();
     expect(Competencia::nombres())->not->toContain('Nim');
+});
+
+it('suspender una empresa corta el acceso en la siguiente petición aunque su estado esté en caché', function () {
+    $this->get('/dashboard')->assertOk();
+    expect(Cache::has("empresa:{$this->empresa->id}:activa"))->toBeTrue();
+
+    $this->empresa->update(['estado' => EstadoEmpresa::Suspendida]);
+
+    $this->get('/dashboard')->assertRedirect(route('login'));
+});
+
+it('la campana sabe si hay avisos sin leer con una sola consulta cuando alguno de los recientes lo está', function () {
+    $this->marta->notify(new AvisoGeneral('Hola'));
+
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+    Livewire::test('layout.navigation')->assertOk();
+    $consultas = collect(DB::getQueryLog())->pluck('query')->filter(fn ($q) => str_contains($q, 'notifications'));
+
+    expect($consultas)->toHaveCount(1);
 });

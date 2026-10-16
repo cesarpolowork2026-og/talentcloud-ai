@@ -83,6 +83,7 @@ new class extends Component
     {
         /** @var User $user */
         $user = auth()->user();
+        $recientes = $user->notifications()->latest()->limit(5)->get();
 
         return [
             'enlaces' => array_map(fn (array $enlace) => $this->resolver($enlace), Navegacion::enlaces($user)),
@@ -93,8 +94,10 @@ new class extends Component
             )),
             'inicial' => Navegacion::inicial($user),
             'etiquetaPerfil' => Navegacion::etiquetaPerfil($user),
-            'notificaciones' => $user->notifications()->latest()->limit(5)->get(),
-            'hayNoLeidas' => $user->unreadNotifications()->exists(),
+            'notificaciones' => $recientes,
+            // Con una de las 5 recientes sin leer ya se sabe; solo si las 5 están leídas puede haber otra más antigua.
+            'hayNoLeidas' => $recientes->contains(fn ($n) => $n->read_at === null)
+                || ($recientes->count() === 5 && $user->unreadNotifications()->exists()),
         ];
     }
 }; ?>
@@ -105,7 +108,7 @@ new class extends Component
     x-data="{ notificaciones: false, perfil: false, menu: false }"
     x-on:keydown.escape.window="notificaciones = false; perfil = false; menu = false"
 >
-    <a href="{{ Navegacion::rutaInicio(auth()->user()) }}" wire:navigate class="nav-brand hover:!no-underline" aria-label="TalentCloud AI, inicio">
+    <a href="{{ Navegacion::rutaInicio(auth()->user()) }}" wire:navigate.hover class="nav-brand hover:!no-underline" aria-label="TalentCloud AI, inicio">
         <x-marca />
     </a>
 
@@ -141,7 +144,7 @@ new class extends Component
                             @if ($hijo['href'])
                                 <a
                                     href="{{ $hijo['href'] }}"
-                                    wire:navigate
+                                    wire:navigate.hover
                                     @class(['block rounded px-2 py-1.5 text-14 hover:bg-neutral-100', 'font-semibold text-accent-700' => $hijo['activo'], 'text-ink' => ! $hijo['activo']])
                                     @if ($hijo['activo']) aria-current="page" @endif
                                 >{{ $hijo['etiqueta'] }}</a>
@@ -152,7 +155,7 @@ new class extends Component
                     </div>
                 </div>
             @elseif ($enlace['href'])
-                <a href="{{ $enlace['href'] }}" wire:navigate class="barra-enlace" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
+                <a href="{{ $enlace['href'] }}" wire:navigate.hover class="barra-enlace" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
             @else
                 <a aria-disabled="true" tabindex="-1" title="Disponible próximamente" class="cursor-default opacity-[0.45]">{{ $enlace['etiqueta'] }}</a>
             @endif
@@ -164,7 +167,7 @@ new class extends Component
         @if ($administracion !== [])
             <div class="hidden items-center gap-4 border-r border-accent-700 pr-4 lg:flex">
                 @foreach ($administracion as $enlace)
-                    <a href="{{ $enlace['href'] }}" wire:navigate class="barra-enlace" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
+                    <a href="{{ $enlace['href'] }}" wire:navigate.hover class="barra-enlace" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
                 @endforeach
             </div>
         @endif
@@ -231,7 +234,7 @@ new class extends Component
             </button>
 
             <div x-show="perfil" x-cloak x-transition.opacity.duration.100ms class="card elev-lg absolute right-0 top-[40px] z-20 w-[170px] p-2">
-                <a href="{{ route('profile') }}" wire:navigate class="block p-2 text-14">Mi perfil</a>
+                <a href="{{ route('profile') }}" wire:navigate.hover class="block p-2 text-14">Mi perfil</a>
                 <button type="button" wire:click="logout" class="block w-full p-2 text-left text-14 text-accent-700 hover:text-accent-800 hover:underline">Cerrar sesión</button>
             </div>
         </div>
@@ -256,14 +259,14 @@ new class extends Component
                     <div id="grupo-{{ $loop->index }}" class="text-12 uppercase tracking-[0.08em] text-accent-200">{{ $enlace['etiqueta'] }} · {{ $enlace['descripcion'] }}</div>
                     @foreach ($enlace['hijos'] as $hijo)
                         @if ($hijo['href'])
-                            <a href="{{ $hijo['href'] }}" wire:navigate class="barra-enlace block py-2 pl-3" @if ($hijo['activo']) aria-current="page" @endif>{{ $hijo['etiqueta'] }}</a>
+                            <a href="{{ $hijo['href'] }}" wire:navigate.hover class="barra-enlace block py-2 pl-3" @if ($hijo['activo']) aria-current="page" @endif>{{ $hijo['etiqueta'] }}</a>
                         @else
                             <span class="block py-2 pl-3 opacity-[0.45]" aria-disabled="true">{{ $hijo['etiqueta'] }}</span>
                         @endif
                     @endforeach
                 </div>
             @elseif ($enlace['href'])
-                <a href="{{ $enlace['href'] }}" wire:navigate class="barra-enlace py-2" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
+                <a href="{{ $enlace['href'] }}" wire:navigate.hover class="barra-enlace py-2" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
             @else
                 <a aria-disabled="true" tabindex="-1" class="cursor-default py-2 opacity-[0.45]">{{ $enlace['etiqueta'] }}</a>
             @endif
@@ -273,7 +276,7 @@ new class extends Component
             <div class="mt-2 border-t border-accent-700 pt-2" role="group" aria-labelledby="grupo-administracion">
                 <div id="grupo-administracion" class="text-12 uppercase tracking-[0.08em] text-accent-200">Administración</div>
                 @foreach ($administracion as $enlace)
-                    <a href="{{ $enlace['href'] }}" wire:navigate class="barra-enlace block py-2" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
+                    <a href="{{ $enlace['href'] }}" wire:navigate.hover class="barra-enlace block py-2" @if ($enlace['activo']) aria-current="page" @endif>{{ $enlace['etiqueta'] }}</a>
                 @endforeach
             </div>
         @endif

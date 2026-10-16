@@ -162,9 +162,13 @@ php artisan optimize          # configuración, rutas, eventos, vistas e iconos 
   lee con `config()`.
 - PHP con OPcache (`opcache.enable=1`, `opcache.validate_timestamps=0` en producción: tras cada despliegue,
   reiniciar PHP-FPM) y compresión gzip en el servidor web.
-- Cloud SQL en la misma región que la aplicación y por IP privada. Sesiones, caché y colas siguen en la base
-  de datos (compartidas si hay más de un servidor); con un solo servidor, `PERMISSION_CACHE_STORE=file` evita
-  una lectura por petición.
+- Cloud SQL en la misma región que la aplicación y por IP privada. **Sesión y caché fuera de PostgreSQL**
+  (`SESSION_DRIVER` y `CACHE_STORE`): con `database`, cada petición web y cada acción de Livewire suma 2–4 viajes
+  a la base solo para la sesión, la caché de roles y las cifras en caché. Con un solo servidor y en local, `file`
+  (el valor de `.env.example`); con varios servidores, Redis (Memorystore, `REDIS_*`, extensión `phpredis`), porque
+  la caché y la sesión deben ser compartidas. Las colas pueden seguir en `database` mientras el volumen sea bajo.
+  Lo que se guarda en caché (estado de la empresa, catálogo de competencias, cifras del dashboard) se invalida al
+  guardar el modelo y tiene vigencia corta, así que suspender una empresa surte efecto en la petición siguiente.
 - Medido con 300 000 postulaciones (base sintética): los listados y el dashboard de una empresa responden en
   decenas de milisegundos gracias a los índices por empresa. El embudo de toda la plataforma (admin SaaS) tarda
   unos 300 ms; si el volumen real se acerca a esa cifra, guardar en la postulación la etapa más avanzada

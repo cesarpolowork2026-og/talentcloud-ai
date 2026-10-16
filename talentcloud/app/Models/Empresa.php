@@ -6,11 +6,13 @@ use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoSuscripcion;
 use App\Enums\Periodicidad;
 use App\Enums\PlanEmpresa;
+use App\Support\BolsaPublica;
 use Database\Factories\EmpresaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Empresa cliente de la plataforma (el tenant).
@@ -53,6 +55,33 @@ class Empresa extends Model
         'plan' => 'gratis',
         'estado' => 'activa',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(function (Empresa $empresa): void {
+            Cache::forget(self::claveDeActiva($empresa->id));
+            BolsaPublica::olvidar();
+        });
+        static::deleted(function (Empresa $empresa): void {
+            Cache::forget(self::claveDeActiva($empresa->id));
+            BolsaPublica::olvidar();
+        });
+    }
+
+    /**
+     * ¿La empresa está activa? La pide `VerificarAcceso` en cada petición y en cada acción de Livewire:
+     * se recuerda 60 s y se olvida al guardar la empresa, así que suspenderla sigue surtiendo efecto
+     * en la siguiente petición. Una empresa que no existe no bloquea (como antes).
+     */
+    public static function estaActivaConCache(int $id): bool
+    {
+        return Cache::remember(self::claveDeActiva($id), 60, fn () => self::query()->whereKey($id)->first(['id', 'estado'])?->estaActiva() ?? true);
+    }
+
+    private static function claveDeActiva(int $id): string
+    {
+        return "empresa:{$id}:activa";
+    }
 
     protected function casts(): array
     {

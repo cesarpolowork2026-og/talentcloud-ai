@@ -2,6 +2,7 @@
 
 namespace App\Tenancy;
 
+use App\Models\Empresa;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
@@ -42,7 +43,7 @@ class VerificarAcceso
             return self::USUARIO_DESACTIVADO;
         }
 
-        if ($user->empresa !== null && ! $user->empresa->estaActiva()) {
+        if ($user->empresa_id !== null && ! Empresa::estaActivaConCache($user->empresa_id)) {
             return self::EMPRESA_SUSPENDIDA;
         }
 
