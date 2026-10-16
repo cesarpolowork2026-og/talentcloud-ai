@@ -48,6 +48,8 @@ async function sinDesborde(pagina, url) {
     afirmar(/Periodo actual: \d+/.test(t), 'el lector de pantalla no recibió el valor: «' + t + '»');
     afirmar((await pagina.locator('div.pointer-events-none.absolute:visible').filter({ hasText: 'Periodo actual' }).count()) === 1, 'no se ve el valor del punto activo');
     await pagina.keyboard.press('Escape');
+    // Alpine oculta el valor en el ciclo siguiente: sin esta espera, el conteo inmediato a veces aún lo ve.
+    await pagina.waitForTimeout(150);
     afirmar((await pagina.locator('div.pointer-events-none.absolute:visible').count()) === 0, 'Escape no oculta el valor');
   });
 
