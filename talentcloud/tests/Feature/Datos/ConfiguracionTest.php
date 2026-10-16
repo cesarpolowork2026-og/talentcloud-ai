@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Middleware\TrustProxies;
+use Illuminate\Support\Env;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
@@ -75,6 +76,9 @@ it('lee el entorno solo desde config/, para que funcione con la configuración e
 
 it('reconoce el HTTPS del balanceador cuando se declara TRUSTED_PROXIES', function () {
     $esquema = function () {
+        // El lector del .env recuerda lo que cargó y lo pisa al reiniciar la aplicación; si el .env
+        // trae la línea TRUSTED_PROXIES= (como .env.example, que usa el CI) borraría el valor de la prueba.
+        Env::enablePutenv();
         $this->refreshApplication();
         Route::get('/_prueba-esquema', fn () => request()->isSecure() ? 'https' : 'http');
 
