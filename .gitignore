@@ -18,3 +18,6 @@ talentcloud-ai/.env
 
 # Manual de usuario: se mantiene solo en local (capturas, HTML y PDF)
 /docs/manual/
+
+# Configuración real del servidor de producción (con secretos)
+/deploy/.env

@@ -1,0 +1,17 @@
+# SITE_ADDRESS decide el modo:
+#   un dominio o "1-2-3-4.sslip.io"  -> HTTPS automático (Let's Encrypt)
+#   ":80"                            -> HTTP sin certificado (pruebas locales)
+{$SITE_ADDRESS:":80"} {
+	root * /var/www/html/public
+	encode zstd gzip
+
+	# Los CV pesan hasta 5 MB; el resto de formularios son pequeños.
+	request_body {
+		max_size 10MB
+	}
+
+	header -Server
+
+	php_fastcgi app:9000
+	file_server
+}

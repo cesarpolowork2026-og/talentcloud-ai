@@ -86,6 +86,10 @@ La lista completa está en [`talentcloud/README.md`](talentcloud/README.md#datos
   - `talentcloud_completa.sql`: estructura y datos de demostración.
 - Cómo restaurarlos: [`talentcloud/database/esquema/LEEME.md`](talentcloud/database/esquema/LEEME.md).
 
+## Despliegue
+
+Pila completa para un servidor con Docker (aplicación, cola, programador, base de datos con pgvector, servicio de IA y HTTPS automático) en [`deploy/`](deploy/). La guía paso a paso, incluidas las copias de seguridad, está en [`deploy/README.md`](deploy/README.md).
+
 ## Pruebas y calidad
 
 ```bash
