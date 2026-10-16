@@ -63,7 +63,7 @@ En `.env`, completar como mínimo:
 | `APP_KEY` | `php -r 'echo "base64:".base64_encode(random_bytes(32));'` (o con Docker: `docker run --rm php:8.2-cli php -r '...'`) |
 | `DB_PASSWORD` | `openssl rand -base64 24` |
 | `IA_API_KEY` | `openssl rand -base64 32` |
-| `MAIL_*` | Un SMTP real (por ejemplo Gmail con una contraseña de aplicación) |
+| `MAIL_*` | Un SMTP real (por ejemplo Gmail con una contraseña de aplicación). `MAIL_FROM_ADDRESS` **no puede quedar vacío**: sin remitente, cada aviso por correo falla en la cola. |
 
 ## 3. Obtener las imágenes
 
@@ -100,7 +100,42 @@ $C exec -T app php artisan optimize:clear
 > ```bash
 > $C exec -T app php artisan tinker --execute="App\Models\User::where('email','admin@talentcloud.ai')->first()->forceFill(['password'=>bcrypt('NUEVA-CLAVE-LARGA')])->save();"
 > ```
-> El volcado incluye el texto extraído de los CV, pero no los archivos originales (PDF y DOCX), que viven en el volumen `storage`: la descarga del CV original no funcionará con datos restaurados. El análisis, el matching y la evidencia sí.
+Un volcado lleva las filas de los CV pero no sus archivos, así que hay que recrearlos para que la descarga del CV original funcione en los datos de demostración:
+
+```bash
+$C exec -T app php artisan talentcloud:regenerar-cvs-demo      # ~10 s para los 2 261 CV
+```
+
+Los genera desde el texto guardado con el mismo generador de la siembra, solo para candidatos `@correo.com`, y nunca pisa un archivo que ya existe. Es seguro repetirlo.
+
+### Prueba de humo
+
+Tras arrancar, comprobar que todo responde y que no hay errores:
+
+```bash
+C="docker compose -f docker-compose.prod.yml"
+$C ps                                                         # los seis servicios en "Up" (app, db e ia "healthy")
+curl -s -o /dev/null -w "%{http_code}
+" https://<SITE_ADDRESS>/up        # 200
+$C exec -T app php -r 'echo file_get_contents("http://ia:8080/health");'   # {"estado":"ok", ...}
+$C exec -T db psql -U talentcloud -d talentcloud -tAc "select count(*) from failed_jobs"   # 0
+```
+
+Después, iniciar sesión con una cuenta de la tabla de la raíz, subir un CV y comprobar que se analiza y que el matching aparece en la postulación.
+
+### Recursos medidos
+
+Pila completa en Docker limitada a 2 núcleos (como un VPS-1) y a 4 (como un VPS-2), con los 2 261 CV de la demostración. La medición se hizo en un PC de escritorio: los núcleos de un VPS pueden ser algo más lentos.
+
+| Prueba | 2 núcleos | 4 núcleos |
+| --- | --- | --- |
+| Analizar un CV nuevo con IA (mediana) | 123 ms | 108 ms |
+| Cola de 40 análisis | 8 s | 7 s |
+| Web con la IA trabajando: mediana / peor caso | 28 / 307 ms | 29 / 287 ms |
+| Recrear los 2 261 archivos de CV | 8 s | 8 s |
+| Memoria total en plena carga | ~1,1 GB | ~1,1 GB |
+
+El servicio de IA es lo más pesado (~0,95 GB). Con 4 GB de RAM y 2 GB de swap sobra margen.
 
 ## 5. Actualizar
 
