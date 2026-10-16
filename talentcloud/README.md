@@ -1,6 +1,6 @@
 # TalentCloud AI — aplicación Laravel
 
-SaaS de reclutamiento y selección con matching semántico explicable. Plan completo en `../PLAN_DE_DESARROLLO.md`; referencia visual y de comportamiento en `../TalentCloud AI Platform/`.
+SaaS de reclutamiento y selección con matching semántico explicable. Visión general del proyecto en el [README de la raíz](../README.md).
 
 Stack: Laravel 12 · PHP 8.2 · Livewire 3 (Volt) + Alpine · Tailwind CSS 3 · PostgreSQL 17 + pgvector · Pest · Pint · Larastan.
 
