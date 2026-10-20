@@ -60,6 +60,12 @@ class Listado extends Component
         $this->authorize('viewAny', Empresa::class);
 
         // «Aplicar plan» del panel de la plataforma: /empresas?cambiar-plan={id} abre el cambio con el plan solicitado propuesto.
+        // /empresas?ver={id} (enlaces del panel): abre el detalle de esa empresa.
+        $ver = request()->query('ver');
+        if (is_numeric($ver)) {
+            $this->verDetalle((int) $ver);
+        }
+
         $cambiar = request()->query('cambiar-plan');
         if (is_numeric($cambiar)) {
             $this->abrirCambioDePlan((int) $cambiar);

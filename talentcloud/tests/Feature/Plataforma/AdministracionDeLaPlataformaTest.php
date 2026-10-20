@@ -15,9 +15,11 @@ use App\Models\Postulacion;
 use App\Models\Requisito;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Services\Empresas\CambiarEstadoEmpresa;
 use App\Services\Plataforma\PanelDePlataforma;
 use App\Services\Plataforma\RegistroDeAuditoria;
 use App\Tenancy\TenantContext;
+use App\Tenancy\VerificarAcceso;
 use Livewire\Livewire;
 
 /*
@@ -241,4 +243,23 @@ it('no deja al admin mover postulaciones ni leer las notas internas', function (
         ->and($this->admin->can('update', $postulacion))->toBeFalse()
         ->and($this->admin->can('gestionarNotas', $postulacion))->toBeFalse()
         ->and($this->clara->can('gestionarNotas', $postulacion))->toBeTrue();
+});
+
+it('abre el detalle de la empresa desde el enlace del panel', function () {
+    actuarComo($this->admin);
+
+    Livewire::withQueryParams(['ver' => $this->vela->id])
+        ->test(EmpresasListado::class)
+        ->assertSet('mostrarDetalle', true)
+        ->assertSet('empresaSeleccionada', $this->vela->id);
+});
+
+it('saca de inmediato a quien pertenece a una empresa suspendida y le dice por qué', function () {
+    $this->actingAs($this->clara)->get('/vacantes')->assertOk();
+
+    app(CambiarEstadoEmpresa::class)->suspender($this->vela);
+
+    $this->actingAs($this->clara->fresh())->get('/vacantes')
+        ->assertRedirect(route('login'))
+        ->assertSessionHas('status', VerificarAcceso::EMPRESA_SUSPENDIDA);
 });
