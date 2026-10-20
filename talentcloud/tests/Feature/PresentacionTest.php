@@ -13,7 +13,7 @@ it('muestra a los invitados la presentación con el login en la raíz', function
         ->assertSee('Iniciar sesión')
         ->assertSee(['Características', 'Beneficios', 'Seguridad'])
         ->assertSee('aria-roledescription="carrusel"', escape: false)
-        ->assertSee('<title>TalentCloud AI</title>', escape: false);
+        ->assertSee('<title>Software de reclutamiento en Perú · TalentCloud AI</title>', escape: false);
 });
 
 it('muestra la misma presentación en /login, con el foco en el correo', function () {

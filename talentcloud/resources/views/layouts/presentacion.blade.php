@@ -17,9 +17,9 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    {{-- En la raíz, el título es solo el nombre del producto. --}}
+    {{-- En la raíz, el título dice qué es el producto (y para quién); /login lleva el suyo. --}}
     @php($descripcionDelSitio = 'TalentCloud AI: gestiona vacantes, candidatos, entrevistas y evaluaciones en un solo flujo, con los datos de cada empresa separados. Tú decides.')
-    @include('partials.head', ['title' => request()->routeIs('inicio') ? null : ($title ?? null), 'compartir' => $descripcionDelSitio, 'sinCanonical' => request()->routeIs('login')])
+    @include('partials.head', ['title' => request()->routeIs('inicio') ? 'Software de reclutamiento en Perú' : ($title ?? null), 'compartir' => $descripcionDelSitio, 'sinCanonical' => request()->routeIs('login')])
     <meta name="description" content="{{ $descripcionDelSitio }}">
     @if (request()->routeIs('login'))
         {{-- /login es la presentación con el diálogo abierto: no se indexa aparte de la portada. --}}
