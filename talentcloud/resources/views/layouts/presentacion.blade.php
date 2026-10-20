@@ -19,9 +19,12 @@
 <head>
     {{-- En la raíz, el título es solo el nombre del producto. --}}
     @php($descripcionDelSitio = 'TalentCloud AI: gestiona vacantes, candidatos, entrevistas y evaluaciones en un solo flujo, con los datos de cada empresa separados. Tú decides.')
-    @include('partials.head', ['title' => request()->routeIs('inicio') ? null : ($title ?? null), 'compartir' => $descripcionDelSitio])
+    @include('partials.head', ['title' => request()->routeIs('inicio') ? null : ($title ?? null), 'compartir' => $descripcionDelSitio, 'sinCanonical' => request()->routeIs('login')])
     <meta name="description" content="{{ $descripcionDelSitio }}">
-    <link rel="canonical" href="{{ route('inicio') }}">
+    @if (request()->routeIs('login'))
+        {{-- /login es la presentación con el diálogo abierto: no se indexa aparte de la portada. --}}
+        <meta name="robots" content="noindex, follow">
+    @endif
     @if (request()->routeIs('inicio'))
         <script type="application/ld+json">{!! \App\Support\DatosEstructurados::json(\App\Support\DatosEstructurados::organizacionYSitio()) !!}</script>
     @endif

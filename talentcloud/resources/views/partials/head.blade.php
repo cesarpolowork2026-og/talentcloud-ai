@@ -16,6 +16,12 @@
     (1200 × 630, generada desde resources/brand/herramientas/vista-previa.html).
 --}}
 @isset($compartir)
+    {{-- Dirección canónica: la de la página sin filtros ni parámetros; solo se conserva el número de página. Se omite
+         donde la página no debe indexarse (el inicio de sesión repite la portada). --}}
+    @unless ($sinCanonical ?? false)
+        @php($paginaActual = (int) request()->query('page'))
+        <link rel="canonical" href="{{ url()->current() }}{{ $paginaActual > 1 ? '?page='.$paginaActual : '' }}">
+    @endunless
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="{{ config('app.name', 'TalentCloud AI') }}">
     <meta property="og:locale" content="es_PE">
