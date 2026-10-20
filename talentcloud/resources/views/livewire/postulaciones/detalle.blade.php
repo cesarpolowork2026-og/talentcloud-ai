@@ -49,16 +49,37 @@
         </x-ui.card>
     </div>
 
-    @if ($vacante && $vacante->requisitos->isNotEmpty())
-        <x-ui.card class="mb-6 max-w-[980px]" kicker="Lo que pide la vacante">
-            <div class="flex flex-wrap gap-2" role="list">
-                @foreach ($vacante->requisitos as $requisito)
-                    <span role="listitem">
-                        <x-ui.tag :tone="$requisito->tipo->tono()">{{ $requisito->competencia?->nombre }} · {{ $requisito->tipo->etiqueta() }}</x-ui.tag>
-                    </span>
+    @if ($cobertura->total() > 0)
+        <x-ui.card class="mb-6 max-w-[980px]" kicker="Requisitos de la vacante frente al CV">
+            <p class="m-0 text-14">
+                <strong>Cubre {{ $cobertura->cubiertos() }} de {{ $cobertura->total() }} requisitos</strong>
+                @if ($cobertura->obligatoriosFaltantes() !== [])
+                    · falta{{ count($cobertura->obligatoriosFaltantes()) === 1 ? '' : 'n' }} {{ implode(', ', $cobertura->obligatoriosFaltantes()) }} (obligatorio{{ count($cobertura->obligatoriosFaltantes()) === 1 ? '' : 's' }})
+                @endif
+            </p>
+            @unless ($cobertura->conCv)
+                <p class="m-0 text-13 text-neutral-700">Este candidato no tiene un CV con texto que revisar: solo cuentan las competencias que anotó tu equipo.</p>
+            @endunless
+            <ul class="m-0 grid list-none gap-3 p-0">
+                @foreach ($cobertura->items as $item)
+                    <li class="grid gap-1" wire:key="requisito-{{ $item['requisito']->id }}">
+                        <div class="flex flex-wrap items-center gap-2 text-14">
+                            <span aria-hidden="true" class="{{ $item['cubierto'] ? 'text-accent-700' : 'text-accent-2-700' }}">{{ $item['cubierto'] ? '✓' : '✗' }}</span>
+                            <span class="font-semibold">{{ $item['requisito']->competencia?->nombre }}</span>
+                            <x-ui.tag :tone="$item['requisito']->tipo->tono()">{{ $item['requisito']->tipo->etiqueta() }}</x-ui.tag>
+                            <span class="text-13 text-neutral-700">
+                                @if ($item['via'] === 'cv') Aparece en el CV
+                                @elseif ($item['via'] === 'anotada') Anotada por tu equipo
+                                @else <span class="sr-only">Resultado: </span>No se encontró @endif
+                            </span>
+                        </div>
+                        @if ($item['fragmento'])
+                            <blockquote class="m-0 border-l-2 border-divider pl-3 text-13 text-neutral-800">{{ $item['fragmento'] }}</blockquote>
+                        @endif
+                    </li>
                 @endforeach
-            </div>
-            <p class="m-0 text-13 text-neutral-700">Compáralos con el CV y las competencias del candidato; la decisión es del equipo de selección.</p>
+            </ul>
+            <p class="m-0 text-13 text-neutral-700">Análisis básico: busca el nombre de la competencia (o sus sinónimos del catálogo) como palabra completa en el CV. Que no aparezca no significa que la persona no la tenga: revisa el CV y decide tú.</p>
         </x-ui.card>
     @endif
 

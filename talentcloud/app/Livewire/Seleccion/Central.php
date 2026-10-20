@@ -10,6 +10,7 @@ use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Services\Evaluaciones\GuardarEvaluacion;
+use App\Services\Postulaciones\AnalisisBasicoDeRequisitos;
 use App\Services\Postulaciones\MoverPostulacion;
 use App\Services\Vacantes\BuscadorDeVacantes;
 use App\Services\Vacantes\OperacionNoPermitida;
@@ -222,6 +223,12 @@ class Central extends Component
             ];
         }
 
+        // Análisis básico de las tarjetas que se ven (menos las descartadas): dos consultas para todas.
+        $coberturas = app(AnalisisBasicoDeRequisitos::class)->paraCandidatos($vacante, collect($columnas)
+            ->reject(fn (array $c) => $c['etapa'] === EtapaPostulacion::Descartado)
+            ->flatMap(fn (array $c) => $c['postulaciones']->pluck('candidato_id'))
+            ->all());
+
         // La postulación abierta se lee completa solo cuando hay una abierta.
         $seleccionada = $this->postulacionSeleccionada
             ? Postulacion::with('candidato')->withCount('notas')->where('vacante_id', $vacante->id)->find($this->postulacionSeleccionada)
@@ -230,6 +237,7 @@ class Central extends Component
         return view('livewire.seleccion.central', [
             'vacante' => $vacante,
             'columnas' => $columnas,
+            'coberturas' => $coberturas,
             'activas' => $todas - (int) ($totales[EtapaPostulacion::Descartado->value]->total ?? 0),
             // Mismo criterio que PostulacionPolicy@update: personal de la empresa de la vacante.
             'editable' => $vacante->estado !== EstadoVacante::Cerrada && $this->usuario()->can('update', $vacante),

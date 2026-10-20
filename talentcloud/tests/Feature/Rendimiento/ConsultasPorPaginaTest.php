@@ -51,8 +51,9 @@ it('no supera el presupuesto de consultas de cada página', function () {
         'marta@nimbus.com' => [
             // Dashboard: atención, ahorro, plan, actividad y el tiempo por etapa suman consultas fijas (ninguna por fila).
             '/dashboard' => 22, '/vacantes' => 7, '/candidatos' => 12,
-            // Selección lee además los requisitos de la vacante y sus competencias (2 consultas fijas, no una por tarjeta).
-            "/seleccion/{$ids['backend']}" => 13,
+            // Selección suma el análisis básico de las tarjetas: requisitos, sus competencias, los CV y las competencias
+            // anotadas (4 consultas fijas para todo el tablero, no una por tarjeta).
+            "/seleccion/{$ids['backend']}" => 15,
             '/entrevistas' => 12, // + el resumen de la agenda (una lectura)
             '/evaluaciones' => 11,
         ],

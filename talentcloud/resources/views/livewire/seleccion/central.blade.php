@@ -40,6 +40,10 @@
             <p class="-mt-3 mb-4 text-13 text-neutral-600">La vacante está cerrada: la selección es de solo lectura.</p>
         @endif
 
+        @if ($coberturas !== [] && collect($coberturas)->contains(fn ($c) => $c->total() > 0))
+            <p class="-mt-2 mb-4 max-w-[90ch] text-13 text-neutral-700">«Cubre X de Y requisitos» compara los requisitos de la vacante con el texto del CV (búsqueda exacta de la competencia o sus sinónimos) y con las competencias que anotó tu equipo. Es una ayuda para revisar: la decisión es tuya y nunca mueve ni descarta a nadie.</p>
+        @endif
+
         <x-ui.actualizable target="verMas,mover">
         <div class="flex gap-4 overflow-x-auto pb-2">
             @foreach ($columnas as $columna)
@@ -88,6 +92,17 @@
                                 <div class="text-13 text-neutral-700">{{ $postulacion->candidato?->titular }}</div>
                                 @if ($postulacion->estaRetirada())
                                     <div class="mt-1"><x-ui.tag tone="outline">Retirada</x-ui.tag></div>
+                                @endif
+                                @php($cobertura = $coberturas[$postulacion->candidato_id] ?? null)
+                                @if ($cobertura && $cobertura->total() > 0 && ! $postulacion->estaRetirada() && $etapa !== EtapaPostulacion::Descartado)
+                                    <div class="text-12 {{ $cobertura->obligatoriosFaltantes() === [] && $cobertura->conCv ? 'text-accent-800' : 'text-neutral-700' }}">
+                                        @if (! $cobertura->conCv && $cobertura->cubiertos() === 0)
+                                            Requisitos: sin CV con texto
+                                        @else
+                                            @php($faltan = count($cobertura->obligatoriosFaltantes()))
+                                            Cubre {{ $cobertura->cubiertos() }} de {{ $cobertura->total() }} requisitos{{ $faltan > 0 ? ' · falta '.$faltan.($faltan === 1 ? ' obligatorio' : ' obligatorios') : '' }}
+                                        @endif
+                                    </div>
                                 @endif
                                 @if (! $postulacion->estaRetirada())
                                     @if ($proxima)

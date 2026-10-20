@@ -5,6 +5,8 @@ namespace App\Livewire\Postulaciones;
 use App\Models\Cv;
 use App\Models\Postulacion;
 use App\Models\Vacante;
+use App\Services\Postulaciones\AnalisisBasicoDeRequisitos;
+use App\Support\BuscadorDeTerminos;
 use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
@@ -27,7 +29,7 @@ class Detalle extends Component
         $this->postulacionId = $postulacion->id;
     }
 
-    public function render(): View
+    public function render(AnalisisBasicoDeRequisitos $analisis): View
     {
         // Con el filtro por empresa, una postulación de otra empresa no se encuentra.
         $postulacion = Postulacion::query()
@@ -42,7 +44,21 @@ class Detalle extends Component
 
         abort_if($postulacion === null, 404);
 
+        // El texto completo del CV (la relación «ligera» solo trae un extracto) para el análisis y para leerlo en pantalla.
+        $texto = $postulacion->candidato?->cvActual
+            ? (string) Cv::query()->whereKey($postulacion->candidato->cvActual->id)->value('texto_extraido')
+            : '';
+        $cobertura = $analisis->para(
+            $postulacion->vacante,
+            $texto,
+            $postulacion->candidato ? ($analisis->anotadas([$postulacion->candidato_id])[$postulacion->candidato_id] ?? []) : [],
+        );
+        $terminos = collect($cobertura->items)->flatMap(fn (array $i) => $analisis->terminos($i['requisito']))->all();
+
         return view('livewire.postulaciones.detalle', [
+            'cobertura' => $cobertura,
+            'textoDelCv' => $texto,
+            'tramosDelCv' => BuscadorDeTerminos::tramos($texto, $terminos),
             'postulacion' => $postulacion,
             'entrevistas' => $postulacion->entrevistas->sortByDesc('inicia_at'),
             'evaluaciones' => $postulacion->evaluaciones->sortByDesc('created_at'),
