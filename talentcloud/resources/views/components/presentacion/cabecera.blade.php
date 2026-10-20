@@ -13,7 +13,7 @@
     $secciones = ['inicio' => 'Inicio', 'caracteristicas' => 'Características', 'beneficios' => 'Beneficios', 'seguridad' => 'Seguridad'];
 @endphp
 
-<header class="barra sticky top-0 z-40">
+<header class="barra sticky top-0 z-40" x-data="{ menu: false }" x-on:keydown.escape.window="menu = false">
     <div class="mx-auto flex max-w-[1480px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-8">
         <a href="{{ route('inicio') }}#inicio" class="shrink-0 hover:no-underline" aria-label="TalentCloud AI, inicio">
             @if ($lema)
@@ -53,6 +53,18 @@
         </nav>
 
         <div class="ml-auto flex items-center gap-2 lg:ml-0">
+            {{-- Por debajo de 1024 px los enlaces no caben en la barra: se abren en un panel. --}}
+            <button
+                type="button"
+                class="barra-control grid h-10 w-10 place-items-center rounded lg:hidden"
+                x-on:click="menu = ! menu"
+                :aria-expanded="menu ? 'true' : 'false'"
+                aria-controls="menu-publico"
+                aria-label="Menú"
+            >
+                <span x-show="! menu"><x-ui.icon name="list" :size="22" /></span>
+                <span x-show="menu" x-cloak><x-ui.icon name="x" :size="22" /></span>
+            </button>
             @auth
                 {{-- Verificar correo y confirmar contraseña se ven con sesión iniciada. --}}
                 <x-ui.button :href="\App\Support\Navegacion::rutaInicio(auth()->user())" class="whitespace-nowrap">Ir a mi panel</x-ui.button>
@@ -71,4 +83,20 @@
             @endauth
         </div>
     </div>
+
+    {{-- Menú de la versión pequeña: los mismos enlaces de la barra. Cada enlace lo cierra al elegirlo. --}}
+    <nav id="menu-publico" aria-label="Menú" class="border-t border-white/20 lg:hidden" x-show="menu" x-cloak x-transition.opacity.duration.150ms>
+        <ul class="mx-auto m-0 flex max-w-[1480px] list-none flex-col p-0 px-4 py-2 sm:px-8">
+            @foreach ($secciones as $ancla => $nombre)
+                <li><a href="{{ route('inicio') }}#{{ $ancla }}" x-on:click="menu = false" class="barra-enlace block py-3 text-16">{{ $nombre }}</a></li>
+            @endforeach
+            <li><a href="{{ route('empleos.index') }}" x-on:click="menu = false" class="barra-enlace block py-3 text-16" @if (request()->routeIs('empleos.*')) aria-current="page" @endif>Empleos</a></li>
+            <li><a href="{{ route('planes') }}" x-on:click="menu = false" class="barra-enlace block py-3 text-16" @if (request()->routeIs('planes')) aria-current="page" @endif>Planes</a></li>
+            @guest
+                @unless (request()->routeIs('register'))
+                    <li><a href="{{ route('register') }}" class="barra-enlace block py-3 text-16">Crear empresa</a></li>
+                @endunless
+            @endguest
+        </ul>
+    </nav>
 </header>
