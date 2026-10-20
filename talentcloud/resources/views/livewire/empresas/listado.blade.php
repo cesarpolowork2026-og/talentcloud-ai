@@ -52,14 +52,48 @@
     {{-- Detalle (diálogo informativo del prototipo) --}}
     <x-ui.dialog wire:model="mostrarDetalle" :title="$seleccionada?->nombre" max-width="520px">
         @if ($seleccionada)
-            <p class="m-0 whitespace-pre-line">Plan: {{ $seleccionada->etiquetaDelPlan() }}{{ $seleccionada->enPrueba() ? ' hasta el '.\App\Support\Formato::fechaCorta($seleccionada->prueba_hasta).'; después, Gratis' : '' }}
-@if ($seleccionada->plan_solicitado)Solicitud: plan {{ $seleccionada->plan_solicitado->etiqueta() }}, el {{ \App\Support\Formato::fechaCorta($seleccionada->plan_solicitado_at) }}
-@endif
-@if ($seleccionada->tieneSuscripcionVigente())Pago con tarjeta: {{ $seleccionada->suscripcion_periodicidad?->importe($seleccionada->plan) }} más IGV, {{ mb_strtolower($seleccionada->suscripcion_estado->etiqueta()) }}{{ $seleccionada->suscripcion_renueva_at ? ($seleccionada->suscripcion_cancela_al_final ? '; cancelada, termina el ' : '; se renueva el ').\App\Support\Formato::fechaCorta($seleccionada->suscripcion_renueva_at) : '' }}
-@endif
-Usuarios: {{ $seleccionada->usuarios_count }}
-Vacantes activas: {{ $seleccionada->vacantes_activas_count }}
-Estado: {{ $seleccionada->estado->etiqueta() }}</p>
+            <div class="flex flex-wrap items-center gap-2">
+                <x-ui.estado :valor="$seleccionada->estado" />
+                <x-ui.tag tone="outline">{{ $seleccionada->etiquetaDelPlan() }}</x-ui.tag>
+                @if ($seleccionada->plan_solicitado)
+                    <x-ui.tag tone="accent-2">Pide {{ $seleccionada->plan_solicitado->etiqueta() }}</x-ui.tag>
+                @endif
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-3">
+                <div class="rounded-md border border-divider bg-surface p-3">
+                    <div class="text-13 text-neutral-700">Usuarios</div>
+                    <div class="font-heading text-24 font-semibold leading-tight" data-dato="usuarios">{{ $seleccionada->usuarios_count }}</div>
+                </div>
+                <div class="rounded-md border border-divider bg-surface p-3">
+                    <div class="text-13 text-neutral-700">Vacantes activas</div>
+                    <div class="font-heading text-24 font-semibold leading-tight" data-dato="vacantes-activas">{{ $seleccionada->vacantes_activas_count }}</div>
+                </div>
+            </div>
+
+            <dl class="m-0 mt-4 grid gap-0 text-14">
+                <div class="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-divider py-2">
+                    <dt class="text-neutral-700">Plan</dt>
+                    <dd class="m-0 text-right font-semibold">
+                        {{ $seleccionada->etiquetaDelPlan() }}
+                        @if ($seleccionada->enPrueba())
+                            <span class="block text-13 font-normal text-neutral-700">Prueba hasta el {{ \App\Support\Formato::fechaCorta($seleccionada->prueba_hasta) }}; después, Gratis</span>
+                        @endif
+                    </dd>
+                </div>
+                @if ($seleccionada->plan_solicitado)
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-divider py-2">
+                        <dt class="text-neutral-700">Solicitud</dt>
+                        <dd class="m-0 text-right">Plan {{ $seleccionada->plan_solicitado->etiqueta() }}, el {{ \App\Support\Formato::fechaCorta($seleccionada->plan_solicitado_at) }}</dd>
+                    </div>
+                @endif
+                @if ($seleccionada->tieneSuscripcionVigente())
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-divider py-2">
+                        <dt class="text-neutral-700">Pago con tarjeta</dt>
+                        <dd class="m-0 text-right">{{ $seleccionada->suscripcion_periodicidad?->importe($seleccionada->plan) }} más IGV, {{ mb_strtolower($seleccionada->suscripcion_estado->etiqueta()) }}{{ $seleccionada->suscripcion_renueva_at ? ($seleccionada->suscripcion_cancela_al_final ? '; cancelada, termina el ' : '; se renueva el ').\App\Support\Formato::fechaCorta($seleccionada->suscripcion_renueva_at) : '' }}</dd>
+                    </div>
+                @endif
+            </dl>
 
             @if ($usoDeLaSeleccionada)
                 <section class="mt-4 grid gap-2" aria-labelledby="detalle-uso">

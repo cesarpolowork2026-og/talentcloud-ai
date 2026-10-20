@@ -146,6 +146,6 @@ it('muestra el detalle de una empresa', function () {
     Livewire::test(Listado::class)
         ->call('verDetalle', $this->nimbus->id)
         ->assertSet('mostrarDetalle', true)
-        ->assertSee('Plan: Enterprise')
-        ->assertSee('Vacantes activas: 2');
+        ->assertSee('Enterprise')
+        ->assertSeeHtml('data-dato="vacantes-activas">2</div>');
 });

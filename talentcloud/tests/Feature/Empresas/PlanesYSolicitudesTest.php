@@ -116,7 +116,8 @@ it('aplicar el plan desde Empresas atiende la solicitud y termina la prueba', fu
 
     Livewire::test(Empresas::class)
         ->call('verDetalle', $this->empresa->id)
-        ->assertSee('Solicitud: plan Starter')
+        ->assertSee('Solicitud')
+        ->assertSee('Plan Starter, el')
         ->call('abrirCambioDePlan', $this->empresa->id)
         ->assertSet('planNuevo', 'starter')
         ->call('cambiarPlan')

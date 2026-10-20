@@ -370,7 +370,8 @@ it('el admin ve el pago con tarjeta y no puede cambiar un plan que la empresa pa
     Livewire::test(Empresas::class)
         ->assertSee('Tarjeta · Al día')
         ->call('verDetalle', $this->empresa->id)
-        ->assertSee('Pago con tarjeta: S/ 3 348 al año más IGV, al día; se renueva el')
+        ->assertSee('Pago con tarjeta')
+        ->assertSee('S/ 3 348 al año más IGV, al día; se renueva el')
         ->assertDontSeeHtml('wire:click="abrirCambioDePlan(');
 
     expect(fn () => app(CambiarPlanEmpresa::class)->ejecutar($this->empresa, PlanEmpresa::Enterprise, $this->admin))
