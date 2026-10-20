@@ -290,3 +290,24 @@ it('explica en el panel qué falla: un CV ilegible no es un problema del servido
         ->assertSee('Hay 1 CV que no se pudo leer')
         ->assertDontSee('conviene revisar el servidor');
 });
+
+it('sugiere al fusionar primero las competencias parecidas y filtra por nombre o sinónimo', function () {
+    actuarComo($this->admin);
+    $origen = Competencia::factory()->create(['nombre' => 'Power BI Desktop', 'categoria' => 'Datos', 'sinonimos' => []]);
+    Competencia::factory()->create(['nombre' => 'Zeta', 'categoria' => 'Otros', 'sinonimos' => ['Tableau']]);
+    Competencia::factory()->create(['nombre' => 'Analítica Power BI', 'categoria' => 'Datos', 'sinonimos' => []]);
+
+    $componente = Livewire::test(Competencias::class)->call('abrirFusion', $origen->id);
+    $buscar = fn (string $texto) => app()->call([$componente->instance(), 'buscarDestinos'], ['texto' => $texto]);
+
+    // Sin texto: la parecida (comparte «power») va antes que las demás, y la propia competencia no aparece.
+    $sinTexto = array_column($buscar(''), 'etiqueta');
+    expect($sinTexto[0])->toBe('Analítica Power BI')
+        ->and($sinTexto)->not->toContain('Power BI Desktop');
+
+    // Con texto: por nombre (sin tildes) y por sinónimo.
+    expect(array_column($buscar('analitica'), 'etiqueta'))->toBe(['Analítica Power BI'])
+        ->and(array_column($buscar('tableau'), 'etiqueta'))->toBe(['Zeta']);
+
+    $componente->assertSee('Esta acción no se puede deshacer');
+});

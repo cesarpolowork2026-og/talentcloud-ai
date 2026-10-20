@@ -10,6 +10,7 @@ use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -112,6 +113,43 @@ class Listado extends Component
         $this->mostrarFormulario = false;
     }
 
+    /**
+     * Buscador de la competencia que se conserva al fusionar: hasta 20 resultados. Sin texto, primero las que se
+     * parecen a la que se fusiona (comparten alguna palabra de su nombre o sinónimos); con texto, las que lo
+     * contienen en su nombre o en un sinónimo, sin tildes ni mayúsculas.
+     *
+     * @return list<array{id: int, etiqueta: string, detalle: string|null}>
+     */
+    #[Renderless]
+    public function buscarDestinos(string $texto): array
+    {
+        $origen = $this->competencia((int) $this->competenciaId);
+        $this->authorize('update', $origen);
+
+        $clave = Competencia::normalizar($texto);
+        $palabras = fn (Competencia $c): array => collect([$c->nombre, ...$c->sinonimos])
+            ->flatMap(fn (string $t) => explode(' ', Competencia::normalizar($t)))
+            ->filter(fn (string $p) => mb_strlen($p) >= 4)
+            ->unique()->values()->all();
+        $deOrigen = $palabras($origen);
+
+        $candidatas = Competencia::query()->whereKeyNot($origen->id)->orderBy('nombre')->get()
+            ->map(fn (Competencia $c) => [
+                'competencia' => $c,
+                'parecida' => array_intersect($deOrigen, $palabras($c)) !== [],
+                'texto' => collect([$c->nombre, ...$c->sinonimos])->map(fn (string $t) => Competencia::normalizar($t))->implode(' | '),
+            ])
+            ->when($clave !== '', fn ($lista) => $lista->filter(fn (array $f) => str_contains($f['texto'], $clave)))
+            ->sortByDesc('parecida')
+            ->take(20);
+
+        return $candidatas->map(fn (array $f) => [
+            'id' => $f['competencia']->id,
+            'etiqueta' => $f['competencia']->nombre,
+            'detalle' => ($f['parecida'] ? 'Parecida · ' : '').($f['competencia']->categoria ?? 'Sin categoría'),
+        ])->values()->all();
+    }
+
     public function abrirFusion(int $id): void
     {
         $this->authorize('update', $competencia = $this->competencia($id));
@@ -188,9 +226,7 @@ class Listado extends Component
             'filas' => $this->listar($consulta),
             'total' => Competencia::count(),
             'seleccionada' => $seleccionada,
-            'otras' => $this->mostrarFusion && $seleccionada !== null
-                ? Competencia::query()->whereKeyNot($seleccionada->id)->orderBy('nombre')->pluck('nombre', 'id')->all()
-                : [],
+            'usosDeLaSeleccionada' => $this->mostrarFusion && $seleccionada !== null ? app(CatalogoDeCompetencias::class)->usos($seleccionada) : null,
         ]);
     }
 

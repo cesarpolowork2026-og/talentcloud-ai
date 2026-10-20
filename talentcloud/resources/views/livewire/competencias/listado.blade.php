@@ -76,9 +76,17 @@
     {{-- Fusionar duplicados --}}
     <x-ui.dialog wire:model="mostrarFusion" :title="'Fusionar '.($seleccionada?->nombre ?? '')" max-width="480px">
         <form wire:submit="fusionar" id="form-fusion" class="grid gap-3">
-            <p class="m-0 text-14">Todo lo que usa «{{ $seleccionada?->nombre }}» (requisitos y anotaciones de candidatos) pasará a la competencia que elijas, y «{{ $seleccionada?->nombre }}» se eliminará. Su nombre quedará como sinónimo de la que conservas.</p>
-            <x-ui.field label="Competencia que se conserva" for="fusion-destino" error="destinoId">
-                <x-ui.select wire:model="destinoId" id="fusion-destino" :options="$otras" placeholder="Elige una competencia" class="w-full" error="destinoId" />
+            <p class="m-0 text-14">«{{ $seleccionada?->nombre }}» se eliminará y su nombre quedará como sinónimo de la competencia que conserves.</p>
+            @if ($usosDeLaSeleccionada)
+                <p class="m-0 text-14">
+                    Pasarán a la que elijas:
+                    <strong>{{ $usosDeLaSeleccionada['requisitos'] }} {{ $usosDeLaSeleccionada['requisitos'] === 1 ? 'requisito' : 'requisitos' }}</strong> de vacantes y
+                    <strong>{{ $usosDeLaSeleccionada['candidatos'] }} {{ $usosDeLaSeleccionada['candidatos'] === 1 ? 'anotación' : 'anotaciones' }}</strong> de candidatos.
+                    Esta acción no se puede deshacer.
+                </p>
+            @endif
+            <x-ui.field label="Competencia que se conserva" for="fusion-destino" error="destinoId" hint="Escribe para buscar por nombre o sinónimo. Las parecidas aparecen primero.">
+                <x-ui.buscador id="fusion-destino" metodo="buscarDestinos" modelo="destinoId" placeholder="Busca la competencia que se conserva…" error="destinoId" wire:key="buscador-fusion-{{ $seleccionada?->id }}" />
             </x-ui.field>
         </form>
         <x-slot:actions>
