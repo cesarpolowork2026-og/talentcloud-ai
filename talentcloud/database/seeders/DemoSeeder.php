@@ -142,7 +142,7 @@ class DemoSeeder extends Seeder
     /**
      * La historia de la demo, día a día ("hace N días"). Cada línea es lo que
      * una persona hizo en la aplicación; los avisos, la actividad, el
-     * historial y el matching los genera la propia aplicación.
+     * historial y la actividad los genera la propia aplicación.
      */
     private function historia(User $admin, User $marta, User $diego, User $clara, User $adminOrbita, Empresa $orbita): void
     {

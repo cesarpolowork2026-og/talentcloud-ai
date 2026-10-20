@@ -15,7 +15,7 @@ use RuntimeException;
  */
 class DocumentosDePrueba
 {
-    /** Títulos de sección que se maquetan como tales (los mismos que reconoce el servicio de IA). */
+    /** Títulos de sección que se maquetan como tales (los típicos de un CV). */
     private const ENCABEZADOS = '/^(perfil( profesional)?|resumen( profesional)?|sobre mi|objetivo( profesional)?'
         .'|experiencia( laboral| profesional)?|trayectoria( profesional| laboral)?|educacion|formacion( academica| profesional)?|estudios'
         .'|habilidades( tecnicas)?|competencias( tecnicas)?|conocimientos( tecnicos)?|herramientas|tecnologias|aptitudes|skills'

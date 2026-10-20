@@ -129,7 +129,7 @@ Extracto del CV: "{{ \Illuminate\Support\Str::limit(\Illuminate\Support\Str::squ
                 <p class="field-hint" wire:loading wire:target="archivoCv">Subiendo archivo…</p>
             </x-ui.field>
             <x-ui.field error="autorizado">
-                <x-ui.checkbox wire:model="autorizado" id="candidato-autorizado">El candidato autorizó el tratamiento de sus datos y el análisis de su CV con IA.</x-ui.checkbox>
+                <x-ui.checkbox wire:model="autorizado" id="candidato-autorizado">El candidato autorizó el tratamiento de sus datos y que su CV se guarde y se lea para evaluar su postulación.</x-ui.checkbox>
             </x-ui.field>
         </form>
         <x-slot:actions>

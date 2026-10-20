@@ -5,7 +5,7 @@ namespace Database\Seeders\Demo;
 /**
  * CV de demostración de las empresas que no son de tecnología (Brío Retail, Ruta
  * Sur Logística, Nuna Salud y Altura Café). Todo es ficticio. Cada vacante tiene
- * candidatos fuertes y débiles para que el matching muestre coincidencias,
+ * candidatos fuertes y débiles para que el análisis de requisitos muestre coincidencias,
  * menciones dudosas y requisitos no encontrados.
  *
  * Convenciones que espera el lector de CV: puesto y periodo en una sola línea

@@ -4,10 +4,10 @@
     <p class="mb-4 text-12 text-neutral-700">Resumen de la actividad de selección de Nimbus Corp.</p>
 
     <div class="mb-4 grid grid-cols-4 gap-3">
-        @foreach (['Vacantes activas' => '2', 'Candidatos evaluados' => '4', 'Match promedio' => '69%', 'Entrevistas hoy' => '2'] as $indicador => $valor)
+        @foreach (['Vacantes activas' => '2', 'Postulantes' => '15', 'Por revisar' => '4', 'Entrevistas hoy' => '2'] as $indicador => $valor)
             <div class="card !gap-1 !p-3">
                 <div class="card-kicker">{{ $indicador }}</div>
-                <p @class(['m-0 font-heading text-24 font-semibold', 'text-accent-700' => $indicador === 'Match promedio'])>{{ $valor }}</p>
+                <p @class(['m-0 font-heading text-24 font-semibold', 'text-accent-700' => $indicador === 'Por revisar'])>{{ $valor }}</p>
             </div>
         @endforeach
     </div>

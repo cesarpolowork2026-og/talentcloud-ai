@@ -8,7 +8,7 @@ use Illuminate\Support\Carbon;
  * Personas ficticias con un CV al estilo del de César Polo, para sembrar cientos
  * de postulaciones por vacante. Es reproducible: la misma semilla da las mismas
  * personas. Cada una tiene un perfil de su familia profesional con competencias
- * del catálogo, así el matching da resultados distintos sin porcentajes escritos
+ * del catálogo, así el análisis de requisitos da resultados distintos sin porcentajes escritos
  * a mano.
  *
  * @phpstan-type Perfil array{titular: string, cargos: list<string>, carrera: string, skills: list<string>, herramientas: list<string>}

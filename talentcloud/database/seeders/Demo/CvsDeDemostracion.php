@@ -4,9 +4,8 @@ namespace Database\Seeders\Demo;
 
 /**
  * CV de demostración de Nimbus Corp y Vela Studio, escritos como CV reales.
- * Personas, empresas y teléfonos son ficticios. El servicio de IA calibra sus
- * umbrales con una versión anterior y más breve de estos CV
- * (talentcloud-ai/tests/datos/cvs), que no se toca.
+ * Personas, empresas y teléfonos son ficticios. El análisis básico de requisitos busca en ellos las competencias
+ * que pide cada vacante.
  */
 class CvsDeDemostracion
 {

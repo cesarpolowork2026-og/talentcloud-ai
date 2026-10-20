@@ -1,32 +1,26 @@
 # TalentCloud AI — aplicación Laravel
 
-SaaS de reclutamiento y selección con matching semántico explicable. Visión general del proyecto en el [README de la raíz](../README.md).
+SaaS de reclutamiento y selección: vacantes, candidatos con su CV, postulaciones en un tablero por etapas, entrevistas, evaluaciones y
+un dashboard por empresa, con un administrador de la plataforma. Esta versión es la de la **primera unidad**: incluye un **análisis básico
+de requisitos, sin IA** (busca cada competencia pedida en el texto del CV y muestra el fragmento como evidencia). La IA (extracción y
+comparación semántica) llega en la segunda unidad.
 
-Stack: Laravel 12 · PHP 8.2 · Livewire 3 (Volt) + Alpine · Tailwind CSS 3 · PostgreSQL 17 + pgvector · Pest · Pint · Larastan.
+Stack: Laravel 12 · PHP 8.2 · Livewire 3 (Volt) + Alpine · Tailwind CSS 3 · PostgreSQL 17 · Pest · Pint · Larastan.
 
 ## Requisitos
 
-PHP 8.2 con `pdo_pgsql`, `intl`, `zip`, `gd` y **OPcache activo** (en XAMPP viene desactivado: en `php.ini`, `zend_extension=opcache`, `opcache.enable=1` y `opcache.revalidate_freq=0`; sin él cada página tarda segundos); Composer 2; Node 20+; Docker Desktop; Python 3.11 y
-[uv](https://docs.astral.sh/uv/) para el servicio de IA (`../talentcloud-ai`).
+PHP 8.2 con `pdo_pgsql`, `intl`, `zip`, `gd` y **OPcache activo** (en XAMPP viene desactivado: en `php.ini`, `zend_extension=opcache`, `opcache.enable=1` y `opcache.revalidate_freq=0`; sin él cada página tarda segundos); Composer 2; Node 20+; Docker Desktop.
 
 ## Puesta en marcha
 
 ```bash
-docker compose up -d          # PostgreSQL + pgvector (puerto 5433) y Mailpit
+docker compose up -d          # PostgreSQL (puerto 5433) y Mailpit
 cp .env.example .env          # completar DB_PASSWORD
 composer install && npm install
 php artisan key:generate
 php artisan migrate
-(cd ../talentcloud-ai && uv sync --extra ml)   # servicio de IA con el modelo de embeddings
-composer dev                  # servidor, cola (ia, default), Vite y servicio de IA (puerto 8001)
+composer dev                  # servidor, cola y Vite
 ```
-
-Servicio de IA: con `IA_HABILITADA=true` y `MATCHING_ENGINE=http`, el matching lo calcula el servicio (coincidencia
-exacta + similitud semántica, con evidencia y motivo); si no responde, se usa el análisis básico y
-`php artisan talentcloud:recalcular-matching --solo-basicos` lo rehace cuando vuelve. Además, cada CV procesado se analiza (competencias, años, fragmentos con
-embedding) y cada cambio de requisitos genera sus embeddings, en la cola `ia`. `IA_API_KEY` debe coincidir con
-`TALENTCLOUD_AI_API_KEY` de `talentcloud-ai/.env`. Con `IA_HABILITADA=false` todo funciona igual con el análisis
-básico. La primera vez, el servicio descarga el modelo (unos 470 MB).
 
 - App: http://localhost:8000
 - Correos capturados (Mailpit): http://localhost:8025
@@ -34,9 +28,10 @@ básico. La primera vez, el servicio descarga el modelo (unos 470 MB).
 ## Datos de demostración
 
 `php artisan migrate:fresh --seed` carga siete empresas (tecnología, diseño, retail, logística, salud y gastronomía), 15 vacantes y 42 postulaciones con su CV, reproduciendo la historia de cada postulación
-con fechas relativas al día de la carga. Con el servicio de IA en marcha (`composer dev`), analiza los CV y
-calcula el matching durante la carga; si la IA no responde, avisa y siembra con el análisis básico, y después
-basta con `php artisan talentcloud:reindexar-embeddings --sync` y `php artisan talentcloud:recalcular-matching`.
+con fechas relativas al día de la carga.
+
+> **Los datos de demostración son sintéticos**: personas, empresas, teléfonos, correos y CV son ficticios, creados solo para probar el sistema con
+> un dominio coherente (ningún dato personal es real). Lo que muestran los paneles (cifras, gráficos, actividad) sale de esas filas de la base de datos.
 Todas las cuentas usan la contraseña `password`:
 
 | Cuenta | Rol | Empresa |
@@ -59,15 +54,14 @@ Todas las cuentas usan la contraseña `password`:
 
 Otros postulantes con cuenta: renzo.paredes, milagros.huaman (retiró su postulación), gianella.torres, luis.chavez,
 karen.espinoza, kevin.morales, mariana.alarcon, lucero.mamani y thiago.huillca, todos `@correo.com`.
-El Libro de Reclamaciones tiene una hoja respondida y otra pendiente.
 
-El postulante ve las vacantes abiertas de las empresas activas en «Vacantes» y postula con su CV; la empresa recibe el aviso y la postulación entra en su Kanban con el matching de la IA. También puede retirar una postulación en curso, editar su titular y teléfono en «Mi perfil» y descargar sus datos en JSON. Sin iniciar sesión, cualquiera ve las vacantes abiertas en `/empleos` (y las más recientes en la presentación); «Postular» lleva a iniciar sesión o registrarse y vuelve a la vacante.
+El postulante ve las vacantes abiertas de las empresas activas en «Vacantes» y postula con su CV; la empresa recibe el aviso y la postulación entra en su tablero de Selección con el análisis básico de requisitos. También puede retirar una postulación en curso, editar su titular y teléfono en «Mi perfil» y descargar sus datos en JSON. Sin iniciar sesión, cualquiera ve las vacantes abiertas en `/empleos` (y las más recientes en la presentación); «Postular» lleva a iniciar sesión o registrarse y vuelve a la vacante.
 
-La empresa ve en el dashboard el embudo de selección de los últimos 90 días, y en «Mi empresa» el uso de su plan: vacantes activas, usuarios y postulaciones evaluadas con IA en el mes (Gratis: 1, 2 y 30; Starter: 3, 3 y 300; Pro: 15, 10 y 2 000; Enterprise: sin límite). Toda empresa nueva entra en Gratis con 14 días del plan Pro. Los precios están en `/planes`. Con la pasarela configurada (`PAGOS_PASARELA=stripe`, ver «Pagos con Stripe»), Starter y Pro se pagan con tarjeta desde «Mi empresa»; sin ella, y para Enterprise, la empresa solicita el plan y el admin SaaS lo aplica desde «Empresas».
+La empresa ve en el dashboard el embudo de selección del periodo elegido (7, 30 o 90 días), y en «Mi empresa» el uso de su plan: vacantes activas y usuarios (Gratis: 1 y 2; Starter: 3 y 3; Pro: 15 y 10; Enterprise: sin límite). Toda empresa nueva entra en Gratis con 14 días del plan Pro. Los precios están en `/planes`. Con la pasarela configurada (`PAGOS_PASARELA=stripe`, ver «Pagos con Stripe»), Starter y Pro se pagan con tarjeta desde «Mi empresa»; sin ella, y para Enterprise, la empresa solicita el plan y el admin SaaS lo aplica desde «Empresas».
 
 ### Volumen de demostración (opcional)
 
-La demo base tiene pocas postulaciones por vacante. Para ver el producto «lleno» (dashboard, ranking, Kanban con
+La demo base tiene pocas postulaciones por vacante. Para ver el producto «lleno» (dashboard, tablero con
 «Ver más», Excel con datos), después de `migrate:fresh --seed`:
 
 ```bash
@@ -79,23 +73,23 @@ límite de vacantes activas de cada plan) y siembra ~3 500 postulaciones de pers
 (perfil, experiencia con fechas, proyectos, educación, habilidades). El volumen depende del tipo de puesto: cientos en
 contratación masiva (cajeros, operarios, mozos), decenas en perfiles técnicos y pocas en jefaturas. Reproduce la historia
 con los servicios de la aplicación (registro, CV, postulación, Kanban, entrevistas, evaluaciones, cierre), así que el
-historial y la actividad son los de un uso real. El matching es el análisis básico (no gasta el cupo de IA); después:
-`php artisan talentcloud:reindexar-embeddings --sync` y `talentcloud:recalcular-matching` para lo que quieras mostrar con IA.
-No es parte de `DatabaseSeeder` (los tests no lo necesitan). Orbita Labs, que está suspendida, no recibe vacantes.
+historial y la actividad son los de un uso real. No es parte de `DatabaseSeeder` (los tests no lo necesitan). Orbita Labs, que está suspendida, no recibe vacantes.
 
 ### Escala
 
 Medido sobre una copia con una sola empresa de 10 000 vacantes, ~120 000 postulaciones y una vacante con 15 000
-(`database/rendimiento/carga_empresa_grande.sql`): Selección 0,45 s y 36 MB (antes 20 s y caída por memoria), matching
-0,4 s, «Programar entrevista» y «Evaluar» 20 ms (antes caída y 3,4 s). Lo que lo permite: el tablero trae las primeras 25
-tarjetas de cada columna («Ver más»), el ranking se pagina en SQL con el resumen de cumplimiento en columnas indexadas
-(`postulaciones.requisitos_total/_cubiertos/obligatorios_faltantes`, que escribe `CalcularMatch`), mover una tarjeta
+(`database/rendimiento/carga_empresa_grande.sql`): Selección 0,45 s y 36 MB (antes 20 s y caída por memoria),
+«Programar entrevista» y «Evaluar» 20 ms (antes caída y 3,4 s). Lo que lo permite: el tablero trae las primeras 25
+tarjetas de cada columna («Ver más»), el análisis básico de las tarjetas visibles se hace con dos lecturas para todo el tablero, mover una tarjeta
 renumera en SQL con un candado sobre la vacante, los desplegables enormes son buscadores (`<x-ui.buscador>`: 20 resultados
 por consulta) y las cifras agregadas del dashboard se guardan 60 s por empresa (`DASHBOARD_CACHE_SEGUNDOS`).
 
 `docker compose` toma `DB_PASSWORD` del `.env`. Crea las bases `talentcloud` y `talentcloud_testing`, ambas con la extensión `vector`.
 
-## Pagos con Stripe
+## Pagos con Stripe (unidad 3)
+
+El cobro en línea está implementado pero **apagado** en esta entrega (`PAGOS_PASARELA` vacío): en la primera unidad el plan se solicita y lo aplica el
+administrador de la plataforma. Se evalúa en la tercera unidad.
 
 La empresa es el cliente de Stripe. «Pagar» en «Mi empresa» abre Stripe Checkout (precio en soles más IGV) y
 el plan cambia **solo** cuando llega el aviso firmado de Stripe a `POST /stripe/webhook`: la suscripción se
@@ -143,7 +137,7 @@ composer analyse              # Larastan
 php artisan test --filter=NombreDelTest
 ```
 
-Los tests usan PostgreSQL (`talentcloud_testing`), no SQLite, porque el esquema usa pgvector.
+Los tests usan PostgreSQL (`talentcloud_testing`), no SQLite, porque el esquema usa tipos y funciones propios de PostgreSQL.
 `tests/Feature/Rendimiento` fija cuántas consultas hace cada página: si una supera su presupuesto, buscar la
 relación que se carga dentro de un bucle (N+1) antes de subir la cifra.
 
