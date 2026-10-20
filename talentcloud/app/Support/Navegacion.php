@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
  * "Mis postulaciones" y "Vacantes"; el reclutador y la empresa ven Dashboard a
  * Evaluaciones, y la empresa añade "Mi empresa". El admin SaaS ve Panel,
  * Empresas, Usuarios, Competencias y las pantallas de selección agrupadas
- * en "Supervisión" (solo lectura).
+ * en "Panorama".
  */
 class Navegacion
 {
@@ -42,7 +42,7 @@ class Navegacion
                 self::enlace('Empresas', 'empresas.index', 'empresas.*'),
                 self::enlace('Usuarios', 'usuarios.index', 'usuarios.*'),
                 self::enlace('Competencias', 'competencias.index', 'competencias.*'),
-                self::grupo('Supervisión', 'Procesos de las empresas, solo lectura', self::pantallasDeSeleccion()),
+                self::grupo('Panorama', 'Todos los procesos de las empresas', self::pantallasDeSeleccion()),
             ];
         }
 

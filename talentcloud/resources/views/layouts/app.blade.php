@@ -24,7 +24,7 @@
                 @if (auth()->user()?->tieneRol(\App\Enums\Rol::Admin) && request()->routeIs('vacantes.*', 'seleccion.*', 'kanban.*', 'postulaciones.*', 'candidatos.*', 'entrevistas.*', 'evaluaciones.*'))
                     <p class="card mb-6 !flex-row items-center gap-2 text-14" role="note">
                         <x-ui.icon name="eye" :size="18" class="shrink-0 text-accent-700" />
-                        <span><strong>Supervisión · solo lectura.</strong> Estás viendo los procesos de las empresas como administrador de la plataforma: puedes consultarlos, pero no crearlos ni modificarlos.</span>
+                        <span><strong>Panorama de la plataforma.</strong> Aquí ves cómo avanzan las empresas hoy. Cada empresa decide sobre sus propios candidatos.</span>
                     </p>
                 @endif
                 {{ $slot }}

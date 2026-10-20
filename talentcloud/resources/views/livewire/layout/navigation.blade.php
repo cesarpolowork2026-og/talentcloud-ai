@@ -123,7 +123,7 @@ new class extends Component
     <div class="hidden items-center gap-4 lg:flex">
         @foreach ($enlaces as $enlace)
             @if (isset($enlace['hijos']))
-                {{-- Grupo (admin SaaS: "Supervisión"). Patrón "disclosure" de navegación (W3C APG):
+                {{-- Grupo (admin SaaS: "Panorama"). Patrón "disclosure" de navegación (W3C APG):
                      un botón con aria-expanded/aria-controls y una lista de enlaces; no es un role="menu".
                      Se cierra al hacer clic fuera, al salir con Tab y con Esc (el foco vuelve al botón). --}}
                 <div

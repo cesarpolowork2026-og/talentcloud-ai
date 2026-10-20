@@ -218,7 +218,7 @@ it('cuenta las postulaciones del mes y los trabajos fallidos del panel', functio
         ->and(array_sum(array_column($resumen->crecimiento, 'postulaciones')))->toBe(1);
 });
 
-// — Supervisión en solo lectura —
+// — Panorama: el admin ve y no modifica —
 
 it('deja al admin ver las vacantes de las empresas pero no crearlas ni cambiarlas', function () {
     $this->actingAs($this->admin)
@@ -226,7 +226,7 @@ it('deja al admin ver las vacantes de las empresas pero no crearlas ni cambiarla
         ->assertOk()
         ->assertSee('Product Designer');
 
-    $this->actingAs($this->admin)->get('/vacantes')->assertOk()->assertSee('Supervisión · solo lectura');
+    $this->actingAs($this->admin)->get('/vacantes')->assertOk()->assertSee('Panorama de la plataforma');
 
     actuarComo($this->admin);
     Livewire::test(Detalle::class, ['vacante' => $this->vacante])
@@ -235,8 +235,8 @@ it('deja al admin ver las vacantes de las empresas pero no crearlas ni cambiarla
     expect($this->vacante->fresh()->estado)->toBe(EstadoVacante::Abierta);
 });
 
-it('no muestra el aviso de solo lectura al personal de una empresa', function () {
-    $this->actingAs($this->clara)->get('/vacantes')->assertOk()->assertDontSee('Supervisión · solo lectura');
+it('no muestra el aviso de Panorama al personal de una empresa', function () {
+    $this->actingAs($this->clara)->get('/vacantes')->assertOk()->assertDontSee('Panorama de la plataforma');
 });
 
 it('no deja al admin mover postulaciones ni leer las notas internas', function () {

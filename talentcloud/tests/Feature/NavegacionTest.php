@@ -27,11 +27,11 @@ it('muestra al reclutador los módulos de selección', function () use ($persona
 it('ordena el menú del admin: lo suyo y la supervisión agrupada', function () use ($personal) {
     $enlaces = Navegacion::enlaces(User::factory()->admin()->create());
 
-    expect(array_column($enlaces, 'etiqueta'))->toBe(['Panel', 'Empresas', 'Usuarios', 'Competencias', 'Supervisión'])
+    expect(array_column($enlaces, 'etiqueta'))->toBe(['Panel', 'Empresas', 'Usuarios', 'Competencias', 'Panorama'])
         ->and($enlaces[0]['ruta'])->toBe('dashboard')
         ->and($enlaces[2]['ruta'])->toBe('usuarios.index')
         ->and($enlaces[3]['ruta'])->toBe('competencias.index')
-        ->and($enlaces[4]['descripcion'])->toBe('Procesos de las empresas, solo lectura')
+        ->and($enlaces[4]['descripcion'])->toBe('Todos los procesos de las empresas')
         // Las mismas pantallas que el reclutador, sin su Dashboard (para el admin es "Panel").
         ->and(array_column($enlaces[4]['hijos'], 'etiqueta'))->toBe(array_slice($personal, 1));
 });
@@ -89,13 +89,13 @@ it('renderiza la barra con la marca, los enlaces y el menú de perfil', function
         ->assertSee('aria-current="page"', false);
 });
 
-it('pinta el desplegable "Supervisión" del admin y lo marca activo dentro de él', function () {
+it('pinta el desplegable "Panorama" del admin y lo marca activo dentro de él', function () {
     $admin = User::factory()->admin()->create();
 
     $this->actingAs($admin)
         ->get('/dashboard')
         ->assertOk()
-        ->assertSeeInOrder(['Panel', 'Empresas', 'Usuarios', 'Competencias', 'Supervisión', 'Procesos de las empresas, solo lectura', 'Vacantes', 'Evaluaciones'])
+        ->assertSeeInOrder(['Panel', 'Empresas', 'Usuarios', 'Competencias', 'Panorama', 'Todos los procesos de las empresas', 'Vacantes', 'Evaluaciones'])
         ->assertDontSee('aria-current="true"', false)
         // Disclosure de navegación, no un menú de aplicación (W3C APG).
         ->assertSee('aria-controls="grupo-escritorio-4"', false)

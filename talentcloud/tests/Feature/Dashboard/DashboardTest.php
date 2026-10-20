@@ -166,7 +166,7 @@ it('muestra al admin SaaS el panel de la plataforma, de lo general a lo particul
     $html = Livewire::test(Panel::class)
         ->assertSee('Panel de la plataforma')
         ->assertDontSee('Tu plan ·')
-        // El embudo y la actividad de selección son de cada empresa: el admin los supervisa desde «Supervisión».
+        // El embudo y la actividad de selección son de cada empresa: el admin los supervisa desde «Panorama».
         ->assertDontSee('Embudo de selección')
         ->assertDontSee('Requiere tu atención')
         ->html();

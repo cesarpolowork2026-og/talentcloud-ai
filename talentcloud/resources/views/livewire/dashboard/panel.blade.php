@@ -93,7 +93,7 @@
         <section class="mb-10" aria-labelledby="panel-uso">
             <div class="mb-3">
                 <h2 id="panel-uso" class="m-0 text-16">2 · Uso y crecimiento</h2>
-                <p class="m-0 mt-1 text-13 text-neutral-700">Cuánta gente y cuánta actividad hay en la plataforma. Para ver los procesos de las empresas, usa «Supervisión» en el menú (solo lectura).</p>
+                <p class="m-0 mt-1 text-13 text-neutral-700">Cuánta gente y cuánta actividad hay en la plataforma. Para ver los procesos de las empresas, usa «Panorama» en el menú.</p>
             </div>
 
             <div class="mb-4 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
