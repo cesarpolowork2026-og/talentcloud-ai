@@ -1,2 +1,20 @@
 User-agent: *
-Disallow:
+# Zona privada (con sesión iniciada): no es contenido para buscadores.
+Disallow: /auditoria
+Disallow: /bienvenida
+Disallow: /candidatos
+Disallow: /competencias
+Disallow: /cvs
+Disallow: /dashboard
+Disallow: /empresas
+Disallow: /entrevistas
+Disallow: /evaluaciones
+Disallow: /kanban
+Disallow: /matching
+Disallow: /mi-empresa
+Disallow: /postulaciones
+Disallow: /postulante
+Disallow: /profile
+Disallow: /seleccion
+Disallow: /usuarios
+Disallow: /vacantes

@@ -2,6 +2,8 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @include('partials.head')
+    {{-- Pantallas con sesión: privadas, nunca para buscadores (ver también CabecerasDeSeguridad y robots.txt). --}}
+    <meta name="robots" content="noindex, nofollow, noarchive">
 </head>
 <body class="antialiased">
     <div class="min-h-screen bg-bg">
