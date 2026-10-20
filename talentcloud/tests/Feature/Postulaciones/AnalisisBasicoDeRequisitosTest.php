@@ -143,3 +143,28 @@ it('el admin supervisa el análisis sin filtro de empresa', function () {
 
     expect($cobertura->cubiertos())->toBe(1);
 });
+
+it('muestra el texto del CV con las competencias pedidas resaltadas', function () {
+    $p = ($this->postular)('Elena Ruiz', "Experiencia sólida.\nUsé Laravel y Docker a diario.");
+
+    // Livewire intercala comentarios de bloque; no se ven, pero separan los fragmentos en el HTML.
+    $html = preg_replace('/<!--.*?-->/s', '', Livewire::test(Detalle::class, ['postulacion' => $p])->assertSee('Texto del CV')->html());
+
+    expect($html)->toContain('<mark class="rounded-sm bg-accent-100 px-[2px] text-ink">Laravel</mark> y <mark class="rounded-sm bg-accent-100 px-[2px] text-ink">Docker</mark> a diario.');
+});
+
+it('explica cuando el CV no tiene texto legible', function () {
+    $candidato = Candidato::factory()->create();
+    Cv::factory()->conError()->create(['candidato_id' => $candidato->id]);
+    $p = Postulacion::factory()->paraVacante($this->vacante)->create(['candidato_id' => $candidato->id, 'orden' => 0]);
+
+    Livewire::test(Detalle::class, ['postulacion' => $p])->assertSee('No se pudo leer el texto de este CV');
+});
+
+it('el texto del CV se escapa: un CV con HTML no inyecta marcado', function () {
+    $p = ($this->postular)('Elena Ruiz', 'Laravel <script>alert(1)</script> y Docker');
+
+    $html = Livewire::test(Detalle::class, ['postulacion' => $p])->html();
+
+    expect($html)->not->toContain('<script>alert(1)</script>')->and($html)->toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+});

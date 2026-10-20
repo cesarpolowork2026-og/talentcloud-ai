@@ -83,6 +83,17 @@
         </x-ui.card>
     @endif
 
+    @if ($cv && $textoDelCv !== '')
+        <x-ui.card class="mb-6 max-w-[980px]" kicker="Texto del CV">
+            <p class="m-0 text-13 text-neutral-700">Texto extraído de «{{ $cv->nombre_original }}». Se resaltan las competencias que pide la vacante. El archivo original es el que vale: descárgalo si algo no se ve bien.</p>
+            <div class="max-h-[420px] overflow-y-auto whitespace-pre-line rounded border border-divider bg-white p-3 text-14 leading-relaxed" tabindex="0" role="region" aria-label="Texto del CV de {{ $candidato?->nombre }}">@foreach ($tramosDelCv as $tramo)@if ($tramo['marcado'])<mark class="rounded-sm bg-accent-100 px-[2px] text-ink">{{ $tramo['texto'] }}</mark>@else{{ $tramo['texto'] }}@endif@endforeach</div>
+        </x-ui.card>
+    @elseif ($cv)
+        <x-ui.card class="mb-6 max-w-[980px]" kicker="Texto del CV">
+            <p class="m-0 text-14 text-neutral-700">No se pudo leer el texto de este CV (por ejemplo, un PDF escaneado como imagen). Descárgalo para revisarlo.</p>
+        </x-ui.card>
+    @endif
+
     <div class="mb-6 grid max-w-[980px] gap-4 md:grid-cols-2">
         <x-ui.card kicker="Entrevistas">
             @forelse ($entrevistas as $entrevista)
