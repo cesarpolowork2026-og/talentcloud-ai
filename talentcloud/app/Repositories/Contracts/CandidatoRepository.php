@@ -31,13 +31,13 @@ interface CandidatoRepository
     /**
      * Consulta base de la pantalla "Candidatos": visibles, con su última
      * postulación (en la empresa del contexto), CV actual y competencias, y
-     * el alias match_de_orden para ordenar por "Match %" (el de la última
-     * postulación; en la vista global, el mejor de todos sus procesos, que
-     * además se cargan para agruparlos por empresa).
+     * el alias ultima_postulacion_at para ordenar por la postulación más
+     * reciente (en la vista global se cargan además todos sus procesos para
+     * agruparlos por empresa).
      *
      * @return Builder<Candidato>
      */
-    public function consultaListado(bool $conOrdenPorMatch = true): Builder;
+    public function consultaListado(bool $conOrdenReciente = true): Builder;
 
     public function buscarVisible(int $id): ?Candidato;
 

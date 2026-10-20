@@ -12,16 +12,13 @@ use App\Enums\Modalidad;
 use App\Enums\ModalidadEntrevista;
 use App\Enums\OrigenPostulacion;
 use App\Enums\TipoActividad;
-use App\Events\CvAnalizado;
 use App\Models\Actividad;
 use App\Models\Candidato;
-use App\Models\Cv;
 use App\Models\Empresa;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
-use App\Notifications\AvisoCvAnalizado;
 use App\Notifications\AvisoDeEntrevista;
 use App\Services\Entrevistas\CambiarEstadoEntrevista;
 use App\Services\Entrevistas\ProgramarEntrevista;
@@ -29,7 +26,6 @@ use App\Services\Evaluaciones\GuardarEvaluacion;
 use App\Services\Postulaciones\MoverPostulacion;
 use App\Services\Postulaciones\PostularCandidato;
 use App\Services\Vacantes\CrearVacante;
-use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -135,24 +131,6 @@ it('anota la evaluación aprobada', function () {
     expect(descripciones())->toBe(['Marta Solís aprobó la evaluación de Sofía Nieto.']);
 });
 
-it('anota el CV analizado en cada empresa donde el candidato postuló', function () {
-    Notification::fake();
-    $vela = app(TenantContext::class)->ejecutarGlobal(function () {
-        $vela = Empresa::factory()->create(['nombre' => 'Vela Studio']);
-        Postulacion::factory()->paraVacante(Vacante::factory()->deEmpresa($vela)->create(['titulo' => 'DevOps Engineer']))
-            ->create(['candidato_id' => $this->sofia->candidato_id]);
-
-        return $vela;
-    });
-
-    // Como en la cola "ia": sin contexto de empresa.
-    app(TenantContext::class)->ejecutarGlobal(fn () => CvAnalizado::dispatch(Cv::factory()->procesado()->create(['candidato_id' => $this->sofia->candidato_id])));
-
-    expect(descripciones())->toBe(['La IA analizó el CV de Sofía Nieto para Desarrollador Backend.']);
-    $deVela = app(TenantContext::class)->ejecutarPara($vela->id, fn () => Actividad::pluck('descripcion')->all());
-    expect($deVela)->toBe(['La IA analizó el CV de Sofía Nieto para DevOps Engineer.']);
-});
-
 it('anota la vacante creada', function () {
     app(CrearVacante::class)->ejecutar($this->nimbus, new NuevaVacanteData('QA Engineer', null, Modalidad::Remoto, ['Selenium']), $this->marta);
 
@@ -208,31 +186,6 @@ it('envía los avisos por la cola y con el enlace de la videollamada', function 
         ->and($correo->subject)->toBe('Entrevista programada: Desarrollador Backend')
         ->and($correo->actionText)->toBe('Unirse a la videollamada')
         ->and($correo->actionUrl)->toBe('https://meet.example.com/abc');
-});
-
-it('avisa del CV analizado a quien lo subió', function () {
-    Notification::fake();
-    $datos = ['competencias' => [
-        ['nombre' => 'Java', 'dudosa' => false], ['nombre' => 'Docker', 'dudosa' => false], ['nombre' => 'Kubernetes', 'dudosa' => true],
-    ]];
-
-    $delReclutador = Cv::factory()->procesado()->create(['candidato_id' => $this->sofia->candidato_id, 'subido_por' => $this->marta->id, 'datos_estructurados' => $datos]);
-    $propio = Cv::factory()->procesado()->create(['candidato_id' => $this->marco->candidato_id, 'subido_por' => $this->marcoUsuario->id, 'datos_estructurados' => $datos]);
-    CvAnalizado::dispatch($delReclutador);
-    CvAnalizado::dispatch($propio);
-
-    Notification::assertSentTo($this->marta, AvisoCvAnalizado::class, fn ($aviso) => $aviso->texto === 'Nuevo CV analizado de Sofía Nieto: 2 competencias detectadas.');
-    Notification::assertSentTo($this->marcoUsuario, AvisoCvAnalizado::class, fn ($aviso) => $aviso->texto === 'Tu CV fue analizado: 2 competencias detectadas.');
-});
-
-it('no repite avisos ni actividad al reanalizar un CV', function () {
-    Notification::fake();
-    $cv = Cv::factory()->procesado()->create(['candidato_id' => $this->sofia->candidato_id, 'subido_por' => $this->marta->id]);
-
-    CvAnalizado::dispatch($cv, primeraVez: false);
-
-    Notification::assertNothingSent();
-    expect(Actividad::count())->toBe(0);
 });
 
 it('nunca pone en un aviso un enlace de videollamada que no sea http o https', function () {

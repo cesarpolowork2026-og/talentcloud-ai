@@ -29,7 +29,6 @@ beforeEach(function () {
             Postulacion::factory()->paraVacante(Vacante::factory()->deEmpresa($empresa)->create())->create(['candidato_id' => $this->elena->id]);
         }
     });
-    $this->elena->todasLasCompetencias()->attach(Competencia::obtenerOCrear('Java')->id, ['fuente' => FuenteCompetencia::Extraccion->value]);
 });
 
 it('muestra las manuales solo a la empresa que las anotó', function () {
@@ -43,7 +42,7 @@ it('muestra las manuales solo a la empresa que las anotó', function () {
     actuarComo($this->clara);
     Livewire::test(Detalle::class, ['candidato' => $this->elena])
         ->assertDontSeeHtml('Quitar Liderazgo') // el catálogo (datalist) sí la incluye
-        ->assertSee('Java · IA'); // las extraídas por la IA las ven todas
+        ->assertSee('Sin competencias registradas.');
 });
 
 it('no deja quitar una competencia manual de otra empresa', function () {
@@ -65,7 +64,7 @@ it('permite que cada empresa anote la misma competencia', function () {
     expect($this->elena->todasLasCompetencias()->wherePivot('fuente', FuenteCompetencia::Manual->value)->count())->toBe(2);
 });
 
-it('muestra una sola etiqueta si la competencia es manual y extraída', function () {
+it('muestra una sola etiqueta por competencia anotada', function () {
     $this->elena->todasLasCompetencias()->attach(Competencia::obtenerOCrear('Java')->id, ['fuente' => FuenteCompetencia::Manual->value, 'empresa_id' => $this->nimbus->id]);
 
     actuarComo($this->marta);

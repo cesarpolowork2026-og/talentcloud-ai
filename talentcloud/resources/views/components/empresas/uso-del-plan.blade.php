@@ -1,5 +1,5 @@
 {{--
-    Uso de los límites del plan vigente ("2 de 3 vacantes activas") y del cupo de IA del mes.
+    Uso de los límites del plan vigente ("2 de 3 vacantes activas").
     Lo usan "Mi empresa" y el detalle de empresa del admin.
 --}}
 @props(['uso'])
@@ -20,15 +20,6 @@
             'excede' => $uso->excedeUsuarios(),
             'nota' => $uso->invitacionesPendientes > 0
                 ? $uso->invitacionesPendientes.' '.($uso->invitacionesPendientes === 1 ? 'invitación pendiente ocupa' : 'invitaciones pendientes ocupan').' lugar hasta que se acepte o se revoque.'
-                : null,
-        ],
-        [
-            'nombre' => 'Postulaciones con IA este mes',
-            'usado' => $uso->postulacionesConIa,
-            'limite' => $uso->cupoIa(),
-            'excede' => false,
-            'nota' => $uso->cupoIaAgotado()
-                ? 'Cupo agotado: hasta el '.\App\Support\Formato::fechaCorta(\App\Services\Empresas\CupoDeIa::renovacion()).' las nuevas postulaciones se evalúan con el análisis básico.'
                 : null,
         ],
     ];

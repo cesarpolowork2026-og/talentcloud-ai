@@ -17,9 +17,7 @@ use App\Enums\ModalidadEntrevista;
 use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
 use App\Enums\TipoRequisito;
-use App\Events\RequisitosActualizados;
 use App\Events\VacanteCreada;
-use App\Ia\ServicioIa;
 use App\Models\Candidato;
 use App\Models\Competencia;
 use App\Models\Empresa;
@@ -61,8 +59,7 @@ use Throwable;
  * No escribe tablas: reproduce la historia de cada postulación con los mismos
  * servicios que usan las pantallas, así el historial, la actividad y los avisos
  * salen como en uso real. Las fechas son relativas al día de la siembra. La cola
- * es "sync" y el correo "array". Si el servicio de IA no responde, se siembra con
- * el análisis básico. Es idempotente.
+ * es "sync" y el correo "array". Es idempotente.
  */
 class DemoSeeder extends Seeder
 {
@@ -84,13 +81,11 @@ class DemoSeeder extends Seeder
         $anterior = [
             'queue.default' => config('queue.default'),
             'mail.default' => config('mail.default'),
-            'talentcloud.ia.habilitada' => config('talentcloud.ia.habilitada'),
         ];
         $relojAnterior = Carbon::getTestNow();
 
         config(['queue.default' => 'sync', 'mail.default' => 'array']);
         app('mail.manager')->forgetMailers();
-        $this->prepararIa();
 
         try {
             app(TenantContext::class)->ejecutarGlobal(fn () => $this->sembrar());
@@ -99,17 +94,6 @@ class DemoSeeder extends Seeder
             auth()->forgetUser();
             config($anterior);
             app('mail.manager')->forgetMailers();
-        }
-    }
-
-    private function prepararIa(): void
-    {
-        $ia = app(ServicioIa::class);
-
-        if ($ia->habilitado() && ! $ia->disponible()) {
-            config(['talentcloud.ia.habilitada' => false]);
-            $this->command->warn('El servicio de IA no responde: la demo se siembra con el análisis básico. '
-                .'Cuando esté en marcha: php artisan talentcloud:reindexar-embeddings --sync y talentcloud:recalcular-matching.');
         }
     }
 
@@ -388,8 +372,8 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * Crea la vacante como borrador con sus requisitos (VacanteCreada y
-     * RequisitosActualizados, como en la pantalla) y la publica media hora después.
+     * Crea la vacante como borrador con sus requisitos (VacanteCreada, como en la
+     * pantalla) y la publica media hora después.
      *
      * @param  list<array{0: string, 1: TipoRequisito, 2: int, 3: int|null}>  $requisitos
      */
@@ -414,7 +398,6 @@ class DemoSeeder extends Seeder
         }
 
         VacanteCreada::dispatch($vacante, $autor);
-        RequisitosActualizados::dispatch($vacante);
 
         if ($publicar) {
             Carbon::setTestNow(now()->addMinutes(30));

@@ -3,7 +3,7 @@
     postulante, contraseña, verificación e invitación): la misma cabecera, pie y
     composición que el hero de layouts.presentacion. $slot es el formulario.
     El mensaje de la izquierda se dirige al postulante en su registro y a la
-    empresa en el resto (texto y tarjeta de coincidencias de Login.dc.html).
+    empresa en el resto (texto y tarjeta del proceso de selección).
 --}}
 @php($paraPostulante = request()->routeIs('register.postulante'))
 <!DOCTYPE html>
@@ -12,7 +12,7 @@
     {{-- Vista previa al compartir solo en los registros: la invitación y la de contraseña llevan un token en la URL. --}}
     @include('partials.head', request()->routeIs('register', 'register.postulante') ? ['compartir' => $paraPostulante
         ? 'Postula con tu CV y sigue cada proceso de selección en TalentCloud AI. Crear tu cuenta es gratis.'
-        : 'TalentCloud AI: gestiona vacantes, candidatos, entrevistas y evaluaciones con un matching de CVs que la IA explica. La IA sugiere; tú decides.'] : [])
+        : 'TalentCloud AI: gestiona vacantes, candidatos, entrevistas y evaluaciones en un solo flujo, con los datos de cada empresa separados. Tú decides.'] : [])
 </head>
 <body class="antialiased">
 <div class="flex min-h-screen flex-col bg-bg">
@@ -22,12 +22,12 @@
         {{-- Mensaje (en móvil, debajo del formulario). --}}
         <div class="order-last grid min-w-0 content-start gap-8 lg:order-first">
             <div class="max-w-[600px]">
-                <p class="mb-3 text-12 uppercase tracking-[0.12em] text-accent-700">— {{ $paraPostulante ? 'Para postulantes' : 'Reclutamiento con IA explicable' }}</p>
+                <p class="mb-3 text-12 uppercase tracking-[0.12em] text-accent-700">— {{ $paraPostulante ? 'Para postulantes' : 'Reclutamiento ordenado' }}</p>
                 <h1 class="mb-4 text-[clamp(32px,4vw,44px)] leading-[1.08] [text-wrap:balance]">
                     {{ $paraPostulante ? 'Postula con tu CV y sigue cada proceso.' : 'Encuentra el talento que necesitas.' }}
                 </h1>
                 <p class="m-0 font-heading text-18 italic leading-[1.5] text-neutral-800 [text-wrap:pretty]">
-                    {{ $paraPostulante ? 'Sube tu CV una sola vez y consulta en qué etapa está cada postulación.' : 'La IA analiza, relaciona y explica. Tú tomas la decisión.' }}
+                    {{ $paraPostulante ? 'Sube tu CV una sola vez y consulta en qué etapa está cada postulación.' : 'Un tablero por vacante, con el historial de cada postulación. Tú tomas la decisión.' }}
                 </p>
             </div>
 
@@ -40,27 +40,27 @@
                 </x-presentacion.telefono>
             @else
                 <x-ui.card kicker="Vacante · Desarrollador Backend" elev="md" class="max-w-[440px] !bg-white" aria-hidden="true">
-                    <div class="card-title mb-3">Coincidencias encontradas</div>
+                    <div class="card-title mb-3">Tu proceso de selección</div>
                     <div class="grid gap-2">
-                        @foreach (['Java' => 96, 'Spring Boot' => 91, 'PostgreSQL' => 87, 'Docker' => 82] as $competencia => $porcentaje)
+                        @foreach (['Postulado' => 12, 'En revisión' => 7, 'Entrevista' => 3, 'Oferta' => 1] as $etapa => $cantidad)
                             <div class="flex items-center gap-3">
-                                <span class="w-[130px] text-14">{{ $competencia }}</span>
-                                <x-ui.progress :value="$porcentaje" class="flex-1" />
-                                <span class="w-[34px] text-right text-13 font-semibold text-accent-700">{{ $porcentaje }}%</span>
+                                <span class="w-[130px] text-14">{{ $etapa }}</span>
+                                <x-ui.progress :value="$cantidad * 100 / 12" class="flex-1" />
+                                <span class="w-[34px] text-right text-13 font-semibold text-accent-700">{{ $cantidad }}</span>
                             </div>
                         @endforeach
                     </div>
                     <div class="mt-4 flex items-center gap-2 border-t border-divider pt-3">
                         <x-ui.icon name="check-circle" class="text-accent" />
-                        <span class="text-14 text-neutral-800">4 competencias encontradas</span>
+                        <span class="text-14 text-neutral-800">23 postulaciones en el tablero</span>
                     </div>
                 </x-ui.card>
             @endif
 
             <ul class="m-0 grid max-w-[46ch] list-none gap-3 p-0">
                 @foreach ($paraPostulante
-                    ? ['La IA lee tu CV y lo relaciona con cada vacante.', 'Tus datos solo los ven las empresas a las que postulas.', 'Puedes eliminar tu cuenta y tus datos cuando quieras.']
-                    : ['Cada coincidencia cita el fragmento del CV que la respalda.', 'Los datos de tu empresa están aislados de las demás.', 'La decisión final siempre es de tu equipo.'] as $punto)
+                    ? ['Postula en un clic con el CV que ya subiste.', 'Tus datos solo los ven las empresas a las que postulas.', 'Puedes eliminar tu cuenta y tus datos cuando quieras.']
+                    : ['Cada postulación guarda su CV, sus notas, sus entrevistas y sus evaluaciones.', 'Los datos de tu empresa están aislados de las demás.', 'La decisión final siempre es de tu equipo.'] as $punto)
                     <li class="flex items-start gap-3 text-15 text-neutral-800">
                         <x-ui.icon name="check-circle" :size="20" class="mt-0.5 text-accent-700" />{{ $punto }}
                     </li>

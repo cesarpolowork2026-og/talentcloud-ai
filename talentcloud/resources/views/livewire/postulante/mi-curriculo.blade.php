@@ -9,20 +9,18 @@
         <div class="card-title mb-2">{{ $cv?->nombre_original ?? 'Aún no subiste tu CV' }}</div>
 
         @if (! $cv)
-            <p class="card-body">Sube tu CV en PDF o Word para postular y que la IA identifique tus competencias.</p>
+            <p class="card-body">Sube tu CV en PDF o Word para postular a las vacantes.</p>
         @elseif ($cv->estado_procesamiento === EstadoProcesamientoCv::Error)
             <div class="card-meta text-accent-2-700">
                 <x-ui.icon name="warning" :size="14" />
-                <span>Error al analizar el CV</span>
+                <span>No pudimos leer el CV</span>
             </div>
             <p class="card-body">{{ $cv->error }}</p>
-            <x-ui.button variant="ghost" size="sm" class="self-start" wire:click="reintentar">Reintentar análisis</x-ui.button>
+            <x-ui.button variant="ghost" size="sm" class="self-start" wire:click="reintentar">Reintentar lectura</x-ui.button>
         @elseif ($procesando)
-            <p class="card-body">Analizando tu CV…</p>
+            <p class="card-body">Procesando tu CV…</p>
         @else
-            <p class="card-body">
-                Analizado por la IA — {{ $competenciasIa }} {{ $competenciasIa === 1 ? 'competencia detectada' : 'competencias detectadas' }}.
-            </p>
+            <p class="card-body">CV cargado y listo para tus postulaciones.</p>
         @endif
 
         @if ($cv)
@@ -36,7 +34,7 @@
 
     <x-ui.dialog wire:model="mostrarSubida" :title="$cv ? 'Subir nuevo CV' : 'Subir tu CV'" max-width="480px">
         <form wire:submit="subir" id="form-mi-cv" class="grid gap-3">
-            <p class="m-0">La IA extraerá automáticamente tus competencias y experiencia del nuevo archivo.</p>
+            <p class="m-0">El nuevo archivo reemplazará al que tienes ahora en tus próximas postulaciones.</p>
             <x-ui.field label="Archivo (PDF o Word, hasta 5 MB)" for="mi-cv" error="archivoCv">
                 <input type="file" wire:model="archivoCv" id="mi-cv" accept=".pdf,.docx" class="input">
                 <p class="field-hint" wire:loading wire:target="archivoCv" role="status">Subiendo archivo…</p>

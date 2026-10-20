@@ -8,13 +8,11 @@ enum FuenteCompetencia: string
     use EsEnumDeEstado;
 
     case Manual = 'manual';
-    case Extraccion = 'extraccion';
 
     public function etiqueta(): string
     {
         return match ($this) {
             self::Manual => 'Registrada manualmente',
-            self::Extraccion => 'Extraída del CV por IA',
         };
     }
 

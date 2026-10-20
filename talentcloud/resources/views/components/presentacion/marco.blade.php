@@ -2,13 +2,13 @@
     Ventana de la app para las maquetas de la presentación: la misma barra de
     navegación que layouts.app, a tamaño reducido. activo: enlace resaltado.
 --}}
-@props(['activo' => 'Kanban'])
+@props(['activo' => 'Selección'])
 
 <div class="flex h-full flex-col overflow-hidden rounded-lg border border-divider bg-bg shadow-md">
     <div class="barra flex shrink-0 items-center gap-3 px-5 py-3">
         <x-marca tamano="pequeno" />
         <div class="mx-auto flex gap-3.5 text-11">
-            @foreach (['Dashboard', 'Vacantes', 'Kanban', 'Candidatos', 'Matching', 'Entrevistas', 'Evaluaciones'] as $enlace)
+            @foreach (['Dashboard', 'Vacantes', 'Selección', 'Candidatos', 'Entrevistas', 'Evaluaciones'] as $enlace)
                 <span @class(['text-accent-300 underline decoration-2 underline-offset-[6px]' => $enlace === $activo])>{{ $enlace }}</span>
             @endforeach
         </div>

@@ -24,9 +24,9 @@
 
         <div class="grid content-start gap-2">
             <p class="m-0 text-13 font-semibold">Actividad reciente</p>
-            @foreach (['La IA analizó 6 CVs nuevos para Desarrollador Backend.', 'Sofía Nieto avanzó a la etapa de entrevista.', 'Marta Solís aprobó la evaluación de Elena Ruiz.'] as $evento)
+            @foreach (['Rosa Paredes postuló a Desarrollador Backend.', 'Sofía Nieto avanzó a la etapa de entrevista.', 'Marta Solís aprobó la evaluación de Elena Ruiz.'] as $evento)
                 <div class="flex items-start gap-2 text-11 leading-[1.5]">
-                    <x-ui.icon name="sparkle" :size="12" class="mt-0.5 text-accent" />{{ $evento }}
+                    <x-ui.icon name="arrows-left-right" :size="12" class="mt-0.5 text-accent" />{{ $evento }}
                 </div>
             @endforeach
         </div>

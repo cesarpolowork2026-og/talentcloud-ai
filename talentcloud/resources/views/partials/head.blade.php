@@ -25,7 +25,7 @@
     <meta property="og:image" content="{{ asset('marca/vista-previa.png') }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="TalentCloud AI: reclutamiento con IA que explica cada coincidencia.">
+    <meta property="og:image:alt" content="TalentCloud AI: vacantes, candidatos y entrevistas en un solo lugar.">
     <meta name="twitter:card" content="summary_large_image">
 @endisset
 

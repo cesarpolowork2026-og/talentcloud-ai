@@ -6,7 +6,6 @@ use App\Enums\EtapaPostulacion;
 use App\Enums\OrigenPostulacion;
 use App\Enums\TipoActividad;
 use App\Events\CandidatoSePostulo;
-use App\Events\CvAnalizado;
 use App\Events\EntrevistaCancelada;
 use App\Events\EntrevistaProgramada;
 use App\Events\EntrevistaReprogramada;
@@ -99,24 +98,6 @@ class AnotarActividad
             "{$postulacion->candidato?->nombre} retiró su postulación a {$titulo}.",
             $evento->postulante,
         );
-    }
-
-    public function handleCv(CvAnalizado $evento): void
-    {
-        if (! $evento->primeraVez) {
-            return;
-        }
-
-        // El CV es global: se anota en cada empresa donde el candidato tiene una postulación.
-        Postulacion::sinFiltroDeEmpresa()
-            ->with(['candidato', 'vacante' => fn ($q) => $q->withoutGlobalScopes()])
-            ->where('candidato_id', $evento->cv->candidato_id)
-            ->get()
-            ->each(fn (Postulacion $p) => $this->anotar(
-                $p,
-                TipoActividad::CvAnalizado,
-                "La IA analizó el CV de {$p->candidato?->nombre} para {$p->vacante?->titulo}.",
-            ));
     }
 
     public function handleEvaluacion(EvaluacionAprobada $evento): void

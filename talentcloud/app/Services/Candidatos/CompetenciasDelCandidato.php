@@ -3,7 +3,6 @@
 namespace App\Services\Candidatos;
 
 use App\Enums\FuenteCompetencia;
-use App\Ia\CompetenciaExtraida;
 use App\Models\Candidato;
 use App\Models\Competencia;
 use App\Models\Postulacion;
@@ -12,9 +11,8 @@ use App\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
- * Competencias del candidato. Las manuales son anotaciones de la empresa en
- * curso: se agregan y quitan una a una y solo las ve esa empresa. Las extraídas
- * del CV por la IA no se editan a mano, se reemplazan con cada análisis.
+ * Competencias del candidato: anotaciones de la empresa en curso. Se agregan y
+ * quitan una a una y solo las ve esa empresa.
  *
  * El admin SaaS indica para qué empresa anota o quita, y debe ser una en la que
  * el candidato tenga un proceso.
@@ -41,26 +39,6 @@ class CompetenciasDelCandidato
     public function quitar(Candidato $candidato, int $competenciaId, ?int $deEmpresaId = null): void
     {
         $this->manualesDe($candidato, $this->empresaDestino($candidato, $deEmpresaId))->detach($competenciaId);
-    }
-
-    /**
-     * Sustituye las competencias extraídas del CV (las manuales no se tocan).
-     *
-     * @param  list<CompetenciaExtraida>  $extraidas
-     */
-    public function reemplazarExtraidas(int $candidatoId, array $extraidas): void
-    {
-        $candidato = Candidato::findOrFail($candidatoId);
-
-        $candidato->todasLasCompetencias()->wherePivot('fuente', FuenteCompetencia::Extraccion->value)->detach();
-
-        $candidato->todasLasCompetencias()->attach(collect($extraidas)->mapWithKeys(fn (CompetenciaExtraida $c) => [
-            $c->competenciaId => [
-                'fuente' => FuenteCompetencia::Extraccion->value,
-                'anios' => $c->anios,
-                'evidencia' => $c->evidencia,
-            ],
-        ])->all());
     }
 
     /**

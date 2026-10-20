@@ -79,10 +79,10 @@
                 @if ($plataforma->cercaDelLimite->isEmpty())
                     <p class="m-0 text-14 text-neutral-800">Ninguna empresa activa usa el 80 % o más de su plan.</p>
                 @else
-                    <p class="m-0 text-13 text-neutral-700">Usan el 80 % o más de sus vacantes activas, de sus usuarios (con invitaciones pendientes) o del cupo de IA del mes. Buen momento para ofrecerles otro plan.</p>
+                    <p class="m-0 text-13 text-neutral-700">Usan el 80 % o más de sus vacantes activas o de sus usuarios (con invitaciones pendientes). Buen momento para ofrecerles otro plan.</p>
                     <x-ui.table>
                         <x-slot:head>
-                            <th>Empresa</th><th>Plan</th><th>Vacantes activas</th><th>Usuarios e invitaciones</th><th>IA este mes</th>
+                            <th>Empresa</th><th>Plan</th><th>Vacantes activas</th><th>Usuarios e invitaciones</th>
                         </x-slot:head>
                         @foreach ($plataforma->cercaDelLimite as $fila)
                             @php($usoDeLaFila = $fila['uso'])
@@ -91,7 +91,6 @@
                                 <td>{{ $usoDeLaFila->etiquetaDelPlan() }}</td>
                                 <td>{{ $usoDeLaFila->vacantesActivas }} {{ $usoDeLaFila->limiteVacantes() === null ? '· sin límite' : 'de '.$usoDeLaFila->limiteVacantes() }}</td>
                                 <td>{{ $usoDeLaFila->usuariosActivos + $usoDeLaFila->invitacionesPendientes }} {{ $usoDeLaFila->limiteUsuarios() === null ? '· sin límite' : 'de '.$usoDeLaFila->limiteUsuarios() }}</td>
-                                <td>{{ $usoDeLaFila->postulacionesConIa }} {{ $usoDeLaFila->cupoIa() === null ? '· sin límite' : 'de '.$usoDeLaFila->cupoIa() }}</td>
                             </tr>
                         @endforeach
                     </x-ui.table>
@@ -99,29 +98,9 @@
             </x-ui.card>
         </section>
 
-        {{-- 2 · Salud de la IA (solo admin SaaS) --}}
-        <section class="mb-10" aria-labelledby="panel-ia">
-            <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
-                <div>
-                    <h2 id="panel-ia" class="m-0 text-16">2 · Salud de la IA</h2>
-                    <p class="m-0 mt-1 text-13 text-neutral-700">Cómo está funcionando el análisis de CV y el matching en los últimos {{ App\Services\Plataforma\CalidadDeLaIa::DIAS }} días.</p>
-                </div>
-                <x-ui.button size="sm" :href="route('calidad-ia')" wire:navigate>Ver calidad de la IA</x-ui.button>
-            </div>
-
-            @php($ia = $plataforma->ia)
-            <div class="grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
-                <x-ui.stat label="Analizadas con IA" :value="$ia->porcentajeConIa() === null ? '—' : $ia->porcentajeConIa().'%'" highlight />
-                <x-ui.stat label="Análisis básico pendiente" :value="$ia->basicasPendientes" />
-                <x-ui.stat label="Marcadas como incorrectas" :value="$ia->marcasDelPeriodo" />
-                <x-ui.stat label="CV con error de lectura" :value="$ia->cvsConError" />
-                <x-ui.stat label="Trabajos fallidos" :value="$ia->trabajosFallidos" />
-            </div>
-        </section>
-
-        {{-- 3 · Actividad de selección en todas las empresas --}}
+        {{-- 2 · Actividad de selección en todas las empresas --}}
         <div class="mb-3">
-            <h2 class="m-0 text-16">3 · Actividad de selección</h2>
+            <h2 class="m-0 text-16">2 · Actividad de selección</h2>
             <p class="m-0 mt-1 text-13 text-neutral-700">Lo que pasa en los procesos de todas las empresas. Para entrar en ellos, usa «Procesos de selección» en el menú.</p>
         </div>
     @endif
@@ -174,16 +153,6 @@
         </section>
 
         <div class="grid gap-4">
-            {{-- Ahorro de tiempo: un cálculo con el supuesto a la vista, no una promesa. --}}
-            <x-ui.card kicker="Tiempo ahorrado con IA">
-                @if ($resumen->analizadasConIa === 0)
-                    <p class="m-0 text-14 text-neutral-800">Aún no hay postulaciones analizadas con IA en los últimos {{ $diasDelAhorro }} días. Cuando lleguen, aquí verás cuánto tiempo de lectura de CV te ahorran.</p>
-                @else
-                    <p class="m-0 font-heading text-32 font-semibold text-accent-700">≈ {{ str_replace('.', ',', (string) $resumen->horasAhorradas()) }} h</p>
-                    <p class="m-0 text-13 text-neutral-700">{{ $resumen->analizadasConIa }} {{ $resumen->analizadasConIa === 1 ? 'postulación analizada' : 'postulaciones analizadas' }} con IA en {{ $diasDelAhorro }} días, a {{ $resumen->minutosPorCv }} min de lectura por CV (supuesto). La IA ordena y explica; tú decides.</p>
-                @endif
-            </x-ui.card>
-
             {{-- Plan: dónde está la empresa y cuánto le queda (el momento natural de pensar en un plan mayor). --}}
             @if ($uso && $empresa)
                 <x-ui.card :kicker="'Tu plan · '.$empresa->etiquetaDelPlan()">
@@ -274,7 +243,7 @@
             @else
                 <x-ui.table>
                     <x-slot:head>
-                        <th>Vacante</th>@if ($plataforma)<th>Empresa</th>@endif<th>Postulantes</th><th>Por revisar</th><th>Mejor match</th><th>Estado</th>
+                        <th>Vacante</th>@if ($plataforma)<th>Empresa</th>@endif<th>Postulantes</th><th>Por revisar</th><th>Estado</th>
                     </x-slot:head>
                     @foreach ($resumen->vacantesConMovimiento as $vacante)
                         <tr class="tc-row" wire:key="reciente-{{ $vacante->id }}" wire:click="verVistaPrevia({{ $vacante->id }})">
@@ -287,12 +256,11 @@
                             @if ($plataforma)<td>{{ $vacante->empresa?->nombre }}</td>@endif
                             <td>{{ $vacante->postulaciones_count }}</td>
                             <td @class(['font-semibold text-accent-700' => $vacante->por_revisar > 0])>{{ $vacante->por_revisar }}</td>
-                            <td>{{ $vacante->mejor_match === null ? '—' : (int) round((float) $vacante->mejor_match).'%' }}</td>
                             <td class="whitespace-nowrap"><x-ui.estado :valor="$vacante->estado" /></td>
                         </tr>
                     @endforeach
                 </x-ui.table>
-                <p class="mt-2 text-13 text-neutral-700">Ordenadas por las que más postulaciones tienen por revisar. El mejor match es una referencia para empezar por ahí; no reemplaza leer el CV.</p>
+                <p class="mt-2 text-13 text-neutral-700">Ordenadas por las que más postulaciones tienen por revisar.</p>
                 <a href="{{ route('vacantes.index') }}" wire:navigate class="mt-1 inline-block text-13">Ver todas las vacantes</a>
             @endif
         </section>

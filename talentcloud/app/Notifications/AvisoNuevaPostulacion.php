@@ -45,7 +45,7 @@ class AvisoNuevaPostulacion extends Notification implements ShouldQueue
             ->subject('Nueva postulación en TalentCloud AI')
             ->greeting('¡Hola!')
             ->line(TextoDeCorreo::literal($this->texto))
-            ->line('La IA ya está analizando su CV frente a los requisitos de la vacante.')
-            ->action('Ver el matching', $this->url);
+            ->line('Revisa su CV y avanza su postulación en el tablero de selección.')
+            ->action('Ver la postulación', $this->url);
     }
 }

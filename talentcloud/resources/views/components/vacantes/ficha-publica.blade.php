@@ -36,7 +36,7 @@
 
     <section>
         <h2 class="mb-1 text-16">Requisitos</h2>
-        <p class="mb-3 text-13 text-neutral-700">La IA comparará tu CV con cada requisito; la decisión final es siempre de la empresa.</p>
+        <p class="mb-3 text-13 text-neutral-700">Un equipo de personas revisará tu CV con estos requisitos; la decisión final es siempre de la empresa.</p>
         @if ($vacante->requisitos->isEmpty())
             <p class="text-14 text-neutral-700">Sin requisitos publicados.</p>
         @else

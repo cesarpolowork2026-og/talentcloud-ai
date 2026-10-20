@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\EstadoProcesamientoCv;
-use App\Events\CvProcesado;
 use App\Jobs\ExtraerTextoCv;
 use App\Models\Candidato;
 use App\Models\Cv;
@@ -12,7 +11,6 @@ use App\Services\Cvs\Extraccion\LectorDeCv;
 use App\Services\Cvs\SubirCv;
 use Database\Seeders\Demo\DocumentosDePrueba;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -55,7 +53,6 @@ it('normaliza espacios y saltos de línea', function () {
 });
 
 it('guarda el CV en el disco privado y lo procesa en la cola', function () {
-    Event::fake([CvProcesado::class]);
     $candidato = Candidato::factory()->create();
 
     $cv = app(SubirCv::class)->ejecutar($candidato, UploadedFile::fake()->createWithContent('Mi CV.pdf', DocumentosDePrueba::pdf(TEXTO_CV)), null);
@@ -70,7 +67,6 @@ it('guarda el CV en el disco privado y lo procesa en la cola', function () {
         ->and($cv->texto_extraido)->toContain('Spring Boot')
         ->and($cv->procesado_at)->not->toBeNull();
 
-    Event::assertDispatched(CvProcesado::class);
 });
 
 it('marca el CV con error y permite reintentar el análisis', function () {

@@ -54,7 +54,6 @@ class CifrasPorVacante
                     AND COALESCE(postulaciones.etapa_cambiada_at, postulaciones.created_at) <= ?) AS esperando,
                 COUNT(*) FILTER (WHERE postulaciones.etapa NOT IN ({$terminadas}) AND postulaciones.retirada_at IS NULL) AS en_curso,
                 COUNT(*) FILTER (WHERE postulaciones.created_at > ? OR postulaciones.etapa_cambiada_at > ?) AS recientes,
-                MAX(postulaciones.match_score) AS mejor_match,
                 GREATEST(MAX(postulaciones.created_at), MAX(postulaciones.etapa_cambiada_at)) AS ultimo_movimiento",
                 [$corteRevision, $corteEstancada, $corteEstancada],
             )
@@ -68,7 +67,6 @@ class CifrasPorVacante
                 'id' => (int) $f->id,
                 'total' => (int) $f->total,
                 'por_revisar' => (int) $f->por_revisar,
-                'mejor_match' => $f->mejor_match === null ? null : (float) $f->mejor_match,
             ], $movimiento),
             esperando: $this->esperandoRevision($filas),
             estancadas: $this->estancadas($filas, array_map(fn (object $f) => (int) $f->id, $movimiento), $corteEstancada),

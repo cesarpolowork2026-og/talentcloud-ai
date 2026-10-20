@@ -91,7 +91,7 @@ it('invita a actuar desde el primer vistazo: crear empresa gratis o buscar emple
 
 it('muestra cada característica junto a la pantalla que la ilustra', function () {
     $this->get('/')
-        ->assertSee(['Matching que se explica', 'Del primer CV a la contratación', 'El proceso de un vistazo']);
+        ->assertSee(['Candidatos y CV, en un solo lugar', 'Del primer CV a la contratación', 'El proceso de un vistazo']);
 });
 
 it('enlaza desde el pie los planes y los documentos legales en todas las pantallas públicas', function (string $ruta) {
@@ -117,7 +117,8 @@ it('publica la política de privacidad y los términos con los datos del respons
     $this->get('/terminos')
         ->assertOk()
         ->assertSee('Términos de uso')
-        ->assertSee('La inteligencia artificial sugiere; las personas deciden');
+        ->assertSee('Las personas deciden')
+        ->assertDontSee('inteligencia artificial');
 });
 
 it('enlaza la política de privacidad junto al consentimiento del postulante', function () {
@@ -125,17 +126,23 @@ it('enlaza la política de privacidad junto al consentimiento del postulante', f
         ->assertSee('Lee la <a href="'.route('privacidad').'"', escape: false);
 });
 
-it('explica con un esquema cómo la IA respalda cada coincidencia, también para lectores de pantalla', function () {
+it('explica en tres pasos cómo funciona, sin prometer una IA que no existe', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
     expect($html)->toContain('id="como-funciona"')
-        ->toContain('Cada coincidencia, con su evidencia')
-        // El esquema es ilustrativo (oculto); la frase accesible dice lo mismo.
-        ->toContain('<p class="sr-only">Ejemplo: el requisito obligatorio Spring Boot coincide')
+        ->toContain('De la vacante a la decisión, en tres pasos')
         ->toContain('href="#como-funciona"')
-        // El ejemplo de evidencia ya no se repite en Beneficios.
-        ->and(Str::between($html, 'id="beneficios"', 'id="seguridad"'))->not->toContain('Diseñé APIs REST');
+        ->and(Str::between($html, 'id="como-funciona"', 'id="caracteristicas"'))->not->toContain('IA');
 });
+
+it('la portada y las páginas públicas no mencionan IA, matching ni porcentajes de coincidencia', function (string $ruta) {
+    $html = $this->get($ruta)->assertOk()->getContent();
+
+    expect($html)->not->toContain('con IA')
+        ->and($html)->not->toContain('La IA ')
+        ->and($html)->not->toContain('matching')
+        ->and($html)->not->toContain('% match');
+})->with(['/', '/empleos', '/planes', '/privacidad', '/terminos', '/registro/postulante']);
 
 it('pinta las ilustraciones decorativas ocultas y las que comunican algo con su descripción', function () {
     $decorativa = Blade::render('<x-ilustracion nombre="conector-horizontal" />');

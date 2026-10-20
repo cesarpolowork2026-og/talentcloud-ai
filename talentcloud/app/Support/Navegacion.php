@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
  * Barra de navegación por rol, a partir de la del prototipo. El postulante ve
  * "Mis postulaciones" y "Vacantes"; el reclutador y la empresa ven Dashboard a
  * Evaluaciones, y la empresa añade "Mi empresa". El admin SaaS ve Panel,
- * Empresas y Calidad de la IA, y las pantallas de selección agrupadas en
+ * Empresas y Reclamaciones, y las pantallas de selección agrupadas en
  * "Procesos de selección".
  */
 class Navegacion
@@ -40,7 +40,6 @@ class Navegacion
             return [
                 self::enlace('Panel', 'dashboard', 'dashboard'),
                 self::enlace('Empresas', 'empresas.index', 'empresas.*'),
-                self::enlace('Calidad de la IA', 'calidad-ia', 'calidad-ia'),
                 self::enlace('Reclamaciones', 'reclamaciones.index', 'reclamaciones.index'),
                 self::grupo('Procesos de selección', 'Supervisión de las empresas', self::pantallasDeSeleccion()),
             ];
@@ -109,8 +108,8 @@ class Navegacion
 
     /**
      * Las pantallas del proceso de selección, en el orden del flujo: la vacante, la
-     * selección de sus postulaciones (tablero y ranking por coincidencia; el matching es
-     * su detalle), el banco de candidatos y, después, entrevistas y evaluaciones.
+     * selección de sus postulaciones (el tablero; cada postulación tiene su
+     * detalle), el banco de candidatos y, después, entrevistas y evaluaciones.
      * Un patrón puede reunir varias rutas separadas por «|».
      *
      * @return list<array{etiqueta: string, ruta: string, patron: string}>
@@ -119,7 +118,7 @@ class Navegacion
     {
         return [
             self::enlace('Vacantes', 'vacantes.index', 'vacantes.*'),
-            self::enlace('Selección', 'seleccion.index', 'seleccion.*|kanban.*|matching.*'),
+            self::enlace('Selección', 'seleccion.index', 'seleccion.*|kanban.*|postulaciones.*'),
             self::enlace('Candidatos', 'candidatos.index', 'candidatos.*'),
             self::enlace('Entrevistas', 'entrevistas.index', 'entrevistas.*'),
             self::enlace('Evaluaciones', 'evaluaciones.index', 'evaluaciones.*'),

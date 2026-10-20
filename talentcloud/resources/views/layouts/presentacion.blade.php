@@ -6,10 +6,8 @@
 --}}
 @php
     $diapositivas = [
-        ['maqueta' => 'kanban', 'etiqueta' => 'Proceso de selección', 'titulo' => 'Cada vacante con su Kanban.', 'descripcion' => 'Mueve candidatos entre etapas arrastrando tarjetas; cada cambio queda registrado.'],
-        ['maqueta' => 'matching', 'etiqueta' => 'Matching con IA explicable', 'titulo' => 'Coincidencias con evidencia.', 'descripcion' => 'Cada requisito muestra si el CV lo cumple y el fragmento que lo respalda.'],
-        ['maqueta' => 'cobertura', 'etiqueta' => 'Cobertura de requisitos', 'titulo' => 'Compara perfiles de un vistazo.', 'descripcion' => 'Un mapa de calor con cada candidato frente a los requisitos de la vacante: qué cubre cada uno y dónde falla.'],
-        ['maqueta' => 'candidatos', 'etiqueta' => 'Candidatos y CV', 'titulo' => 'CVs analizados al subirlos.', 'descripcion' => 'La IA extrae competencias, años de experiencia y certificaciones de PDF y Word.'],
+        ['maqueta' => 'kanban', 'etiqueta' => 'Proceso de selección', 'titulo' => 'Cada vacante con su tablero.', 'descripcion' => 'Mueve candidatos entre etapas arrastrando tarjetas; cada cambio queda registrado.'],
+        ['maqueta' => 'candidatos', 'etiqueta' => 'Candidatos y CV', 'titulo' => 'Cada CV, en un solo lugar.', 'descripcion' => 'Recibe CV en PDF y Word, guárdalos de forma privada y anota las competencias de cada candidato.'],
         ['maqueta' => 'entrevistas', 'etiqueta' => 'Entrevistas y evaluaciones', 'titulo' => 'Agenda y evaluación por criterios.', 'descripcion' => 'Entrevistas sin choques de horario y puntajes de 0 a 10 por criterio.'],
         ['maqueta' => 'embudo', 'etiqueta' => 'Embudo de selección', 'titulo' => 'Dónde se queda cada postulación.', 'descripcion' => 'El embudo muestra cuántas llegan a cada etapa y qué parte pasa a la siguiente.'],
         ['maqueta' => 'dashboard', 'etiqueta' => 'Dashboard', 'titulo' => 'El proceso de un vistazo.', 'descripcion' => 'Vacantes activas, entrevistas del día, tendencia de postulaciones y actividad reciente.'],
@@ -20,7 +18,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     {{-- En la raíz, el título es solo el nombre del producto. --}}
-    @php($descripcionDelSitio = 'TalentCloud AI: gestiona vacantes, candidatos, entrevistas y evaluaciones con un matching de CVs que la IA explica. La IA sugiere; tú decides.')
+    @php($descripcionDelSitio = 'TalentCloud AI: gestiona vacantes, candidatos, entrevistas y evaluaciones en un solo flujo, con los datos de cada empresa separados. Tú decides.')
     @include('partials.head', ['title' => request()->routeIs('inicio') ? null : ($title ?? null), 'compartir' => $descripcionDelSitio])
     <meta name="description" content="{{ $descripcionDelSitio }}">
     <link rel="canonical" href="{{ route('inicio') }}">
@@ -36,9 +34,9 @@
         <section id="inicio" class="mx-auto max-w-[1480px] px-4 pb-16 pt-10 sm:px-8 xl:pt-14" x-intersect.margin.-45%.0px.-45%.0px="seccion = 'inicio'">
             <div class="presentacion-hero">
                 <div class="presentacion-texto">
-                    <p class="mb-3 text-12 uppercase tracking-[0.12em] text-accent-700">— Reclutamiento con IA explicable</p>
+                    <p class="mb-3 text-12 uppercase tracking-[0.12em] text-accent-700">— Reclutamiento ordenado</p>
                     <h1 class="mb-4 text-[clamp(32px,6vw,44px)] leading-[1.08] [text-wrap:balance] min-[1400px]:text-[40px]">Todo tu reclutamiento en un solo lugar</h1>
-                    <p class="m-0 max-w-[48ch] text-17 !leading-[1.6] text-neutral-800">Gestiona vacantes, candidatos, entrevistas y evaluaciones en un flujo simple. La IA analiza cada CV y explica cada coincidencia; la decisión siempre es tuya.</p>
+                    <p class="m-0 max-w-[48ch] text-17 !leading-[1.6] text-neutral-800">Gestiona vacantes, candidatos, entrevistas y evaluaciones en un flujo simple, con un tablero por vacante y el historial de cada postulación. La decisión siempre es tuya.</p>
 
                     {{-- Qué hacer: la empresa empieza gratis; el postulante va a la bolsa de empleos. --}}
                     <div class="mt-7 flex flex-wrap gap-3">
@@ -52,44 +50,34 @@
             </div>
         </section>
 
-        {{-- Cómo funciona: el fragmento del CV que respalda cada requisito, dibujado. --}}
+        {{-- Cómo funciona: los tres pasos del proceso. --}}
         <x-presentacion.como-funciona />
 
         {{-- Características: lo que hace el producto, junto a la pantalla que lo muestra (maquetas ilustrativas). --}}
         <section id="caracteristicas" class="bg-surface py-16" x-intersect.margin.-45%.0px.-45%.0px="seccion = 'caracteristicas'">
             <div class="mx-auto max-w-[1480px] px-4 sm:px-8">
                 <x-presentacion.encabezado rotulo="Características" titulo="De la vacante a la contratación, sin cambiar de herramienta" class="!mb-12">
-                    Requisitos, CV, Kanban, entrevistas, evaluaciones e indicadores en un mismo lugar, con los datos de cada empresa separados de los de las demás.
+                    Requisitos, CV, tablero de selección, entrevistas, evaluaciones e indicadores en un mismo lugar, con los datos de cada empresa separados de los de las demás.
                 </x-presentacion.encabezado>
 
                 <div class="grid gap-16 lg:gap-20">
                     @foreach ([
                         [
-                            'maqueta' => 'matching',
-                            'titulo' => 'Matching que se explica',
-                            'texto' => 'Sube CVs en PDF o Word y compáralos con los requisitos de la vacante. Cada coincidencia cita el fragmento del CV que la respalda.',
+                            'maqueta' => 'candidatos',
+                            'titulo' => 'Candidatos y CV, en un solo lugar',
+                            'texto' => 'Recibe los CV en PDF o Word, guárdalos de forma privada y registra a quienes llegan por otras vías, sin duplicar personas entre vacantes.',
                             'puntos' => [
-                                'Competencias, años de experiencia y certificaciones extraídas de cada CV.',
-                                'Requisito por requisito: coincide, para revisar o no encontrado.',
-                                'Si un resultado no te convence, márcalo como incorrecto y ayuda a mejorar la IA.',
-                            ],
-                        ],
-                        [
-                            'maqueta' => 'cobertura',
-                            'titulo' => 'Compara candidatos de un vistazo',
-                            'texto' => 'Un mapa de calor pone a los mejores de la vacante frente a sus requisitos, para ver en segundos qué cubre cada persona y dónde falla.',
-                            'puntos' => [
-                                'Cada celda indica si el CV respalda el requisito, si conviene revisarlo o si no aparece.',
-                                'Los requisitos obligatorios van marcados.',
-                                'Ordena y explica: la decisión de a quién entrevistar es tuya.',
+                                'Cada candidato tiene su ficha, su CV y las competencias que anota tu equipo.',
+                                'Los CV no tienen una dirección pública: solo se descargan con permiso.',
+                                'Notas internas por postulación que nunca ve el candidato.',
                             ],
                         ],
                         [
                             'maqueta' => 'entrevistas',
                             'titulo' => 'Del primer CV a la contratación',
-                            'texto' => 'Cada vacante tiene su Kanban: mueve candidatos entre etapas, agenda entrevistas y evalúa con criterios claros.',
+                            'texto' => 'Cada vacante tiene su tablero: mueve candidatos entre etapas, agenda entrevistas y evalúa con criterios claros.',
                             'puntos' => [
-                                'Requisitos obligatorios y deseables, con su peso y los años mínimos.',
+                                'Requisitos obligatorios y deseables, con su importancia y los años mínimos.',
                                 'Entrevistas sin choques de horario y avisos al candidato.',
                                 'Evaluaciones de 0 a 10 por criterio y el historial completo de cada etapa.',
                             ],
@@ -131,14 +119,14 @@
             <div class="mx-auto grid max-w-[1480px] gap-10 px-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-16">
                 <div>
                     <p class="mb-2 text-12 uppercase tracking-[0.12em] text-accent-700">Beneficios</p>
-                    <h2 class="mb-4 text-[clamp(26px,3vw,34px)] leading-[1.15]">La IA analiza y explica. Tú decides.</h2>
+                    <h2 class="mb-4 text-[clamp(26px,3vw,34px)] leading-[1.15]">Un proceso ordenado. Tú decides.</h2>
                     {{-- El ejemplo de evidencia que había aquí lo muestra ahora «Cómo funciona». --}}
                     <p class="m-0 max-w-[46ch] text-16 text-neutral-800">Un flujo de trabajo claro para decidir mejor: menos tiempo leyendo CVs y más tiempo con las personas.</p>
                 </div>
                 <ul class="m-0 grid list-none content-start gap-8 p-0 sm:grid-cols-2">
                     @foreach ([
-                        ['Decisiones con evidencia', 'Nada de puntajes opacos: cada coincidencia cita el texto del CV.'],
-                        ['Menos tiempo filtrando', 'La IA lee y ordena los CVs; tu equipo se enfoca en las entrevistas.'],
+                        ['Decisiones con información', 'Cada postulación guarda su CV, sus notas, sus entrevistas y sus evaluaciones.'],
+                        ['Menos tiempo en planillas', 'El tablero y el embudo reemplazan las hojas de cálculo; tu equipo se enfoca en las entrevistas.'],
                         ['Todo el equipo alineado', 'Administración y reclutadores trabajan sobre el mismo proceso.'],
                         ['Seguimiento en tiempo real', 'Avisos en la aplicación y por correo cuando hay novedades.'],
                     ] as [$titulo, $texto])
@@ -164,8 +152,8 @@
                     @foreach ([
                         ['buildings', 'Datos aislados por empresa', 'Cada empresa ve solo sus vacantes, postulaciones y evaluaciones.'],
                         ['lock-key', 'CVs privados', 'Los CV no tienen una dirección pública: solo se descargan con permiso.'],
-                        ['identification-card', 'Consentimiento', 'El candidato autoriza el análisis de su CV y puede eliminar su cuenta y sus datos.'],
-                        ['scales', 'Decisión humana', 'La IA sugiere y explica; avanzar, descartar o contratar lo decide una persona.'],
+                        ['identification-card', 'Consentimiento', 'El candidato autoriza el tratamiento de su CV y puede eliminar su cuenta y sus datos.'],
+                        ['scales', 'Decisión humana', 'Avanzar, descartar o contratar lo decide siempre una persona del equipo.'],
                     ] as [$icono, $titulo, $texto])
                         <div>
                             <x-ui.icon :name="$icono" :size="28" class="mb-3 text-accent-700" />

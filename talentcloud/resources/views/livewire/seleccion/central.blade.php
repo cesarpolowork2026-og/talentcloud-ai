@@ -1,6 +1,5 @@
-{{-- «Selección»: Kanban del prototipo (TalentCloud App.dc.html, isKanban) + ranking por coincidencia de la misma vacante. --}}
+{{-- «Selección»: Kanban del prototipo (TalentCloud App.dc.html, isKanban) de las postulaciones de una vacante. --}}
 @use('App\Enums\EtapaPostulacion')
-@use('App\Enums\NivelCoincidencia')
 <div>
     @if (! $vacante)
         <x-ui.page-header title="Selección" subtitle="Seguimiento de postulaciones por vacante." />
@@ -25,30 +24,12 @@
                         :etiqueta="App\Support\Formato::vacante($vacante)"
                         placeholder="Buscar otra vacante…"
                         class="w-[280px] max-w-full"
-                        x-on:elegido="Livewire.navigate('{{ url('seleccion') }}/' + $event.detail.id + '?vista={{ $vista }}')"
+                        x-on:elegido="Livewire.navigate('{{ url('seleccion') }}/' + $event.detail.id)"
                     />
 
                 </x-slot:actions>
             @endif
         </x-ui.page-header>
-
-        {{-- Vista y filtros: dos formas de ver las mismas postulaciones. --}}
-        <div class="-mt-2 mb-5 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <div class="flex items-center gap-3">
-                <span id="seleccion-vista" class="text-13 text-neutral-700">Ver como</span>
-                <x-ui.seg labelledby="seleccion-vista">
-                    <x-ui.seg-option name="vista" value="tablero" wire:model.live="vista">Tablero</x-ui.seg-option>
-                    <x-ui.seg-option name="vista" value="ranking" wire:model.live="vista">Ranking por coincidencia</x-ui.seg-option>
-                </x-ui.seg>
-            </div>
-            <x-ui.checkbox wire:model.live="soloObligatorios" id="seleccion-obligatorios" name="soloObligatorios">Solo quienes cubren los obligatorios</x-ui.checkbox>
-            @if ($vista === 'ranking')
-                <x-ui.checkbox wire:model.live="verDescartados" id="seleccion-descartados" name="verDescartados">Incluir descartados</x-ui.checkbox>
-            @endif
-            @if ($ocultas > 0)
-                <span class="text-13 text-neutral-700" role="status">{{ $ocultas }} {{ $ocultas === 1 ? 'postulación oculta' : 'postulaciones ocultas' }} por el filtro.</span>
-            @endif
-        </div>
 
         @error('tablero')
             <p class="field-error -mt-3 mb-4 text-14" role="alert">{{ $message }}</p>
@@ -58,102 +39,7 @@
             <p class="-mt-3 mb-4 text-13 text-neutral-600">La vacante está cerrada: la selección es de solo lectura.</p>
         @endif
 
-        @if ($vista === 'ranking')
-            {{-- Ranking: el porcentaje ordena y explica; no mueve ni descarta a nadie. --}}
-            @if ($ranking->isEmpty())
-                <x-ui.empty-state icon="funnel" :message="$soloObligatorios ? 'Nadie cubre todos los requisitos obligatorios todavía.' : 'Esta vacante aún no tiene postulaciones.'" />
-            @else
-                <p class="mb-3 max-w-[80ch] text-13 text-neutral-700">
-                    Ordenado por coincidencia con lo que pide la vacante. Cada competencia indica si el CV la respalda
-                    (<span aria-hidden="true">✓</span><span class="sr-only">respaldada</span>), conviene revisarla (<span aria-hidden="true">?</span><span class="sr-only">por revisar</span>)
-                    o no aparece (<span aria-hidden="true">✗</span><span class="sr-only">no encontrada</span>); lo obligatorio va marcado con <span aria-hidden="true">*</span><span class="sr-only">asterisco</span>.
-                    Es una ayuda para decidir a quién entrevistar primero: la decisión es tuya.
-                </p>
-                @php
-                    // Mapa de calor de los primeros de la página: usa lo que el ranking ya calculó (sin consultas nuevas).
-                    $paraElMapa = collect($ranking->items())->take(10)->filter(fn ($p) => $cumplimiento[$p->id]->hayCalculo())->values();
-                    $columnasDelMapa = $paraElMapa->isEmpty() ? [] : array_map(fn (array $r) => ['competencia' => $r['competencia'], 'obligatorio' => $r['obligatorio']], $cumplimiento[$paraElMapa->first()->id]->requisitos);
-                @endphp
-                <x-ui.actualizable target="vista,soloObligatorios,gotoPage,nextPage,previousPage,setPage">
-                @if ($paraElMapa->count() >= 2 && $columnasDelMapa !== [])
-                    <x-ui.card class="mb-6 !bg-white">
-                        <div class="card-kicker">Cobertura de requisitos</div>
-                        <p class="m-0 max-w-[80ch] text-13 text-neutral-700">
-                            Los {{ $paraElMapa->count() }} primeros de esta página frente a lo que pide la vacante: de un vistazo se ve qué cubre cada persona y dónde falla.
-                            Lo obligatorio va marcado con <span aria-hidden="true">*</span><span class="sr-only">asterisco</span>. Ordena y explica; no descarta a nadie.
-                        </p>
-                        <x-grafico.mapa-de-calor
-                            :columnas="$columnasDelMapa"
-                            :filas="$paraElMapa->map(fn ($p) => [
-                                'clave' => $p->id,
-                                'titulo' => (string) $p->candidato?->nombre,
-                                'subtitulo' => $p->candidato?->titular,
-                                'url' => $p->match_detalle ? route('matching.show', $p) : route('candidatos.show', $p->candidato_id),
-                                'porcentaje' => $p->matchPorcentaje(),
-                                'niveles' => array_column($cumplimiento[$p->id]->requisitos, 'nivel'),
-                            ])->all()"
-                        />
-                    </x-ui.card>
-                @endif
-                <x-ui.table>
-                    <x-slot:head>
-                        <th>#</th><th>Candidato</th><th>Coincidencia</th><th>Requisitos de la vacante</th><th>Etapa</th><th><span class="sr-only">Acciones</span></th>
-                    </x-slot:head>
-                    @foreach ($ranking as $posicion => $postulacion)
-                        @php($cumple = $cumplimiento[$postulacion->id])
-                        <tr wire:key="ranking-{{ $postulacion->id }}">
-                            <td class="text-neutral-700">{{ $ranking->firstItem() + $loop->index }}</td>
-                            <td>
-                                <a href="{{ $postulacion->match_detalle ? route('matching.show', $postulacion) : route('candidatos.show', $postulacion->candidato_id) }}" wire:navigate class="font-semibold">{{ $postulacion->candidato?->nombre }}</a>
-                                <div class="text-13 text-neutral-700">{{ $postulacion->candidato?->titular }}</div>
-                            </td>
-                            <td class="min-w-[130px]">
-                                @if ($postulacion->matchPorcentaje() !== null)
-                                    <div class="mb-1 text-14 font-semibold">{{ $postulacion->matchPorcentaje() }}%</div>
-                                    <x-ui.progress :value="$postulacion->matchPorcentaje()" :label="'Coincidencia de '.$postulacion->candidato?->nombre.': '.$postulacion->matchPorcentaje().'%'" />
-                                @else
-                                    <span class="text-13 text-neutral-700">Sin calcular</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if ($cumple->hayCalculo())
-                                    <div class="mb-1 text-13 text-neutral-700">
-                                        {{ $cumple->resumen() }}
-                                        @if ($cumple->obligatoriosFaltantes() > 0)
-                                            · <span class="font-semibold text-accent-2-700">{{ $cumple->obligatoriosFaltantes() === 1 ? 'falta 1 obligatorio' : 'faltan '.$cumple->obligatoriosFaltantes().' obligatorios' }}</span>
-                                        @endif
-                                    </div>
-                                    <div class="flex flex-wrap gap-1">
-                                        @foreach ($cumple->requisitos as $requisito)
-                                            @php($nivel = $requisito['nivel'])
-                                            <x-ui.tag :tone="$nivel?->tono() ?? 'outline'">
-                                                <span aria-hidden="true">{{ match ($nivel) { NivelCoincidencia::Coincide => '✓', NivelCoincidencia::Revisar => '?', NivelCoincidencia::NoEncontrado => '✗', default => '·' } }}</span>
-                                                <span class="ml-1">{{ $requisito['competencia'] }}{{ $requisito['obligatorio'] ? '*' : '' }}</span>
-                                                <span class="sr-only">: {{ $nivel?->etiqueta() ?? 'sin calcular' }}{{ $requisito['obligatorio'] ? ', obligatorio' : '' }}</span>
-                                            </x-ui.tag>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <span class="text-13 text-neutral-700">Aún sin análisis del CV.</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if ($postulacion->estaRetirada())
-                                    <x-ui.tag tone="outline">Retirada</x-ui.tag>
-                                @else
-                                    <x-ui.tag tone="neutral">{{ $postulacion->etapa->etiqueta() }}</x-ui.tag>
-                                @endif
-                            </td>
-                            <td class="text-right">
-                                <x-ui.button size="sm" wire:click="abrir({{ $postulacion->id }})">Abrir</x-ui.button>
-                            </td>
-                        </tr>
-                    @endforeach
-                </x-ui.table>
-                {{ $ranking->links() }}</x-ui.actualizable>
-            @endif
-        @else
-        <x-ui.actualizable target="vista,soloObligatorios,verDescartados,verMas,mover">
+        <x-ui.actualizable target="verMas,mover">
         <div class="flex gap-4 overflow-x-auto pb-2">
             @foreach ($columnas as $columna)
                 @php($etapa = $columna['etapa'])
@@ -201,19 +87,6 @@
                                 <div class="text-13 text-neutral-700">{{ $postulacion->candidato?->titular }}</div>
                                 @if ($postulacion->estaRetirada())
                                     <div class="mt-1"><x-ui.tag tone="outline">Retirada</x-ui.tag></div>
-                                @elseif ($postulacion->matchPorcentaje() !== null)
-                                    <div class="mt-1 flex items-center gap-2">
-                                        <x-ui.progress :value="$postulacion->matchPorcentaje()" :label="'Coincidencia: '.$postulacion->matchPorcentaje().'%'" class="flex-1" />
-                                        <span class="text-13 font-semibold">{{ $postulacion->matchPorcentaje() }}%</span>
-                                    </div>
-                                    @if ($postulacion->tieneResumenDeCumplimiento())
-                                        <div class="text-12 text-neutral-700">
-                                            {{ $postulacion->resumenDeCumplimiento() }}
-                                            @if ($postulacion->obligatorios_faltantes > 0)
-                                                · <span class="font-semibold text-accent-2-700">falta{{ $postulacion->obligatorios_faltantes === 1 ? '' : 'n' }} {{ $postulacion->obligatorios_faltantes }} obligatorio{{ $postulacion->obligatorios_faltantes === 1 ? '' : 's' }}</span>
-                                            @endif
-                                        </div>
-                                    @endif
                                 @endif
                                 @if (! $postulacion->estaRetirada())
                                     @if ($proxima)
@@ -230,7 +103,7 @@
                         @endif
                     </div>
                     @if ($columna['restantes'] > 0 && $columna['enElTope'])
-                        <p class="m-0 text-13 text-neutral-700">Se muestran las primeras {{ number_format(App\Livewire\Seleccion\Central::MAXIMO_POR_COLUMNA, 0, ',', ' ') }}. Para ver el resto, usa los filtros o el ranking.</p>
+                        <p class="m-0 text-13 text-neutral-700">Se muestran las primeras {{ number_format(App\Livewire\Seleccion\Central::MAXIMO_POR_COLUMNA, 0, ',', ' ') }}. Para ver el resto, abre la ficha de cada candidato desde Candidatos.</p>
                     @elseif ($columna['restantes'] > 0)
                         {{-- Una vacante masiva tiene miles por columna: se cargan de a 25. --}}
                         <x-ui.button size="sm" wire:click="verMas('{{ $etapa->value }}')" wire:loading.attr="disabled" wire:target="verMas('{{ $etapa->value }}')">
@@ -241,34 +114,16 @@
             @endforeach
         </div>
         </x-ui.actualizable>
-        @endif
 
         {{-- Detalle de la tarjeta (prototipo: openCard) + "Mover a…" --}}
         <x-ui.dialog wire:model="mostrarDetalle" :title="$seleccionada?->candidato?->nombre" max-width="480px">
             @if ($seleccionada)
-                <p class="m-0 whitespace-pre-line">{{ $seleccionada->candidato?->titular ?? 'Candidato' }}{{ $seleccionada->matchPorcentaje() !== null ? ' · '.$seleccionada->matchPorcentaje().'% de coincidencia con la vacante.' : '.' }}
+                <p class="m-0 whitespace-pre-line">{{ $seleccionada->candidato?->titular ?? 'Candidato' }}.
 Columna: {{ $seleccionada->etapa->etiqueta() }}.@if ($seleccionada->estaRetirada())
 
 Retiró su postulación el {{ App\Support\Formato::fechaCorta($seleccionada->retirada_at) }}.@endif</p>
-                @php($cumpleSeleccionada = $cumplimiento[$seleccionada->id])
-                @if ($cumpleSeleccionada->hayCalculo())
-                    {{-- Todos los requisitos de la vacante, no solo los primeros: lo que el CV respalda y lo que no. --}}
-                    <h3 class="mb-1 mt-4 text-14">Requisitos de la vacante · {{ $cumpleSeleccionada->resumen() }}</h3>
-                    <ul class="m-0 grid list-none gap-1 p-0 text-14">
-                        @foreach ($cumpleSeleccionada->requisitos as $requisito)
-                            <li class="flex items-center justify-between gap-2" wire:key="req-{{ $seleccionada->id }}-{{ $requisito['id'] }}">
-                                <span>{{ $requisito['competencia'] }}@if ($requisito['obligatorio']) <span class="text-12 text-neutral-700">· obligatorio</span>@endif</span>
-                                @if ($requisito['nivel'])
-                                    <x-ui.estado :valor="$requisito['nivel']" />
-                                @else
-                                    <x-ui.tag tone="outline">Sin calcular</x-ui.tag>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
                 <p class="m-0 mt-3 text-14">
-                    <a href="{{ route('matching.show', $seleccionada) }}#notas" wire:navigate>Notas del equipo ({{ $seleccionada->notas_count }})</a>
+                    <a href="{{ route('postulaciones.show', $seleccionada) }}#notas" wire:navigate>Notas del equipo ({{ $seleccionada->notas_count }})</a>
                 </p>
 
                 @if ($editable && ! $seleccionada->estaRetirada())
@@ -283,9 +138,7 @@ Retiró su postulación el {{ App\Support\Formato::fechaCorta($seleccionada->ret
                 <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
                 @if ($seleccionada)
                     <x-ui.button :href="route('candidatos.show', $seleccionada->candidato_id)" wire:navigate>Ver candidato</x-ui.button>
-                    @if ($seleccionada->match_detalle)
-                        <x-ui.button :href="route('matching.show', $seleccionada)" wire:navigate>Ver matching</x-ui.button>
-                    @endif
+                    <x-ui.button :href="route('postulaciones.show', $seleccionada)" wire:navigate>Ver postulación</x-ui.button>
                     @if ($editable && $seleccionada->etapa !== EtapaPostulacion::Descartado)
                         @can('create', App\Models\Entrevista::class)
                             <x-ui.button :href="route('entrevistas.index', ['programar' => $seleccionada->id])" wire:navigate>Programar entrevista</x-ui.button>

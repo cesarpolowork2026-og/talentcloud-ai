@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Mueve una postulación en el Kanban: a otra columna o a otra posición en
  * la misma. Reordena ambas columnas para que "orden" quede 0, 1, 2… sin
- * huecos, en SQL (escala a miles de postulaciones por columna). La IA no mueve postulaciones: esto solo lo hace una persona.
+ * huecos, en SQL (escala a miles de postulaciones por columna). Mover una postulación solo lo hace una persona.
  */
 class MoverPostulacion
 {

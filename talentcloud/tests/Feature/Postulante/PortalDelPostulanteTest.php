@@ -35,7 +35,6 @@ beforeEach(function () {
                 'candidato_id' => $this->candidato->id,
                 'etapa' => EtapaPostulacion::EnRevision,
                 'created_at' => '2026-09-02 10:00',
-                'match_detalle' => ['requisitos' => [['nivel' => 'coincide'], ['nivel' => 'coincide'], ['nivel' => 'no_encontrado']]],
             ]);
         $devops = Postulacion::factory()
             ->paraVacante(Vacante::factory()->deEmpresa($vela)->enEstado(EstadoVacante::Cerrada)->create(['titulo' => 'DevOps Engineer']))
@@ -59,13 +58,13 @@ it('muestra las postulaciones de todas las empresas como en el prototipo', funct
         ->assertSee('Eliminar mi cuenta y mis datos');
 });
 
-it('muestra el detalle con las competencias que identificó la IA', function () {
+it('muestra el detalle de la postulación sin análisis de IA', function () {
     Livewire::test(MisPostulaciones::class)
         ->call('verDetalle', $this->backend->id)
         ->assertSet('mostrarDetalle', true)
         ->assertSee('Estado: En revisión')
         ->assertSee('Postulación enviada el 2 sep.')
-        ->assertSee('La IA identificó en tu CV 2 de 3 competencias que pide la vacante.');
+        ->assertDontSee('La IA');
 });
 
 it('muestra un descarte en un proceso abierto como "No seleccionado"', function () {

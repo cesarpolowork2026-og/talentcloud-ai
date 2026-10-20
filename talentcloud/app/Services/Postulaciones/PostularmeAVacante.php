@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\RateLimiter;
  * "Postular con mi CV": el postulante se postula por su cuenta a una vacante
  * publicada. Aplica las reglas del autoservicio y delega en PostularCandidato,
  * así la postulación sigue el mismo camino que la de un reclutador (Kanban,
- * matching con IA, actividad).
+ * actividad).
  */
 class PostularmeAVacante
 {
@@ -70,13 +70,13 @@ class PostularmeAVacante
         return $postulacion;
     }
 
-    /** Por qué no se puede postular con el CV actual (se exige uno que la IA haya podido leer). */
+    /** Por qué no se puede postular con el CV actual (se exige uno cuyo texto se haya podido leer). */
     private static function motivoDelCv(?Cv $cv): string
     {
         return match ($cv?->estado_procesamiento) {
             null => 'Sube tu CV en "Mi currículo" para poder postular.',
             EstadoProcesamientoCv::Error => 'Tu CV no se pudo leer. Sube una versión en PDF con texto o en Word para postular.',
-            default => 'Tu CV todavía se está analizando. Inténtalo en unos segundos.',
+            default => 'Tu CV todavía se está procesando. Inténtalo en unos segundos.',
         };
     }
 }

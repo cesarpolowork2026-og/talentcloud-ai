@@ -64,7 +64,6 @@
             <ul class="m-0 grid list-disc gap-1 pl-5 text-14">
                 <li>{{ $cantidad($plan->limiteVacantesActivas(), 'vacante activa', 'vacantes activas') }}</li>
                 <li>{{ $cantidad($plan->limiteUsuarios(), 'usuario', 'usuarios') }}</li>
-                <li>{{ $plan->cupoIaMensual() === null ? 'Matching con IA sin límite' : $cantidad($plan->cupoIaMensual(), 'postulación', 'postulaciones').' con IA al mes' }}</li>
                 <li>{{ $plan->soporte() }}</li>
             </ul>
 

@@ -1,10 +1,10 @@
-{{-- Términos de uso. Coherentes con lo que hace la aplicación (planes, IA explicable, decisión humana). --}}
+{{-- Términos de uso. Coherentes con lo que hace la aplicación (planes, decisión humana). --}}
 <div>
     <x-legal.documento titulo="Términos de uso">
         <p>Estos términos regulan el uso de TalentCloud AI por parte de las empresas, su personal de selección y los postulantes. Al crear una cuenta los aceptas, junto con la <a href="{{ route('privacidad') }}">Política de privacidad</a>.</p>
 
         <h2 id="servicio">1. El servicio</h2>
-        <p>TalentCloud AI permite a las empresas publicar vacantes, recibir y registrar candidatos, gestionar su proceso de selección (Kanban, entrevistas y evaluaciones) y comparar cada CV con los requisitos de la vacante mediante un análisis con inteligencia artificial que explica cada coincidencia. Los postulantes pueden subir su CV, postular a las vacantes abiertas y seguir el estado de sus postulaciones.</p>
+        <p>TalentCloud AI permite a las empresas publicar vacantes, recibir y registrar candidatos, gestionar su proceso de selección (tablero por vacante, entrevistas y evaluaciones) y revisar cada CV frente a los requisitos de la vacante. Los postulantes pueden subir su CV, postular a las vacantes abiertas y seguir el estado de sus postulaciones.</p>
 
         <h2 id="cuentas">2. Cuentas</h2>
         <ul>
@@ -20,13 +20,13 @@
             <li>Quien registra a un candidato sin cuenta declara haber obtenido su consentimiento para hacerlo.</li>
         </ul>
 
-        <h2 id="ia">4. La inteligencia artificial sugiere; las personas deciden</h2>
-        <p>Los porcentajes de coincidencia y la evidencia que los acompaña son una ayuda para revisar CVs, no una evaluación definitiva de la persona. Toda decisión de avanzar, descartar o contratar la toma una persona de la empresa, que es responsable de ella. Si el servicio de IA no está disponible o el cupo mensual del plan se agotó, la plataforma usa un análisis básico por palabras clave, también con evidencia, y lo indica en pantalla.</p>
+        <h2 id="decisiones">4. Las personas deciden</h2>
+        <p>Toda decisión de avanzar, descartar o contratar la toma una persona de la empresa, que es responsable de ella. La plataforma ordena la información de cada postulación, pero no evalúa ni decide por nadie.</p>
 
         <h2 id="planes">5. Planes y pagos</h2>
         <ul>
             <li>Los postulantes no pagan.</li>
-            <li>Las empresas eligen un plan según sus vacantes activas, usuarios y cupo mensual de análisis con IA. Los precios están publicados en <a href="{{ route('planes') }}">Planes y precios</a>, en soles y sin IGV.</li>
+            <li>Las empresas eligen un plan según sus vacantes activas y usuarios. Los precios están publicados en <a href="{{ route('planes') }}">Planes y precios</a>, en soles y sin IGV.</li>
             <li>Toda empresa empieza en el plan Gratis con {{ \App\Enums\PlanEmpresa::DIAS_DE_PRUEBA }} días del plan Pro. Al terminar la prueba, o al bajar de plan, se conserva todo lo existente, pero no se puede sumar por encima de los límites del plan.</li>
             @if (\App\Pagos\CobroEnLinea::habilitado())
                 <li>Starter y Pro se pagan por adelantado con tarjeta, a través de Stripe, cada mes o cada año según lo elegido, más IGV. El plan cambia cuando Stripe confirma el pago. Si pagas durante la prueba, la prueba termina ese día.</li>

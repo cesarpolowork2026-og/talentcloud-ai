@@ -56,13 +56,10 @@
     {{-- Detalle (prototipo: título = vacante) --}}
     <x-ui.dialog wire:model="mostrarDetalle" :title="$seleccionada?->vacante?->titulo" max-width="460px">
         @if ($seleccionada)
-            @php($competencias = MisPostulaciones::competenciasIdentificadas($seleccionada))
             <x-postulante.progreso :estado="EstadoDeMiPostulacion::de($seleccionada)" class="mb-4" />
             <p class="m-0 whitespace-pre-line">{{ $seleccionada->vacante?->empresa?->nombre }}
 Estado: {{ EstadoDeMiPostulacion::de($seleccionada)->etiqueta() }} — {{ EstadoDeMiPostulacion::de($seleccionada)->explicacion() }}
-Postulación enviada el {{ Formato::fechaCorta($seleccionada->created_at) }}.@if ($competencias)
-
-La IA identificó en tu CV {{ $competencias[0] }} de {{ $competencias[1] }} {{ $competencias[1] === 1 ? 'competencia' : 'competencias' }} que pide la vacante.@endif</p>
+Postulación enviada el {{ Formato::fechaCorta($seleccionada->created_at) }}.</p>
             @php($susEntrevistas = $entrevistasPorPostulacion->get($seleccionada->id, collect()))
             @if ($susEntrevistas->isNotEmpty())
                 <h3 class="mb-0 mt-4 text-15">Entrevistas</h3>

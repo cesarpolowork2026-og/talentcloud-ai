@@ -78,7 +78,7 @@
     </div>
 
     <p class="field-hint m-0">
-        Elige del catálogo para que el matching reconozca la competencia aunque el CV use otro nombre (por ejemplo «PowerBI» para Power BI).
-        Enter agrega, × quita. Podrás ajustar tipo, peso y años de cada una antes de publicar.
+        Elige del catálogo para que cada competencia tenga un solo nombre aunque se escriba distinto (por ejemplo «PowerBI» para Power BI).
+        Enter agrega, × quita. Podrás ajustar tipo, importancia y años de cada una antes de publicar.
     </p>
 </div>

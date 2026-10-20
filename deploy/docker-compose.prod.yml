@@ -1,9 +1,9 @@
-# TalentCloud AI en un solo servidor (VPS de 4 GB). Se ejecuta desde esta carpeta:
+# TalentCloud AI en un solo servidor (VPS de 4 GB; la aplicación usa menos de 1 GB). Se ejecuta desde esta carpeta:
 #
 #   cp .env.example .env        # y completar los valores
 #   docker compose -f docker-compose.prod.yml up -d
 #
-# Solo Caddy publica puertos (80 y 443). La base y el servicio de IA quedan en la red interna.
+# Solo Caddy publica puertos (80 y 443). La base de datos queda en la red interna.
 # Los límites de memoria evitan que un servicio deje sin memoria a los demás: si uno se pasa, Docker lo reinicia.
 name: talentcloud-prod
 
@@ -22,6 +22,7 @@ x-laravel: &laravel
 
 services:
   db:
+    # La imagen con pgvector se conserva: las migraciones de la base la habilitan (se usará en una versión posterior).
     image: pgvector/pgvector:pg17
     restart: unless-stopped
     environment:
@@ -44,23 +45,8 @@ services:
       retries: 10
     mem_limit: 700m
 
-  ia:
-    image: ${IMAGEN_PREFIJO:-talentcloud}/ia:${IMAGEN_ETIQUETA:-local}
-    build:
-      context: ../talentcloud-ai
-    environment:
-      TALENTCLOUD_AI_API_KEY: ${IA_API_KEY}
-    restart: unless-stopped
-    # El modelo ocupa ~1,2 GB en reposo y algo más mientras analiza un CV.
-    mem_limit: 1900m
-
   app:
     <<: *laravel
-    depends_on:
-      db:
-        condition: service_healthy
-      ia:
-        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "php -r 'exit(@fsockopen(\"127.0.0.1\", 9000) ? 0 : 1);'"]
       interval: 10s
@@ -68,10 +54,10 @@ services:
       start_period: 20s
     mem_limit: 500m
 
-  # Procesa los CV, el matching y los avisos (colas "ia" y "default").
+  # Procesa los CV y los avisos (cola "default").
   queue:
     <<: *laravel
-    command: php artisan queue:work --queue=ia,default --sleep=3 --max-time=3600 --memory=200
+    command: php artisan queue:work --queue=default --sleep=3 --max-time=3600 --memory=200
     depends_on:
       app:
         condition: service_healthy

@@ -33,7 +33,7 @@ class EloquentVacanteRepository implements VacanteRepository
             ->with([
                 'empresa:id,nombre,sector,sitio_web,descripcion',
                 // Requisito también lleva el filtro de empresa: el postulante no tiene contexto.
-                // Solo las columnas públicas (sin el embedding).
+                // Solo las columnas públicas.
                 'requisitos' => fn ($q) => $q->withoutGlobalScope(EmpresaScope::class)
                     ->select(['id', 'vacante_id', 'competencia_id', 'tipo', 'anios_minimos', 'orden'])
                     ->with('competencia:id,nombre')

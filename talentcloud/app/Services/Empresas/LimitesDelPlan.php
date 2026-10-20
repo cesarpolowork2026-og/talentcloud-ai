@@ -19,8 +19,6 @@ use Illuminate\Support\Facades\DB;
  */
 class LimitesDelPlan
 {
-    public function __construct(private readonly CupoDeIa $cupoDeIa) {}
-
     public function uso(Empresa $empresa): UsoDelPlan
     {
         return new UsoDelPlan(
@@ -28,7 +26,6 @@ class LimitesDelPlan
             vacantesActivas: $this->vacantesActivas($empresa->id),
             usuariosActivos: $this->usuariosActivos($empresa->id),
             invitacionesPendientes: $this->invitacionesPendientes($empresa->id),
-            postulacionesConIa: $this->cupoDeIa->usadasEsteMes($empresa->id),
             pruebaHasta: $empresa->enPrueba() ? $empresa->prueba_hasta : null,
         );
     }

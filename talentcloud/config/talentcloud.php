@@ -12,29 +12,7 @@ return [
     ],
 
     /*
-    | Servicio de IA (talentcloud-ai, FastAPI). Deshabilitado, los CV se
-    | procesan igual (texto extraído) y el matching usa el motor "fake".
-    */
-    'ia' => [
-        'habilitada' => (bool) env('IA_HABILITADA', false),
-        'url' => env('IA_URL', 'http://127.0.0.1:8001'),
-        'api_key' => env('IA_API_KEY'),
-        'timeout' => (int) env('IA_TIMEOUT', 30),
-        'reintentos' => (int) env('IA_REINTENTOS', 2),
-    ],
-
-    /*
-    | Motor de matching: "fake" (reglas y palabras clave, sin IA) o "http"
-    | (servicio de IA, a partir del día 15 del plan).
-    */
-    'matching' => [
-        'motor' => env('MATCHING_ENGINE', 'fake'),
-    ],
-
-    /*
-    | Dashboard: el ahorro de tiempo que se muestra es un cálculo con este supuesto
-    | (minutos que lleva leer y comparar un CV con los requisitos), visible en la
-    | pantalla y ajustable por despliegue.
+    | Dashboard: las cifras agregadas se guardan en caché unos segundos por empresa.
     */
     'dashboard' => [
         // Segundos que se guardan las cifras agregadas (postulantes, embudo) por empresa; 0 = sin caché.
@@ -44,10 +22,6 @@ return [
     'demo' => [
         // Multiplica el volumen de postulaciones de VolumenDeDemostracionSeeder (1 = completo; 0.05 = prueba rápida).
         'escala_de_volumen' => (float) env('DEMO_ESCALA_DE_VOLUMEN', 1),
-    ],
-
-    'ahorro' => [
-        'minutos_por_cv' => (int) env('AHORRO_MINUTOS_POR_CV', 6),
     ],
 
     /*
@@ -71,7 +45,7 @@ return [
         'ruc' => env('LEGAL_RUC'),
         'domicilio' => env('LEGAL_DOMICILIO'),
         // Fecha de la última versión de los textos (cambiarla al editarlos).
-        'actualizado' => '2026-10-11',
+        'actualizado' => '2026-10-20',
     ],
 
     /*

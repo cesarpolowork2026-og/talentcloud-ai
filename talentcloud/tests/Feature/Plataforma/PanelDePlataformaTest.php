@@ -9,14 +9,13 @@ use App\Models\Empresa;
 use App\Models\Invitacion;
 use App\Models\User;
 use App\Models\Vacante;
-use App\Services\Plataforma\CalidadDeLaIa;
 use App\Services\Plataforma\PanelDePlataforma;
 use App\Tenancy\TenantContext;
 use Livewire\Livewire;
 
 /*
  * Panel de la plataforma del admin SaaS: empresas cliente (planes y uso) y
- * salud de la IA, antes de la actividad de selección.
+ * Libro de Reclamaciones, antes de la actividad de selección.
  */
 
 beforeEach(function () {
@@ -87,9 +86,9 @@ it('muestra al admin las tres secciones numeradas con sus accesos', function () 
         ->assertSee('Cerca del límite de su plan')
         ->assertSeeHtml('<td>Orbita Labs</td>')
         ->assertSee('3 de 3')
-        ->assertSee('2 · Salud de la IA')
-        ->assertSee('Ver calidad de la IA')
-        ->assertSee('3 · Actividad de selección');
+        ->assertSee('2 · Actividad de selección')
+        ->assertDontSee('Salud de la IA')
+        ->assertDontSee('calidad de la IA');
 });
 
 it('no muestra las secciones de la plataforma al personal de una empresa', function () {
@@ -100,17 +99,6 @@ it('no muestra las secciones de la plataforma al personal de una empresa', funct
         ->assertDontSee('Empresas cliente')
         ->assertDontSee('Salud de la IA')
         ->assertDontSee('Orbita Labs');
-});
-
-it('usa solo los indicadores de la IA, sin cargar listas que el panel no muestra', function () {
-    $calidad = app(CalidadDeLaIa::class);
-    $completo = $calidad->resumen();
-    $indicadores = $calidad->indicadores();
-
-    expect($indicadores->marcas)->toBeEmpty()
-        ->and($indicadores->ultimosTrabajosFallidos)->toBeEmpty()
-        ->and([$indicadores->calculadas, $indicadores->conIa, $indicadores->basicasPendientes, $indicadores->cvsConError, $indicadores->marcasDelPeriodo])
-        ->toBe([$completo->calculadas, $completo->conIa, $completo->basicasPendientes, $completo->cvsConError, $completo->marcasDelPeriodo]);
 });
 
 it('muestra la distribución de empresas por plan como una barra apilada con su leyenda', function () {

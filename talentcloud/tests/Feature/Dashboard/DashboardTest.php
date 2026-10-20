@@ -3,7 +3,6 @@
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
-use App\Enums\MotorMatching;
 use App\Livewire\Dashboard\ActividadReciente;
 use App\Livewire\Dashboard\Panel;
 use App\Models\Actividad;
@@ -28,17 +27,11 @@ beforeEach(function () {
     $this->analyst = Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::EnRevision)->create(['titulo' => 'Data Analyst']);
     Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Cerrada)->create(['titulo' => 'DevOps Engineer']);
 
-    // Elena: analizada con IA hace dos días; Sofía, hace diez; la tercera, hace dos meses (fuera de los 30 días).
     $this->elena = Postulacion::factory()->paraVacante($this->backend)->create([
         'candidato_id' => Candidato::factory()->create(['nombre' => 'Elena Ruiz'])->id,
-        'match_score' => 80, 'match_motor' => MotorMatching::Http, 'match_calculado_at' => now()->subDays(2),
     ]);
-    $this->sofia = Postulacion::factory()->paraVacante($this->backend)->create([
-        'match_score' => 91, 'match_motor' => MotorMatching::Http, 'match_calculado_at' => now()->subDays(10),
-    ]);
-    Postulacion::factory()->paraVacante($this->backend)->create([
-        'match_score' => 10, 'match_motor' => MotorMatching::Http, 'match_calculado_at' => now()->subDays(60),
-    ]);
+    $this->sofia = Postulacion::factory()->paraVacante($this->backend)->create();
+    Postulacion::factory()->paraVacante($this->backend)->create();
 
     // Hoy: una confirmada y una cancelada (no cuenta); mañana: una pendiente.
     Entrevista::factory()->create(['postulacion_id' => $this->elena->id, 'inicia_at' => '2026-09-24 15:00', 'estado' => EstadoEntrevista::Confirmada]);
@@ -49,7 +42,7 @@ beforeEach(function () {
     app(TenantContext::class)->ejecutarGlobal(function () {
         $vela = Empresa::factory()->create(['nombre' => 'Vela Studio']);
         $vacante = Vacante::factory()->deEmpresa($vela)->enEstado(EstadoVacante::Abierta)->create(['titulo' => 'Product Designer']);
-        Postulacion::factory()->paraVacante($vacante)->create(['match_score' => 20, 'match_motor' => MotorMatching::Http, 'match_calculado_at' => now()]);
+        Postulacion::factory()->paraVacante($vacante)->create();
         $actividad = new Actividad(['tipo' => 'vacante.creada', 'descripcion' => 'Vela Studio creó la vacante Product Designer.']);
         $actividad->empresa_id = $vela->id;
         $actividad->save();
@@ -73,19 +66,7 @@ it('calcula los indicadores con el alcance de la empresa', function () {
         ->and($resumen->porRevisar)->toBe(3)
         ->and($resumen->entrevistasHoy)->toBe(1)
         ->and($resumen->entrevistasProximas)->toBe(2) // la confirmada de hoy a las 15:00 y la pendiente de mañana
-        ->and($resumen->analizadasConIa)->toBe(2) // la de hace dos meses queda fuera de los 30 días
         ->and($resumen->vacantesConMovimiento->pluck('titulo')->all())->not->toContain('Product Designer', 'DevOps Engineer');
-});
-
-it('calcula las horas ahorradas con el supuesto de minutos por CV y lo declara', function () {
-    config(['talentcloud.ahorro.minutos_por_cv' => 6]);
-
-    $resumen = app(DashboardService::class)->resumen();
-
-    expect($resumen->horasAhorradas())->toBe(0.2) // 2 CV × 6 min = 12 min
-        ->and($resumen->minutosPorCv)->toBe(6);
-
-    Livewire::test(Panel::class)->assertSee('2 postulaciones analizadas con IA en 30 días, a 6 min de lectura por CV (supuesto)');
 });
 
 it('muestra el dashboard con lo que pide atención primero', function () {
@@ -94,7 +75,9 @@ it('muestra el dashboard con lo que pide atención primero', function () {
         ->assertSee('Resumen de la actividad de selección de Nimbus Corp.')
         ->assertSeeInOrder(['Vacantes activas', '2', 'Postulantes', '3', 'Por revisar', '3', 'Entrevistas hoy', '1'])
         ->assertSeeInOrder(['Requiere tu atención', 'Tienes 1 entrevista hoy.', '1 entrevista por confirmar.'])
-        ->assertSeeInOrder(['Tiempo ahorrado con IA', 'Vacantes en curso', 'Actividad reciente'])
+        ->assertSeeInOrder(['Vacantes en curso', 'Actividad reciente'])
+        ->assertDontSee('Tiempo ahorrado')
+        ->assertDontSee('con IA')
         ->assertSee('Sofía Nieto avanzó a la etapa de entrevista.')
         ->assertDontSee('Vela Studio creó la vacante')
         // Se retiraron los indicadores que informaban pero no ayudaban a decidir.
@@ -136,17 +119,16 @@ it('dice que todo está al día cuando no hay nada pendiente', function () {
     Livewire::test(Panel::class)->assertSee('Todo al día');
 });
 
-it('ordena las vacantes en curso por lo que tienen por revisar y muestra su mejor match', function () {
-    Postulacion::factory()->paraVacante($this->analyst)->enEtapa(EtapaPostulacion::EnRevision)->create(['match_score' => 55]);
+it('ordena las vacantes en curso por lo que tienen por revisar', function () {
+    Postulacion::factory()->paraVacante($this->analyst)->enEtapa(EtapaPostulacion::EnRevision)->create();
 
     $filas = app(DashboardService::class)->resumen()->vacantesConMovimiento;
 
     expect($filas->pluck('titulo')->all())->toBe(['Desarrollador Backend', 'Data Analyst'])
         ->and((int) $filas[0]->por_revisar)->toBe(3)
-        ->and((int) round((float) $filas[0]->mejor_match))->toBe(91)
         ->and((int) $filas[1]->por_revisar)->toBe(0);
 
-    Livewire::test(Panel::class)->assertSeeInOrder(['Vacante', 'Postulantes', 'Por revisar', 'Mejor match', 'Estado'])->assertSee('91%');
+    Livewire::test(Panel::class)->assertSeeInOrder(['Vacante', 'Postulantes', 'Por revisar', 'Estado'])->assertDontSee('Mejor match');
 });
 
 it('la actividad reciente es un componente que se refresca solo y muestra solo lo de la empresa', function () {
@@ -187,7 +169,7 @@ it('muestra al admin SaaS el panel de la plataforma, de lo general a lo particul
         ->assertDontSee('Tu plan ·')
         ->html();
 
-    $orden = array_map(fn (string $texto) => mb_strpos($html, $texto), ['1 · Empresas cliente', '2 · Salud de la IA', '3 · Actividad de selección', 'Embudo de selección']);
+    $orden = array_map(fn (string $texto) => mb_strpos($html, $texto), ['1 · Empresas cliente', '2 · Actividad de selección', 'Embudo de selección']);
     expect($orden)->not->toContain(false)->and($orden)->toBe(collect($orden)->sort()->values()->all());
     expect(app(DashboardService::class)->resumen()->vacantesActivas)->toBe(3);
 });

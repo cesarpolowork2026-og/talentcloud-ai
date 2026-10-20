@@ -221,14 +221,11 @@ it('no toca la ficha si no se envía, y el personal no ve esos campos', function
 
 // — Descargar mis datos —
 
-it('descarga sus datos sin notas, evaluaciones, puntajes ni competencias manuales', function () {
-    $java = Competencia::obtenerOCrear('Java');
+it('descarga sus datos sin notas, evaluaciones ni competencias anotadas por una empresa', function () {
     $kotlin = Competencia::obtenerOCrear('Kotlin');
-    $this->candidato->todasLasCompetencias()->attach($java->id, ['fuente' => FuenteCompetencia::Extraccion->value, 'anios' => 5, 'evidencia' => 'Java 5 años']);
     $this->candidato->todasLasCompetencias()->attach($kotlin->id, ['fuente' => FuenteCompetencia::Manual->value, 'empresa_id' => $this->nimbus->id]);
 
     app(TenantContext::class)->ejecutarGlobal(function () {
-        $this->postulacion->update(['match_score' => 87.5]);
         $nota = new Nota(['texto' => 'Pedir referencias']);
         $nota->empresa_id = $this->nimbus->id;
         $nota->postulacion_id = $this->postulacion->id;
@@ -245,11 +242,10 @@ it('descarga sus datos sin notas, evaluaciones, puntajes ni competencias manuale
 
     expect($datos['cuenta']['email'])->toBe($this->marco->email)
         ->and($datos['cvs'][0]['archivo'])->toBe('CV_MarcoDiaz.pdf')
-        ->and(array_column($datos['competencias_extraidas_de_tu_cv'], 'competencia'))->toBe(['Java'])
+        ->and($datos)->not->toHaveKey('competencias_extraidas_de_tu_cv')
         ->and($datos['postulaciones'][0])->toMatchArray(['vacante' => 'Desarrollador Backend', 'empresa' => 'Nimbus Corp', 'estado' => 'En revisión'])
         ->and($json)->not->toContain('Pedir referencias')
         ->and($json)->not->toContain('Kotlin')
-        ->and($json)->not->toContain('87.5')
         ->and($json)->not->toContain('match');
 });
 

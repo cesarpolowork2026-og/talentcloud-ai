@@ -2,14 +2,13 @@
 
 namespace App\Exports;
 
-use App\Enums\FuenteCompetencia;
 use App\Models\Candidato;
 use App\Models\Competencia;
 use App\Models\Postulacion;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Candidatos visibles para la empresa, una fila por postulación (con su match).
+ * Candidatos visibles para la empresa, una fila por postulación.
  * Un candidato registrado sin postular aparece en una fila sin vacante.
  *
  * @extends ExportacionDeListado<Candidato>
@@ -18,7 +17,7 @@ class CandidatosExport extends ExportacionDeListado
 {
     public function headings(): array
     {
-        return ['Candidato', 'Correo', 'Titular', 'Vacante', 'Etapa', 'Match %', 'Análisis', 'Competencias extraídas por IA', 'Postulación'];
+        return ['Candidato', 'Correo', 'Titular', 'Vacante', 'Etapa', 'Competencias', 'Postulación'];
     }
 
     protected function titulo(): string
@@ -26,10 +25,10 @@ class CandidatosExport extends ExportacionDeListado
         return 'Candidatos';
     }
 
-    /** Competencias extraídas por IA. */
+    /** Competencias anotadas por la empresa. */
     protected function columnasDeTexto(): array
     {
-        return [8];
+        return [5];
     }
 
     /**
@@ -50,7 +49,6 @@ class CandidatosExport extends ExportacionDeListado
     public function map($candidato): array
     {
         $competencias = $candidato->competencias
-            ->where('pivot.fuente', FuenteCompetencia::Extraccion->value)
             ->unique('id')
             ->map(fn (Competencia $c) => $c->nombre)
             ->join(', ');
@@ -58,15 +56,13 @@ class CandidatosExport extends ExportacionDeListado
         $comun = [$candidato->nombre, $candidato->email, $candidato->titular];
 
         if ($candidato->postulaciones->isEmpty()) {
-            return [[...$comun, null, null, null, null, $competencias, null]];
+            return [[...$comun, null, null, $competencias, null]];
         }
 
         return $candidato->postulaciones->map(fn (Postulacion $p) => [
             ...$comun,
             $p->vacante?->titulo,
             $p->etapa->etiqueta(),
-            $p->matchPorcentaje(),
-            $p->match_motor?->etiqueta(),
             $competencias,
             self::fecha($p->created_at),
         ])->values()->all();

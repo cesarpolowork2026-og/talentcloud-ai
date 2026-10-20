@@ -4,7 +4,6 @@ use App\DTO\DatosDeEntrevista;
 use App\Models\Empresa;
 use App\Models\Invitacion;
 use App\Notifications\AvisoCambioDePlan;
-use App\Notifications\AvisoCvAnalizado;
 use App\Notifications\AvisoDeEntrevista;
 use App\Notifications\AvisoEntrevistaReprogramada;
 use App\Notifications\AvisoEstadoDePostulacion;
@@ -81,7 +80,6 @@ it('tampoco en los avisos de estado, entrevista, postulación, plan y pago', fun
         'entrevista cancelada' => [AvisoDeEntrevista::class, ['datos' => $datos, 'cancelada' => true, 'paraCandidato' => false]],
         'entrevista reprogramada' => [AvisoEntrevistaReprogramada::class, ['datos' => $datos, 'fechaAnterior' => '13 oct', 'paraCandidato' => true]],
         'nueva postulación' => [AvisoNuevaPostulacion::class, ['texto' => TEXTO_HOSTIL, 'url' => 'https://app.example/x', 'candidatoId' => null]],
-        'CV analizado' => [AvisoCvAnalizado::class, ['texto' => TEXTO_HOSTIL, 'url' => 'https://app.example/x', 'candidatoId' => null]],
         'postulación retirada' => [AvisoPostulacionRetirada::class, ['texto' => TEXTO_HOSTIL, 'url' => 'https://app.example/x', 'candidatoId' => null]],
         'cambio de plan' => [AvisoCambioDePlan::class, ['texto' => TEXTO_HOSTIL, 'limites' => TEXTO_HOSTIL, 'url' => 'https://app.example/x']],
         'solicitud de plan' => [AvisoSolicitudDePlan::class, ['texto' => TEXTO_HOSTIL, 'url' => 'https://app.example/x']],

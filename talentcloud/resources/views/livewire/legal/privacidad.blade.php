@@ -24,20 +24,20 @@
         <h2 id="finalidad">2. Para qué los usamos</h2>
         <ul>
             <li>Gestionar tus postulaciones y los procesos de selección de las empresas.</li>
-            <li>Analizar tu CV con inteligencia artificial para extraer competencias y compararlas con los requisitos de cada vacante. El resultado es un porcentaje de coincidencia que <strong>siempre cita el fragmento de tu CV que lo respalda</strong>.</li>
+            <li>Leer el texto de tu CV para que el equipo de selección de cada empresa pueda revisarlo y anotar sus competencias.</li>
             <li>Avisarte por correo y en la aplicación de los cambios en tus postulaciones y entrevistas.</li>
             <li>Mantener la seguridad de la plataforma y de las cuentas.</li>
         </ul>
         <p>No usamos tus datos con fines publicitarios ni los vendemos.</p>
 
-        <h2 id="ia">3. Inteligencia artificial y decisiones</h2>
-        <p>La IA sugiere y explica; <strong>no decide</strong>. Avanzar, descartar o contratar a un candidato lo decide siempre una persona de la empresa. El análisis lo hace nuestro propio servicio de IA: el texto de tu CV no se envía a proveedores externos de inteligencia artificial. Los reclutadores pueden marcar un resultado como incorrecto, y esas marcas se usan para revisar y mejorar el análisis.</p>
+        <h2 id="decisiones">3. Decisiones sobre tu postulación</h2>
+        <p>Avanzar, descartar o contratar a un candidato lo decide siempre <strong>una persona</strong> de la empresa: la plataforma no toma decisiones automáticas sobre ti. El texto de tu CV no se envía a proveedores externos.</p>
 
         <h2 id="acceso">4. Quién ve tus datos</h2>
         <ul>
             <li><strong>Las empresas a cuyas vacantes postulas</strong>, o que te registraron en un proceso, y solo su personal de selección. Una empresa no ve tus postulaciones a otras empresas.</li>
             <li>Cada empresa escribe sus propias notas internas y evaluaciones de tu proceso; las demás empresas no las ven.</li>
-            <li>El equipo de administración de TalentCloud AI, para dar soporte y supervisar la calidad del análisis.</li>
+            <li>El equipo de administración de TalentCloud AI, para dar soporte y supervisar el servicio.</li>
             <li>Nuestros proveedores de infraestructura (alojamiento en Google Cloud y envío de correos), que tratan los datos por nuestro encargo y con sus propias garantías de seguridad. Los servidores pueden estar fuera del Perú.</li>
             @if (\App\Pagos\CobroEnLinea::habilitado())
                 <li>Stripe, procesador de los pagos de los planes, solo con los datos de pago de las empresas descritos en el punto 1. Stripe los trata en Estados Unidos y en otros países (transferencia internacional de datos) con sus propias garantías de seguridad.</li>

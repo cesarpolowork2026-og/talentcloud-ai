@@ -2,7 +2,6 @@
 
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
-use App\Enums\FuenteCompetencia;
 use App\Livewire\Candidatos\Detalle;
 use App\Livewire\Candidatos\Listado;
 use App\Livewire\Postulante\MiCurriculo;
@@ -35,9 +34,9 @@ beforeEach(function () {
     $this->marco = Candidato::factory()->create(['nombre' => 'Marco Díaz']);
     $this->rosa = Candidato::factory()->registradoPor($this->nimbus)->create(['nombre' => 'Rosa Paredes']);
 
-    Postulacion::factory()->paraVacante($this->backend)->create(['candidato_id' => $this->elena->id, 'match_score' => 88]);
+    Postulacion::factory()->paraVacante($this->backend)->create(['candidato_id' => $this->elena->id, 'created_at' => now()->subDays(3)]);
     Postulacion::factory()->paraVacante($this->designer)->create(['candidato_id' => $this->ivan->id]);
-    Postulacion::factory()->paraVacante($this->backend)->create(['candidato_id' => $this->marco->id, 'match_score' => 64]);
+    Postulacion::factory()->paraVacante($this->backend)->create(['candidato_id' => $this->marco->id]);
     Postulacion::factory()->paraVacante($this->designer)->create(['candidato_id' => $this->marco->id]);
 
     actuarComo($this->marta);
@@ -46,13 +45,13 @@ beforeEach(function () {
 it('muestra la pantalla Candidatos del prototipo', function () {
     $this->get('/candidatos')
         ->assertOk()
-        ->assertSee('CVs recibidos y analizados por la IA.')
+        ->assertSee('CVs recibidos y candidatos de tus vacantes.')
         ->assertSee('Buscar candidato…')
-        ->assertSeeInOrder(['Nombre', 'Match %'])
+        ->assertSeeInOrder(['Nombre', 'Postulación más reciente'])
         ->assertSee('Desarrolladora Backend')
         ->assertSee('Desarrollador Backend · Postulado')
         ->assertSeeHtml('wire:click.stop="verDetalle(')
-        ->assertSee('88% match');
+        ->assertDontSee('% match');
 });
 
 it('muestra solo los candidatos que postularon a la empresa o que ella registró', function () {
@@ -80,23 +79,23 @@ it('muestra al admin SaaS todos los candidatos', function () {
     Livewire::test(Listado::class)->assertSee('Iván Torres')->assertSee('Rosa Paredes');
 });
 
-it('ordena por match, con los candidatos sin postulación al final', function () {
-    // assertSeeInOrder de Livewire compara el JSON (con "í" escapada); se revisa el HTML.
+it('ordena por la postulación más reciente, con los candidatos sin postulación al final', function () {
+    // Marco postuló después que Elena. assertSeeInOrder de Livewire compara el JSON (con "í" escapada); se revisa el HTML.
     $html = Livewire::test(Listado::class)
-        ->set('orden', 'match')
+        ->set('orden', 'reciente')
         ->call('alternarDireccion')
         ->html();
 
-    expect(strpos($html, 'Elena Ruiz</button>'))->toBeLessThan(strpos($html, 'Marco Díaz</button>'))
-        ->and(strpos($html, 'Marco Díaz</button>'))->toBeLessThan(strpos($html, 'Rosa Paredes</button>'));
+    expect(strpos($html, 'Marco Díaz</button>'))->toBeLessThan(strpos($html, 'Elena Ruiz</button>'))
+        ->and(strpos($html, 'Elena Ruiz</button>'))->toBeLessThan(strpos($html, 'Rosa Paredes</button>'));
 });
 
-it('muestra el estado de error del CV con "Reintentar análisis"', function () {
+it('muestra el estado de error del CV con "Reintentar lectura"', function () {
     app(SubirCv::class)->ejecutar($this->elena, UploadedFile::fake()->createWithContent('escaneado.pdf', DocumentosDePrueba::pdf(null)), null);
 
     Livewire::test(Listado::class)
-        ->assertSee('Error al analizar el CV')
-        ->assertSee('Reintentar análisis')
+        ->assertSee('No pudimos leer el CV')
+        ->assertSee('Reintentar lectura')
         ->call('reintentar', $this->elena->cvActual->id)
         ->assertHasNoErrors();
 });
@@ -108,7 +107,7 @@ it('abre el diálogo del CV con el extracto', function () {
     Livewire::test(Listado::class)
         ->call('verDetalle', $this->elena->id)
         ->assertSet('mostrarDetalle', true)
-        ->assertSee('Coincidencia: 85%')
+        ->assertDontSee('Coincidencia')
         ->assertSee('Extracto del CV:')
         ->assertSee('5 años de experiencia con Java');
 });
@@ -175,20 +174,18 @@ it('no postula a vacantes de otra empresa', function () {
         ->assertHasErrors(['vacanteId']);
 });
 
-it('gestiona competencias manuales sin tocar las extraídas', function () {
-    $this->elena->competencias()->attach(Competencia::obtenerOCrear('Java')->id, ['fuente' => FuenteCompetencia::Extraccion->value]);
-
+it('gestiona las competencias que anota la empresa: se agregan y se quitan', function () {
     $componente = Livewire::test(Detalle::class, ['candidato' => $this->elena])
         ->set('nuevaCompetencia', 'Scrum')
         ->call('agregarCompetencia')
         ->assertHasNoErrors()
         ->assertSee('Scrum')
-        ->assertSee('Java · IA');
+        ->assertDontSee('· IA');
 
     $scrum = Competencia::where('nombre', 'Scrum')->firstOrFail();
     $componente->call('quitarCompetencia', $scrum->id);
 
-    expect($this->elena->competencias()->pluck('nombre')->all())->toBe(['Java']);
+    expect($this->elena->competencias()->pluck('nombre')->all())->toBe([]);
 });
 
 it('muestra "Mi currículo" al postulante y le deja subir un CV nuevo', function () {
@@ -203,7 +200,7 @@ it('muestra "Mi currículo" al postulante y le deja subir un CV nuevo', function
         ->call('subir')
         ->assertHasNoErrors()
         ->assertSee('CV_Marco.pdf')
-        ->assertSee('Analizado por la IA');
+        ->assertSee('CV cargado y listo para tus postulaciones');
 
     expect($user->candidato->cvActual->texto_extraido)->toContain('MySQL');
 });

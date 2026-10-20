@@ -7,7 +7,6 @@ use App\Enums\EtapaPostulacion;
 use App\Enums\Rol;
 use App\Events\CandidatoSePostulo;
 use App\Events\ContrasenaCambiada;
-use App\Events\CvAnalizado;
 use App\Events\EntrevistaCancelada;
 use App\Events\EntrevistaProgramada;
 use App\Events\EntrevistaReprogramada;
@@ -28,7 +27,6 @@ use App\Models\User;
 use App\Models\Vacante;
 use App\Notifications\AvisoCambioDePlan;
 use App\Notifications\AvisoContrasenaCambiada;
-use App\Notifications\AvisoCvAnalizado;
 use App\Notifications\AvisoDeEntrevista;
 use App\Notifications\AvisoEntrevistaReprogramada;
 use App\Notifications\AvisoGeneral;
@@ -47,7 +45,7 @@ use Illuminate\Support\Collection;
 
 /**
  * Notificaciones (campana y correo según preferencia): entrevistas programadas
- * o canceladas, CV analizados, postulaciones del candidato, cambios de plan y
+ * o canceladas, postulaciones del candidato, cambios de plan y
  * cambios de estado o cierre del proceso. Los avisos al candidato salen
  * diferidos (AvisarEstadoDePostulacion) y nadie recibe aviso de lo que hizo él.
  */
@@ -82,30 +80,6 @@ class EnviarAvisos
         $this->alCandidato($entrevista->postulacion?->candidato, AvisoEntrevistaReprogramada::paraCandidato($datos, $evento->fechaAnterior));
     }
 
-    public function handleCv(CvAnalizado $evento): void
-    {
-        if (! $evento->primeraVez) {
-            return; // reanálisis de mantenimiento: sin avisos repetidos
-        }
-
-        $cv = $evento->cv->loadMissing(['subidoPor', 'candidato']);
-        $quienLoSubio = $cv->subidoPor;
-        $candidato = $cv->candidato;
-
-        if ($quienLoSubio === null || $candidato === null) {
-            return;
-        }
-
-        $competencias = count(array_filter(
-            (array) ($cv->datos_estructurados['competencias'] ?? []),
-            fn ($c) => is_array($c) && ! ($c['dudosa'] ?? false),
-        ));
-
-        $quienLoSubio->notify($quienLoSubio->id === $candidato->user_id
-            ? AvisoCvAnalizado::paraPostulante($competencias, route('postulante.postulaciones'))
-            : AvisoCvAnalizado::paraReclutador($candidato->nombre, $competencias, route('candidatos.show', $candidato), $candidato->id));
-    }
-
     /** Postulación propia del candidato: aviso a quien creó la vacante y a la cuenta de empresa. */
     public function handleCandidatoSePostulo(CandidatoSePostulo $evento): void
     {
@@ -120,7 +94,7 @@ class EnviarAvisos
         $aviso = AvisoNuevaPostulacion::de(
             (string) $postulacion->candidato?->nombre,
             $vacante->titulo,
-            route('matching.show', $postulacion),
+            route('postulaciones.show', $postulacion),
             $postulacion->candidato_id,
         );
 

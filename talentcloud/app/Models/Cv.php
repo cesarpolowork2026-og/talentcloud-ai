@@ -8,7 +8,6 @@ use Database\Factories\CvFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Carbon;
 
@@ -21,7 +20,6 @@ use Illuminate\Support\Carbon;
  * @property string $ruta
  * @property string $nombre_original
  * @property string|null $texto_extraido
- * @property array<string, mixed>|null $datos_estructurados
  * @property EstadoProcesamientoCv $estado_procesamiento
  * @property string|null $error
  * @property Carbon|null $procesado_at
@@ -42,7 +40,6 @@ class Cv extends Model
         'mime',
         'tamano',
         'texto_extraido',
-        'datos_estructurados',
         'estado_procesamiento',
         'error',
         'procesado_at',
@@ -56,7 +53,6 @@ class Cv extends Model
     protected function casts(): array
     {
         return [
-            'datos_estructurados' => 'array',
             'estado_procesamiento' => EstadoProcesamientoCv::class,
             'procesado_at' => 'datetime',
             'tamano' => 'integer',
@@ -91,13 +87,5 @@ class Cv extends Model
     public function subidoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'subido_por');
-    }
-
-    /**
-     * @return HasMany<CvFragmento, $this>
-     */
-    public function fragmentos(): HasMany
-    {
-        return $this->hasMany(CvFragmento::class)->orderBy('orden');
     }
 }

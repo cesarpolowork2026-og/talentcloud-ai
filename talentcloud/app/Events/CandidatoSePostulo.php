@@ -8,8 +8,8 @@ use Illuminate\Foundation\Events\Dispatchable;
 
 /**
  * El postulante se postuló por su cuenta ("Postular con mi CV"). Se despacha
- * además de PostulacionCreada, que ya programa el matching: este solo sirve
- * para avisar a la empresa, que no creó la postulación.
+ * además de PostulacionCreada: este solo sirve para avisar a la empresa, que no
+ * creó la postulación.
  */
 class CandidatoSePostulo
 {

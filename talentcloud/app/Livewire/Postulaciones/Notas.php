@@ -12,7 +12,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
- * "Notas del equipo" de una postulación: se usa en el matching y en la ficha
+ * "Notas del equipo" de una postulación: se usa en el detalle de la postulación y en la ficha
  * del candidato. Solo el personal de la empresa (PostulacionPolicy::gestionarNotas).
  */
 class Notas extends Component

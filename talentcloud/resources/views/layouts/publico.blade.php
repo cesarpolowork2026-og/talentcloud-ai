@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    @include('partials.head', ['title' => $title ?? null, 'compartir' => $descripcion ?? 'TalentCloud AI: gestiona vacantes, candidatos, entrevistas y evaluaciones con un matching de CVs que la IA explica. La IA sugiere; tú decides.'])
+    @include('partials.head', ['title' => $title ?? null, 'compartir' => $descripcion ?? 'TalentCloud AI: gestiona vacantes, candidatos, entrevistas y evaluaciones en un solo flujo, con los datos de cada empresa separados. Tú decides.'])
     @isset($descripcion)
         <meta name="description" content="{{ $descripcion }}">
     @endisset

@@ -19,7 +19,6 @@ final readonly class UsoDelPlan
         public int $vacantesActivas,
         public int $usuariosActivos,
         public int $invitacionesPendientes,
-        public int $postulacionesConIa = 0,
         public ?DateTimeInterface $pruebaHasta = null,
     ) {}
 
@@ -44,11 +43,6 @@ final readonly class UsoDelPlan
         return $this->plan->limiteUsuarios();
     }
 
-    public function cupoIa(): ?int
-    {
-        return $this->plan->cupoIaMensual();
-    }
-
     /** Tras una bajada de plan puede quedar por encima: se conserva lo existente. */
     public function excedeVacantes(): bool
     {
@@ -60,15 +54,9 @@ final readonly class UsoDelPlan
         return $this->limiteUsuarios() !== null && $this->usuariosActivos > $this->limiteUsuarios();
     }
 
-    /** Las nuevas postulaciones del mes se evalúan con el análisis básico. */
-    public function cupoIaAgotado(): bool
-    {
-        return $this->cupoIa() !== null && $this->postulacionesConIa >= $this->cupoIa();
-    }
-
     /**
-     * Usa ya el 80 % o más de algún límite (vacantes, usuarios con sus
-     * invitaciones pendientes o cupo de IA del mes): el admin SaaS lo ve en su
+     * Usa ya el 80 % o más de algún límite (vacantes o usuarios con sus
+     * invitaciones pendientes): el admin SaaS lo ve en su
      * panel para ofrecer un cambio de plan antes de que la empresa se quede sin lugar.
      */
     public function cercaDelLimite(): bool
@@ -76,8 +64,7 @@ final readonly class UsoDelPlan
         $proporcion = fn (int $usado, ?int $limite) => $limite !== null && $limite > 0 && $usado / $limite >= self::UMBRAL_CERCA_DEL_LIMITE;
 
         return $proporcion($this->vacantesActivas, $this->limiteVacantes())
-            || $proporcion($this->usuariosActivos + $this->invitacionesPendientes, $this->limiteUsuarios())
-            || $proporcion($this->postulacionesConIa, $this->cupoIa());
+            || $proporcion($this->usuariosActivos + $this->invitacionesPendientes, $this->limiteUsuarios());
     }
 
     public function vacantesAlLimite(): bool

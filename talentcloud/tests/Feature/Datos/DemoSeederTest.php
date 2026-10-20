@@ -20,6 +20,7 @@ use App\Models\Vacante;
 use App\Support\Formato;
 use App\Tenancy\TenantContext;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Support\Facades\Schema;
 
 /*
  * El seeder de demostración deja la app con las personas y vacantes del
@@ -84,17 +85,23 @@ it('no tiene incoherencias entre etapas, entrevistas, evaluaciones y fechas', fu
     });
 });
 
-it('calcula el matching de la demo con el motor a partir de los CV', function () {
-    $match = app(TenantContext::class)->ejecutarPara($this->marta->empresa_id, fn () => Postulacion::query()
-        ->with('candidato')
-        ->whereHas('vacante', fn ($q) => $q->where('titulo', 'Desarrollador Backend'))
-        ->get()
-        ->mapWithKeys(fn (Postulacion $p) => [$p->candidato->nombre => $p->matchPorcentaje()]));
+it('la demo no trae resultados de matching ni de IA: cada postulación guarda su CV y su etapa', function () {
+    app(TenantContext::class)->ejecutarPara($this->marta->empresa_id, function () {
+        $columnas = Schema::getColumnListing('postulaciones');
 
-    // Los porcentajes son los del motor, no números fijos: se comprueba su coherencia.
-    expect($match['Elena Ruiz'])->toBeGreaterThan($match['Marco Díaz'])
-        ->and($match['Sofía Nieto'])->toBeGreaterThan($match['Marco Díaz'])
-        ->and($match['Pablo Vega'])->toBeNull(); // CV escaneado sin texto
+        expect($columnas)->not->toContain('match_score')
+            ->and($columnas)->not->toContain('match_detalle');
+
+        // El CV escaneado de Pablo Vega queda como error de lectura; los demás se procesaron.
+        $estados = Postulacion::query()
+            ->with('candidato.cvActual')
+            ->whereHas('vacante', fn ($q) => $q->where('titulo', 'Desarrollador Backend'))
+            ->get()
+            ->mapWithKeys(fn (Postulacion $p) => [$p->candidato->nombre => $p->candidato->cvActual?->estado_procesamiento?->value]);
+
+        expect($estados['Elena Ruiz'])->toBe('procesado')
+            ->and($estados['Pablo Vega'])->toBe('error');
+    });
 });
 
 it('muestra a Marta solo las vacantes, entrevistas y evaluaciones de Nimbus Corp', function () {
@@ -223,7 +230,7 @@ it('avisa y anota solo lo que la aplicación generaría, de la propia empresa', 
         ->and($actividad)->toContain('Marco Díaz postuló a Desarrollador Backend.')
         ->and(implode(' ', $actividad))->not->toContain('Orbita');
 
-    // Marco (sin IA en los tests, sin el aviso del CV): en revisión en DevOps y, después, el cierre de esa vacante.
+    // Marco: en revisión en DevOps y, después, el cierre de esa vacante.
     $marco = User::where('email', 'marco@correo.com')->firstOrFail();
     expect($marco->notifications()->reorder('created_at')->get()->pluck('data.texto')->all())->sequence(
         fn ($t) => $t->toContain('DevOps Engineer')->toContain('revisando'),

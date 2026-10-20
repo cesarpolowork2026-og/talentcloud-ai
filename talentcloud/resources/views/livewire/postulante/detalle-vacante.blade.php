@@ -1,8 +1,8 @@
 {{-- Detalle de una vacante publicada y "Postular con mi CV" (ampliación sobre el prototipo). --}}
 @use('App\Enums\EstadoProcesamientoCv')
 @php($cvListo = $cv?->estado_procesamiento === EstadoProcesamientoCv::Procesado)
-@php($cvAnalizandose = in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true))
-<div @if ($cvAnalizandose) wire:poll.4s="esperarCv" @endif>
+@php($cvProcesandose = in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true))
+<div @if ($cvProcesandose) wire:poll.4s="esperarCv" @endif>
     @if ($vacante === null)
         {{-- Se cerró (o su empresa se suspendió) mientras el postulante la miraba. --}}
         <x-ui.empty-state icon="briefcase" message="Esta vacante ya no recibe postulaciones.">
@@ -33,7 +33,7 @@
                 @if ($postulado)
                     <p class="m-0 text-15" role="status">
                         <strong class="font-semibold">¡Listo! Te postulaste a {{ $vacante->titulo }}.</strong>
-                        {{ $vacante->empresa?->nombre }} revisará tu CV y la IA ya lo está comparando con los requisitos.
+                        {{ $vacante->empresa?->nombre }} revisará tu CV con los requisitos de la vacante.
                     </p>
                     <x-ui.button variant="primary" :href="route('postulante.postulaciones')" wire:navigate>Ver mis postulaciones</x-ui.button>
                 @elseif ($laRetiro)
@@ -46,9 +46,9 @@
                     <x-ui.button :href="route('postulante.postulaciones')" wire:navigate>Ver mis postulaciones</x-ui.button>
                 @else
                     @if ($cvListo)
-                        <p class="m-0 text-14 text-neutral-800">Se enviará tu CV <strong class="font-semibold">{{ $cv->nombre_original }}</strong>. La empresa lo verá junto con el análisis de la IA.</p>
-                    @elseif ($cvAnalizandose)
-                        <p class="m-0 text-14 text-neutral-800" role="status">Tu CV se está analizando. Podrás postular en unos segundos.</p>
+                        <p class="m-0 text-14 text-neutral-800">Se enviará tu CV <strong class="font-semibold">{{ $cv->nombre_original }}</strong>. La empresa lo verá junto con tu perfil.</p>
+                    @elseif ($cvProcesandose)
+                        <p class="m-0 text-14 text-neutral-800" role="status">Tu CV se está procesando. Podrás postular en unos segundos.</p>
                     @elseif ($cv === null)
                         <p class="m-0 text-14 text-neutral-800">Para postular necesitas subir tu CV.</p>
                     @else
@@ -61,7 +61,7 @@
 
                     @if ($cvListo)
                         <x-ui.button variant="primary" block wire:click="confirmar">Postular con mi CV</x-ui.button>
-                    @elseif (! $cvAnalizandose)
+                    @elseif (! $cvProcesandose)
                         {{-- Sube el CV aquí mismo: al terminar el análisis aparece "Postular con mi CV". --}}
                         <livewire:postulante.mi-curriculo solo-subida />
                     @endif
@@ -70,7 +70,7 @@
         </div>
 
         <x-ui.dialog wire:model="mostrarConfirmacion" title="Postular a {{ $vacante->titulo }}" max-width="440px">
-            <p class="m-0">Enviaremos tu CV {{ $cv?->nombre_original }} a {{ $vacante->empresa?->nombre }}. La empresa verá tu CV y el análisis de la IA; tú podrás seguir el estado en «Mis postulaciones».</p>
+            <p class="m-0">Enviaremos tu CV {{ $cv?->nombre_original }} a {{ $vacante->empresa?->nombre }}. La empresa verá tu CV; tú podrás seguir el estado en «Mis postulaciones».</p>
             <x-slot:actions>
                 <x-ui.button x-on:click="open = false">Cancelar</x-ui.button>
                 <x-ui.button variant="primary" wire:click="postular" wire:loading.attr="disabled" wire:target="postular">Postular</x-ui.button>

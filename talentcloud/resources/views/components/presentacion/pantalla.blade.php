@@ -1,7 +1,7 @@
 {{--
     Una maqueta de la app (components/presentacion/maqueta-*) escalada al ancho disponible,
     como en el carrusel: dibujada a 880×520 y reducida con maquetaEscalada. Es ilustrativa
-    (aria-hidden): el texto que la acompaña dice lo mismo. maqueta: kanban | matching | …
+    (aria-hidden): el texto que la acompaña dice lo mismo. maqueta: kanban | candidatos | …
 --}}
 @props(['maqueta'])
 

@@ -14,7 +14,7 @@
     <h2 class="sr-only">Planes</h2>
     <x-planes.tabla />
 
-    <p class="mt-4 text-13 text-neutral-700">Precios en soles; no incluyen IGV. Todos los planes incluyen todas las funciones: vacantes, Kanban, matching explicable con evidencia, entrevistas, evaluaciones, exportación a Excel y bolsa de empleos. Los postulantes nunca pagan.</p>
+    <p class="mt-4 text-13 text-neutral-700">Precios en soles; no incluyen IGV. Todos los planes incluyen todas las funciones: vacantes, tablero de selección, entrevistas, evaluaciones, exportación a Excel y bolsa de empleos. Los postulantes nunca pagan.</p>
 
     <section class="mt-10 max-w-[75ch]" aria-labelledby="preguntas">
         <h2 id="preguntas" class="text-20">Preguntas frecuentes</h2>
@@ -22,10 +22,6 @@
             <div>
                 <dt class="font-semibold">¿Qué es una vacante activa?</dt>
                 <dd class="m-0 text-neutral-800">Una vacante abierta o en revisión. Los borradores y las vacantes cerradas no cuentan.</dd>
-            </div>
-            <div>
-                <dt class="font-semibold">¿Qué pasa si se agota el cupo de IA del mes?</dt>
-                <dd class="m-0 text-neutral-800">Nada se bloquea: las nuevas postulaciones se evalúan con el análisis básico (palabras clave, también con evidencia) hasta que el cupo se renueva el primer día del mes.</dd>
             </div>
             <div>
                 <dt class="font-semibold">¿Qué pasa si bajo de plan?</dt>

@@ -1,8 +1,5 @@
 <?php
 
-use App\Enums\TipoRequisito;
-use App\Matching\MatchInput;
-use App\Matching\RequisitoInput;
 use App\Models\User;
 use App\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -59,42 +56,4 @@ function actuarComo(User $user): User
     app(TenantContext::class)->establecerParaUsuario($user);
 
     return $user;
-}
-
-/**
- * Ejemplo del contrato con el servicio de IA (talentcloud-ai/contrato/ejemplos),
- * el mismo que valida el pytest del servicio.
- *
- * @return array<string, mixed>
- */
-function ejemploDeContrato(string $nombre): array
-{
-    $ruta = dirname(__DIR__, 2).'/talentcloud-ai/contrato/ejemplos/'.$nombre.'.json';
-
-    return json_decode((string) file_get_contents($ruta), true, flags: JSON_THROW_ON_ERROR);
-}
-
-/**
- * El MatchInput que corresponde a un ejemplo del contrato (match_input.json).
- *
- * @param  array<string, mixed>  $ejemplo
- */
-function entradaDeEjemplo(array $ejemplo): MatchInput
-{
-    return new MatchInput(
-        postulacionId: $ejemplo['postulacion_id'],
-        vacante: $ejemplo['vacante']['titulo'],
-        descripcionVacante: $ejemplo['vacante']['descripcion'],
-        requisitos: array_map(fn (array $r) => new RequisitoInput(
-            id: $r['id'],
-            competencia: $r['competencia'],
-            sinonimos: $r['sinonimos'],
-            tipo: TipoRequisito::from($r['tipo']),
-            peso: $r['peso'],
-            aniosMinimos: $r['anios_minimos'],
-            descripcion: $r['descripcion'],
-        ), $ejemplo['requisitos']),
-        cvId: $ejemplo['cv']['id'],
-        textoCv: $ejemplo['cv']['texto'],
-    );
 }

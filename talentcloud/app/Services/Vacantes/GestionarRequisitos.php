@@ -3,7 +3,6 @@
 namespace App\Services\Vacantes;
 
 use App\DTO\RequisitoData;
-use App\Events\RequisitosActualizados;
 use App\Models\Competencia;
 use App\Models\Requisito;
 use App\Models\Vacante;
@@ -32,8 +31,6 @@ class GestionarRequisitos
             ...$this->atributos($datos),
         ]);
 
-        RequisitosActualizados::dispatch($vacante);
-
         return $requisito;
     }
 
@@ -52,8 +49,6 @@ class GestionarRequisitos
             ...$this->atributos($datos),
         ]);
 
-        RequisitosActualizados::dispatch($vacante);
-
         return $requisito;
     }
 
@@ -62,8 +57,6 @@ class GestionarRequisitos
         $this->asegurarEditable($vacante);
 
         $requisito->delete();
-
-        RequisitosActualizados::dispatch($vacante);
     }
 
     /**

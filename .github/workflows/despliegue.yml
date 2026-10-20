@@ -1,7 +1,7 @@
 name: despliegue
 
-# Manual: se lanza desde la pestaña Actions ("Run workflow"). Construye las tres imágenes en GitHub
-# (el servidor de 4 GB no puede compilar PyTorch ni el frontend) y las publica en ghcr.io.
+# Manual: se lanza desde la pestaña Actions ("Run workflow"). Construye las dos imágenes en GitHub
+# (el servidor pequeño no debe compilar el frontend) y las publica en ghcr.io.
 # Con "desplegar" marcado, además actualiza el servidor por SSH.
 on:
   workflow_dispatch:
@@ -24,7 +24,6 @@ jobs:
         include:
           - { nombre: app, contexto: talentcloud, target: app }
           - { nombre: web, contexto: talentcloud, target: web }
-          - { nombre: ia, contexto: talentcloud-ai, target: '' }
     steps:
       - uses: actions/checkout@v4
 

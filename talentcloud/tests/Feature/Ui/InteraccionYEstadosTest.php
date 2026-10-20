@@ -47,7 +47,7 @@ it('las listas con datos, el dashboard y el tablero usan la zona actualizable', 
     }
 
     $this->get('/dashboard')->assertOk()->assertSee('wire:target="periodo"', false);
-    $this->get('/seleccion/'.$this->vacante->id)->assertOk()->assertSee('wire:target="vista,soloObligatorios,verDescartados,verMas,mover"', false);
+    $this->get('/seleccion/'.$this->vacante->id)->assertOk()->assertSee('wire:target="verMas,mover"', false);
 });
 
 // — Hover —

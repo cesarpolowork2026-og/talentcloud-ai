@@ -120,7 +120,7 @@ abstract class ExportacionDeListado extends DefaultValueBinder implements FromQu
         $filas = $hayDatos ? $ultima - $encabezado : 0;
         $hoja->setCellValueExplicit('A1', 'TalentCloud AI · '.$this->titulo(), DataType::TYPE_STRING);
         $hoja->setCellValueExplicit('A2', 'Generado el '.Formato::fechaLarga(now()).' · '.$filas.' '.($filas === 1 ? 'registro' : 'registros'), DataType::TYPE_STRING);
-        $hoja->setCellValueExplicit('A3', 'Inteligencia que conecta talento. La IA sugiere y explica; la decisión es siempre de la persona.', DataType::TYPE_STRING);
+        $hoja->setCellValueExplicit('A3', 'Inteligencia que conecta talento. La decisión es siempre de la persona.', DataType::TYPE_STRING);
         $hoja->getStyle('A1')->getFont()->setBold(true)->setSize(16)->getColor()->setARGB(self::COLOR_MARCA);
         $hoja->getStyle('A2')->getFont()->setSize(11)->getColor()->setARGB('FF3B4048');
         $hoja->getStyle('A3')->getFont()->setItalic(true)->setSize(10)->getColor()->setARGB('FF5B616B');

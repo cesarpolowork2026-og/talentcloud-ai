@@ -12,7 +12,6 @@ use App\Enums\EtapaPostulacion;
 use App\Enums\FuenteCompetencia;
 use App\Enums\Modalidad;
 use App\Enums\ModalidadEntrevista;
-use App\Enums\MotorMatching;
 use App\Enums\OrigenPostulacion;
 use App\Enums\Periodicidad;
 use App\Enums\PlanEmpresa;
@@ -72,7 +71,6 @@ dataset('enums de la base', [
     'requisitos.tipo' => ['requisitos', 'tipo', TipoRequisito::class],
     'postulaciones.etapa' => ['postulaciones', 'etapa', EtapaPostulacion::class],
     'postulaciones.origen' => ['postulaciones', 'origen', OrigenPostulacion::class],
-    'postulaciones.match_motor' => ['postulaciones', 'match_motor', MotorMatching::class],
     'postulaciones.estado_avisado' => ['postulaciones', 'estado_avisado', EstadoDeMiPostulacion::class],
     'postulacion_etapas.etapa' => ['postulacion_etapas', 'etapa', EtapaPostulacion::class],
     'entrevistas.estado' => ['entrevistas', 'estado', EstadoEntrevista::class],
@@ -123,13 +121,7 @@ it('rechaza un estado o una etapa que no existe', function () {
 // — Rangos y reglas de los valores —
 
 it('rechaza números fuera de rango', function () {
-    rechazadaPorLaBase(fn () => DB::table('postulaciones')->where('id', $this->postulacion->id)->update(['match_score' => 100.5]), CHECK);
-    rechazadaPorLaBase(fn () => DB::table('postulaciones')->where('id', $this->postulacion->id)->update(['match_score' => -1]), CHECK);
     rechazadaPorLaBase(fn () => DB::table('postulaciones')->where('id', $this->postulacion->id)->update(['orden' => -3]), CHECK);
-
-    // El resumen de cumplimiento no puede cubrir más requisitos de los que hay.
-    rechazadaPorLaBase(fn () => DB::table('postulaciones')->where('id', $this->postulacion->id)
-        ->update(['requisitos_total' => 3, 'requisitos_cubiertos' => 4, 'obligatorios_faltantes' => 0]), CHECK);
 
     $entrevista = Entrevista::factory()->create(['postulacion_id' => $this->postulacion->id]);
     rechazadaPorLaBase(fn () => DB::table('entrevistas')->where('id', $entrevista->id)->update(['duracion_min' => 0]), CHECK);
@@ -140,11 +132,11 @@ it('rechaza números fuera de rango', function () {
 });
 
 it('acepta los extremos válidos', function () {
-    DB::table('postulaciones')->where('id', $this->postulacion->id)
-        ->update(['match_score' => 100, 'requisitos_total' => 3, 'requisitos_cubiertos' => 3, 'obligatorios_faltantes' => 0]);
-    DB::table('postulaciones')->where('id', $this->postulacion->id)->update(['match_score' => 0]);
+    $requisito = Requisito::factory()->create(['vacante_id' => $this->backend->id]);
+    DB::table('requisitos')->where('id', $requisito->id)->update(['peso' => 5, 'anios_minimos' => 40]);
+    DB::table('postulaciones')->where('id', $this->postulacion->id)->update(['orden' => 0]);
 
-    expect((float) DB::table('postulaciones')->where('id', $this->postulacion->id)->value('match_score'))->toBe(0.0);
+    expect(DB::table('requisitos')->where('id', $requisito->id)->value('peso'))->toBe(5);
 });
 
 it('una vacante presencial o híbrida necesita ubicación; en remoto es opcional', function () {
@@ -235,6 +227,6 @@ it('el índice del tablero cubre las columnas que lee el dashboard', function ()
 
     expect($definicion)->not->toBeNull()
         ->and($definicion)->toContain('(empresa_id, vacante_id, etapa, orden)')
-        ->and($definicion)->toContain('INCLUDE (retirada_at, etapa_cambiada_at, created_at, match_score)')
+        ->and($definicion)->toContain('INCLUDE (retirada_at, etapa_cambiada_at, created_at)')
         ->and(DB::scalar("SELECT 1 FROM pg_indexes WHERE indexname = 'postulaciones_empresa_id_vacante_id_etapa_orden_index'"))->toBeNull();
 });

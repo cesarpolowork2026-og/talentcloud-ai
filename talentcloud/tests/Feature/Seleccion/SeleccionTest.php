@@ -3,22 +3,12 @@
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
-use App\Enums\MotorMatching;
-use App\Enums\NivelCoincidencia;
-use App\Enums\TipoRequisito;
 use App\Events\PostulacionCambioDeEtapa;
-use App\Jobs\CalcularMatch;
 use App\Livewire\Seleccion\Central;
-use App\Matching\CumplimientoDeRequisitos;
-use App\Matching\MatchResult;
-use App\Matching\RequisitoMatch;
 use App\Models\Candidato;
-use App\Models\Competencia;
-use App\Models\Cv;
 use App\Models\Empresa;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
-use App\Models\Requisito;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Services\Postulaciones\MoverPostulacion;
@@ -32,19 +22,18 @@ beforeEach(function () {
     $this->marta = User::factory()->deEmpresa($this->nimbus)->reclutador()->create();
     $this->backend = Vacante::factory()->deEmpresa($this->nimbus)->create(['titulo' => 'Desarrollador Backend']);
 
-    $crear = fn (string $nombre, EtapaPostulacion $etapa, int $orden, ?int $match = null) => Postulacion::factory()
+    $crear = fn (string $nombre, EtapaPostulacion $etapa, int $orden) => Postulacion::factory()
         ->paraVacante($this->backend)
         ->create([
             'candidato_id' => Candidato::factory()->create(['nombre' => $nombre, 'titular' => 'Backend'])->id,
             'etapa' => $etapa,
             'orden' => $orden,
-            'match_score' => $match,
         ]);
 
-    $this->elena = $crear('Elena Ruiz', EtapaPostulacion::Postulado, 0, 88);
-    $this->marco = $crear('Marco Díaz', EtapaPostulacion::Postulado, 1, 64);
-    $this->sofia = $crear('Sofía Nieto', EtapaPostulacion::EnRevision, 0, 91);
-    $this->pablo = $crear('Pablo Vega', EtapaPostulacion::Descartado, 0, 42);
+    $this->elena = $crear('Elena Ruiz', EtapaPostulacion::Postulado, 0);
+    $this->marco = $crear('Marco Díaz', EtapaPostulacion::Postulado, 1);
+    $this->sofia = $crear('Sofía Nieto', EtapaPostulacion::EnRevision, 0);
+    $this->pablo = $crear('Pablo Vega', EtapaPostulacion::Descartado, 0);
 
     actuarComo($this->marta);
 });
@@ -60,13 +49,14 @@ function columna(Vacante $vacante, EtapaPostulacion $etapa): array
         ->all();
 }
 
-it('muestra el tablero con las seis columnas y el match de cada tarjeta', function () {
+it('muestra el tablero con las seis columnas y sus tarjetas, sin porcentajes de coincidencia', function () {
     $this->get(route('kanban.show', $this->backend))
         ->assertOk()
         ->assertSee('Selección · Desarrollador Backend')
         ->assertSee('Nimbus Corp — 3 postulaciones activas.')
         ->assertSeeInOrder(['Postulado', 'En revisión', 'Entrevista', 'Oferta', 'Contratado', 'Descartado'])
-        ->assertSee('88%')
+        ->assertDontSee('% match')
+        ->assertDontSee('coincidencia')
         ->assertSee('Descartar a Elena Ruiz', false);
 });
 
@@ -141,7 +131,6 @@ it('mueve desde el diálogo con "Mover a…" (alternativa al arrastre)', functio
     Livewire::test(Central::class, ['vacante' => $this->backend])
         ->call('abrir', $this->marco->id)
         ->assertSee('Columna: Postulado.')
-        ->assertSee('64% de coincidencia con la vacante.')
         ->set('etapaDestino', 'oferta')
         ->call('moverA')
         ->assertSet('mostrarDetalle', false);
@@ -228,74 +217,6 @@ it('abre la tarjeta con el teclado: el nombre es un botón', function () {
         ->assertSeeHtml('wire:click.stop="abrir('.$this->sofia->id.')"');
 });
 
-it('ordena el ranking por coincidencia y oculta a los descartados salvo que se pida', function () {
-    $pantalla = Livewire::test(Central::class, ['vacante' => $this->backend])->set('vista', 'ranking');
-    $html = $pantalla->html();
-
-    $posicion = fn (string $nombre) => mb_strpos($html, $nombre);
-
-    expect($posicion('Sofía Nieto'))->toBeLessThan($posicion('Elena Ruiz'))
-        ->and($posicion('Elena Ruiz'))->toBeLessThan($posicion('Marco Díaz'))
-        ->and($posicion('Pablo Vega'))->toBeFalse();
-
-    $pantalla->set('verDescartados', true)->assertSee('Pablo Vega');
-});
-
-it('el ranking solo ordena: no mueve ni descarta a nadie', function () {
-    $antes = Postulacion::where('vacante_id', $this->backend->id)->pluck('etapa', 'id')->all();
-
-    Livewire::test(Central::class, ['vacante' => $this->backend])->set('vista', 'ranking')->set('soloObligatorios', true);
-
-    expect(Postulacion::where('vacante_id', $this->backend->id)->pluck('etapa', 'id')->all())->toEqual($antes);
-});
-
-it('muestra qué requisitos de la vacante cubre cada CV y filtra por los obligatorios', function () {
-    $java = Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Java')->id, 'tipo' => TipoRequisito::Obligatorio]);
-    $docker = Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Docker')->id, 'tipo' => TipoRequisito::Deseable]);
-
-    $detalle = fn (NivelCoincidencia $nivelJava, NivelCoincidencia $nivelDocker) => (new MatchResult(80, [
-        new RequisitoMatch($java->id, 'Java', 80, $nivelJava, 'Java 5 años', 'ok'),
-        new RequisitoMatch($docker->id, 'Docker', 50, $nivelDocker, null, 'ok'),
-    ], MotorMatching::Fake))->aArreglo();
-
-    // Como CalcularMatch: guarda el matching y su resumen indexado (lo que usan el tablero y los filtros).
-    $guardar = function (Postulacion $postulacion, array $detalle) {
-        $postulacion->update(['match_detalle' => $detalle, 'match_calculado_at' => now(), ...CumplimientoDeRequisitos::de($detalle, $this->backend->requisitos()->with('competencia')->get())->columnas()]);
-    };
-    $guardar($this->elena, $detalle(NivelCoincidencia::Coincide, NivelCoincidencia::NoEncontrado));
-    $guardar($this->sofia, $detalle(NivelCoincidencia::NoEncontrado, NivelCoincidencia::Coincide));
-
-    $pantalla = Livewire::test(Central::class, ['vacante' => $this->backend])
-        ->assertSee('1 de 2 requisitos')
-        ->assertSee('falta 1 obligatorio');
-
-    // Solo Elena cubre el obligatorio (Java): Sofía y quienes no tienen análisis quedan fuera.
-    $pantalla->set('soloObligatorios', true)
-        ->assertSee('Elena Ruiz')
-        ->assertDontSee('Sofía Nieto')
-        ->assertDontSee('Marco Díaz')
-        ->assertSee('postulaciones ocultas por el filtro');
-});
-
-it('cuenta como «sin calcular» el requisito que se agregó después del cálculo', function () {
-    $java = Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Java')->id, 'tipo' => TipoRequisito::Obligatorio]);
-    $detalle = (new MatchResult(70, [new RequisitoMatch($java->id, 'Java', 70, NivelCoincidencia::Coincide, 'x', 'ok')], MotorMatching::Fake))->aArreglo();
-
-    Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Terraform')->id, 'tipo' => TipoRequisito::Deseable]);
-
-    $cumplimiento = CumplimientoDeRequisitos::de($detalle, $this->backend->requisitos()->with('competencia')->get());
-
-    expect($cumplimiento->total())->toBe(2)
-        ->and($cumplimiento->cumplidos())->toBe(1)
-        ->and($cumplimiento->cubreLosObligatorios())->toBeTrue()
-        ->and(CumplimientoDeRequisitos::de(null, $this->backend->requisitos()->with('competencia')->get())->hayCalculo())->toBeFalse();
-});
-
-it('la vista del ranking se abre desde la dirección y /matching lleva a ella', function () {
-    $this->get('/seleccion?vista=ranking')->assertOk()->assertSee('Ordenado por coincidencia');
-    $this->get('/matching')->assertRedirect('/seleccion?vista=ranking');
-});
-
 it('una vacante masiva muestra de a 25 tarjetas por columna y cuenta todas', function () {
     Postulacion::factory()->count(60)->paraVacante($this->backend)->enEtapa(EtapaPostulacion::EnRevision)->create();
 
@@ -328,20 +249,6 @@ it('un cliente no puede pedir más tarjetas de las permitidas manipulando la pro
     expect($pantalla->get('mostrando')['en_revision'])->toBe(Central::MAXIMO_POR_COLUMNA);
 });
 
-it('el ranking se pagina en SQL y ordena por coincidencia sin leer a toda la vacante', function () {
-    Postulacion::factory()->count(40)->paraVacante($this->backend)->create(['match_score' => 5]);
-
-    $pantalla = Livewire::test(Central::class, ['vacante' => $this->backend])->set('vista', 'ranking');
-    $html = $pantalla->html();
-
-    // Primera página: 25 filas, empezando por la mejor (Sofía, 91 %).
-    expect(substr_count($html, 'wire:key="ranking-'))->toBe(25)
-        ->and(mb_strpos($html, 'Sofía Nieto'))->toBeLessThan(mb_strpos($html, 'Elena Ruiz'));
-
-    $pantalla->call('gotoPage', 2);
-    expect(substr_count($pantalla->html(), 'wire:key="ranking-'))->toBe(18); // 43 sin descartados (Pablo) − 25
-});
-
 it('mover una tarjeta no carga ni bloquea a toda la vacante y deja cada columna numerada sin huecos', function () {
     Postulacion::factory()->count(30)->paraVacante($this->backend)->enEtapa(EtapaPostulacion::Postulado)->create();
     app(MoverPostulacion::class)->ejecutar($this->elena->fresh(['vacante']), EtapaPostulacion::Oferta, 0, $this->marta);
@@ -355,50 +262,22 @@ it('mover una tarjeta no carga ni bloquea a toda la vacante y deja cada columna 
         ->and(Postulacion::find($this->marco->id)->orden)->toBe(0);
 });
 
-it('el resumen de cumplimiento se guarda al calcular el matching', function () {
-    $java = Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Java')->id, 'tipo' => TipoRequisito::Obligatorio]);
-    Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Terraform')->id, 'tipo' => TipoRequisito::Obligatorio]);
+it('Selección ya no ofrece ranking ni filtros por coincidencia; /matching lleva al tablero', function () {
+    $this->get('/seleccion?vista=ranking')->assertOk()
+        ->assertDontSee('Ranking por coincidencia')
+        ->assertDontSee('Solo quienes cubren los obligatorios')
+        ->assertSee('Selección · Desarrollador Backend');
 
-    $cv = Cv::factory()->procesado('5 años de experiencia con Java en proyectos de alto tráfico.')->create(['candidato_id' => $this->elena->candidato_id]);
-    $this->elena->update(['cv_id' => $cv->id]);
-
-    CalcularMatch::dispatchSync($this->nimbus->id, $this->elena->id);
-
-    $elena = $this->elena->fresh();
-    expect($elena->requisitos_total)->toBe(2)
-        ->and($elena->requisitos_cubiertos)->toBe(1)
-        ->and($elena->obligatorios_faltantes)->toBe(1)
-        ->and($elena->tieneResumenDeCumplimiento())->toBeTrue()
-        ->and($elena->resumenDeCumplimiento())->toBe('1 de 2 requisitos');
+    $this->get('/matching')->assertRedirect('/seleccion');
 });
 
-it('el ranking dibuja el mapa de calor de cobertura solo si hay dos o más análisis que comparar', function () {
-    $java = Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Java')->id, 'tipo' => TipoRequisito::Obligatorio]);
-    $docker = Requisito::factory()->create(['vacante_id' => $this->backend->id, 'competencia_id' => Competencia::obtenerOCrear('Docker')->id, 'tipo' => TipoRequisito::Deseable]);
+it('la ficha de una postulación muestra su etapa, sus entrevistas y las notas del equipo', function () {
+    $this->get(route('postulaciones.show', $this->sofia))
+        ->assertOk()
+        ->assertSee('Sofía Nieto')
+        ->assertSee('Notas del equipo')
+        ->assertDontSee('Matching');
 
-    $guardar = function (Postulacion $postulacion, NivelCoincidencia $nivelJava, NivelCoincidencia $nivelDocker) use ($java, $docker) {
-        $detalle = (new MatchResult(70, [
-            new RequisitoMatch($java->id, 'Java', 80, $nivelJava, 'Java 5 años', 'ok'),
-            new RequisitoMatch($docker->id, 'Docker', 50, $nivelDocker, null, 'ok'),
-        ], MotorMatching::Fake))->aArreglo();
-        $postulacion->update(['match_detalle' => $detalle, 'match_calculado_at' => now(), ...CumplimientoDeRequisitos::de($detalle, $this->backend->requisitos()->with('competencia')->get())->columnas()]);
-    };
-
-    // Un solo análisis: no hay con quién comparar, el mapa no aparece.
-    $guardar($this->elena, NivelCoincidencia::Coincide, NivelCoincidencia::NoEncontrado);
-    Livewire::test(Central::class, ['vacante' => $this->backend])->set('vista', 'ranking')
-        ->assertDontSee('Cobertura de requisitos')
-        ->assertDontSeeHtml('class="viz"');
-
-    // Con dos, aparece como tabla con las dos filas y los dos requisitos.
-    $guardar($this->sofia, NivelCoincidencia::Revisar, NivelCoincidencia::Coincide);
-    $html = Livewire::test(Central::class, ['vacante' => $this->backend])->set('vista', 'ranking')
-        ->assertSee('Cobertura de requisitos')
-        ->html();
-
-    expect(substr_count($html, 'wire:key="mapa-'))->toBe(2)
-        ->and($html)->toContain('Java: Coincide')->toContain('Java: Revisar')->toContain('Docker: No encontrado')->toContain('Docker: Coincide');
-
-    // Sin calcular a nadie más: Marco no aparece en el mapa (solo quienes tienen análisis).
-    expect($html)->not->toContain('mapa-'.$this->marco->id);
+    // El enlace antiguo (/matching/{id}) que quedó en avisos ya enviados lleva a la ficha.
+    $this->get('/matching/'.$this->sofia->id)->assertRedirect(route('postulaciones.show', $this->sofia));
 });

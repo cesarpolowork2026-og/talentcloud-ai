@@ -2,17 +2,9 @@
 
 namespace App\Providers;
 
-use App\Enums\MotorMatching;
-use App\Ia\HttpServicioIa;
-use App\Ia\ServicioIa;
-use App\Matching\FakeMatchingEngine;
-use App\Matching\HttpMatchingEngine;
-use App\Matching\MatchingEngineInterface;
-use App\Matching\MotorConRespaldo;
 use App\Pagos\PasarelaDePago;
 use App\Pagos\PasarelaStripe;
 use App\Tenancy\TenantContext;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Carbon;
@@ -30,24 +22,6 @@ class AppServiceProvider extends ServiceProvider
     {
         // Una instancia por petición o por Job: el contexto de empresa nunca se arrastra.
         $this->app->scoped(TenantContext::class);
-
-        // Motor de matching: con MATCHING_ENGINE=http y el servicio de IA habilitado, el del servicio con
-        // respaldo en el análisis básico si falla; en cualquier otro caso, directamente el análisis básico.
-        $this->app->bind(MatchingEngineInterface::class, function (Application $app) {
-            $ia = $app->make(ServicioIa::class);
-
-            return config('talentcloud.matching.motor') === MotorMatching::Http->value && $ia->habilitado()
-                ? new MotorConRespaldo(new HttpMatchingEngine($ia), new FakeMatchingEngine)
-                : new FakeMatchingEngine;
-        });
-
-        $this->app->bind(ServicioIa::class, fn () => new HttpServicioIa(
-            habilitado: (bool) config('talentcloud.ia.habilitada'),
-            url: (string) config('talentcloud.ia.url'),
-            apiKey: config('talentcloud.ia.api_key') ?: null,
-            timeout: (int) config('talentcloud.ia.timeout'),
-            reintentos: (int) config('talentcloud.ia.reintentos'),
-        ));
 
         // Pasarela de pago (PAGOS_PASARELA). Solo se resuelve con el cobro en línea habilitado.
         $this->app->bind(PasarelaDePago::class, fn () => match (config('talentcloud.pagos.pasarela')) {

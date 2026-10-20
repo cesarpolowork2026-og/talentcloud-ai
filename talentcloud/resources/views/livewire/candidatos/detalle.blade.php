@@ -1,6 +1,5 @@
 {{-- Ficha del candidato, con los componentes del prototipo. --}}
 @use('App\Enums\EstadoProcesamientoCv')
-@use('App\Enums\FuenteCompetencia')
 @use('App\Support\Formato')
 <div>
     <x-ui.page-header :title="$candidato->nombre" :subtitle="collect([$candidato->titular, $candidato->email, $candidato->telefono])->filter()->join(' · ')">
@@ -29,7 +28,7 @@
                                     <h3 class="mb-2 text-15">{{ $empresa }}</h3>
                                     <x-ui.table>
                                         <x-slot:head>
-                                            <th>Vacante</th><th>Etapa</th><th>Match</th><th>Fecha</th>
+                                            <th>Vacante</th><th>Etapa</th><th>Fecha</th><th>Detalle</th>
                                         </x-slot:head>
                                         @foreach ($procesos as $postulacion)
                                             <x-candidatos.fila-postulacion :postulacion="$postulacion" wire:key="postulacion-{{ $postulacion->id }}" />
@@ -46,7 +45,7 @@
                 @else
                     <x-ui.table>
                         <x-slot:head>
-                            <th>Vacante</th><th>Etapa</th><th>Match</th><th>Fecha</th>
+                            <th>Vacante</th><th>Etapa</th><th>Fecha</th><th>Detalle</th>
                         </x-slot:head>
                         @foreach ($candidato->postulaciones as $postulacion)
                             <x-candidatos.fila-postulacion :postulacion="$postulacion" wire:key="postulacion-{{ $postulacion->id }}" />
@@ -81,29 +80,14 @@
                 </section>
             @endif
 
-            {{-- Competencias --}}
+            {{-- Competencias: anotaciones de cada empresa sobre el candidato --}}
             <section>
                 <h2 class="mb-1 text-16">Competencias</h2>
                 @if ($vistaGlobal)
-                    {{-- Admin SaaS: las de la IA (comunes) y las que anotó cada empresa, que solo ve esa empresa. --}}
-                    <p class="mb-3 text-13 text-neutral-700">Las extraídas por la IA son comunes a todas las empresas; las anotadas a mano son de cada empresa y solo ella las ve.</p>
-                    @php
-                        $extraidas = $candidato->competencias->where('pivot.fuente', FuenteCompetencia::Extraccion->value);
-                    @endphp
+                    {{-- Admin SaaS: las que anotó cada empresa, que solo ve esa empresa. --}}
+                    <p class="mb-3 text-13 text-neutral-700">Cada empresa anota las suyas y solo ella las ve.</p>
                     <div class="grid gap-3">
-                        <div>
-                            <p class="mb-1 text-12 uppercase tracking-[0.06em] text-accent-700">Extraídas del CV por la IA</p>
-                            @if ($extraidas->isEmpty())
-                                <p class="m-0 text-14 text-neutral-700">Ninguna todavía.</p>
-                            @else
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach ($extraidas as $competencia)
-                                        <x-ui.tag tone="accent" title="{{ $competencia->pivot->evidencia }}" wire:key="ia-{{ $competencia->id }}">{{ $competencia->nombre }} · IA</x-ui.tag>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
-                        @foreach ($manualesPorEmpresa as $grupo)
+                        @forelse ($manualesPorEmpresa as $grupo)
                             <div wire:key="manuales-{{ $grupo['empresaId'] ?? 'plataforma' }}">
                                 <p class="mb-1 text-12 uppercase tracking-[0.06em] text-accent-700">Anotadas por {{ $grupo['empresa'] }}</p>
                                 <div class="flex flex-wrap gap-2">
@@ -117,34 +101,27 @@
                                     @endforeach
                                 </div>
                             </div>
-                        @endforeach
+                        @empty
+                            <p class="m-0 text-14 text-neutral-600">Ninguna empresa anotó competencias todavía.</p>
+                        @endforelse
                     </div>
                 @else
-                <p class="mb-3 text-13 text-neutral-600">Las competencias extraídas del CV por la IA se actualizan con cada análisis; las manuales las registra tu equipo.</p>
+                    <p class="mb-3 text-13 text-neutral-600">Las registra tu equipo al revisar el CV; no las ve el candidato ni otras empresas.</p>
 
-                @if ($candidato->competencias->isEmpty())
-                    <p class="text-14 text-neutral-600">Sin competencias registradas.</p>
-                @else
-                    <div class="flex flex-wrap gap-2">
-                        {{-- Una etiqueta por competencia: si tu equipo también la anotó, se muestra la manual (se puede quitar). --}}
-                        @foreach ($candidato->competencias->groupBy('id') as $filas)
-                            @php
-                                $competencia = $filas->firstWhere('pivot.fuente', FuenteCompetencia::Manual->value) ?? $filas->first();
-                                $extraida = $filas->firstWhere('pivot.fuente', FuenteCompetencia::Extraccion->value);
-                            @endphp
-                            @if ($competencia->pivot->fuente === FuenteCompetencia::Extraccion->value)
-                                <x-ui.tag tone="accent" title="{{ $competencia->pivot->evidencia }}" wire:key="comp-{{ $competencia->id }}">{{ $competencia->nombre }} · IA</x-ui.tag>
-                            @else
-                                <span class="tag tag-outline gap-1" wire:key="comp-{{ $competencia->id }}" @if ($extraida) title="{{ $extraida->pivot->evidencia }}" @endif>
-                                    {{ $competencia->nombre }}{{ $extraida ? ' · IA' : '' }}
+                    @if ($candidato->competencias->isEmpty())
+                        <p class="text-14 text-neutral-600">Sin competencias registradas.</p>
+                    @else
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($candidato->competencias->unique('id') as $competencia)
+                                <span class="tag tag-outline gap-1" wire:key="comp-{{ $competencia->id }}">
+                                    {{ $competencia->nombre }}
                                     @if ($puedeEditar)
                                         <button type="button" wire:click="quitarCompetencia({{ $competencia->id }})" class="leading-none" aria-label="Quitar {{ $competencia->nombre }}">×</button>
                                     @endif
                                 </span>
-                            @endif
-                        @endforeach
-                    </div>
-                @endif
+                            @endforeach
+                        </div>
+                    @endif
                 @endif
 
                 @if ($puedeEditar && (! $vistaGlobal || $empresasDelCandidato))
@@ -182,12 +159,12 @@
                 @if ($cv->estado_procesamiento === EstadoProcesamientoCv::Error)
                     <p class="card-body text-accent-2-700">{{ $cv->error }}</p>
                     @if ($puedeEditar)
-                        <x-ui.button variant="ghost" size="sm" class="self-start" wire:click="reintentar">Reintentar análisis</x-ui.button>
+                        <x-ui.button variant="ghost" size="sm" class="self-start" wire:click="reintentar">Reintentar lectura</x-ui.button>
                     @endif
                 @elseif ($cv->texto_extraido)
                     <p class="card-body">"{{ \Illuminate\Support\Str::limit(\Illuminate\Support\Str::squish($cv->texto_extraido), 220) }}"</p>
                 @else
-                    <p class="card-body">Analizando el CV…</p>
+                    <p class="card-body">Procesando el CV…</p>
                 @endif
                 <x-ui.button :href="route('cvs.descargar', $cv)" class="self-start" size="sm" variant="ghost">Descargar CV</x-ui.button>
             @else

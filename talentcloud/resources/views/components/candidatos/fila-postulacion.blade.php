@@ -1,4 +1,4 @@
-{{-- Fila de una postulación en la ficha del candidato: vacante, etapa (o "Retirada"), match y fecha. --}}
+{{-- Fila de una postulación en la ficha del candidato: vacante, etapa (o "Retirada"), fecha y enlace a su detalle. --}}
 @props(['postulacion'])
 
 <tr {{ $attributes }}>
@@ -10,12 +10,6 @@
             <x-ui.estado :valor="$postulacion->etapa" />
         @endif
     </td>
-    <td>
-        @if ($postulacion->matchPorcentaje() !== null)
-            <a href="{{ route('matching.show', $postulacion) }}" wire:navigate>{{ $postulacion->matchPorcentaje() }}%</a>
-        @else
-            —
-        @endif
-    </td>
     <td class="text-neutral-600">{{ \App\Support\Formato::fechaCorta($postulacion->created_at) }}</td>
+    <td><a href="{{ route('postulaciones.show', $postulacion) }}" wire:navigate>Ver postulación</a></td>
 </tr>

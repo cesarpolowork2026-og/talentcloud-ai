@@ -34,14 +34,12 @@ beforeEach(function () {
 it('el listado de candidatos trae solo un extracto del CV, no el texto completo', function () {
     Cv::factory()->procesado(str_repeat('Experiencia en backend. ', 2000))->create([
         'candidato_id' => $this->candidato->id,
-        'datos_estructurados' => ['clave' => 'valor'],
     ]);
 
     $fila = app(CandidatoRepository::class)->consultaListado()->get()->firstWhere('id', $this->candidato->id);
 
     expect($fila->cvActual)->not->toBeNull()
         ->and(mb_strlen($fila->cvActual->texto_extraido))->toBe(1000)
-        ->and($fila->cvActual->getAttributes())->not->toHaveKey('datos_estructurados')
         ->and($fila->cvActual->nombre_original)->toBe('CV.pdf');
 });
 

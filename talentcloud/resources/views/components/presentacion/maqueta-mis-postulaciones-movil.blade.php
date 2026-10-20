@@ -45,7 +45,7 @@
             <x-ui.icon name="file-text" :size="18" class="text-accent-700" />
             <span class="min-w-0 flex-1">
                 <span class="block truncate text-12 font-semibold">cv_andrea.pdf</span>
-                <span class="block text-11 text-neutral-700">Analizado · 9 competencias</span>
+                <span class="block text-11 text-neutral-700">CV cargado y listo</span>
             </span>
         </div>
     </div>

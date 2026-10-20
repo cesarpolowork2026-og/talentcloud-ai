@@ -6,7 +6,6 @@ use App\DTO\CifrasPorVacanteData;
 use App\DTO\ResumenDelDashboard;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
-use App\Enums\MotorMatching;
 use App\Models\Postulacion;
 use App\Models\Vacante;
 use App\Services\Entrevistas\ResumenDeAgenda;
@@ -19,14 +18,11 @@ use Illuminate\Support\Collection;
 /**
  * Indicadores del dashboard. Cada consulta pasa por el filtro por empresa: una
  * empresa ve lo suyo y el admin SaaS toda la plataforma. Responde qué pide una
- * acción hoy, cómo van las vacantes y cuánto trabajo ahorró la IA. Las cifras
- * por vacante salen de {@see CifrasPorVacante}.
+ * acción hoy y cómo van las vacantes. Las cifras por vacante salen de
+ * {@see CifrasPorVacante}.
  */
 class DashboardService
 {
-    /** La IA se cuenta sobre los análisis de los últimos días. */
-    public const DIAS_DEL_AHORRO = 30;
-
     /** «Nuevas» son las postulaciones de los últimos días. */
     public const DIAS_NUEVAS = 7;
 
@@ -71,8 +67,6 @@ class DashboardService
             porRevisar: (int) $postulaciones->por_revisar,
             entrevistasHoy: $entrevistas->hoy,
             entrevistasProximas: $entrevistas->proximas,
-            analizadasConIa: (int) $postulaciones->con_ia,
-            minutosPorCv: (int) config('talentcloud.ahorro.minutos_por_cv'),
             atencion: $this->atencion($entrevistas->hoy, $entrevistas->sin_confirmar, $cifras, $vacantes),
             estancadas: $cifras->estancadas,
             vacantesConMovimiento: $this->vacantesConMovimiento($cifras, $vacantes),
@@ -94,16 +88,13 @@ class DashboardService
             ->selectRaw(
                 "COUNT(DISTINCT candidato_id) AS postulantes,
                 COUNT(*) FILTER (WHERE created_at >= ?) AS nuevas,
-                COUNT(*) FILTER (WHERE etapa = ? AND retirada_at IS NULL AND vacante_id IN (SELECT id FROM vacantes WHERE estado IN ({$activas}))) AS por_revisar,
-                COUNT(*) FILTER (WHERE match_motor = ? AND match_calculado_at >= ?) AS con_ia",
+                COUNT(*) FILTER (WHERE etapa = ? AND retirada_at IS NULL AND vacante_id IN (SELECT id FROM vacantes WHERE estado IN ({$activas}))) AS por_revisar",
                 [
                     now()->subDays(self::DIAS_NUEVAS),
                     EtapaPostulacion::Postulado->value,
-                    MotorMatching::Http->value,
-                    now()->subDays(self::DIAS_DEL_AHORRO),
                 ],
             )
-            ->first() ?? (object) ['postulantes' => 0, 'nuevas' => 0, 'por_revisar' => 0, 'con_ia' => 0];
+            ->first() ?? (object) ['postulantes' => 0, 'nuevas' => 0, 'por_revisar' => 0];
     }
 
     /**
@@ -144,7 +135,6 @@ class DashboardService
                 $vacante = $vacantes->get($fila['id']);
                 $vacante?->setAttribute('postulaciones_count', $fila['total']);
                 $vacante?->setAttribute('por_revisar', $fila['por_revisar']);
-                $vacante?->setAttribute('mejor_match', $fila['mejor_match']);
 
                 return $vacante;
             })
@@ -161,7 +151,7 @@ class DashboardService
                 ->limit($faltan)
                 ->tap($this->conEmpresaSiEsGlobal(...))
                 ->get()
-                ->each(fn (Vacante $v) => $v->setAttribute('postulaciones_count', 0)->setAttribute('por_revisar', 0)->setAttribute('mejor_match', null));
+                ->each(fn (Vacante $v) => $v->setAttribute('postulaciones_count', 0)->setAttribute('por_revisar', 0));
 
             $lista = $lista->concat($sinPostulaciones)->values();
         }

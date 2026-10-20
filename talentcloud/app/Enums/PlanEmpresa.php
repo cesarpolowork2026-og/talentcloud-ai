@@ -66,20 +66,6 @@ enum PlanEmpresa: string
         };
     }
 
-    /**
-     * Postulaciones evaluadas con el matching de IA por mes calendario (null = sin
-     * límite). Agotado el cupo, las nuevas se evalúan con el análisis básico.
-     */
-    public function cupoIaMensual(): ?int
-    {
-        return match ($this) {
-            self::Gratis => 30,
-            self::Starter => 300,
-            self::Pro => 2000,
-            self::Enterprise => null,
-        };
-    }
-
     /** Precio mensual en soles, sin IGV (Enterprise: precio desde, se cotiza). */
     public function precioMensual(): int
     {
@@ -123,15 +109,14 @@ enum PlanEmpresa: string
         };
     }
 
-    /** "Hasta 3 vacantes activas, 3 usuarios y 300 postulaciones con IA al mes." */
+    /** "Hasta 3 vacantes activas y 3 usuarios." */
     public function descripcionDeLimites(): string
     {
         $partes = [
             $this->limiteVacantesActivas() === null ? 'vacantes activas sin límite' : 'hasta '.$this->limiteVacantesActivas().' '.($this->limiteVacantesActivas() === 1 ? 'vacante activa' : 'vacantes activas'),
             $this->limiteUsuarios() === null ? 'usuarios sin límite' : $this->limiteUsuarios().' usuarios',
-            $this->cupoIaMensual() === null ? 'matching con IA sin límite' : number_format($this->cupoIaMensual(), 0, ',', ' ').' postulaciones con IA al mes',
         ];
 
-        return ucfirst($partes[0].', '.$partes[1].' y '.$partes[2]).'.';
+        return ucfirst($partes[0].' y '.$partes[1]).'.';
     }
 }

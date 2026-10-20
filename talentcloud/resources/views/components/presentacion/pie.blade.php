@@ -34,7 +34,7 @@
             <a href="{{ route('inicio') }}#inicio" class="self-start hover:no-underline" aria-label="TalentCloud AI, ir al inicio">
                 <x-marca />
             </a>
-            <p class="m-0 max-w-[32ch] text-14 text-accent-100">Reclutamiento con IA explicable: la IA sugiere y explica; tú decides.</p>
+            <p class="m-0 max-w-[32ch] text-14 text-accent-100">Reclutamiento ordenado: vacantes, candidatos y entrevistas en un solo lugar; tú decides.</p>
 
             {{-- Ayuda: soporte y Libro de Reclamaciones, a la vista en todas las páginas públicas. --}}
             <div class="grid gap-3" role="group" aria-labelledby="pie-ayuda">

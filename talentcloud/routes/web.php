@@ -13,11 +13,10 @@ use App\Livewire\Empresas;
 use App\Livewire\Entrevistas;
 use App\Livewire\Evaluaciones;
 use App\Livewire\Legal;
-use App\Livewire\Matching;
 use App\Livewire\MiEmpresa;
 use App\Livewire\Onboarding;
 use App\Livewire\Planes;
-use App\Livewire\Plataforma;
+use App\Livewire\Postulaciones;
 use App\Livewire\Postulante;
 use App\Livewire\Reclamaciones;
 use App\Livewire\Seleccion;
@@ -69,13 +68,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('vacantes', Vacantes\Listado::class)->name('vacantes.index');
         Route::get('vacantes/{vacante}', Vacantes\Detalle::class)->name('vacantes.show');
 
-        // «Selección»: el tablero (Kanban) y el ranking por match de las postulaciones de una vacante.
+        // «Selección»: el tablero (Kanban) de las postulaciones de una vacante.
         Route::get('seleccion', Seleccion\Central::class)->name('seleccion.index');
         Route::get('seleccion/{vacante}', Seleccion\Central::class)->name('seleccion.show');
 
-        // El matching es el detalle explicable de una postulación; sin ella, lleva al ranking.
-        Route::redirect('matching', '/seleccion?vista=ranking')->name('matching.index');
-        Route::get('matching/{postulacion}', Matching\Detalle::class)->name('matching.show');
+        // Una postulación: su resumen, entrevistas, evaluaciones y las notas del equipo.
+        Route::get('postulaciones/{postulacion}', Postulaciones\Detalle::class)->name('postulaciones.show');
+
+        // Direcciones anteriores de la postulación («matching»): siguen funcionando para los enlaces ya enviados.
+        Route::redirect('matching', '/seleccion');
+        Route::get('matching/{postulacion}', fn (int $postulacion) => redirect()->route('postulaciones.show', $postulacion));
 
         // Direcciones anteriores del Kanban: siguen funcionando (enlaces guardados, correos ya enviados).
         Route::get('kanban', Seleccion\Central::class)->name('kanban.index');
@@ -92,7 +94,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin SaaS.
     Route::middleware('rol:admin')->group(function () {
         Route::get('empresas', Empresas\Listado::class)->name('empresas.index');
-        Route::get('calidad-ia', Plataforma\CalidadIa::class)->name('calidad-ia');
         Route::get('reclamaciones', Reclamaciones\Listado::class)->name('reclamaciones.index');
     });
 

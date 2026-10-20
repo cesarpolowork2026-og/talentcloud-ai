@@ -36,14 +36,14 @@
         {{-- Requisitos --}}
         <section>
             <h2 class="mb-1 text-16">Requisitos</h2>
-            <p class="mb-3 text-13 text-neutral-600">La IA compara cada requisito con los CV y explica la evidencia; el peso define cuánto cuenta en la coincidencia global.</p>
+            <p class="mb-3 text-13 text-neutral-600">Lo que pide la vacante. La importancia (de 1 a 5) indica cuánto pesa cada requisito al revisar a los candidatos.</p>
 
             @if ($vacante->requisitos->isEmpty())
                 <x-ui.empty-state icon="list-checks" message="Todavía no hay requisitos. Agrega al menos uno para publicar la vacante." class="!py-6" />
             @else
                 <x-ui.table>
                     <x-slot:head>
-                        <th>Competencia</th><th>Tipo</th><th>Peso</th><th>Años mín.</th>
+                        <th>Competencia</th><th>Tipo</th><th>Importancia</th><th>Años mín.</th>
                         @if ($editable)
                             <th><span class="sr-only">Acciones</span></th>
                         @endif
@@ -78,7 +78,7 @@
                     <x-ui.field label="Tipo" for="req-tipo">
                         <x-ui.select wire:model="tipo" id="req-tipo" :options="$tipos" />
                     </x-ui.field>
-                    <x-ui.field label="Peso" for="req-peso">
+                    <x-ui.field label="Importancia" for="req-peso">
                         <x-ui.select wire:model="peso" id="req-peso" :options="$pesos" />
                     </x-ui.field>
                     <x-ui.field label="Años mín." for="req-anios" error="aniosMinimos">
@@ -137,7 +137,7 @@
                 <x-ui.field label="Tipo" for="edit-tipo">
                     <x-ui.select wire:model="tipo" id="edit-tipo" :options="$tipos" class="w-full" />
                 </x-ui.field>
-                <x-ui.field label="Peso" for="edit-peso">
+                <x-ui.field label="Importancia" for="edit-peso">
                     <x-ui.select wire:model="peso" id="edit-peso" :options="$pesos" class="w-full" />
                 </x-ui.field>
                 <x-ui.field label="Años mín." for="edit-anios" error="aniosMinimos">
@@ -156,7 +156,7 @@
 
     {{-- Quitar requisito --}}
     <x-ui.confirm wire:model="mostrarQuitarRequisito" title="Quitar requisito" action-label="Quitar" action="quitarRequisito">
-        Se quitará {{ $requisitoSeleccionado?->competencia?->nombre ?? 'el requisito' }} de la vacante. El matching de las postulaciones se recalculará sin él.
+        Se quitará {{ $requisitoSeleccionado?->competencia?->nombre ?? 'el requisito' }} de la vacante. Las postulaciones ya recibidas no cambian.
     </x-ui.confirm>
 
     {{-- Cerrar vacante --}}

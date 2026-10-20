@@ -9,21 +9,18 @@ use Database\Factories\RequisitoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Pgvector\Laravel\Vector;
 
 /**
  * Requisito de una vacante: una competencia del catálogo, obligatoria o
- * deseable, con su peso en el score global.
+ * deseable, con su importancia (de 1 a 5) y los años mínimos de experiencia.
  *
  * @property int $id
  * @property int $vacante_id
  * @property int $competencia_id
  * @property TipoRequisito $tipo
- * @property int $peso
+ * @property int $peso Importancia del requisito, de 1 (baja) a 5 (alta).
  * @property int|null $anios_minimos
  * @property string|null $descripcion
- * @property Vector|null $embedding Lo calcula el servicio de IA (no asignable en masa).
- * @property string|null $embedding_modelo
  */
 class Requisito extends Model
 {
@@ -41,9 +38,6 @@ class Requisito extends Model
         'anios_minimos',
         'orden',
     ];
-
-    /** El embedding solo lo usan el servicio de IA y las consultas de pgvector. */
-    protected $hidden = ['embedding'];
 
     /** @var array<string, mixed> */
     protected $attributes = [
@@ -63,7 +57,6 @@ class Requisito extends Model
             'tipo' => TipoRequisito::class,
             'peso' => 'integer',
             'anios_minimos' => 'integer',
-            'embedding' => Vector::class,
         ];
     }
 

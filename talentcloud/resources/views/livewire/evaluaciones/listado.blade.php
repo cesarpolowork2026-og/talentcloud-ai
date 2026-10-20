@@ -57,12 +57,12 @@
                     @foreach ($criterios as $criterio)
                         <th>{{ $criterio->etiqueta() }}</th>
                     @endforeach
-                    <th>Puntaje</th><th>Coincidencia IA</th><th>Etapa</th>
+                    <th>Puntaje</th><th>Etapa</th>
                 </x-slot:head>
                 @foreach ($comparativa as $fila)
                     <tr wire:key="comparar-{{ $fila['postulacion_id'] }}">
                         <td>
-                            <a href="{{ route('matching.show', $fila['postulacion_id']) }}" wire:navigate class="font-semibold">{{ $fila['candidato'] }}</a>
+                            <a href="{{ route('postulaciones.show', $fila['postulacion_id']) }}" wire:navigate class="font-semibold">{{ $fila['candidato'] }}</a>
                             <div class="text-12 text-neutral-700">{{ $fila['evaluaciones'] }} {{ $fila['evaluaciones'] === 1 ? 'evaluación' : 'evaluaciones' }}</div>
                         </td>
                         @foreach ($criterios as $criterio)
@@ -75,7 +75,6 @@
                                 <x-ui.tag tone="accent" class="ml-1">Mayor puntaje</x-ui.tag>
                             @endif
                         </td>
-                        <td>{{ $fila['match'] === null ? '—' : $fila['match'].'%' }}</td>
                         <td><x-ui.tag tone="neutral">{{ $fila['etapa'] }}</x-ui.tag></td>
                     </tr>
                 @endforeach

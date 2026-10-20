@@ -1,8 +1,7 @@
 {{-- Pantalla "Candidatos" del prototipo (TalentCloud App.dc.html, isCandidatos). --}}
 @use('App\Enums\EstadoProcesamientoCv')
-@use('App\Enums\FuenteCompetencia')
 <div>
-    <x-ui.page-header title="Candidatos" subtitle="CVs recibidos y analizados por la IA.">
+    <x-ui.page-header title="Candidatos" subtitle="CVs recibidos y candidatos de tus vacantes.">
         <x-slot:actions>
             <x-ui.button wire:click="exportar" wire:loading.attr="disabled" wire:target="exportar">Exportar a Excel</x-ui.button>
             @if ($puedeRegistrar)
@@ -51,16 +50,13 @@
                     @if ($conError)
                         <div class="card-meta text-accent-2-700">
                             <x-ui.icon name="warning" :size="14" />
-                            <span>Error al analizar el CV</span>
+                            <span>No pudimos leer el CV</span>
                         </div>
-                        <x-ui.button variant="ghost" size="sm" class="mt-2 self-start" wire:click.stop="reintentar({{ $cv->id }})">Reintentar análisis</x-ui.button>
+                        <x-ui.button variant="ghost" size="sm" class="mt-2 self-start" wire:click.stop="reintentar({{ $cv->id }})">Reintentar lectura</x-ui.button>
                     @else
                         <div class="card-meta flex-wrap">
-                            {{-- En la vista global cada proceso ya muestra su match: un único porcentaje confundiría. --}}
-                            @if (! $vistaGlobal && $postulacion?->matchPorcentaje() !== null)
-                                <x-ui.tag tone="accent">{{ $postulacion->matchPorcentaje() }}% match</x-ui.tag>
-                            @elseif (in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true))
-                                <span>Analizando CV…</span>
+                            @if (in_array($cv?->estado_procesamiento, [EstadoProcesamientoCv::Pendiente, EstadoProcesamientoCv::Procesando], true))
+                                <span>Procesando CV…</span>
                             @endif
                             @foreach ($candidato->competencias->unique('id')->take(4) as $competencia)
                                 <x-ui.tag tone="outline">{{ $competencia->nombre }}</x-ui.tag>
@@ -79,16 +75,13 @@
         @if ($seleccionado)
             @php
                 $p = $seleccionado->ultimaPostulacion;
-                $extraidas = $seleccionado->competencias->where('pivot.fuente', FuenteCompetencia::Extraccion->value);
-                $lista = ($extraidas->isNotEmpty() ? $extraidas : $seleccionado->competencias)->unique('id')->pluck('nombre')->join(', ');
+                $lista = $seleccionado->competencias->unique('id')->pluck('nombre')->join(', ');
                 $texto = $seleccionado->cvActual?->texto_extraido;
             @endphp
             <p class="m-0 whitespace-pre-line">{{ $seleccionado->titular ?? 'Candidato' }}
 @unless ($vistaGlobal){{ $p?->vacante ? $p->vacante->titulo.' · '.$p->etapaVisible() : 'Sin postulaciones' }}
-@if ($p?->matchPorcentaje() !== null)Coincidencia: {{ $p->matchPorcentaje() }}%
-@endif
 @endunless
-{{ $extraidas->isNotEmpty() ? 'Competencias extraídas por IA' : 'Competencias' }}: {{ $lista !== '' ? $lista : 'sin registrar' }}
+Competencias: {{ $lista !== '' ? $lista : 'sin registrar' }}
 @if ($texto)
 
 Extracto del CV: "{{ \Illuminate\Support\Str::limit(\Illuminate\Support\Str::squish($texto), 180) }}"
@@ -102,8 +95,8 @@ Extracto del CV: "{{ \Illuminate\Support\Str::limit(\Illuminate\Support\Str::squ
             @if ($seleccionado?->cvActual)
                 <x-ui.button :href="route('cvs.descargar', $seleccionado->cvActual)">Descargar CV</x-ui.button>
             @endif
-            @if ($seleccionado?->ultimaPostulacion?->match_detalle)
-                <x-ui.button :href="route('matching.show', $seleccionado->ultimaPostulacion)" wire:navigate>Ver matching</x-ui.button>
+            @if ($seleccionado?->ultimaPostulacion)
+                <x-ui.button :href="route('postulaciones.show', $seleccionado->ultimaPostulacion)" wire:navigate>Ver postulación</x-ui.button>
             @endif
             @if ($seleccionado)
                 <x-ui.button variant="primary" :href="route('candidatos.show', $seleccionado)" wire:navigate>Ver candidato</x-ui.button>

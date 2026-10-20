@@ -6,7 +6,7 @@ use App\Enums\PlanEmpresa;
 use App\Models\Empresa;
 use Illuminate\Support\Collection;
 
-/** Lo que el admin SaaS ve primero en su panel: las empresas cliente y la salud de la IA. */
+/** Lo que el admin SaaS ve primero en su panel: las empresas cliente, sus planes y los reclamos. */
 final readonly class ResumenDePlataforma
 {
     /**
@@ -20,7 +20,6 @@ final readonly class ResumenDePlataforma
         public int $empresasSuspendidas,
         public array $porPlan,
         public Collection $cercaDelLimite,
-        public ResumenCalidadIa $ia,
         public int $enPrueba = 0,
         public Collection $solicitudesDePlan = new Collection,
         public ?ResumenDeReclamaciones $reclamaciones = null,

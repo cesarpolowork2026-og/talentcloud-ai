@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use App\Enums\FuenteCompetencia;
 use App\Tenancy\EmpresaScope;
 use App\Tenancy\TenantContext;
 use Database\Factories\CandidatoFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -85,9 +83,9 @@ class Candidato extends Model
     }
 
     /**
-     * Competencias visibles en el contexto actual: las extraídas del CV por la
-     * IA y las manuales de la empresa en curso (el admin SaaS ve todas). Las
-     * manuales son anotaciones de cada empresa sobre un candidato global.
+     * Competencias visibles en el contexto actual: las que anotó la empresa en
+     * curso (el admin SaaS ve todas). Son anotaciones de cada empresa sobre un
+     * candidato global.
      *
      * @return BelongsToMany<Competencia, $this>
      */
@@ -100,9 +98,10 @@ class Candidato extends Model
             return $relacion;
         }
 
-        return $relacion->where(fn (Builder $q) => $q
-            ->where('candidato_competencia.fuente', FuenteCompetencia::Extraccion->value)
-            ->when($contexto->tieneEmpresa(), fn (Builder $q) => $q->orWhere('candidato_competencia.empresa_id', $contexto->id())));
+        // Sin empresa en el contexto (el propio postulante) no hay anotaciones que mostrar.
+        return $contexto->tieneEmpresa()
+            ? $relacion->where('candidato_competencia.empresa_id', $contexto->id())
+            : $relacion->whereRaw('false');
     }
 
     /**
@@ -114,7 +113,7 @@ class Candidato extends Model
     public function todasLasCompetencias(): BelongsToMany
     {
         return $this->belongsToMany(Competencia::class, 'candidato_competencia')
-            ->withPivot(['fuente', 'empresa_id', 'anios', 'evidencia'])
+            ->withPivot(['fuente', 'empresa_id'])
             ->withTimestamps();
     }
 

@@ -22,7 +22,7 @@
                 @endif
 
                 @guest
-                    <p class="m-0 text-14 text-neutral-800">Postula con tu CV: la IA lo compara con cada requisito y tú sigues el estado del proceso.</p>
+                    <p class="m-0 text-14 text-neutral-800">Postula con tu CV y sigue el estado del proceso desde «Mis postulaciones».</p>
                     <x-ui.button variant="primary" block :href="route('empleos.postular', $vacante->id)">Iniciar sesión para postular</x-ui.button>
                     <x-ui.button block :href="route('empleos.postular', ['id' => $vacante->id, 'cuenta' => 'nueva'])">Crear mi cuenta de postulante</x-ui.button>
                 @else

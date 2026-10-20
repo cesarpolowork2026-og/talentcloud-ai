@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\EstadoDeMiPostulacion;
 use App\Enums\EtapaPostulacion;
-use App\Enums\MotorMatching;
 use App\Enums\OrigenPostulacion;
 use App\Observers\PostulacionObserver;
 use App\Tenancy\BelongsToEmpresa;
@@ -18,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
- * Postulación de un candidato a una vacante: su etapa en el Kanban y el
- * resultado del matching (sugerencia de la IA; la decisión es del reclutador).
+ * Postulación de un candidato a una vacante: su etapa en el Kanban. La decisión
+ * de avanzarla o descartarla es siempre del reclutador.
  *
  * @property int $id
  * @property int $empresa_id
@@ -28,20 +27,11 @@ use Illuminate\Support\Carbon;
  * @property int|null $cv_id
  * @property EtapaPostulacion $etapa
  * @property int $orden
- * @property string|null $match_score
- * @property array<string, mixed>|null $match_detalle
- * @property MotorMatching|null $match_motor
- * @property Carbon|null $match_calculado_at
- * @property int|null $requisitos_total Requisitos de la vacante al calcular el matching (resumen indexado; lo escribe CalcularMatch).
- * @property int|null $requisitos_cubiertos Los que el CV respalda («Coincide»).
- * @property int|null $obligatorios_faltantes Obligatorios que el CV no menciona.
  * @property Carbon|null $etapa_cambiada_at
  * @property OrigenPostulacion $origen
  * @property Carbon|null $retirada_at La retiró el propio postulante (no asignable en masa).
  * @property Carbon $created_at
  * @property EstadoDeMiPostulacion|null $estado_avisado Último estado comunicado al postulante (no asignable en masa).
- * @property Carbon|null $ia_cupo_at Cuándo consumió su lugar del cupo mensual de IA (CupoDeIa; no asignable en masa).
- * @property bool $ia_sin_cupo Se evaluó con el análisis básico por cupo de IA agotado (no asignable en masa).
  */
 #[ObservedBy(PostulacionObserver::class)]
 class Postulacion extends Model
@@ -59,13 +49,6 @@ class Postulacion extends Model
         'orden',
         'etapa_cambiada_at',
         'origen',
-        'match_score',
-        'match_detalle',
-        'match_motor',
-        'match_calculado_at',
-        'requisitos_total',
-        'requisitos_cubiertos',
-        'obligatorios_faltantes',
     ];
 
     /** @var array<string, mixed> */
@@ -84,12 +67,6 @@ class Postulacion extends Model
             'origen' => OrigenPostulacion::class,
             'retirada_at' => 'datetime',
             'estado_avisado' => EstadoDeMiPostulacion::class,
-            'match_score' => 'decimal:2',
-            'match_detalle' => 'array',
-            'match_motor' => MotorMatching::class,
-            'match_calculado_at' => 'datetime',
-            'ia_cupo_at' => 'datetime',
-            'ia_sin_cupo' => 'boolean',
         ];
     }
 
@@ -169,20 +146,6 @@ class Postulacion extends Model
             ->orWhereHas('vacante', fn (Builder $v) => $v->whereRaw('unaccent(vacantes.titulo) ilike unaccent(?)', [$patron])));
     }
 
-    /** ¿Hay un resumen de cumplimiento guardado (se calculó el matching sobre los requisitos)? */
-    public function tieneResumenDeCumplimiento(): bool
-    {
-        return $this->match_calculado_at !== null && $this->requisitos_total !== null;
-    }
-
-    /** «4 de 6 requisitos»: lo que el CV respalda sobre lo que pide la vacante, sin leer el JSON del matching. */
-    public function resumenDeCumplimiento(): string
-    {
-        $total = (int) $this->requisitos_total;
-
-        return (int) $this->requisitos_cubiertos.' de '.$total.' '.($total === 1 ? 'requisito' : 'requisitos');
-    }
-
     public function estaRetirada(): bool
     {
         return $this->retirada_at !== null;
@@ -192,11 +155,5 @@ class Postulacion extends Model
     public function etapaVisible(): string
     {
         return $this->estaRetirada() ? 'Retirada' : $this->etapa->etiqueta();
-    }
-
-    /** Porcentaje de coincidencia redondeado ("88% match"), o null si no se calculó. */
-    public function matchPorcentaje(): ?int
-    {
-        return $this->match_score === null ? null : (int) round((float) $this->match_score);
     }
 }

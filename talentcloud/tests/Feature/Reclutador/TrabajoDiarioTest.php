@@ -110,10 +110,10 @@ it('las notas no las ve otra empresa ni el postulante', function () {
     Livewire::test(MisPostulaciones::class)->assertDontSee('Dato interno de Nimbus');
 });
 
-it('las notas se ven en el matching, en la ficha del candidato y se cuentan en el Kanban', function () {
+it('las notas se ven en la ficha de la postulación y del candidato, y se cuentan en el tablero', function () {
     app(NotasDePostulacion::class)->agregar($this->postulacion, $this->marta, 'Revisar Kubernetes');
 
-    $this->get(route('matching.show', $this->postulacion))->assertOk()->assertSee(['Notas del equipo', 'Revisar Kubernetes']);
+    $this->get(route('postulaciones.show', $this->postulacion))->assertOk()->assertSee(['Notas del equipo', 'Revisar Kubernetes']);
     $this->get(route('candidatos.show', $this->marco))->assertOk()->assertSee(['Notas del equipo', 'Desarrollador Backend', 'Revisar Kubernetes']);
     $this->get(route('kanban.show', $this->backend))->assertOk();
 
@@ -137,7 +137,7 @@ it('busca candidatos por competencia, sin contar las manuales de otra empresa', 
     app(TenantContext::class)->ejecutarGlobal(function () {
         $elena = Candidato::factory()->create(['nombre' => 'Elena Ruiz']);
         Postulacion::factory()->paraVacante($this->backend)->create(['candidato_id' => $elena->id]);
-        $elena->todasLasCompetencias()->attach(Competencia::obtenerOCrear('Kubernetes')->id, ['fuente' => FuenteCompetencia::Extraccion->value]);
+        $elena->todasLasCompetencias()->attach(Competencia::obtenerOCrear('Kubernetes')->id, ['fuente' => FuenteCompetencia::Manual->value, 'empresa_id' => $this->nimbus->id]);
 
         // Marco tiene Kubernetes solo como anotación manual de Vela: para Nimbus no cuenta.
         $this->marco->todasLasCompetencias()->attach(Competencia::obtenerOCrear('Kubernetes')->id, ['fuente' => FuenteCompetencia::Manual->value, 'empresa_id' => $this->vela->id]);

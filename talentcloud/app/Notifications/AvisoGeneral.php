@@ -6,8 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
 /**
- * Aviso de texto para la campana de notificaciones ("Nuevo CV analizado para
- * Desarrollador Backend (Elena Ruiz)."). Las notificaciones de cada módulo
+ * Aviso de texto para la campana de notificaciones ("Nueva nota en la
+ * postulación de Elena Ruiz."). Las notificaciones de cada módulo
  * guardan también su texto en data['texto'].
  */
 class AvisoGeneral extends Notification

@@ -22,9 +22,9 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
- * Dashboard: qué requiere atención hoy, cómo van las vacantes, cuánto ahorra la
- * IA y el embudo de selección. Para el admin SaaS es el "Panel de la
- * plataforma": primero sus empresas cliente y la salud de la IA.
+ * Dashboard: qué requiere atención hoy, cómo van las vacantes y el embudo de
+ * selección. Para el admin SaaS es el "Panel de la plataforma": primero sus
+ * empresas cliente y el Libro de Reclamaciones.
  */
 #[Title('Dashboard')]
 class Panel extends Component
@@ -101,11 +101,10 @@ class Panel extends Component
             // El plan es de la empresa: el admin SaaS ve la plataforma entera y no tiene uno propio.
             'uso' => $esAdmin || $usuario->empresa === null ? null : CacheDeResumenes::recordar('uso-del-plan', fn () => $limites->uso($usuario->empresa), 30),
             'empresa' => $esAdmin ? null : $usuario->empresa,
-            'diasDelAhorro' => DashboardService::DIAS_DEL_AHORRO,
             'diasSinRevisar' => DashboardService::DIAS_SIN_REVISAR,
             'titulo' => $esAdmin ? 'Panel de la plataforma' : 'Dashboard',
             'subtitulo' => $esAdmin
-                ? 'Tus empresas cliente, la salud de la IA y la actividad de selección de toda la plataforma.'
+                ? 'Tus empresas cliente, el Libro de Reclamaciones y la actividad de selección de toda la plataforma.'
                 : 'Resumen de la actividad de selección de '.$usuario->empresa?->nombre.'.',
             'seleccionada' => $this->vacanteSeleccionada && $this->mostrarVistaPrevia
                 ? $vacantes->buscar($this->vacanteSeleccionada)?->load('empresa')->loadCount('postulaciones')

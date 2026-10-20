@@ -64,8 +64,8 @@ class Listado extends Component
     }
 
     /**
-     * También por competencia: las extraídas por la IA y las manuales de la
-     * empresa en curso (la relación ya oculta las anotadas por otras empresas).
+     * También por competencia: las anotadas por la empresa en curso (la relación
+     * ya oculta las de otras empresas).
      *
      * @return list<string>
      */
@@ -77,13 +77,12 @@ class Listado extends Component
     /** @return array<string, string> */
     protected function opcionesOrden(): array
     {
-        // En la vista global (admin SaaS) un candidato puede tener varios procesos: se ordena por el mejor.
-        return ['nombre' => 'Nombre', 'match' => app(TenantContext::class)->esGlobal() ? 'Mejor match %' : 'Match %'];
+        return ['nombre' => 'Nombre', 'reciente' => 'Postulación más reciente'];
     }
 
     protected function columnaDeOrden(string $clave): string
     {
-        return $clave === 'match' ? 'match_de_orden' : 'candidatos.nombre';
+        return $clave === 'reciente' ? 'ultima_postulacion_at' : 'candidatos.nombre';
     }
 
     protected function porPagina(): int
@@ -199,9 +198,9 @@ class Listado extends Component
 
     public function render(CandidatoRepository $candidatos): View
     {
-        // La ficha se lee solo con el diálogo abierto y sin la subconsulta de orden por match.
+        // La ficha se lee solo con el diálogo abierto y sin la subconsulta de orden.
         $seleccionado = $this->candidatoSeleccionado && $this->mostrarDetalle
-            ? $candidatos->consultaListado(conOrdenPorMatch: false)->whereKey($this->candidatoSeleccionado)->first()
+            ? $candidatos->consultaListado(conOrdenReciente: false)->whereKey($this->candidatoSeleccionado)->first()
             : null;
 
         return view('livewire.candidatos.listado', [

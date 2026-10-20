@@ -42,31 +42,23 @@ class EloquentCandidatoRepository implements CandidatoRepository
         return $consulta->where(fn (Builder $q) => $this->condicionDeVisibilidad($q, $empresaId));
     }
 
-    public function consultaListado(bool $conOrdenPorMatch = true): Builder
+    public function consultaListado(bool $conOrdenReciente = true): Builder
     {
         $global = $this->contexto->esGlobal();
 
-        // La subconsulta de Postulacion ya va filtrada por la empresa del contexto. En la
-        // vista global un candidato puede tener procesos en varias empresas: se ordena por
-        // el mejor match; en una empresa, por el de su última postulación.
-        $matchDeOrden = $global
-            ? Postulacion::query()
-                ->selectRaw('max(match_score)')
-                ->whereColumn('postulaciones.candidato_id', 'candidatos.id')
-            : Postulacion::query()
-                ->select('match_score')
-                ->whereColumn('postulaciones.candidato_id', 'candidatos.id')
-                ->latest('postulaciones.created_at')
-                ->latest('postulaciones.id')
-                ->limit(1);
+        // La subconsulta de Postulacion ya va filtrada por la empresa del contexto: la fecha de su
+        // postulación más reciente en esa empresa (en la vista global, en cualquiera).
+        $ultimaPostulacion = Postulacion::query()
+            ->selectRaw('max(postulaciones.created_at)')
+            ->whereColumn('postulaciones.candidato_id', 'candidatos.id');
 
-        // coalesce por fuera: sin postulaciones la subconsulta no devuelve filas (NULL)
-        // y quedaría primera al ordenar de mayor a menor.
+        // coalesce por fuera: sin postulaciones la subconsulta devuelve NULL y quedaría primero al ordenar de
+        // más reciente a más antiguo.
         return $this->visibles()
-            // Quien abre una sola ficha no ordena: se ahorra la subconsulta de match.
-            ->when($conOrdenPorMatch, fn (Builder $q) => $q
+            // Quien abre una sola ficha no ordena: se ahorra la subconsulta.
+            ->when($conOrdenReciente, fn (Builder $q) => $q
                 ->select('candidatos.*')
-                ->selectRaw('coalesce(('.$matchDeOrden->toSql().'), -1) as match_de_orden', $matchDeOrden->getBindings()))
+                ->selectRaw("coalesce(({$ultimaPostulacion->toSql()}), '1970-01-01') as ultima_postulacion_at", $ultimaPostulacion->getBindings()))
             ->with(['ultimaPostulacion.vacante.empresa:id,nombre', 'cvActual' => Cv::ligero(), 'competencias'])
             // Vista global (admin SaaS): todos sus procesos, agrupados por empresa en la tarjeta.
             ->when($global, fn (Builder $q) => $q->with(['postulaciones' => fn ($p) => $p->with('vacante.empresa:id,nombre')->latest()]));

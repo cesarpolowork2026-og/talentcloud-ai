@@ -12,9 +12,7 @@ use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
 use App\Enums\ModalidadEntrevista;
 use App\Enums\Rol;
-use App\Events\RequisitosActualizados;
 use App\Events\VacanteCreada;
-use App\Matching\MatchingEngineInterface;
 use App\Models\Candidato;
 use App\Models\Competencia;
 use App\Models\Empresa;
@@ -50,8 +48,7 @@ use Throwable;
  *   php artisan db:seed --class=VolumenDeDemostracionSeeder   (después de migrate:fresh --seed)
  *
  * Igual que DemoSeeder, reproduce el proceso con los servicios de la aplicación.
- * El matching es el análisis básico, para no gastar el cupo de IA. No es parte
- * de DatabaseSeeder porque tarda varios minutos.
+ * No es parte de DatabaseSeeder porque tarda varios minutos.
  */
 class VolumenDeDemostracionSeeder extends Seeder
 {
@@ -86,7 +83,6 @@ class VolumenDeDemostracionSeeder extends Seeder
         $anterior = [
             'queue.default' => config('queue.default'),
             'mail.default' => config('mail.default'),
-            'talentcloud.ia.habilitada' => config('talentcloud.ia.habilitada'),
             'hashing.bcrypt.rounds' => config('hashing.bcrypt.rounds'),
             'talentcloud.dashboard.cache_segundos' => config('talentcloud.dashboard.cache_segundos'),
         ];
@@ -95,10 +91,9 @@ class VolumenDeDemostracionSeeder extends Seeder
         $hasher = app('hash')->driver('bcrypt');
         $costeAnterior = (int) config('hashing.bcrypt.rounds', 12);
 
-        // Cola en el momento, sin correos, sin IA (análisis básico) y contraseñas rápidas de calcular.
-        config(['queue.default' => 'sync', 'mail.default' => 'array', 'talentcloud.ia.habilitada' => false, 'hashing.bcrypt.rounds' => 4, 'talentcloud.dashboard.cache_segundos' => 0]);
+        // Cola en el momento, sin correos y contraseñas rápidas de calcular.
+        config(['queue.default' => 'sync', 'mail.default' => 'array', 'hashing.bcrypt.rounds' => 4, 'talentcloud.dashboard.cache_segundos' => 0]);
         app('mail.manager')->forgetMailers();
-        app()->forgetInstance(MatchingEngineInterface::class);
         if (method_exists($hasher, 'setRounds')) {
             $hasher->setRounds(4);
         }
@@ -119,7 +114,6 @@ class VolumenDeDemostracionSeeder extends Seeder
                 $hasher->setRounds($costeAnterior);
             }
             app('mail.manager')->forgetMailers();
-            app()->forgetInstance(MatchingEngineInterface::class);
         }
 
         $this->command->info(sprintf('Listo: %d postulaciones sembradas en %.1f min.', $this->postulaciones, (microtime(true) - $inicio) / 60));
@@ -248,7 +242,6 @@ class VolumenDeDemostracionSeeder extends Seeder
         }
 
         VacanteCreada::dispatch($vacante, $autor);
-        RequisitosActualizados::dispatch($vacante);
 
         return $vacante;
     }
@@ -463,13 +456,12 @@ class VolumenDeDemostracionSeeder extends Seeder
         return null;
     }
 
-    /** Evaluación tras la entrevista: los puntajes siguen el matching de la postulación, con algo de ruido. */
+    /** Evaluación tras la entrevista: una nota base por candidato (algo mejor si avanza) y algo de ruido en cada criterio. */
     private function evaluar(Postulacion $postulacion, User $evaluador, Carbon $cuando, string $plan): void
     {
         $this->fijarReloj($cuando, $evaluador);
 
-        $postulacion = Postulacion::sinFiltroDeEmpresa()->findOrFail($postulacion->id);
-        $base = 4.5 + ((float) ($postulacion->match_score ?? 50) / 100) * 4.5 + (($plan === 'contratado' || $plan === 'oferta') ? 0.8 : 0) - ($plan === 'descartado_tras_entrevista' ? 0.8 : 0);
+        $base = 4.5 + (mt_rand(35, 90) / 100) * 4.5 + (($plan === 'contratado' || $plan === 'oferta') ? 0.8 : 0) - ($plan === 'descartado_tras_entrevista' ? 0.8 : 0);
 
         $puntajes = [];
         foreach (CriterioEvaluacion::cases() as $criterio) {

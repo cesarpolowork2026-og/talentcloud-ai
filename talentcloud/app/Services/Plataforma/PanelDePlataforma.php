@@ -8,16 +8,15 @@ use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoVacante;
 use App\Models\Empresa;
 use App\Repositories\Contracts\ReclamacionRepository;
-use App\Services\Empresas\CupoDeIa;
 use App\Services\Reclamaciones\PlazoDeRespuesta;
 use App\Tenancy\EmpresaScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
- * Panel del admin SaaS: el estado de las empresas cliente (planes y uso) y un
- * resumen de la calidad de la IA. Solo lo usa el admin; lee sin filtro de
- * empresa, igual que la pantalla "Empresas".
+ * Panel del admin SaaS: el estado de las empresas cliente (planes y uso) y el
+ * Libro de Reclamaciones. Solo lo usa el admin; lee sin filtro de empresa, igual
+ * que la pantalla "Empresas".
  */
 class PanelDePlataforma
 {
@@ -25,7 +24,6 @@ class PanelDePlataforma
     public const DIAS_POR_VENCER = 3;
 
     public function __construct(
-        private readonly CalidadDeLaIa $calidad,
         private readonly ReclamacionRepository $reclamaciones,
         private readonly PlazoDeRespuesta $plazo,
     ) {}
@@ -43,9 +41,6 @@ class PanelDePlataforma
                     ->withoutGlobalScope(EmpresaScope::class)
                     ->whereNull('aceptada_at')
                     ->where('expira_at', '>', now()),
-                'postulaciones as postulaciones_con_ia_count' => fn (Builder $q) => $q
-                    ->withoutGlobalScope(EmpresaScope::class)
-                    ->where('ia_cupo_at', '>=', CupoDeIa::inicioDelMes()),
             ])
             ->orderBy('nombre')
             ->get();
@@ -65,12 +60,10 @@ class PanelDePlataforma
                     vacantesActivas: (int) $e->getAttribute('vacantes_activas_count'),
                     usuariosActivos: (int) $e->getAttribute('usuarios_activos_count'),
                     invitacionesPendientes: (int) $e->getAttribute('invitaciones_pendientes_count'),
-                    postulacionesConIa: (int) $e->getAttribute('postulaciones_con_ia_count'),
                     pruebaHasta: $e->enPrueba() ? $e->prueba_hasta : null,
                 )])
                 ->filter(fn (array $fila) => $fila['uso']->cercaDelLimite())
                 ->values(),
-            ia: $this->calidad->indicadores(),
             enPrueba: $activas->filter(fn (Empresa $e) => $e->enPrueba())->count(),
             solicitudesDePlan: $activas
                 ->filter(fn (Empresa $e) => $e->plan_solicitado !== null)

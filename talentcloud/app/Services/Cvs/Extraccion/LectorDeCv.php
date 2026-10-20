@@ -13,7 +13,7 @@ class LectorDeCv
     private const MINIMO_CARACTERES = 40;
 
     /**
-     * Tope de caracteres que se conservan (MAX_TEXTO_CV del contrato con el servicio de IA):
+     * Tope de caracteres que se conservan (un tope razonable para guardar el texto del CV):
      * un CV real es mucho menor; un documento más largo se recorta en vez de quedar sin análisis.
      */
     public const MAXIMO_CARACTERES = 200_000;

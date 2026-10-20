@@ -3,7 +3,6 @@
 namespace App\Livewire\Postulante;
 
 use App\Enums\EstadoEntrevista;
-use App\Enums\NivelCoincidencia;
 use App\Models\Candidato;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
@@ -83,7 +82,7 @@ class MisPostulaciones extends Component
 
         return view('livewire.postulante.mis-postulaciones', [
             'postulaciones' => $postulaciones,
-            // Solo la abierta en el detalle trae el análisis completo (match_detalle); la lista, no.
+            // Solo la postulación abierta en el detalle se trae completa.
             'seleccionada' => $this->postulacionSeleccionada !== null && ($this->mostrarDetalle || $this->mostrarRetiro) ? $this->seleccionada() : null,
             'entrevistasPorPostulacion' => $entrevistas->groupBy('postulacion_id'),
             // Próximas: pendientes o confirmadas y aún por celebrarse.
@@ -91,24 +90,6 @@ class MisPostulaciones extends Component
                 ->filter(fn (Entrevista $e) => in_array($e->estado, [EstadoEntrevista::Pendiente, EstadoEntrevista::Confirmada], true) && $e->inicia_at->isFuture())
                 ->values(),
         ]);
-    }
-
-    /**
-     * "La IA identificó 2 de 3 competencias requeridas en tu CV." (null sin matching).
-     *
-     * @return array{0: int, 1: int}|null
-     */
-    public static function competenciasIdentificadas(Postulacion $postulacion): ?array
-    {
-        $requisitos = (array) ($postulacion->match_detalle['requisitos'] ?? []);
-
-        if ($requisitos === []) {
-            return null;
-        }
-
-        $coinciden = count(array_filter($requisitos, fn ($r) => is_array($r) && ($r['nivel'] ?? null) === NivelCoincidencia::Coincide->value));
-
-        return [$coinciden, count($requisitos)];
     }
 
     /** La postulación abierta en el detalle, completa; siempre una del propio postulante. */
@@ -122,7 +103,7 @@ class MisPostulaciones extends Component
     }
 
     /**
-     * La lista, sin el análisis de matching (jsonb de ~2 KB por fila que solo usa el detalle).
+     * La lista, solo con las columnas que pinta.
      *
      * @return Collection<int, Postulacion>
      */

@@ -3,8 +3,6 @@
 namespace App\Services\Cuenta;
 
 use App\Enums\EstadoDeMiPostulacion;
-use App\Enums\FuenteCompetencia;
-use App\Models\Competencia;
 use App\Models\Cv;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
@@ -14,9 +12,8 @@ use App\Tenancy\EmpresaScope;
 
 /**
  * "Descargar mis datos" del postulante (derecho de acceso): su cuenta, su ficha
- * de candidato, sus CV (metadatos), las competencias que la IA extrajo y sus
- * postulaciones y entrevistas tal como él las ve. Nunca incluye lo que es de
- * cada empresa: notas, evaluaciones, puntajes de matching ni competencias
+ * de candidato, sus CV (metadatos), sus postulaciones y entrevistas tal como él
+ * las ve. Nunca incluye lo que es de cada empresa: notas, evaluaciones ni competencias
  * añadidas a mano por una empresa.
  */
 class ExportarMisDatos
@@ -67,15 +64,6 @@ class ExportarMisDatos
                 'estado' => $cv->estado_procesamiento->etiqueta(),
                 'subido_el' => $cv->created_at?->toIso8601String(),
             ])->all(),
-            'competencias_extraidas_de_tu_cv' => $candidato->todasLasCompetencias()
-                ->wherePivot('fuente', FuenteCompetencia::Extraccion->value)
-                ->orderBy('nombre')
-                ->get()
-                ->map(fn (Competencia $c) => [
-                    'competencia' => $c->nombre,
-                    'anios' => data_get($c, 'pivot.anios') === null ? null : (float) data_get($c, 'pivot.anios'),
-                    'evidencia' => data_get($c, 'pivot.evidencia'),
-                ])->all(),
             'postulaciones' => $postulaciones->map(fn (Postulacion $p) => [
                 'vacante' => $p->vacante?->titulo,
                 'empresa' => $p->vacante?->empresa?->nombre,

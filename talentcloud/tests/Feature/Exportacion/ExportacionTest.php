@@ -3,7 +3,6 @@
 use App\Enums\EstadoEvaluacion;
 use App\Enums\EstadoVacante;
 use App\Enums\FuenteCompetencia;
-use App\Enums\MotorMatching;
 use App\Exports\CandidatosExport;
 use App\Exports\EvaluacionesExport;
 use App\Exports\ExportacionDeListado;
@@ -39,9 +38,9 @@ beforeEach(function () {
     Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Borrador)->create(['titulo' => 'QA Engineer']);
 
     $this->elena = Candidato::factory()->create(['nombre' => 'Elena Ruiz', 'email' => 'elena@correo.com']);
-    $this->elena->competencias()->attach(Competencia::obtenerOCrear('Java')->id, ['fuente' => FuenteCompetencia::Extraccion->value]);
+    $this->elena->todasLasCompetencias()->attach(Competencia::obtenerOCrear('Java')->id, ['fuente' => FuenteCompetencia::Manual->value, 'empresa_id' => $this->nimbus->id]);
     $this->postulacion = Postulacion::factory()->paraVacante($this->backend)->create([
-        'candidato_id' => $this->elena->id, 'match_score' => 78.4, 'match_motor' => MotorMatching::Http,
+        'candidato_id' => $this->elena->id,
     ]);
     Evaluacion::factory()->create([
         'postulacion_id' => $this->postulacion->id,
@@ -98,14 +97,14 @@ it('exporta solo lo que se ve con la búsqueda y el filtro vigentes', function (
     Excel::assertDownloaded('vacantes-2026-09-24.xlsx', fn (VacantesExport $e) => array_column(filasDe($e), 0) === ['QA Engineer']);
 });
 
-it('exporta los candidatos con el match de cada postulación de la empresa', function () {
+it('exporta los candidatos con cada postulación de la empresa', function () {
     Excel::fake();
 
     Livewire::test(Candidatos::class)->call('exportar');
 
     Excel::assertDownloaded('candidatos-2026-09-24.xlsx', function (CandidatosExport $exportacion) {
         return filasDe($exportacion) === [
-            ['Elena Ruiz', 'elena@correo.com', $this->elena->titular, 'Desarrollador Backend', 'Postulado', 78, 'Servicio de IA', 'Java', '2026-09-24'],
+            ['Elena Ruiz', 'elena@correo.com', $this->elena->titular, 'Desarrollador Backend', 'Postulado', 'Java', '2026-09-24'],
         ];
     });
 });

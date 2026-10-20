@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Enums\EstadoProcesamientoCv;
-use App\Events\CvProcesado;
 use App\Models\Cv;
 use App\Services\Cvs\Extraccion\ArchivoIlegible;
 use App\Services\Cvs\Extraccion\LectorDeCv;
@@ -59,7 +58,5 @@ class ExtraerTextoCv implements ShouldQueue
             Log::error('Fallo al procesar el CV', ['cv_id' => $cv->id, 'excepcion' => $e]);
             $cv->update(['estado_procesamiento' => EstadoProcesamientoCv::Error, 'error' => 'Ocurrió un error inesperado al leer el CV. Inténtalo de nuevo.']);
         }
-
-        CvProcesado::dispatch($cv->refresh());
     }
 }

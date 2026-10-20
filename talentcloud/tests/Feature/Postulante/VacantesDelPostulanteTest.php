@@ -5,7 +5,6 @@ use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
 use App\Enums\Modalidad;
 use App\Enums\TipoRequisito;
-use App\Jobs\CalcularMatch;
 use App\Livewire\Postulante\DetalleVacante;
 use App\Livewire\Postulante\MiCurriculo;
 use App\Livewire\Postulante\MisPostulaciones;
@@ -35,11 +34,11 @@ use Livewire\Livewire;
 /*
  * Ampliación sobre el prototipo: el postulante ve las vacantes abiertas de las
  * empresas activas y postula con su CV. La postulación sigue el camino de la
- * de un reclutador (Kanban, matching) y avisa a la empresa.
+ * de un reclutador (tablero de selección) y avisa a la empresa.
  */
 
 beforeEach(function () {
-    Queue::fake(); // el matching se programa, no se ejecuta
+    Queue::fake(); // los avisos y la lectura de CV se programan, no se ejecutan
 
     app(TenantContext::class)->ejecutarGlobal(function () {
         $this->nimbus = Empresa::factory()->create(['nombre' => 'Nimbus Corp']);
@@ -137,7 +136,7 @@ it('da 404 en el detalle de una vacante inexistente', function () {
 
 // — Postular —
 
-it('postula con su CV: entra en el Kanban de la empresa y se programa el matching', function () {
+it('postula con su CV: entra en el tablero de la empresa', function () {
     Livewire::test(DetalleVacante::class, ['id' => $this->backend->id])
         ->call('confirmar')
         ->assertSet('mostrarConfirmacion', true)
@@ -153,7 +152,6 @@ it('postula con su CV: entra en el Kanban de la empresa y se programa el matchin
         ->and($postulacion->etapa)->toBe(EtapaPostulacion::Postulado)
         ->and($postulacion->cv_id)->toBe($this->cv->id);
 
-    Queue::assertPushed(CalcularMatch::class, fn (CalcularMatch $job) => $job->postulacionId === $postulacion->id && $job->empresaId === $this->nimbus->id);
 });
 
 it('hace visible al candidato para la empresa a la que postuló y solo para ella', function () {
@@ -209,7 +207,7 @@ it('no deja postular dos veces a la misma vacante', function () {
     expect(Postulacion::sinFiltroDeEmpresa()->where('candidato_id', $this->candidato->id)->count())->toBe(1);
 });
 
-it('exige un CV que la IA haya podido leer', function (string $situacion, string $mensaje) {
+it('exige un CV cuyo texto se haya podido leer', function (string $situacion, string $mensaje) {
     $this->cv->delete();
     match ($situacion) {
         'ilegible' => Cv::factory()->conError()->create(['candidato_id' => $this->candidato->id]),
@@ -225,7 +223,7 @@ it('exige un CV que la IA haya podido leer', function (string $situacion, string
 })->with([
     'sin CV' => ['sin CV', 'Sube tu CV en "Mi currículo" para poder postular.'],
     'CV ilegible' => ['ilegible', 'Tu CV no se pudo leer. Sube una versión en PDF con texto o en Word para postular.'],
-    'CV en análisis' => ['en análisis', 'Tu CV todavía se está analizando. Inténtalo en unos segundos.'],
+    'CV en proceso' => ['en análisis', 'Tu CV todavía se está procesando. Inténtalo en unos segundos.'],
 ]);
 
 it('no deja postular si la vacante deja de ser pública mientras la mira', function (string $cambio) {
@@ -285,7 +283,7 @@ it('marca los requisitos de la tarjeta como un grupo con nombre accesible', func
     Livewire::test(Vacantes::class)->assertSeeHtml('role="group" aria-label="Requisitos obligatorios"');
 });
 
-it('sube el CV desde la propia vacante y la página espera su análisis para postular', function () {
+it('sube el CV desde la propia vacante y la página espera a que se procese para postular', function () {
     Storage::fake('cvs');
     $this->cv->delete();
 
@@ -301,9 +299,9 @@ it('sube el CV desde la propia vacante y la página espera su análisis para pos
         ->assertHasNoErrors()
         ->assertDispatched('cv-subido');
 
-    // Con la cola simulada, el CV queda pendiente de análisis: la vacante lo indica y espera.
+    // Con la cola simulada, el CV queda pendiente de lectura: la vacante lo indica y espera.
     Livewire::test(DetalleVacante::class, ['id' => $this->backend->id])
-        ->assertSee('Tu CV se está analizando. Podrás postular en unos segundos.');
+        ->assertSee('Tu CV se está procesando. Podrás postular en unos segundos.');
 });
 
 it('si la vacante a la que postuló cierra mientras la mira, lleva a sus postulaciones', function () {

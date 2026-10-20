@@ -7,7 +7,7 @@ use App\Livewire\Candidatos\Detalle as FichaCandidato;
 use App\Livewire\Candidatos\Listado as Candidatos;
 use App\Livewire\Entrevistas\Listado as Entrevistas;
 use App\Livewire\Evaluaciones\Listado as Evaluaciones;
-use App\Livewire\Matching\Detalle as Matching;
+use App\Livewire\Postulaciones\Detalle as FichaDePostulacion;
 use App\Livewire\Seleccion\Central;
 use App\Models\Candidato;
 use App\Models\Competencia;
@@ -44,12 +44,12 @@ beforeEach(function () {
         $this->sofia = Candidato::factory()->create(['nombre' => 'Sofía Nieto']);
         $this->ivan = Candidato::factory()->create(['nombre' => 'Iván Torres']);
 
-        $this->deSofia = Postulacion::factory()->paraVacante($this->backend)->create(['candidato_id' => $this->sofia->id, 'match_score' => 60]);
+        $this->deSofia = Postulacion::factory()->paraVacante($this->backend)->create(['candidato_id' => $this->sofia->id, 'created_at' => now()->subDays(2)]);
         // Iván está en procesos de las dos empresas.
         $this->ivanEnNimbus = Postulacion::factory()->paraVacante($this->backend)->enEtapa(EtapaPostulacion::Entrevista)
-            ->create(['candidato_id' => $this->ivan->id, 'match_score' => 5, 'created_at' => now()->subDay()]);
+            ->create(['candidato_id' => $this->ivan->id, 'created_at' => now()->subDays(3)]);
         $this->ivanEnVela = Postulacion::factory()->paraVacante($this->disenador)
-            ->create(['candidato_id' => $this->ivan->id, 'match_score' => 95, 'match_detalle' => ['version' => 1, 'requisitos' => []]]);
+            ->create(['candidato_id' => $this->ivan->id, 'created_at' => now()->subHour()]);
     });
 
     $this->marta = User::factory()->deEmpresa($this->nimbus)->reclutador()->create();
@@ -124,8 +124,8 @@ it('muestra al admin los procesos de cada candidato agrupados por empresa', func
 
     $html = Livewire::test(Candidatos::class)
         ->assertSee('2 procesos en 2 empresas')
-        ->assertSee('Entrevista · 5 %')
-        ->assertSee('Postulado · 95 %')
+        ->assertSee('Entrevista')
+        ->assertSee('Postulado')
         ->assertDontSee('% match')
         ->html();
 
@@ -133,16 +133,16 @@ it('muestra al admin los procesos de cada candidato agrupados por empresa', func
     expect(mb_strpos($html, 'Nimbus Corp'))->toBeLessThan(mb_strpos($html, 'Vela Studio'));
 });
 
-it('ordena por el mejor match del candidato en la vista global', function () {
+it('ordena por la postulación más reciente del candidato en la vista global', function () {
     actuarComo($this->admin);
 
     $html = Livewire::test(Candidatos::class)
-        ->assertSee('Mejor match %')
-        ->set('orden', 'match')
+        ->assertSee('Postulación más reciente')
+        ->set('orden', 'reciente')
         ->call('alternarDireccion')
         ->html();
 
-    // Iván (mejor: 95) antes que Sofía (60), aunque el último proceso de Sofía sea más reciente.
+    // Iván (su último proceso fue hace una hora) antes que Sofía (hace dos días).
     expect(mb_strpos($html, 'Iván Torres'))->toBeLessThan(mb_strpos($html, 'Sofía Nieto'));
 });
 
@@ -161,8 +161,8 @@ it('muestra al reclutador en Candidatos solo lo de su empresa, como siempre', fu
 
     Livewire::test(Candidatos::class)
         ->assertSee('Desarrollador Backend · ')
-        ->assertSee('% match')
-        ->assertSee('Match %')
+        ->assertDontSee('% match')
+        ->assertSee('Postulación más reciente')
         ->assertDontSee('procesos en')
         ->assertDontSee('Product Designer');
 });
@@ -252,17 +252,17 @@ it('no deja al personal de una empresa anotar ni quitar para otra', function () 
     expect(DB::table('candidato_competencia')->where('candidato_id', $this->ivan->id)->value('empresa_id'))->toBe($this->nimbus->id);
 });
 
-// — Matching, Entrevistas y Evaluaciones —
+// — Postulación, Entrevistas y Evaluaciones —
 
-it('muestra al admin los otros procesos del candidato en el matching', function () {
+it('muestra al admin los otros procesos del candidato en la ficha de la postulación', function () {
     actuarComo($this->admin);
-    Livewire::test(Matching::class, ['postulacion' => $this->ivanEnNimbus])
-        ->assertSee('Otros procesos de Iván Torres:')
-        ->assertSee('Product Designer · Vela Studio (95 %)')
-        ->assertSeeHtml(route('matching.show', $this->ivanEnVela));
+    Livewire::test(FichaDePostulacion::class, ['postulacion' => $this->ivanEnNimbus])
+        ->assertSee('Otros procesos de este candidato')
+        ->assertSee('Product Designer · Vela Studio')
+        ->assertSeeHtml(route('postulaciones.show', $this->ivanEnVela));
 
     actuarComo($this->marta);
-    Livewire::test(Matching::class, ['postulacion' => $this->ivanEnNimbus])->assertDontSee('Otros procesos');
+    Livewire::test(FichaDePostulacion::class, ['postulacion' => $this->ivanEnNimbus])->assertDontSee('Otros procesos');
 });
 
 it('añade la columna Empresa en Entrevistas y Evaluaciones solo para el admin', function () {

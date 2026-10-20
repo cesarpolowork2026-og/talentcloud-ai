@@ -22,7 +22,7 @@
                 @foreach ($susProcesos as $postulacion)
                     <li class="flex flex-wrap items-baseline justify-between gap-x-2">
                         <span class="text-neutral-800">{{ $postulacion->vacante?->titulo }}</span>
-                        <span class="text-neutral-700">{{ $postulacion->estaRetirada() ? 'Retirada' : $postulacion->etapa->etiqueta() }} · {{ $postulacion->matchPorcentaje() === null ? 'sin match' : $postulacion->matchPorcentaje().' %' }}</span>
+                        <span class="text-neutral-700">{{ $postulacion->estaRetirada() ? 'Retirada' : $postulacion->etapa->etiqueta() }}</span>
                     </li>
                 @endforeach
             </ul>

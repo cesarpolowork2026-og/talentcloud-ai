@@ -6,7 +6,6 @@ namespace App\Enums;
 enum TipoActividad: string
 {
     case EtapaCambiada = 'postulacion.etapa';
-    case CvAnalizado = 'cv.analizado';
     case EvaluacionAprobada = 'evaluacion.aprobada';
     case EntrevistaProgramada = 'entrevista.programada';
     case EntrevistaCancelada = 'entrevista.cancelada';
@@ -24,7 +23,6 @@ enum TipoActividad: string
     {
         return match ($this) {
             self::EtapaCambiada => 'arrows-left-right',
-            self::CvAnalizado => 'file-text',
             self::EvaluacionAprobada => 'seal-check',
             self::EntrevistaProgramada, self::EntrevistaCancelada, self::EntrevistaReprogramada => 'calendar-blank',
             self::NotaAgregada => 'note',

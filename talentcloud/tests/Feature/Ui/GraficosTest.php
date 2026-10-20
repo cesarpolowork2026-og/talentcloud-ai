@@ -1,11 +1,10 @@
 <?php
 
 use App\Enums\EstadoDeMiPostulacion;
-use App\Enums\NivelCoincidencia;
 use Illuminate\Support\Facades\Blade;
 
 /*
- * Gráficos de datos (embudo, mapa de calor, radar comparativo y minigráfico): el marcado fija que el dato nunca
+ * Gráficos de datos (embudo, radar comparativo y minigráfico): el marcado fija que el dato nunca
  * depende solo del color ni del dibujo (cifras en texto, símbolos en las celdas, tabla real, leyenda con trazo).
  */
 
@@ -42,37 +41,6 @@ it('el embudo mantiene visible una etapa vacía (la cifra real va en texto) y no
         ->and($html)->toMatch('/0\s*<small>0 % del total<\/small>/');
 });
 
-it('el mapa de calor es una tabla real con un símbolo y un texto por celda', function () {
-    $html = Blade::render('<x-grafico.mapa-de-calor :columnas="$c" :filas="$f" />', [
-        'c' => [['competencia' => 'Java', 'obligatorio' => true], ['competencia' => 'Docker', 'obligatorio' => false], ['competencia' => 'Git', 'obligatorio' => false]],
-        'f' => [
-            ['clave' => 1, 'titulo' => 'Elena Ruiz', 'subtitulo' => 'Backend', 'url' => '/c/1', 'porcentaje' => 82, 'niveles' => [NivelCoincidencia::Coincide, NivelCoincidencia::Revisar, NivelCoincidencia::NoEncontrado]],
-            ['clave' => 2, 'titulo' => 'Marco Díaz', 'subtitulo' => null, 'url' => '/c/2', 'porcentaje' => null, 'niveles' => [null, null, null]],
-        ],
-    ]);
-
-    expect($html)->toContain('<table aria-label="Cobertura de los requisitos de la vacante por candidato">')
-        ->and(substr_count($html, 'scope="col"'))->toBe(5)   // candidato + 3 requisitos + coincidencia
-        ->and(substr_count($html, 'scope="row"'))->toBe(2)
-        ->and($html)->toContain('mapa-coincide')->toContain('mapa-revisar')->toContain('mapa-no')->toContain('mapa-sin')
-        // El color nunca va solo: símbolo visible y nivel dicho para los lectores de pantalla.
-        ->and($html)->toContain('✓')->toContain('?')->toContain('✗')
-        ->and($html)->toContain('Java: Coincide')->toContain('Docker: Revisar')->toContain('Git: No encontrado')->toContain('Java: Sin calcular')
-        ->and($html)->toContain('>Java*</span>')   // obligatorio marcado
-        ->and($html)->toContain('82 %')->toContain('—')
-        ->and($html)->toContain('href="/c/1"');
-});
-
-it('el mapa de calor escapa los nombres escritos por personas', function () {
-    $html = Blade::render('<x-grafico.mapa-de-calor :columnas="$c" :filas="$f" />', [
-        'c' => [['competencia' => '<script>alert(1)</script>', 'obligatorio' => false]],
-        'f' => [['clave' => 1, 'titulo' => '"><img src=x onerror=alert(2)>', 'subtitulo' => null, 'url' => '/c/1', 'porcentaje' => 10, 'niveles' => [NivelCoincidencia::Coincide]]],
-    ]);
-
-    expect($html)->not->toContain('<script>alert(1)</script>')
-        ->and($html)->not->toContain('<img src=x');
-});
-
 it('el radar superpone de dos a tres personas con leyenda y sin pintar nada si no se puede comparar', function () {
     $ejes = [['etiqueta' => 'Conocimiento técnico'], ['etiqueta' => 'Comunicación'], ['etiqueta' => 'Resolución de problemas'], ['etiqueta' => 'Ajuste cultural']];
     $serie = fn (string $nombre, array $v, ?float $promedio) => ['nombre' => $nombre, 'valores' => $v, 'promedio' => $promedio];
@@ -102,12 +70,6 @@ it('el radar no pinta más de tres series', function () {
     $html = Blade::render('<x-grafico.radar-comparativo :ejes="$e" :series="$s" />', ['e' => $ejes, 's' => $series]);
 
     expect(substr_count($html, 'class="radar-poligono"'))->toBe(3)->and($html)->not->toContain('Persona 4');
-});
-
-it('el contenedor desplazable del mapa contiene a los textos solo para lectores (si no, ensanchan la página en móvil)', function () {
-    $css = file_get_contents(resource_path('css/graficos.css'));
-
-    expect($css)->toMatch('/\.mapa\s*\{[^}]*position:\s*relative;[^}]*overflow-x:\s*auto/');
 });
 
 it('las barras con énfasis marcan solo la mayor y dejan el valor en texto', function () {

@@ -4,7 +4,7 @@ use App\Enums\EstadoVacante;
 use App\Livewire\Candidatos\Detalle as DetalleCandidato;
 use App\Livewire\Dashboard\Panel;
 use App\Livewire\Entrevistas\Listado as ListadoEntrevistas;
-use App\Livewire\Matching\Detalle as DetalleMatching;
+use App\Livewire\Postulaciones\Detalle as DetalleDePostulacion;
 use App\Livewire\Seleccion\Central;
 use App\Livewire\Vacantes\Listado as ListadoVacantes;
 use App\Models\Candidato;
@@ -48,7 +48,7 @@ it('niega por dirección directa cada recurso de otra empresa', function (string
         'vacantes.show' => route('vacantes.show', $this->vacante->id),
         'seleccion.show' => route('seleccion.show', $this->vacante->id),
         'kanban.show' => route('kanban.show', $this->vacante->id),
-        'matching.show' => route('matching.show', $this->postulacion->id),
+        'postulaciones.show' => route('postulaciones.show', $this->postulacion->id),
         'candidatos.show' => route('candidatos.show', $this->candidato->id),
         'entrevistas.calendario' => route('entrevistas.calendario', $this->entrevista->id),
         'cvs.descargar' => route('cvs.descargar', $this->cv->id),
@@ -62,7 +62,7 @@ it('niega por dirección directa cada recurso de otra empresa', function (string
     'vacante' => ['vacantes.show', 'GET'],
     'selección' => ['seleccion.show', 'GET'],
     'kanban (dirección anterior)' => ['kanban.show', 'GET'],
-    'matching' => ['matching.show', 'GET'],
+    'postulación' => ['postulaciones.show', 'GET'],
     'candidato' => ['candidatos.show', 'GET'],
     'calendario de la entrevista' => ['entrevistas.calendario', 'GET'],
     'descarga del CV' => ['cvs.descargar', 'GET'],
@@ -74,7 +74,7 @@ it('la propia empresa sí accede a esos mismos recursos', function () {
 
     $this->get(route('vacantes.show', $this->vacante->id))->assertOk();
     $this->get(route('seleccion.show', $this->vacante->id))->assertOk();
-    $this->get(route('matching.show', $this->postulacion->id))->assertOk();
+    $this->get(route('postulaciones.show', $this->postulacion->id))->assertOk();
     $this->get(route('entrevistas.calendario', $this->entrevista->id))->assertOk();
 });
 
@@ -83,7 +83,7 @@ it('niega a un postulante todas las pantallas del personal y descargar el CV de 
     Candidato::factory()->create(['user_id' => $postulante->id]);
     $this->actingAs($postulante);
 
-    foreach (['vacantes.show' => $this->vacante->id, 'seleccion.show' => $this->vacante->id, 'matching.show' => $this->postulacion->id, 'candidatos.show' => $this->candidato->id] as $ruta => $id) {
+    foreach (['vacantes.show' => $this->vacante->id, 'seleccion.show' => $this->vacante->id, 'postulaciones.show' => $this->postulacion->id, 'candidatos.show' => $this->candidato->id] as $ruta => $id) {
         $this->get(route($ruta, $id))->assertForbidden();
     }
 
@@ -112,7 +112,7 @@ it('no deja abrir en Livewire una vacante, entrevista, candidato o postulación 
     negadoPorLivewire(Livewire::test(Panel::class)->call('verVistaPrevia', $this->vacante->id));
     negadoPorLivewire(Livewire::test(ListadoVacantes::class)->call('verVistaPrevia', $this->vacante->id));
     negadoPorLivewire(Livewire::test(ListadoEntrevistas::class)->call('confirmar', $this->entrevista->id));
-    negadoPorLivewire(Livewire::test(DetalleMatching::class, ['postulacion' => $this->postulacion]));
+    negadoPorLivewire(Livewire::test(DetalleDePostulacion::class, ['postulacion' => $this->postulacion]));
     negadoPorLivewire(Livewire::test(DetalleCandidato::class, ['candidato' => $this->candidato]));
     negadoPorLivewire(Livewire::test(Central::class, ['vacante' => $this->vacante]));
 
@@ -132,5 +132,5 @@ it('el administrador de la plataforma sí puede ver el recurso de cualquier empr
     $this->actingAs(User::factory()->admin()->create());
 
     $this->get(route('vacantes.show', $this->vacante->id))->assertOk();
-    $this->get(route('matching.show', $this->postulacion->id))->assertOk();
+    $this->get(route('postulaciones.show', $this->postulacion->id))->assertOk();
 });

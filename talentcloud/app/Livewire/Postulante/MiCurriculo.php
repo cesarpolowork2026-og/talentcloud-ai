@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Postulante;
 
-use App\Enums\FuenteCompetencia;
 use App\Livewire\Concerns\EsperaElAnalisisDelCv;
 use App\Models\Candidato;
 use App\Models\Cv;
@@ -67,14 +66,10 @@ class MiCurriculo extends Component
         $user = auth()->user();
 
         // El registro de postulante siempre crea su perfil; sin él, la tarjeta se muestra vacía.
-        $candidato = $user->candidato?->load(['cvActual' => Cv::ligero(), 'competencias']);
+        $candidato = $user->candidato?->load(['cvActual' => Cv::ligero()]);
 
         return view('livewire.postulante.mi-curriculo', [
             'cv' => $candidato?->cvActual,
-            'competenciasIa' => $candidato?->competencias
-                ->where('pivot.fuente', FuenteCompetencia::Extraccion->value)
-                ->unique('id')
-                ->count() ?? 0,
         ]);
     }
 
