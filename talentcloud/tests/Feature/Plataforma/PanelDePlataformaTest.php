@@ -116,7 +116,7 @@ it('muestra la distribución de empresas por plan como una barra apilada con su 
         ->and($html)->toContain('Empresas con el plan Starter')->toContain('Orbita Labs')
         ->and($html)->toContain('Empresas con el plan Pro')->toContain('Vela Studio')
         ->and($html)->toContain('Empresas con el plan Enterprise')->toContain('Nimbus Corp')
-        ->and($html)->toContain('q=Orbita');
+        ->and($html)->toContain('ver='.$this->orbita->id)
     // La empresa suspendida no figura en ningún plan.
     expect($html)->not->toContain('Suspendida SA');
 });
