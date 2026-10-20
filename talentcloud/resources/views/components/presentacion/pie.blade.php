@@ -1,7 +1,7 @@
 {{--
     Pie de las páginas públicas, en el mismo azul petróleo que la barra superior (.barra):
-    la marca, los enlaces por tipo de visitante, la ayuda (correo de soporte y Libro de
-    Reclamaciones, obligatorio en Perú) y los documentos legales (Ley 29733).
+    la marca, los enlaces por tipo de visitante, la ayuda (correo de soporte) y los
+    documentos legales (Ley 29733).
 --}}
 @php
     $soporte = config('talentcloud.soporte.correo');
@@ -36,16 +36,12 @@
             </a>
             <p class="m-0 max-w-[32ch] text-14 text-accent-100">Reclutamiento ordenado: vacantes, candidatos y entrevistas en un solo lugar; tú decides.</p>
 
-            {{-- Ayuda: soporte y Libro de Reclamaciones, a la vista en todas las páginas públicas. --}}
+            {{-- Ayuda: soporte, a la vista en todas las páginas públicas. --}}
             <div class="grid gap-3" role="group" aria-labelledby="pie-ayuda">
                 <h2 id="pie-ayuda" class="m-0 text-12 font-semibold uppercase tracking-[0.12em] text-accent-200">Ayuda</h2>
                 <a href="mailto:{{ $soporte }}" class="barra-enlace flex items-center gap-2 text-14 break-all">
                     <x-ui.icon name="envelope-simple" :size="18" class="shrink-0" />
                     <span><span class="sr-only">Correo de soporte: </span>{{ $soporte }}</span>
-                </a>
-                <a href="{{ route('reclamaciones.crear') }}" class="barra-libro justify-self-start" @if (request()->routeIs('reclamaciones.crear')) aria-current="page" @endif>
-                    <x-ui.icon name="book-open-text" :size="22" class="shrink-0" />
-                    <span>Libro de Reclamaciones</span>
                 </a>
             </div>
         </div>

@@ -20,6 +20,13 @@
         >
             <x-ui.page-skeleton x-show="navegando" x-cloak />
             <div x-show="! navegando">
+                {{-- El admin SaaS supervisa los procesos de las empresas, pero no los modifica (modo auditoría/soporte). --}}
+                @if (auth()->user()?->tieneRol(\App\Enums\Rol::Admin) && request()->routeIs('vacantes.*', 'seleccion.*', 'kanban.*', 'postulaciones.*', 'candidatos.*', 'entrevistas.*', 'evaluaciones.*'))
+                    <p class="card mb-6 !flex-row items-center gap-2 text-14" role="note">
+                        <x-ui.icon name="eye" :size="18" class="shrink-0 text-accent-700" />
+                        <span><strong>Supervisión · solo lectura.</strong> Estás viendo los procesos de las empresas como administrador de la plataforma: puedes consultarlos, pero no crearlos ni modificarlos.</span>
+                    </p>
+                @endif
                 {{ $slot }}
             </div>
         </main>

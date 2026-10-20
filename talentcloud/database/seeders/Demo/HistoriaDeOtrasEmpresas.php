@@ -2,7 +2,6 @@
 
 namespace Database\Seeders\Demo;
 
-use App\DTO\DatosDeReclamacion;
 use App\DTO\RegistroEmpresaData;
 use App\Enums\EstadoEvaluacion;
 use App\Enums\EstadoVacante;
@@ -10,13 +9,10 @@ use App\Enums\EtapaPostulacion;
 use App\Enums\Modalidad;
 use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
-use App\Enums\TipoDocumento;
-use App\Enums\TipoReclamacion;
 use App\Enums\TipoRequisito;
 use App\Models\Empresa;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
-use App\Models\Reclamacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Services\Cvs\SubirCv;
@@ -24,16 +20,13 @@ use App\Services\Empresas\SolicitarCambioDePlan;
 use App\Services\Entrevistas\CambiarEstadoEntrevista;
 use App\Services\Postulaciones\PostularmeAVacante;
 use App\Services\Postulaciones\RetirarPostulacion;
-use App\Services\Reclamaciones\RegistrarReclamacion;
-use App\Services\Reclamaciones\ResponderReclamacion;
 use App\Services\Registro\RegistrarEmpresa;
 use App\Services\Vacantes\CambiarEstadoVacante;
 use Illuminate\Support\Carbon;
 use LogicException;
 
 /**
- * Historia de las empresas que no son de tecnología y de la plataforma (Libro
- * de Reclamaciones). Sus pasos se agendan con su fecha y DemoSeeder los ejecuta
+ * Historia de las empresas que no son de tecnología. Sus pasos se agendan con su fecha y DemoSeeder los ejecuta
  * intercalados con los suyos, en orden cronológico. Las horas evitan las de la
  * historia de Nimbus Corp, Vela Studio y Orbita Labs, porque el reloj nunca
  * retrocede.
@@ -57,8 +50,6 @@ trait HistoriaDeOtrasEmpresas
 
     /** @var array<string, Entrevista> */
     private array $entrevistas = [];
-
-    private ?Reclamacion $reclamacion = null;
 
     /** Agenda un paso "hace $haceDias días, a la $hora", hecho por $quien (clave de $gente; null = la plataforma o un visitante). */
     private function en(int $haceDias, string $hora, ?string $quien, callable $paso): void
@@ -90,7 +81,6 @@ trait HistoriaDeOtrasEmpresas
         $this->agendarBrio();
         $this->agendarNuna();
         $this->agendarAlturaCafe();
-        $this->agendarReclamaciones();
     }
 
     /** Ruta Sur Logística (Starter): contrata un jefe de almacén y cierra la vacante; luego busca un analista. */
@@ -357,52 +347,6 @@ trait HistoriaDeOtrasEmpresas
         $this->postulantePostula(3, 'lucero', 'Lucero Mamani', 'lucero.mamani@correo.com', 'Barista', 'barista');
         $this->postulantePostula(2, 'thiago', 'Thiago Huillca', 'thiago.huillca@correo.com', 'Mozo', 'barista');
         $this->en(1, '08:15', 'gabriela', fn () => $this->mover($this->postulaciones['lucero'], EtapaPostulacion::EnRevision, $this->gente['gabriela']));
-    }
-
-    /** Libro de Reclamaciones: una queja ya respondida y un reclamo pendiente, de consumidores ficticios. */
-    private function agendarReclamaciones(): void
-    {
-        $this->en(21, '19:00', null, fn () => $this->reclamacion = app(RegistrarReclamacion::class)->ejecutar(new DatosDeReclamacion(
-            tipo: TipoReclamacion::Queja,
-            nombre: 'Rubén Salinas',
-            tipoDocumento: TipoDocumento::Dni,
-            numeroDocumento: '41256789',
-            domicilio: 'Av. Arequipa 1450, Lince, Lima',
-            telefono: '987654321',
-            email: 'ruben.salinas@correo.com',
-            esMenor: false,
-            apoderadoNombre: null,
-            apoderadoTipoDocumento: null,
-            apoderadoNumeroDocumento: null,
-            servicio: 'Bolsa de empleos de TalentCloud AI',
-            monto: null,
-            detalle: 'Quise postular a una vacante de la bolsa de empleos y me pidió crear una cuenta; no encontré cómo enviar solo mi CV.',
-            pedido: 'Que se pueda postular sin crear una cuenta.',
-        )));
-        $this->en(17, '11:30', 'admin', fn () => app(ResponderReclamacion::class)->ejecutar(
-            $this->reclamacion ?? throw new LogicException('Falta la hoja de reclamación.'),
-            'Pedimos una cuenta para que pueda seguir el estado de cada postulación, recibir los avisos de sus entrevistas, '
-            .'retirar una postulación y descargar o eliminar sus datos cuando quiera. Crearla es gratuito y toma un minuto: '
-            .'en la vacante, pulse «Crear mi cuenta de postulante» y, al terminar, volverá a la misma vacante para postular con su CV. Gracias por su comentario.',
-            $this->gente['admin'],
-        ));
-        $this->en(2, '20:00', null, fn () => app(RegistrarReclamacion::class)->ejecutar(new DatosDeReclamacion(
-            tipo: TipoReclamacion::Reclamo,
-            nombre: 'Teresa Huamaní',
-            tipoDocumento: TipoDocumento::Dni,
-            numeroDocumento: '29784512',
-            domicilio: 'Jr. Puno 320, Cercado, Arequipa',
-            telefono: null,
-            email: 'teresa.huamani@correo.com',
-            esMenor: false,
-            apoderadoNombre: null,
-            apoderadoTipoDocumento: null,
-            apoderadoNumeroDocumento: null,
-            servicio: 'Bolsa de empleos de TalentCloud AI',
-            monto: null,
-            detalle: 'La vacante a la que quería postular desapareció de la bolsa de empleos sin ningún aviso.',
-            pedido: 'Que me expliquen por qué ya no aparece la vacante.',
-        )));
     }
 
     /** Una persona crea su cuenta de postulante, sube su CV y postula por su cuenta (por la tarde). */

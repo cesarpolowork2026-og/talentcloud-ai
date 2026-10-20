@@ -15,8 +15,6 @@ use App\Events\PlanEmpresaCambiado;
 use App\Events\PlanSolicitado;
 use App\Events\PostulacionCambioDeEtapa;
 use App\Events\PostulacionRetirada;
-use App\Events\ReclamacionRegistrada;
-use App\Events\ReclamacionRespondida;
 use App\Events\VacanteCerrada;
 use App\Jobs\AvisarEstadoDePostulacion;
 use App\Models\Candidato;
@@ -29,17 +27,12 @@ use App\Notifications\AvisoCambioDePlan;
 use App\Notifications\AvisoContrasenaCambiada;
 use App\Notifications\AvisoDeEntrevista;
 use App\Notifications\AvisoEntrevistaReprogramada;
-use App\Notifications\AvisoGeneral;
 use App\Notifications\AvisoNuevaPostulacion;
 use App\Notifications\AvisoPagoFallido;
 use App\Notifications\AvisoPostulacionRetirada;
 use App\Notifications\AvisoSolicitudDePlan;
-use App\Notifications\HojaDeReclamacion;
-use App\Notifications\RespuestaAReclamacion;
 use App\Services\Avisos\AvisoAlCandidato;
-use App\Support\Formato;
 use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 
@@ -179,35 +172,6 @@ class EnviarAvisos
             ->whereNull('desactivado_at')
             ->get()
             ->each(fn (User $u) => $u->notify($aviso));
-    }
-
-    /**
-     * Hoja del Libro de Reclamaciones: copia al correo de soporte (para atenderla), al
-     * consumidor (constancia) y aviso en la campana de los admins SaaS, que la responden.
-     */
-    public function handleReclamacionRegistrada(ReclamacionRegistrada $evento): void
-    {
-        $reclamacion = $evento->reclamacion;
-
-        (new AnonymousNotifiable)->route('mail', config('talentcloud.soporte.correo'))
-            ->notify(HojaDeReclamacion::paraSoporte($reclamacion, route('reclamaciones.index', ['ver' => $reclamacion->id])));
-        (new AnonymousNotifiable)->route('mail', $reclamacion->email)
-            ->notify(HojaDeReclamacion::paraConsumidor($reclamacion));
-
-        $aviso = new AvisoGeneral('Nueva hoja '.$reclamacion->codigo().' en el Libro de Reclamaciones ('.mb_strtolower($reclamacion->tipo->etiqueta()).'). Fecha límite: '.Formato::fechaCorta($reclamacion->fecha_limite).'.');
-
-        User::query()
-            ->role(Rol::Admin->value)
-            ->whereNull('desactivado_at')
-            ->get()
-            ->each(fn (User $u) => $u->notify($aviso));
-    }
-
-    /** Respuesta a una hoja del Libro de Reclamaciones: se envía al consumidor. */
-    public function handleReclamacionRespondida(ReclamacionRespondida $evento): void
-    {
-        (new AnonymousNotifiable)->route('mail', $evento->reclamacion->email)
-            ->notify(RespuestaAReclamacion::de($evento->reclamacion));
     }
 
     /** Cambio de etapa: aviso diferido al candidato, salvo que lo haya hecho él mismo. */

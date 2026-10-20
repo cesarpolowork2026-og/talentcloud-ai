@@ -187,23 +187,17 @@ it('exige al menos una competencia y reconoce sinónimos del catálogo sin dupli
         ->and(Competencia::where('nombre_normalizado', 'powerbi')->exists())->toBeFalse();
 });
 
-it('exige empresa al admin al crear una vacante', function () {
+it('no deja al admin crear vacantes: solo las supervisa', function () {
     actuarComo(User::factory()->admin()->create());
-
-    Livewire::test(Listado::class)
-        ->set('titulo', 'QA')
-        ->set('competencias', ['Selenium'])
-        ->call('crear')
-        ->assertHasErrors(['empresaId']);
 
     Livewire::test(Listado::class)
         ->set('titulo', 'QA')
         ->set('empresaId', (string) $this->vela->id)
         ->set('competencias', ['Selenium'])
         ->call('crear')
-        ->assertHasNoErrors();
+        ->assertForbidden();
 
-    expect(Vacante::sinFiltroDeEmpresa()->where('titulo', 'QA')->first()->empresa_id)->toBe($this->vela->id);
+    expect(Vacante::sinFiltroDeEmpresa()->where('titulo', 'QA')->exists())->toBeFalse();
 });
 
 it('abre el detalle de su vacante y da 404 con la de otra empresa', function () {

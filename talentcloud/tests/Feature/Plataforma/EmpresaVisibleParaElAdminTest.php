@@ -98,23 +98,10 @@ it('agrupa por empresa los selectores del admin y deja planos los del reclutador
     $vacantes = app()->call([Livewire::test(Central::class, ['vacante' => $this->backend])->instance(), 'buscarVacantes'], ['texto' => '']);
     expect(array_column($vacantes, 'etiqueta'))->toContain('Product Designer · Vela Studio');
 
-    $postulaciones = app()->call([Livewire::test(Entrevistas::class)->instance(), 'buscarPostulaciones'], ['texto' => 'iván']);
-    expect(array_column($postulaciones, 'etiqueta'))->toContain('Iván Torres — Desarrollador Backend · Nimbus Corp')
-        ->toContain('Iván Torres — Product Designer · Vela Studio');
-
     actuarComo($this->marta);
     $propias = app()->call([Livewire::test(Entrevistas::class)->instance(), 'buscarPostulaciones'], ['texto' => '']);
     expect(array_column($propias, 'etiqueta'))->toContain('Sofía Nieto — Desarrollador Backend')
         ->and(implode(' ', array_column($propias, 'etiqueta')))->not->toContain('Product Designer');
-});
-
-it('agrupa por empresa las vacantes a las que el admin puede postular al candidato', function () {
-    app(TenantContext::class)->ejecutarGlobal(fn () => Vacante::factory()->deEmpresa($this->vela)->enEstado(EstadoVacante::Abierta)->create(['titulo' => 'UX Writer']));
-    actuarComo($this->admin);
-
-    Livewire::test(FichaCandidato::class, ['candidato' => $this->sofia])
-        ->assertSeeHtml('<optgroup label="Vela Studio">')
-        ->assertSeeHtml('>UX Writer</option>');
 });
 
 // — Candidatos —
@@ -207,7 +194,7 @@ it('muestra al admin la ficha con los procesos agrupados por empresa', function 
         ->assertDontSee('Product Designer');
 });
 
-it('muestra al admin las competencias anotadas por cada empresa y le deja quitarlas', function () {
+it('muestra al admin las competencias anotadas por cada empresa, sin dejarle quitarlas', function () {
     $kotlin = Competencia::obtenerOCrear('Kotlin');
     $figma = Competencia::obtenerOCrear('Figma');
     $this->ivan->todasLasCompetencias()->attach($kotlin->id, ['fuente' => FuenteCompetencia::Manual->value, 'empresa_id' => $this->nimbus->id]);
@@ -218,23 +205,20 @@ it('muestra al admin las competencias anotadas por cada empresa y le deja quitar
         ->assertSee('Anotadas por Nimbus Corp')
         ->assertSee('Anotadas por Vela Studio')
         ->call('quitarCompetencia', $kotlin->id, $this->nimbus->id)
-        ->assertHasNoErrors();
+        ->assertForbidden();
 
-    $manuales = DB::table('candidato_competencia')->where('candidato_id', $this->ivan->id)->where('fuente', FuenteCompetencia::Manual->value)->pluck('empresa_id')->all();
-    expect($manuales)->toBe([$this->vela->id]);
+    $manuales = DB::table('candidato_competencia')->where('candidato_id', $this->ivan->id)->where('fuente', FuenteCompetencia::Manual->value)->pluck('empresa_id')->sort()->values()->all();
+    expect($manuales)->toBe(collect([$this->nimbus->id, $this->vela->id])->sort()->values()->all());
 });
 
-it('deja al admin anotar una competencia para una empresa con proceso del candidato', function () {
+it('no deja al admin anotar competencias: es una tarea de cada empresa', function () {
     actuarComo($this->admin);
 
     Livewire::test(FichaCandidato::class, ['candidato' => $this->ivan])
         ->set('nuevaCompetencia', 'Scrum')
-        ->call('agregarCompetencia')
-        ->assertHasErrors('empresaCompetencia')
         ->set('empresaCompetencia', (string) $this->vela->id)
         ->call('agregarCompetencia')
-        ->assertHasNoErrors()
-        ->assertSee('Anotadas por Vela Studio');
+        ->assertForbidden();
 
     $sinProceso = app(TenantContext::class)->ejecutarGlobal(fn () => Empresa::factory()->create());
     expect(fn () => app(CompetenciasDelCandidato::class)->agregar($this->ivan, 'Go', $sinProceso->id))

@@ -15,7 +15,7 @@ use Livewire\Livewire;
 
 /*
  * Panel de la plataforma del admin SaaS: empresas cliente (planes y uso) y
- * Libro de Reclamaciones, antes de la actividad de selección.
+ * crecimiento y estado del sistema.
  */
 
 beforeEach(function () {
@@ -86,7 +86,8 @@ it('muestra al admin las tres secciones numeradas con sus accesos', function () 
         ->assertSee('Cerca del límite de su plan')
         ->assertSeeHtml('<td>Orbita Labs</td>')
         ->assertSee('3 de 3')
-        ->assertSee('2 · Actividad de selección')
+        ->assertSee('2 · Uso y crecimiento')
+        ->assertSee('3 · Estado del sistema')
         ->assertDontSee('Salud de la IA')
         ->assertDontSee('calidad de la IA');
 });

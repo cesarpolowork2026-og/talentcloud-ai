@@ -23,8 +23,9 @@ use Livewire\Component;
 
 /**
  * Dashboard: qué requiere atención hoy, cómo van las vacantes y el embudo de
- * selección. Para el admin SaaS es el "Panel de la plataforma": primero sus
- * empresas cliente y el Libro de Reclamaciones.
+ * selección. Para el admin SaaS es el "Panel de la plataforma": el negocio
+ * (empresas, planes, ingresos), el crecimiento y el estado del sistema; no
+ * calcula nada de la parte de selección, que es de cada empresa.
  */
 #[Title('Dashboard')]
 class Panel extends Component
@@ -93,10 +94,10 @@ class Panel extends Component
 
         return view('livewire.dashboard.panel', [
             'plataforma' => $esAdmin ? CacheDeResumenes::recordar('plataforma', fn () => $panel->resumen(), 30) : null,
-            'resumen' => $dashboard->resumen(),
+            'resumen' => $esAdmin ? null : $dashboard->resumen(),
             'periodo' => $periodo,
-            'tendencia' => $tendencia->calcular($periodo),
-            'embudo' => $embudo->calcular($vacanteDelEmbudo?->id, $periodo),
+            'tendencia' => $esAdmin ? null : $tendencia->calcular($periodo),
+            'embudo' => $esAdmin ? null : $embudo->calcular($vacanteDelEmbudo?->id, $periodo),
             'etiquetaDeLaVacanteDelEmbudo' => $vacanteDelEmbudo ? Formato::vacante($vacanteDelEmbudo->loadMissing('empresa:id,nombre')) : '',
             // El plan es de la empresa: el admin SaaS ve la plataforma entera y no tiene uno propio.
             'uso' => $esAdmin || $usuario->empresa === null ? null : CacheDeResumenes::recordar('uso-del-plan', fn () => $limites->uso($usuario->empresa), 30),
@@ -104,7 +105,7 @@ class Panel extends Component
             'diasSinRevisar' => DashboardService::DIAS_SIN_REVISAR,
             'titulo' => $esAdmin ? 'Panel de la plataforma' : 'Dashboard',
             'subtitulo' => $esAdmin
-                ? 'Tus empresas cliente, el Libro de Reclamaciones y la actividad de selección de toda la plataforma.'
+                ? 'Tus empresas cliente, los ingresos estimados, el crecimiento y el estado del sistema.'
                 : 'Resumen de la actividad de selección de '.$usuario->empresa?->nombre.'.',
             'seleccionada' => $this->vacanteSeleccionada && $this->mostrarVistaPrevia
                 ? $vacantes->buscar($this->vacanteSeleccionada)?->load('empresa')->loadCount('postulaciones')

@@ -41,9 +41,9 @@ class CandidatoPolicy
         return $this->viewAny($user) && $user->empresa_id !== null;
     }
 
-    /** Competencias manuales y nuevos CV. */
+    /** Anotar competencias y subir CV nuevos: la empresa o el propio postulante (el admin SaaS solo ve). */
     public function update(User $user, Candidato $candidato): bool
     {
-        return $this->view($user, $candidato);
+        return ! $user->tieneRol(Rol::Admin) && $this->view($user, $candidato);
     }
 }

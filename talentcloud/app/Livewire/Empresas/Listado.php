@@ -15,6 +15,7 @@ use App\Services\Empresas\CambiarPlanEmpresa;
 use App\Services\Empresas\CrearEmpresa;
 use App\Services\Empresas\LimitesDelPlan;
 use App\Services\Equipo\InvitacionNoValida;
+use App\Services\Plataforma\RegistroDeAuditoria;
 use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
@@ -113,12 +114,21 @@ class Listado extends Component
         $this->mostrarConfirmacion = true;
     }
 
-    public function cambiarEstado(CambiarEstadoEmpresa $cambiar): void
+    public function cambiarEstado(CambiarEstadoEmpresa $cambiar, RegistroDeAuditoria $auditoria): void
     {
         $empresa = $this->empresa((int) $this->empresaSeleccionada);
         $this->authorize('cambiarEstado', $empresa);
 
-        $this->suspenderSeleccionada ? $cambiar->suspender($empresa) : $cambiar->activar($empresa);
+        /** @var User $admin */
+        $admin = auth()->user();
+
+        if ($this->suspenderSeleccionada) {
+            $cambiar->suspender($empresa);
+            $auditoria->anotar($admin, RegistroDeAuditoria::EMPRESA_SUSPENDIDA, "Se suspendió la empresa {$empresa->nombre}.", $empresa->id);
+        } else {
+            $cambiar->activar($empresa);
+            $auditoria->anotar($admin, RegistroDeAuditoria::EMPRESA_ACTIVADA, "Se activó la empresa {$empresa->nombre}.", $empresa->id);
+        }
 
         $this->mostrarConfirmacion = false;
     }
@@ -135,7 +145,7 @@ class Listado extends Component
         $this->mostrarCambioDePlan = true;
     }
 
-    public function cambiarPlan(CambiarPlanEmpresa $cambiar): void
+    public function cambiarPlan(CambiarPlanEmpresa $cambiar, RegistroDeAuditoria $auditoria): void
     {
         $empresa = $this->empresa((int) $this->empresaSeleccionada);
         $this->authorize('cambiarPlan', $empresa);
@@ -145,8 +155,11 @@ class Listado extends Component
         /** @var User $admin */
         $admin = auth()->user();
 
+        $anterior = $empresa->plan->etiqueta();
+
         try {
-            $cambiar->ejecutar($empresa, PlanEmpresa::from($datos['planNuevo']), $admin);
+            $cambiado = $cambiar->ejecutar($empresa, PlanEmpresa::from($datos['planNuevo']), $admin);
+            $auditoria->anotar($admin, RegistroDeAuditoria::PLAN_CAMBIADO, "Se cambió el plan de {$empresa->nombre}: de {$anterior} a {$cambiado->plan->etiqueta()}.", $empresa->id);
         } catch (OperacionNoPermitida $e) {
             $this->addError('planNuevo', $e->getMessage());
 
@@ -165,7 +178,7 @@ class Listado extends Component
         $this->mostrarFormulario = true;
     }
 
-    public function crear(CrearEmpresa $crear): void
+    public function crear(CrearEmpresa $crear, RegistroDeAuditoria $auditoria): void
     {
         $this->authorize('create', Empresa::class);
 
@@ -182,7 +195,8 @@ class Listado extends Component
         $admin = auth()->user();
 
         try {
-            $crear->ejecutar(new NuevaEmpresaData($datos['nombre'], PlanEmpresa::from($datos['plan']), $datos['emailAdministrador']), $admin);
+            $nueva = $crear->ejecutar(new NuevaEmpresaData($datos['nombre'], PlanEmpresa::from($datos['plan']), $datos['emailAdministrador']), $admin);
+            $auditoria->anotar($admin, RegistroDeAuditoria::EMPRESA_CREADA, "Se creó la empresa {$nueva->nombre} (plan {$nueva->plan->etiqueta()}).", $nueva->id);
         } catch (InvitacionNoValida $e) {
             $this->addError('emailAdministrador', $e->getMessage());
 

@@ -3,7 +3,6 @@
 use App\Enums\EstadoDeMiPostulacion;
 use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoEntrevista;
-use App\Enums\EstadoReclamacion;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
 use App\Enums\PlanEmpresa;
@@ -14,7 +13,6 @@ use App\Models\Entrevista;
 use App\Models\Evaluacion;
 use App\Models\Postulacion;
 use App\Models\PostulacionEtapa;
-use App\Models\Reclamacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Support\Formato;
@@ -144,9 +142,6 @@ it('cuenta la historia de las empresas de otros sectores con los mismos servicio
     $nuna = Empresa::where('nombre', 'Nuna Salud')->firstOrFail();
     expect($altura->enPrueba())->toBeTrue()
         ->and($nuna->plan_solicitado)->toBe(PlanEmpresa::Enterprise);
-
-    // Libro de Reclamaciones: una hoja respondida y otra pendiente.
-    expect(Reclamacion::orderBy('numero')->pluck('estado')->all())->toBe([EstadoReclamacion::Respondida, EstadoReclamacion::Pendiente]);
 });
 
 it('se puede ejecutar dos veces sin duplicar datos', function () {

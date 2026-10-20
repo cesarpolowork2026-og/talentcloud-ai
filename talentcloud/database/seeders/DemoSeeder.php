@@ -146,7 +146,7 @@ class DemoSeeder extends Seeder
      */
     private function historia(User $admin, User $marta, User $diego, User $clara, User $adminOrbita, Empresa $orbita): void
     {
-        // Brío Retail, Ruta Sur Logística, Nuna Salud, Altura Café y el Libro de Reclamaciones,
+        // Brío Retail, Ruta Sur Logística, Nuna Salud, Altura Café,
         // intercalados por fecha con lo que sigue (HistoriaDeOtrasEmpresas).
         $this->gente['admin'] = $admin;
         $this->agendarOtrasEmpresas();

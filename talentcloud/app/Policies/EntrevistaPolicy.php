@@ -14,28 +14,25 @@ class EntrevistaPolicy
         return $user->rol()?->esPersonalDeSeleccion() ?? false;
     }
 
+    /** Programar entrevistas es de la empresa: el admin SaaS supervisa (solo lectura). */
     public function create(User $user): bool
     {
-        return $this->viewAny($user);
+        return $this->viewAny($user) && ! $user->tieneRol(Rol::Admin);
     }
 
     public function view(User $user, Entrevista $entrevista): bool
     {
-        return $this->alcanza($user, $entrevista);
+        return $user->tieneRol(Rol::Admin) || $this->delaEmpresa($user, $entrevista);
     }
 
     /** Confirmar, completar o cancelar. */
     public function update(User $user, Entrevista $entrevista): bool
     {
-        return $this->alcanza($user, $entrevista);
+        return $this->delaEmpresa($user, $entrevista);
     }
 
-    private function alcanza(User $user, Entrevista $entrevista): bool
+    private function delaEmpresa(User $user, Entrevista $entrevista): bool
     {
-        if ($user->tieneRol(Rol::Admin)) {
-            return true;
-        }
-
-        return $this->viewAny($user) && $user->empresa_id === $entrevista->empresa_id;
+        return $this->viewAny($user) && ! $user->tieneRol(Rol::Admin) && $user->empresa_id === $entrevista->empresa_id;
     }
 }

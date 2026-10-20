@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Route;
  * Barra de navegación por rol, a partir de la del prototipo. El postulante ve
  * "Mis postulaciones" y "Vacantes"; el reclutador y la empresa ven Dashboard a
  * Evaluaciones, y la empresa añade "Mi empresa". El admin SaaS ve Panel,
- * Empresas y Reclamaciones, y las pantallas de selección agrupadas en
- * "Procesos de selección".
+ * Empresas, Usuarios, Competencias y las pantallas de selección agrupadas
+ * en "Supervisión" (solo lectura).
  */
 class Navegacion
 {
@@ -40,8 +40,9 @@ class Navegacion
             return [
                 self::enlace('Panel', 'dashboard', 'dashboard'),
                 self::enlace('Empresas', 'empresas.index', 'empresas.*'),
-                self::enlace('Reclamaciones', 'reclamaciones.index', 'reclamaciones.index'),
-                self::grupo('Procesos de selección', 'Supervisión de las empresas', self::pantallasDeSeleccion()),
+                self::enlace('Usuarios', 'usuarios.index', 'usuarios.*'),
+                self::enlace('Competencias', 'competencias.index', 'competencias.*'),
+                self::grupo('Supervisión', 'Procesos de las empresas, solo lectura', self::pantallasDeSeleccion()),
             ];
         }
 

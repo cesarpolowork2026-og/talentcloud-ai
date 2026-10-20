@@ -78,28 +78,11 @@ return [
     ],
 
     /*
-    | Correo de soporte: lo muestra el pie y recibe las hojas del Libro de
-    | Reclamaciones. Un solo valor para no tener correos distintos por ahí.
+    | Correo de soporte: lo muestra el pie. Un solo valor para no tener correos
+    | distintos por ahí.
     */
     'soporte' => [
         'correo' => env('SOPORTE_CORREO') ?: 'talentcloudia@gmail.com',
-    ],
-
-    /*
-    | Libro de Reclamaciones (Código de Protección y Defensa del Consumidor,
-    | Ley 29571, y su reglamento): plazo de respuesta en días hábiles y
-    | feriados nacionales fijos (mes-día). Jueves y Viernes Santo se calculan
-    | cada año (PlazoDeRespuesta). Revisar la lista si cambia la ley.
-    */
-    'reclamaciones' => [
-        'dias_habiles' => 15,
-        'feriados' => [
-            '01-01', '05-01', '06-07', '06-29', '07-23', '07-28', '07-29',
-            '08-06', '08-30', '10-08', '11-01', '12-08', '12-09', '12-25',
-        ],
-        // Hojas por IP y hora, y copias a un mismo correo por día (el formulario es público).
-        'por_hora' => 5,
-        'por_correo_al_dia' => 3,
     ],
 
 ];

@@ -8,7 +8,7 @@ use App\Models\User;
 
 /**
  * Postulaciones: las gestiona el personal de la empresa de la vacante (y el
- * admin SaaS). El postulante solo ve las suyas.
+ * admin SaaS, solo para verlas). El postulante solo ve las suyas.
  */
 class PostulacionPolicy
 {
@@ -21,10 +21,10 @@ class PostulacionPolicy
         return $this->esDelPersonal($user, $postulacion);
     }
 
-    /** Mover en el Kanban y descartar. */
+    /** Mover en el tablero y descartar: solo el personal de la empresa (el admin SaaS supervisa, solo lectura). */
     public function update(User $user, Postulacion $postulacion): bool
     {
-        return $this->esDelPersonal($user, $postulacion);
+        return $this->delaEmpresa($user, $postulacion);
     }
 
     /**
@@ -40,21 +40,25 @@ class PostulacionPolicy
     }
 
     /**
-     * Ver y escribir notas internas: solo el personal de la empresa (y el admin).
-     * No depende de view(): el postulante ve su postulación pero nunca las notas.
+     * Ver y escribir notas internas: solo el personal de la empresa. Son de la empresa: ni el postulante ni el
+     * admin SaaS las ven. No depende de view().
      */
     public function gestionarNotas(User $user, Postulacion $postulacion): bool
     {
-        return $this->esDelPersonal($user, $postulacion);
+        return $this->delaEmpresa($user, $postulacion);
     }
 
+    /** Ver: el admin SaaS (supervisión) y el personal de la empresa. */
     private function esDelPersonal(User $user, Postulacion $postulacion): bool
     {
-        if ($user->tieneRol(Rol::Admin)) {
-            return true;
-        }
+        return $user->tieneRol(Rol::Admin) || $this->delaEmpresa($user, $postulacion);
+    }
 
+    /** Escribir: solo el personal de la empresa de la postulación. */
+    private function delaEmpresa(User $user, Postulacion $postulacion): bool
+    {
         return ($user->rol()?->esPersonalDeSeleccion() ?? false)
+            && ! $user->tieneRol(Rol::Admin)
             && $user->empresa_id === $postulacion->empresa_id;
     }
 }

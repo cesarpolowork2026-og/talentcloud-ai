@@ -7,6 +7,7 @@ use App\Http\Controllers\DescargarCvController;
 use App\Http\Controllers\DescargarMisDatosController;
 use App\Http\Controllers\PostularDesdeEmpleosController;
 use App\Livewire\Candidatos;
+use App\Livewire\Competencias;
 use App\Livewire\Dashboard;
 use App\Livewire\Empleos;
 use App\Livewire\Empresas;
@@ -16,10 +17,11 @@ use App\Livewire\Legal;
 use App\Livewire\MiEmpresa;
 use App\Livewire\Onboarding;
 use App\Livewire\Planes;
+use App\Livewire\Plataforma;
 use App\Livewire\Postulaciones;
 use App\Livewire\Postulante;
-use App\Livewire\Reclamaciones;
 use App\Livewire\Seleccion;
+use App\Livewire\Usuarios;
 use App\Livewire\Vacantes;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Session\Middleware\AuthenticateSession;
@@ -50,9 +52,6 @@ Route::get('planes', Planes\Precios::class)->name('planes');
 // Política de privacidad (Ley 29733) y términos de uso: públicas, enlazadas desde el pie y el registro.
 Route::get('privacidad', Legal\Privacidad::class)->name('privacidad');
 Route::get('terminos', Legal\Terminos::class)->name('terminos');
-
-// Libro de Reclamaciones virtual (Ley 29571): público; las hojas las atiende el admin SaaS en /reclamaciones.
-Route::get('libro-de-reclamaciones', Reclamaciones\Formulario::class)->name('reclamaciones.crear');
 
 // Avisos de la pasarela de pago (Stripe): sin sesión ni CSRF, autenticados por su firma. Sin la sesión,
 // cada aviso no deja una fila en la tabla de sesiones.
@@ -94,7 +93,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin SaaS.
     Route::middleware('rol:admin')->group(function () {
         Route::get('empresas', Empresas\Listado::class)->name('empresas.index');
-        Route::get('reclamaciones', Reclamaciones\Listado::class)->name('reclamaciones.index');
+        Route::get('usuarios', Usuarios\Listado::class)->name('usuarios.index');
+        Route::get('competencias', Competencias\Listado::class)->name('competencias.index');
+        Route::get('auditoria', Plataforma\Auditoria::class)->name('auditoria');
     });
 
     // Cuenta de empresa.

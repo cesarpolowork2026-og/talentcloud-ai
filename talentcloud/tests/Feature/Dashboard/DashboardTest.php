@@ -165,13 +165,14 @@ it('muestra al admin SaaS el panel de la plataforma, de lo general a lo particul
 
     $html = Livewire::test(Panel::class)
         ->assertSee('Panel de la plataforma')
-        ->assertSee('Vela Studio creó la vacante Product Designer.')
         ->assertDontSee('Tu plan ·')
+        // El embudo y la actividad de selección son de cada empresa: el admin los supervisa desde «Supervisión».
+        ->assertDontSee('Embudo de selección')
+        ->assertDontSee('Requiere tu atención')
         ->html();
 
-    $orden = array_map(fn (string $texto) => mb_strpos($html, $texto), ['1 · Empresas cliente', '2 · Actividad de selección', 'Embudo de selección']);
+    $orden = array_map(fn (string $texto) => mb_strpos($html, $texto), ['1 · Empresas cliente', '2 · Uso y crecimiento', '3 · Estado del sistema']);
     expect($orden)->not->toContain(false)->and($orden)->toBe(collect($orden)->sort()->values()->all());
-    expect(app(DashboardService::class)->resumen()->vacantesActivas)->toBe(3);
 });
 
 it('no deja entrar al postulante', function () {

@@ -5,28 +5,32 @@ namespace App\Services\Plataforma;
 use App\DTO\ResumenDePlataforma;
 use App\DTO\UsoDelPlan;
 use App\Enums\EstadoEmpresa;
+use App\Enums\EstadoProcesamientoCv;
 use App\Enums\EstadoVacante;
+use App\Enums\Rol;
+use App\Models\Cv;
 use App\Models\Empresa;
-use App\Repositories\Contracts\ReclamacionRepository;
-use App\Services\Reclamaciones\PlazoDeRespuesta;
+use App\Models\Postulacion;
+use App\Models\User;
+use App\Models\Vacante;
+use App\Support\Formato;
 use App\Tenancy\EmpresaScope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Panel del admin SaaS: el estado de las empresas cliente (planes y uso) y el
- * Libro de Reclamaciones. Solo lo usa el admin; lee sin filtro de empresa, igual
- * que la pantalla "Empresas".
+ * Panel del admin SaaS: el negocio (empresas cliente, planes, ingreso mensual estimado), el crecimiento semanal, el
+ * estado del sistema y sus últimas acciones. Solo lo usa el admin; lee sin filtro de empresa, igual que la pantalla
+ * «Empresas». No mira dentro de los procesos de selección: eso es de cada empresa (y el admin solo los supervisa).
  */
 class PanelDePlataforma
 {
-    /** Días hábiles con los que una hoja pendiente se cuenta "por vencer". */
-    public const DIAS_POR_VENCER = 3;
+    /** Semanas que muestra el gráfico de crecimiento. */
+    public const SEMANAS = 8;
 
-    public function __construct(
-        private readonly ReclamacionRepository $reclamaciones,
-        private readonly PlazoDeRespuesta $plazo,
-    ) {}
+    public function __construct(private readonly RegistroDeAuditoria $auditoria) {}
 
     public function resumen(): ResumenDePlataforma
     {
@@ -69,7 +73,55 @@ class PanelDePlataforma
                 ->filter(fn (Empresa $e) => $e->plan_solicitado !== null)
                 ->sortBy(fn (Empresa $e) => $e->plan_solicitado_at)
                 ->values(),
-            reclamaciones: $this->reclamaciones->resumen($this->plazo->sumarDiasHabiles(now(), self::DIAS_POR_VENCER)),
+            usuariosDeEmpresas: User::query()->whereNotNull('empresa_id')->whereNull('desactivado_at')->count(),
+            postulantes: User::role(Rol::Postulante->value)->count(),
+            vacantesActivas: Vacante::query()->whereIn('estado', EstadoVacante::activos())->count(),
+            postulacionesDelMes: Postulacion::query()->where('created_at', '>=', Carbon::now()->startOfMonth())->count(),
+            // Estimado: lo que sumarían las empresas activas con su plan contratado (las pruebas aún no pagan).
+            ingresoMensual: $activas->sum(fn (Empresa $e) => $e->plan->precioMensual()),
+            ingresoConEnterprise: $activas->contains(fn (Empresa $e) => $e->plan->seCotiza()),
+            crecimiento: $this->crecimiento(),
+            trabajosFallidos: DB::table('failed_jobs')->count(),
+            trabajosEnCola: DB::table('jobs')->count(),
+            cvConError: Cv::query()->where('estado_procesamiento', EstadoProcesamientoCv::Error)->count(),
+            ultimasAcciones: $this->auditoria->ultimas(6),
         );
+    }
+
+    /**
+     * Empresas nuevas y postulaciones recibidas por semana (lunes a domingo), de la más antigua a la actual.
+     *
+     * @return list<array{semana: string, empresas: int, postulaciones: int}>
+     */
+    private function crecimiento(): array
+    {
+        $inicioActual = Carbon::today()->startOfWeek();
+        $desde = $inicioActual->copy()->subWeeks(self::SEMANAS - 1);
+
+        $porSemana = fn (Builder $consulta): array => $consulta
+            ->where('created_at', '>=', $desde)
+            ->toBase()
+            ->selectRaw("date_trunc('week', created_at)::date AS semana, COUNT(*) AS n")
+            ->groupBy('semana')
+            ->pluck('n', 'semana')
+            ->map(fn ($n) => (int) $n)
+            ->all();
+
+        $empresas = $porSemana(Empresa::query());
+        $postulaciones = $porSemana(Postulacion::query());
+
+        $filas = [];
+        for ($i = 0; $i < self::SEMANAS; $i++) {
+            $lunes = $desde->copy()->addWeeks($i);
+            $clave = $lunes->toDateString();
+
+            $filas[] = [
+                'semana' => Formato::fechaCorta($lunes),
+                'empresas' => $empresas[$clave] ?? 0,
+                'postulaciones' => $postulaciones[$clave] ?? 0,
+            ];
+        }
+
+        return $filas;
     }
 }

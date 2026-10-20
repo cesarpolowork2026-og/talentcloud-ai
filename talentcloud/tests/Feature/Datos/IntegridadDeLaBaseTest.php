@@ -5,7 +5,6 @@ use App\Enums\EstadoEmpresa;
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoEvaluacion;
 use App\Enums\EstadoProcesamientoCv;
-use App\Enums\EstadoReclamacion;
 use App\Enums\EstadoSuscripcion;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
@@ -17,8 +16,6 @@ use App\Enums\Periodicidad;
 use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
 use App\Enums\TipoActividad;
-use App\Enums\TipoDocumento;
-use App\Enums\TipoReclamacion;
 use App\Enums\TipoRequisito;
 use App\Models\Empresa;
 use App\Models\Entrevista;
@@ -84,10 +81,6 @@ dataset('enums de la base', [
     'invitaciones.rol' => ['invitaciones', 'rol', Rol::class],
     'candidato_competencia.fuente' => ['candidato_competencia', 'fuente', FuenteCompetencia::class],
     'cvs.estado_procesamiento' => ['cvs', 'estado_procesamiento', EstadoProcesamientoCv::class],
-    'reclamaciones.tipo' => ['reclamaciones', 'tipo', TipoReclamacion::class],
-    'reclamaciones.estado' => ['reclamaciones', 'estado', EstadoReclamacion::class],
-    'reclamaciones.tipo_documento' => ['reclamaciones', 'tipo_documento', TipoDocumento::class],
-    'reclamaciones.apoderado_tipo_documento' => ['reclamaciones', 'apoderado_tipo_documento', TipoDocumento::class],
     'actividades.tipo' => ['actividades', 'tipo', TipoActividad::class],
 ]);
 

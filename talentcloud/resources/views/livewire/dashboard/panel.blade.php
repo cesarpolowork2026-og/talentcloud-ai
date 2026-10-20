@@ -4,12 +4,14 @@
     <x-ui.page-header :title="$titulo" :subtitle="$subtitulo" />
 
     @if ($plataforma)
-        {{-- 1 · Empresas cliente (solo admin SaaS) --}}
+        @php($soles = fn (int $monto): string => 'S/ '.number_format($monto, 0, ',', ' '))
+
+        {{-- 1 · El negocio: empresas cliente, planes e ingresos --}}
         <section class="mb-10" aria-labelledby="panel-empresas">
             <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
                 <div>
                     <h2 id="panel-empresas" class="m-0 text-16">1 · Empresas cliente</h2>
-                    <p class="m-0 mt-1 text-13 text-neutral-700">Quién usa TalentCloud, con qué plan contratado (se cuentan las empresas activas; las que están en prueba, como Gratis) y qué empresas están por quedarse sin lugar en el suyo.</p>
+                    <p class="m-0 mt-1 text-13 text-neutral-700">Quién usa TalentCloud y con qué plan contratado (se cuentan las empresas activas; las que están en prueba, como Gratis).</p>
                 </div>
                 <x-ui.button size="sm" :href="route('empresas.index')" wire:navigate>Gestionar empresas</x-ui.button>
             </div>
@@ -18,7 +20,11 @@
                 <x-ui.stat label="Empresas activas" :value="$plataforma->empresasActivas" highlight />
                 <x-ui.stat label="Suspendidas" :value="$plataforma->empresasSuspendidas" />
                 <x-ui.stat :label="'En prueba '.PlanEmpresa::PLAN_DE_PRUEBA->etiqueta()" :value="$plataforma->enPrueba" />
+                <x-ui.stat label="Ingreso mensual estimado" :value="($plataforma->ingresoConEnterprise ? 'desde ' : '').$soles($plataforma->ingresoMensual)" />
             </div>
+            <p class="-mt-2 mb-4 text-13 text-neutral-700">
+                El ingreso estimado suma el precio mensual (sin IGV) del plan contratado de cada empresa activa; las pruebas aún no pagan{{ $plataforma->ingresoConEnterprise ? ' y Enterprise se cuenta con su precio «desde», porque se cotiza' : '' }}. Es una referencia, no una cifra de facturación.
+            </p>
 
             <x-ui.card class="mb-4 !bg-white">
                 <div class="card-kicker">Empresas activas por plan contratado</div>
@@ -55,25 +61,6 @@
                 </x-ui.card>
             @endif
 
-            @if ($plataforma->reclamaciones)
-                @php($libro = $plataforma->reclamaciones)
-                <x-ui.card class="mb-4">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div class="card-kicker">Libro de Reclamaciones</div>
-                        <x-ui.button size="sm" :href="route('reclamaciones.index')" wire:navigate>Atender reclamaciones</x-ui.button>
-                    </div>
-                    <p class="m-0 text-14 text-neutral-800">
-                        @if ($libro->pendientes === 0)
-                            No hay hojas pendientes de respuesta.
-                        @else
-                            {{ $libro->pendientes === 1 ? '1 hoja pendiente' : $libro->pendientes.' hojas pendientes' }}:
-                            {{ $libro->vencidas }} {{ $libro->vencidas === 1 ? 'vencida' : 'vencidas' }} y
-                            {{ $libro->porVencer }} por vencer en los próximos {{ App\Services\Plataforma\PanelDePlataforma::DIAS_POR_VENCER }} días hábiles.
-                        @endif
-                    </p>
-                </x-ui.card>
-            @endif
-
             <x-ui.card>
                 <div class="card-kicker">Cerca del límite de su plan</div>
                 @if ($plataforma->cercaDelLimite->isEmpty())
@@ -98,12 +85,81 @@
             </x-ui.card>
         </section>
 
-        {{-- 2 · Actividad de selección en todas las empresas --}}
-        <div class="mb-3">
-            <h2 class="m-0 text-16">2 · Actividad de selección</h2>
-            <p class="m-0 mt-1 text-13 text-neutral-700">Lo que pasa en los procesos de todas las empresas. Para entrar en ellos, usa «Procesos de selección» en el menú.</p>
-        </div>
-    @endif
+        {{-- 2 · Uso de la plataforma y crecimiento --}}
+        <section class="mb-10" aria-labelledby="panel-uso">
+            <div class="mb-3">
+                <h2 id="panel-uso" class="m-0 text-16">2 · Uso y crecimiento</h2>
+                <p class="m-0 mt-1 text-13 text-neutral-700">Cuánta gente y cuánta actividad hay en la plataforma. Para ver los procesos de las empresas, usa «Supervisión» en el menú (solo lectura).</p>
+            </div>
+
+            <div class="mb-4 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+                <x-ui.stat label="Usuarios de empresas" :value="$plataforma->usuariosDeEmpresas" />
+                <x-ui.stat label="Postulantes registrados" :value="$plataforma->postulantes" />
+                <x-ui.stat label="Vacantes activas" :value="$plataforma->vacantesActivas" />
+                <x-ui.stat label="Postulaciones del mes" :value="$plataforma->postulacionesDelMes" />
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+                <x-ui.card class="!bg-white">
+                    <div class="card-kicker">Postulaciones por semana</div>
+                    <x-grafico.lineas
+                        id="crecimiento-postulaciones"
+                        :etiquetas="array_column($plataforma->crecimiento, 'semana')"
+                        :series="[['nombre' => 'Postulaciones', 'valores' => array_column($plataforma->crecimiento, 'postulaciones'), 'principal' => true]]"
+                        :descripcion="'Postulaciones recibidas en las últimas '.count($plataforma->crecimiento).' semanas, por semana (la etiqueta es el lunes de cada semana)'"
+                    />
+                </x-ui.card>
+                <x-ui.card class="!bg-white">
+                    <div class="card-kicker">Empresas nuevas por semana</div>
+                    <x-grafico.lineas
+                        id="crecimiento-empresas"
+                        unidad="empresas"
+                        :etiquetas="array_column($plataforma->crecimiento, 'semana')"
+                        :series="[['nombre' => 'Empresas nuevas', 'valores' => array_column($plataforma->crecimiento, 'empresas'), 'principal' => true]]"
+                        :descripcion="'Empresas que se registraron en las últimas '.count($plataforma->crecimiento).' semanas, por semana (la etiqueta es el lunes de cada semana)'"
+                    />
+                </x-ui.card>
+            </div>
+        </section>
+
+        {{-- 3 · Estado del sistema y últimas acciones --}}
+        <section class="mb-10 grid gap-4 md:grid-cols-2" aria-labelledby="panel-sistema">
+            <x-ui.card>
+                <div class="card-kicker"><h2 id="panel-sistema" class="m-0 text-inherit">3 · Estado del sistema</h2></div>
+                <p class="m-0 text-14 text-neutral-800">
+                    @if ($plataforma->sistemaSano())
+                        Todo en orden: no hay trabajos fallidos ni CV con error de lectura.
+                    @else
+                        Hay cosas por revisar en el servidor.
+                    @endif
+                </p>
+                <ul class="m-0 grid list-none gap-1 p-0 text-14">
+                    <li><strong>{{ $plataforma->trabajosFallidos }}</strong> {{ $plataforma->trabajosFallidos === 1 ? 'trabajo fallido' : 'trabajos fallidos' }}</li>
+                    <li><strong>{{ $plataforma->trabajosEnCola }}</strong> {{ $plataforma->trabajosEnCola === 1 ? 'trabajo en cola' : 'trabajos en cola' }}</li>
+                    <li><strong>{{ $plataforma->cvConError }}</strong> {{ $plataforma->cvConError === 1 ? 'CV con error de lectura' : 'CV con error de lectura' }}</li>
+                </ul>
+            </x-ui.card>
+
+            <x-ui.card>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="card-kicker">Últimas acciones de administración</div>
+                    <x-ui.button size="sm" :href="route('auditoria')" wire:navigate>Ver el registro</x-ui.button>
+                </div>
+                @if ($plataforma->ultimasAcciones->isEmpty())
+                    <p class="m-0 text-14 text-neutral-800">Todavía no se registró ninguna acción.</p>
+                @else
+                    <ul class="m-0 grid list-none gap-2 p-0 text-14">
+                        @foreach ($plataforma->ultimasAcciones as $accion)
+                            <li wire:key="accion-{{ $accion->id }}">
+                                {{ $accion->descripcion }}
+                                <span class="block text-13 text-neutral-700">{{ $accion->usuario_nombre }} · {{ \App\Support\Formato::fechaHora($accion->created_at) }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </x-ui.card>
+        </section>
+    @else
 
     {{-- Indicadores: lo que hay que mirar primero. --}}
     <div class="mb-6 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
@@ -353,6 +409,8 @@
         @endif
         </x-ui.actualizable>
     </section>
+
+    @endif
 
     <x-vacantes.vista-previa wire:model="mostrarVistaPrevia" :vacante="$seleccionada" />
 </div>

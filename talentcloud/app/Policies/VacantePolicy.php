@@ -35,19 +35,20 @@ class VacantePolicy
         return $this->alcanza($user, $vacante);
     }
 
+    /** Crear y editar vacantes es de la empresa: el admin SaaS supervisa (solo lectura). */
     public function create(User $user): bool
     {
-        return $this->viewAny($user);
+        return $this->viewAny($user) && ! $user->tieneRol(Rol::Admin);
     }
 
     public function update(User $user, Vacante $vacante): bool
     {
-        return $this->alcanza($user, $vacante);
+        return $this->delaEmpresa($user, $vacante);
     }
 
     public function cambiarEstado(User $user, Vacante $vacante): bool
     {
-        return $this->alcanza($user, $vacante);
+        return $this->delaEmpresa($user, $vacante);
     }
 
     public function delete(User $user, Vacante $vacante): bool
@@ -56,12 +57,19 @@ class VacantePolicy
         return false;
     }
 
+    /** Ver: el admin SaaS (supervisión) y el personal de la empresa de la vacante. */
     private function alcanza(User $user, Vacante $vacante): bool
     {
         if ($user->tieneRol(Rol::Admin)) {
             return true;
         }
 
-        return $this->viewAny($user) && $user->empresa_id === $vacante->empresa_id;
+        return $this->delaEmpresa($user, $vacante);
+    }
+
+    /** Escribir: solo el personal de la empresa de la vacante. */
+    private function delaEmpresa(User $user, Vacante $vacante): bool
+    {
+        return $this->viewAny($user) && ! $user->tieneRol(Rol::Admin) && $user->empresa_id === $vacante->empresa_id;
     }
 }
