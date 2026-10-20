@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\EstadoProcesamientoCv;
 use App\Enums\EstadoVacante;
 use App\Enums\PlanEmpresa;
 use App\Livewire\Competencias\Listado as Competencias;
@@ -10,6 +11,7 @@ use App\Livewire\Usuarios\Listado as Usuarios;
 use App\Livewire\Vacantes\Detalle;
 use App\Models\Auditoria;
 use App\Models\Competencia;
+use App\Models\Cv;
 use App\Models\Empresa;
 use App\Models\Postulacion;
 use App\Models\Requisito;
@@ -278,4 +280,13 @@ it('oculta el filtro por estado al buscar una empresa y lo reinicia', function (
         ->assertDontSeeHtml('wire:click="filtrarEstado(')
         ->set('busqueda', '')
         ->assertSeeHtml('wire:click="filtrarEstado(');
+});
+
+it('explica en el panel qué falla: un CV ilegible no es un problema del servidor', function () {
+    app(TenantContext::class)->ejecutarGlobal(fn () => Cv::factory()->create(['estado_procesamiento' => EstadoProcesamientoCv::Error]));
+    actuarComo($this->admin);
+
+    Livewire::test(Panel::class)
+        ->assertSee('Hay 1 CV que no se pudo leer')
+        ->assertDontSee('conviene revisar el servidor');
 });

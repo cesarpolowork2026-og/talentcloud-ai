@@ -134,13 +134,18 @@
                     @if ($plataforma->sistemaSano())
                         Todo en orden: no hay trabajos fallidos ni CV con error de lectura.
                     @else
-                        Hay cosas por revisar en el servidor.
+                        @if ($plataforma->trabajosFallidos > 0)
+                            {{ $plataforma->trabajosFallidos === 1 ? 'Hay 1 trabajo en segundo plano que falló' : 'Hay '.$plataforma->trabajosFallidos.' trabajos en segundo plano que fallaron' }}: conviene revisar el servidor.
+                        @endif
+                        @if ($plataforma->cvConError > 0)
+                            {{ $plataforma->cvConError === 1 ? 'Hay 1 CV que no se pudo leer' : 'Hay '.$plataforma->cvConError.' CV que no se pudieron leer' }} (por ejemplo, un PDF escaneado como imagen): quien lo subió debe adjuntar una versión con texto.
+                        @endif
                     @endif
                 </p>
                 <ul class="m-0 grid list-none gap-1 p-0 text-14">
                     <li><strong>{{ $plataforma->trabajosFallidos }}</strong> {{ $plataforma->trabajosFallidos === 1 ? 'trabajo fallido' : 'trabajos fallidos' }}</li>
                     <li><strong>{{ $plataforma->trabajosEnCola }}</strong> {{ $plataforma->trabajosEnCola === 1 ? 'trabajo en cola' : 'trabajos en cola' }}</li>
-                    <li><strong>{{ $plataforma->cvConError }}</strong> {{ $plataforma->cvConError === 1 ? 'CV con error de lectura' : 'CV con error de lectura' }}</li>
+                    <li><strong>{{ $plataforma->cvConError }}</strong> CV con error de lectura</li>
                 </ul>
             </x-ui.card>
 
