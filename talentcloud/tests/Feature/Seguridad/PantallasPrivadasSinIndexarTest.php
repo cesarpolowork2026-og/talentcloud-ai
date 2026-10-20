@@ -35,13 +35,14 @@ it('no marca como noindex las páginas públicas para quien no tiene sesión', f
 });
 
 it('bloquea en robots.txt las rutas privadas y deja abiertas las públicas', function () {
-    $robots = file_get_contents(public_path('robots.txt'));
+    $robots = $this->get('/robots.txt')->assertOk()->getContent();
 
     foreach (['/dashboard', '/empresas', '/usuarios', '/competencias', '/auditoria', '/vacantes', '/seleccion'] as $ruta) {
         expect($robots)->toContain("Disallow: {$ruta}\n");
     }
 
     foreach (['/empleos', '/planes', '/privacidad', '/terminos'] as $publica) {
-        expect($robots)->not->toContain("Disallow: {$publica}");
+        expect($robots)->not->toContain("Disallow: {$publica}
+");
     }
 });

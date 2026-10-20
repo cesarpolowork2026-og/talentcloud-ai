@@ -37,6 +37,13 @@ interface VacanteRepository
      */
     public function publicadasParaListado(): Builder;
 
+    /**
+     * Id y última modificación de cada vacante pública, sin relaciones ni descripción: para el sitemap.
+     *
+     * @return Builder<Vacante>
+     */
+    public function publicadasParaSitemap(): Builder;
+
     /** Una vacante de publicadas(), o null si no existe o ya no es pública. */
     public function buscarPublicada(int $id): ?Vacante;
 

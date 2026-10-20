@@ -9,13 +9,15 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Guarda 30 s la sección «Vacantes abiertas» de la portada, que se pinta en cada
- * visita y lee datos que casi no cambian. Las vacantes, sus requisitos y las
+ * visita y lee datos que casi no cambian (y 10 minutos el sitemap). Las vacantes, sus requisitos y las
  * empresas la olvidan al guardarse (ver `booted()` de esos modelos); un cambio
  * masivo tarda como máximo 30 s en verse.
  */
 final class BolsaPublica
 {
     private const CLAVE_PORTADA = 'bolsa-publica:portada';
+
+    private const CLAVE_SITEMAP = 'bolsa-publica:sitemap';
 
     /**
      * @param  Closure(): Collection<int, Vacante>  $leer
@@ -26,8 +28,19 @@ final class BolsaPublica
         return Cache::remember(self::CLAVE_PORTADA, 30, $leer);
     }
 
+    /**
+     * El sitemap con las vacantes abiertas: 10 minutos, o hasta que cambie una vacante, requisito o empresa.
+     *
+     * @param  Closure(): string  $leer
+     */
+    public static function sitemap(Closure $leer): string
+    {
+        return Cache::remember(self::CLAVE_SITEMAP, 600, $leer);
+    }
+
     public static function olvidar(): void
     {
         Cache::forget(self::CLAVE_PORTADA);
+        Cache::forget(self::CLAVE_SITEMAP);
     }
 }

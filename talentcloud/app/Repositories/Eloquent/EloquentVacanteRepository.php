@@ -50,6 +50,11 @@ class EloquentVacanteRepository implements VacanteRepository
         ]);
     }
 
+    public function publicadasParaSitemap(): Builder
+    {
+        return $this->publicadas()->setEagerLoads([])->select(['vacantes.id', 'vacantes.updated_at'])->orderBy('vacantes.id');
+    }
+
     public function buscarPublicada(int $id): ?Vacante
     {
         return $this->publicadas()->find($id);

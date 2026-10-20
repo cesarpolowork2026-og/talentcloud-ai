@@ -6,6 +6,8 @@ use App\Http\Controllers\DescargarCalendarioDeMiEntrevistaController;
 use App\Http\Controllers\DescargarCvController;
 use App\Http\Controllers\DescargarMisDatosController;
 use App\Http\Controllers\PostularDesdeEmpleosController;
+use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\SitemapController;
 use App\Livewire\Candidatos;
 use App\Livewire\Competencias;
 use App\Livewire\Dashboard;
@@ -45,6 +47,10 @@ Volt::route('/', 'pages.auth.login')->middleware('guest')->name('inicio');
 Route::get('empleos', Empleos\Listado::class)->name('empleos.index');
 Route::get('empleos/{id}', Empleos\Detalle::class)->whereNumber('id')->name('empleos.show');
 Route::get('empleos/{id}/postular', PostularDesdeEmpleosController::class)->whereNumber('id')->name('empleos.postular');
+
+// Para los buscadores: robots.txt (con la dirección del sitemap) y el sitemap de las páginas y vacantes públicas. Sin sesión.
+Route::get('robots.txt', RobotsController::class)->withoutMiddleware([StartSession::class, ShareErrorsFromSession::class, AuthenticateSession::class, ValidateCsrfToken::class])->name('robots');
+Route::get('sitemap.xml', SitemapController::class)->withoutMiddleware([StartSession::class, ShareErrorsFromSession::class, AuthenticateSession::class, ValidateCsrfToken::class])->name('sitemap');
 
 // Planes y precios (ampliación): página pública con los precios de PlanEmpresa.
 Route::get('planes', Planes\Precios::class)->name('planes');

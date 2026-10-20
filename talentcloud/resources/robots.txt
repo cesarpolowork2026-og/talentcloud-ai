@@ -18,3 +18,5 @@ Disallow: /profile
 Disallow: /seleccion
 Disallow: /usuarios
 Disallow: /vacantes
+# Lleva al inicio de sesión: no es contenido.
+Disallow: /empleos/*/postular
