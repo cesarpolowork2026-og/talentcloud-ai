@@ -43,7 +43,14 @@ new class extends Component
         $notificacion->markAsRead();
 
         if (filled($notificacion->data['url'] ?? null)) {
-            $this->redirect($notificacion->data['url'], navigate: true);
+            // Las URL se guardan absolutas con el APP_URL del worker de la cola, que puede no ser
+            // el dominio por el que se entra (túnel, balanceador): se navega solo a la ruta.
+            $partes = parse_url((string) $notificacion->data['url']);
+            $destino = ($partes['path'] ?? '/')
+                .(isset($partes['query']) ? '?'.$partes['query'] : '')
+                .(isset($partes['fragment']) ? '#'.$partes['fragment'] : '');
+
+            $this->redirect($destino, navigate: true);
         }
     }
 

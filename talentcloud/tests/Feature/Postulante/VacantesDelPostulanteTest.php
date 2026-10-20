@@ -274,7 +274,7 @@ it('en una vacante remota muestra la cobertura después de la modalidad y no rep
 
     expect($vacante->lugarYModalidad())->toBe($esperado);
 })->with([
-    'cobertura' => ['Perú', 'Remoto · Perú'],
+    'cobertura' => ['Perú', 'Perú · Remoto'],
     'repetida' => ['remoto', 'Remoto'],
     'sin ubicación' => [null, 'Remoto'],
 ]);

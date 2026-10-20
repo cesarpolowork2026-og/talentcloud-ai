@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Rol;
+use App\Notifications\VerificarCorreo;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
@@ -118,5 +119,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function scopeDeEmpresa(Builder $query, int $empresaId): void
     {
         $query->where('empresa_id', $empresaId);
+    }
+
+    /** El enlace de verificación va en cola: un correo caído no debe romper el registro. */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerificarCorreo);
     }
 }

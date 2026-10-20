@@ -63,8 +63,8 @@ class Vacante extends Model
     }
 
     /**
-     * "Madrid · Presencial", "Remoto" o "Remoto · Perú" (la cobertura de una vacante
-     * remota). Si el lugar repite la modalidad ("Remoto · Remoto"), se muestra una sola vez.
+     * "Madrid · Presencial", "Remoto" o "Perú · Remoto" (la cobertura de una vacante
+     * remota; siempre primero el lugar y luego la modalidad). Si el lugar repite la modalidad ("Remoto · Remoto"), se muestra una sola vez.
      */
     public function lugarYModalidad(): string
     {
@@ -75,7 +75,7 @@ class Vacante extends Model
             return $modalidad;
         }
 
-        return $this->modalidad->requiereUbicacion() ? "{$lugar} · {$modalidad}" : "{$modalidad} · {$lugar}";
+        return "{$lugar} · {$modalidad}";
     }
 
     /**

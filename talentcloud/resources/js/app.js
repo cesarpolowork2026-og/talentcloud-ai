@@ -266,7 +266,14 @@ document.addEventListener('alpine:init', () => {
 
             // Con la etiqueta ya elegida en el campo se muestran las sugerencias iniciales, no un filtro por ella.
             const consulta = this.texto === this.elegida ? '' : this.texto;
-            const resultado = await this.$wire.call(metodo, consulta);
+            let resultado = [];
+
+            try {
+                resultado = await this.$wire.call(metodo, consulta);
+            } catch (error) {
+                // Una petición fallida (red, sesión caducada) no debe dejar el buscador en «Buscando…» para siempre.
+                resultado = [];
+            }
 
             if (numero === this.pedido) {
                 this.opciones = vacio !== null && consulta === '' ? [{ id: '', etiqueta: vacio, detalle: null }, ...resultado] : resultado;

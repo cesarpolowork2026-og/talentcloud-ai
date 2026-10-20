@@ -186,7 +186,8 @@
     font-size: 20px;
   }
   .dialog-body { font-size: 14px; opacity: 0.85; }
-  .dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-2); }
+  /* TalentCloud: flex-wrap, para que los diálogos con varias acciones no se salgan por la izquierda. */
+  .dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-2); }
 
   /* TalentCloud: hueco donde caerá la tarjeta arrastrada en el Kanban. */
   .kanban-fantasma { opacity: 0.4; outline: 2px dashed var(--color-accent); outline-offset: -2px; }

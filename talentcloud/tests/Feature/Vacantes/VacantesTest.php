@@ -145,7 +145,7 @@ it('en una vacante remota la ubicación es una cobertura opcional y se muestra j
     $presencial = Vacante::factory()->make(['modalidad' => Modalidad::Presencial, 'ubicacion' => 'Lima']);
     $remota = Vacante::factory()->make(['modalidad' => Modalidad::Remoto, 'ubicacion' => 'Remoto']);
 
-    expect($soporte->lugarYModalidad())->toBe('Remoto · Perú')
+    expect($soporte->lugarYModalidad())->toBe('Perú · Remoto')
         ->and($presencial->lugarYModalidad())->toBe('Lima · Presencial')
         ->and($remota->lugarYModalidad())->toBe('Remoto');
 });

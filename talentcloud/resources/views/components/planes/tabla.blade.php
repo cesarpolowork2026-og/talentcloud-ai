@@ -9,6 +9,12 @@
 @props(['empresa' => null, 'cobro' => false])
 
 @php
+    // Sin empresa (página pública): adónde lleva elegir un plan; null si la sesión no es de una empresa.
+    $destinoPublico = $empresa !== null ? null : match (true) {
+        ! auth()->check() => route('register'),
+        auth()->user()->hasRole(\App\Enums\Rol::Empresa->value) => route('mi-empresa', ['abrir' => 'planes']),
+        default => null,
+    };
     $soles = fn (int $monto) => 'S/ '.number_format($monto, 0, ',', ' ');
     $cantidad = fn (?int $n, string $uno, string $varios) => $n === null ? ucfirst($varios).' sin límite' : number_format($n, 0, ',', ' ').' '.($n === 1 ? $uno : $varios);
 @endphp
@@ -88,6 +94,19 @@
                             {{ $plan->seCotiza() ? 'Solicitar cotización' : 'Solicitar plan '.$plan->etiqueta() }}
                         </x-ui.button>
                     @endif
+                </div>
+            @elseif ($destinoPublico !== null)
+                {{-- Página pública: sin sesión se crea la empresa; con sesión de empresa se elige en «Mi empresa». --}}
+                <div class="mt-auto pt-2">
+                    <x-ui.button size="sm" :variant="$recomendado ? 'primary' : 'secondary'" :href="$destinoPublico" wire:navigate>
+                        @if ($plan->seCotiza())
+                            Solicitar cotización
+                        @elseif (auth()->check())
+                            Elegir plan {{ $plan->etiqueta() }}
+                        @else
+                            {{ $plan === \App\Enums\PlanEmpresa::Gratis ? 'Empezar gratis' : 'Probar '.$plan->etiqueta().' gratis' }}
+                        @endif
+                    </x-ui.button>
                 </div>
             @endif
         </section>
