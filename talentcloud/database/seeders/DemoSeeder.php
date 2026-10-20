@@ -39,6 +39,7 @@ use App\Services\Postulaciones\PostularmeAVacante;
 use App\Services\Registro\RegistrarPostulante;
 use App\Services\Vacantes\CambiarEstadoVacante;
 use App\Tenancy\TenantContext;
+use Database\Seeders\Demo\CondicionesDeDemostracion;
 use Database\Seeders\Demo\CvsDeDemostracion;
 use Database\Seeders\Demo\CvsDeOtrasEmpresas;
 use Database\Seeders\Demo\DocumentosDePrueba;
@@ -88,7 +89,10 @@ class DemoSeeder extends Seeder
         app('mail.manager')->forgetMailers();
 
         try {
-            app(TenantContext::class)->ejecutarGlobal(fn () => $this->sembrar());
+            app(TenantContext::class)->ejecutarGlobal(function () {
+                $this->sembrar();
+                CondicionesDeDemostracion::aplicar();
+            });
         } finally {
             Carbon::setTestNow($relojAnterior);
             auth()->forgetUser();

@@ -19,6 +19,22 @@
         @endif
     </section>
 
+    @if ($vacante->jornada || $vacante->sueldoEnTexto())
+        <section>
+            <h2 class="mb-2 text-16">Condiciones</h2>
+            <dl class="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-15">
+                @if ($vacante->jornada)
+                    <dt class="text-neutral-700">Jornada</dt>
+                    <dd class="m-0">{{ $vacante->jornada->etiqueta() }}</dd>
+                @endif
+                @if ($vacante->sueldoEnTexto())
+                    <dt class="text-neutral-700">Sueldo</dt>
+                    <dd class="m-0">{{ $vacante->sueldoEnTexto() }}</dd>
+                @endif
+            </dl>
+        </section>
+    @endif
+
     @if ($empresa && ($empresa->sector || $empresa->descripcion || $sitioWeb))
         <section>
             <h2 class="mb-2 text-16">Sobre {{ $empresa->nombre }}</h2>

@@ -22,11 +22,18 @@ class ActualizarVacante
             throw new OperacionNoPermitida('Indica dónde se trabajará: una vacante '.mb_strtolower($datos->modalidad->etiqueta()).' necesita ubicación.', 'ubicacion');
         }
 
+        if ($datos->sueldoMinimo !== null && $datos->sueldoMaximo !== null && $datos->sueldoMaximo < $datos->sueldoMinimo) {
+            throw new OperacionNoPermitida('El sueldo máximo no puede ser menor que el mínimo.', 'sueldoMaximo');
+        }
+
         return $this->vacantes->actualizar($vacante, [
             'titulo' => $datos->titulo,
             'descripcion' => $datos->descripcion,
             'ubicacion' => $ubicacion,
             'modalidad' => $datos->modalidad,
+            'jornada' => $datos->jornada,
+            'sueldo_minimo' => $datos->sueldoMinimo,
+            'sueldo_maximo' => $datos->sueldoMaximo,
         ]);
     }
 }

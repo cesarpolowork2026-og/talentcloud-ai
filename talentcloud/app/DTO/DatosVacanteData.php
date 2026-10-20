@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Enums\Jornada;
 use App\Enums\Modalidad;
 
 final readonly class DatosVacanteData
@@ -11,5 +12,8 @@ final readonly class DatosVacanteData
         public ?string $descripcion,
         public ?string $ubicacion,
         public Modalidad $modalidad,
+        public ?Jornada $jornada = null,
+        public ?int $sueldoMinimo = null,
+        public ?int $sueldoMaximo = null,
     ) {}
 }

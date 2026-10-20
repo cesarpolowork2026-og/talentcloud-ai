@@ -114,6 +114,17 @@
                         </x-ui.field>
                     @endif
                 </div>
+                <div class="grid gap-3 sm:grid-cols-3">
+                    <x-ui.field label="Jornada (opcional)" for="vacante-jornada" error="jornada">
+                        <x-ui.select wire:model="jornada" id="vacante-jornada" :options="$jornadas" placeholder="Sin indicar" class="w-full" error="jornada" :disabled="! $editable" />
+                    </x-ui.field>
+                    <x-ui.field label="Sueldo mensual mínimo (S/)" for="vacante-sueldo-minimo" error="sueldoMinimo" hint="Opcional. Quien postula lo ve en la bolsa de empleos.">
+                        <x-ui.input wire:model="sueldoMinimo" id="vacante-sueldo-minimo" inputmode="numeric" placeholder="1500" error="sueldoMinimo" :disabled="! $editable" />
+                    </x-ui.field>
+                    <x-ui.field label="Sueldo mensual máximo (S/)" for="vacante-sueldo-maximo" error="sueldoMaximo">
+                        <x-ui.input wire:model="sueldoMaximo" id="vacante-sueldo-maximo" inputmode="numeric" placeholder="2200" error="sueldoMaximo" :disabled="! $editable" />
+                    </x-ui.field>
+                </div>
                 <x-ui.field label="Descripción" for="vacante-descripcion" error="descripcion">
                     <x-ui.textarea wire:model="descripcion" id="vacante-descripcion" rows="6" placeholder="Responsabilidades, contexto del equipo, condiciones…" error="descripcion" :disabled="! $editable" />
                 </x-ui.field>

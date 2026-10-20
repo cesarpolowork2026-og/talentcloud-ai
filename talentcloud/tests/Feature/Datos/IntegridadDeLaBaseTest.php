@@ -9,6 +9,7 @@ use App\Enums\EstadoSuscripcion;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
 use App\Enums\FuenteCompetencia;
+use App\Enums\Jornada;
 use App\Enums\Modalidad;
 use App\Enums\ModalidadEntrevista;
 use App\Enums\OrigenPostulacion;
@@ -65,6 +66,7 @@ beforeEach(function () {
 dataset('enums de la base', [
     'vacantes.estado' => ['vacantes', 'estado', EstadoVacante::class],
     'vacantes.modalidad' => ['vacantes', 'modalidad', Modalidad::class],
+    'vacantes.jornada' => ['vacantes', 'jornada', Jornada::class],
     'requisitos.tipo' => ['requisitos', 'tipo', TipoRequisito::class],
     'postulaciones.etapa' => ['postulaciones', 'etapa', EtapaPostulacion::class],
     'postulaciones.origen' => ['postulaciones', 'origen', OrigenPostulacion::class],

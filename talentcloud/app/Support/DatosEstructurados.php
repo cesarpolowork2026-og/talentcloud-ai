@@ -34,6 +34,18 @@ final class DatosEstructurados
             'url' => route('empleos.show', $vacante->id),
         ];
 
+        if ($vacante->jornada !== null) {
+            $oferta['employmentType'] = $vacante->jornada->tipoDeEmpleo();
+        }
+
+        if ($vacante->sueldo_minimo !== null || $vacante->sueldo_maximo !== null) {
+            // Solo lo que la empresa indicó: con un solo extremo, un valor; con los dos, un rango (siempre por mes).
+            $valor = ($vacante->sueldo_minimo !== null && $vacante->sueldo_maximo !== null && $vacante->sueldo_minimo !== $vacante->sueldo_maximo)
+                ? ['@type' => 'QuantitativeValue', 'minValue' => $vacante->sueldo_minimo, 'maxValue' => $vacante->sueldo_maximo, 'unitText' => 'MONTH']
+                : ['@type' => 'QuantitativeValue', 'value' => $vacante->sueldo_minimo ?? $vacante->sueldo_maximo, 'unitText' => 'MONTH'];
+            $oferta['baseSalary'] = ['@type' => 'MonetaryAmount', 'currency' => 'PEN', 'value' => $valor];
+        }
+
         if ($vacante->modalidad === Modalidad::Remoto) {
             // Remoto: Google pide los países desde donde se puede postular; sin cobertura escrita, Perú.
             $oferta['jobLocationType'] = 'TELECOMMUTE';

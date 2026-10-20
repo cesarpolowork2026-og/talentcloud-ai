@@ -5,6 +5,7 @@ namespace App\Livewire\Vacantes;
 use App\DTO\DatosVacanteData;
 use App\DTO\RequisitoData;
 use App\Enums\EstadoVacante;
+use App\Enums\Jornada;
 use App\Enums\Modalidad;
 use App\Enums\TipoRequisito;
 use App\Models\Competencia;
@@ -37,6 +38,13 @@ class Detalle extends Component
     public string $modalidad = 'remoto';
 
     public string $descripcion = '';
+
+    // Condiciones opcionales que se ven en la bolsa pública.
+    public string $jornada = '';
+
+    public string $sueldoMinimo = '';
+
+    public string $sueldoMaximo = '';
 
     // Nuevo requisito / edición.
     public string $competencia = '';
@@ -76,9 +84,15 @@ class Detalle extends Component
             'ubicacion' => ['nullable', 'string', 'max:120', Rule::requiredIf($this->modalidad !== Modalidad::Remoto->value)],
             'modalidad' => ['required', Rule::enum(Modalidad::class)],
             'descripcion' => ['nullable', 'string', 'max:5000'],
+            'jornada' => ['nullable', Rule::enum(Jornada::class)],
+            'sueldoMinimo' => ['nullable', 'integer', 'min:1', 'max:1000000'],
+            'sueldoMaximo' => ['nullable', 'integer', 'min:1', 'max:1000000', 'gte:sueldoMinimo'],
         ], messages: [
             'ubicacion.required' => 'Indica dónde se trabajará: una vacante presencial o híbrida necesita ubicación.',
-        ], attributes: ['titulo' => 'título del puesto']);
+            'sueldoMaximo.gte' => 'El sueldo máximo no puede ser menor que el mínimo.',
+            'sueldoMinimo.integer' => 'Escribe el sueldo en soles, sin decimales.',
+            'sueldoMaximo.integer' => 'Escribe el sueldo en soles, sin decimales.',
+        ], attributes: ['titulo' => 'título del puesto', 'sueldoMinimo' => 'sueldo mínimo', 'sueldoMaximo' => 'sueldo máximo']);
 
         try {
             $actualizar->ejecutar($vacante, new DatosVacanteData(
@@ -86,6 +100,9 @@ class Detalle extends Component
                 descripcion: $datos['descripcion'] ?: null,
                 ubicacion: $datos['ubicacion'] ?: null,
                 modalidad: Modalidad::from($datos['modalidad']),
+                jornada: ($datos['jornada'] ?? '') !== '' ? Jornada::from($datos['jornada']) : null,
+                sueldoMinimo: ($datos['sueldoMinimo'] ?? '') !== '' ? (int) $datos['sueldoMinimo'] : null,
+                sueldoMaximo: ($datos['sueldoMaximo'] ?? '') !== '' ? (int) $datos['sueldoMaximo'] : null,
             ));
         } catch (OperacionNoPermitida $e) {
             $this->addError($e->campo ?? 'titulo', $e->getMessage());
@@ -220,6 +237,7 @@ class Detalle extends Component
             'catalogo' => Competencia::nombres(),
             'tipos' => TipoRequisito::opciones(),
             'modalidades' => Modalidad::opciones(),
+            'jornadas' => Jornada::opciones(),
             'pesos' => [1 => '1 · bajo', 2 => '2', 3 => '3 · medio', 4 => '4', 5 => '5 · alto'],
             'requisitoSeleccionado' => $seleccionado,
         ])->title($vacante->titulo);
@@ -253,6 +271,9 @@ class Detalle extends Component
         $this->ubicacion = (string) $vacante->ubicacion;
         $this->modalidad = $vacante->modalidad->value;
         $this->descripcion = (string) $vacante->descripcion;
+        $this->jornada = (string) $vacante->jornada?->value;
+        $this->sueldoMinimo = (string) $vacante->sueldo_minimo;
+        $this->sueldoMaximo = (string) $vacante->sueldo_maximo;
     }
 
     /** Con el filtro por empresa, una vacante de otra empresa no se encuentra. */
