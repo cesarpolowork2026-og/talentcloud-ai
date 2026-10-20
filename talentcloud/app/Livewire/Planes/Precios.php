@@ -9,7 +9,7 @@ use Livewire\Component;
 
 /**
  * Planes y precios (/planes), página pública del menú junto a Empleos. Los
- * precios salen de PlanEmpresa; no hay pago en línea todavía.
+ * precios salen de PlanEmpresa; si el pago en línea está habilitado, sus textos lo dicen.
  */
 #[Layout('layouts.publico')]
 #[Title('Planes y precios')]

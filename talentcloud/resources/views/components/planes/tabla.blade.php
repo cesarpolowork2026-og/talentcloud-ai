@@ -103,7 +103,8 @@
                         @elseif (auth()->check())
                             Elegir plan {{ $plan->etiqueta() }}
                         @else
-                            {{ $plan === \App\Enums\PlanEmpresa::Gratis ? 'Empezar gratis' : 'Probar '.$plan->etiqueta().' gratis' }}
+                            {{-- Registrarse es gratis y trae la prueba del plan Pro: el botón no promete una prueba de Starter. --}}
+                            Crear empresa gratis
                         @endif
                     </x-ui.button>
                 </div>

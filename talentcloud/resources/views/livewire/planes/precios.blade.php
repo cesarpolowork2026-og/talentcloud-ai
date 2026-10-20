@@ -29,7 +29,12 @@
             </div>
             <div>
                 <dt class="font-semibold">¿Cómo cambio de plan?</dt>
-                <dd class="m-0 text-neutral-800">Desde «Mi empresa». El equipo de TalentCloud te escribe para coordinar el pago y lo aplica.</dd>
+                {{-- El texto sigue a lo que la aplicación hace de verdad (igual que los términos de uso y «Mi empresa»). --}}
+                @if (\App\Pagos\CobroEnLinea::habilitado())
+                    <dd class="m-0 text-neutral-800">Desde «Mi empresa». Starter y Pro se pagan con tarjeta en la página segura de Stripe y el plan cambia al confirmarse el pago; Enterprise se cotiza y el equipo de TalentCloud te escribe.</dd>
+                @else
+                    <dd class="m-0 text-neutral-800">Desde «Mi empresa». El equipo de TalentCloud te escribe para coordinar el pago y lo aplica.</dd>
+                @endif
             </div>
         </dl>
     </section>
