@@ -245,13 +245,15 @@ it('no deja al admin mover postulaciones ni leer las notas internas', function (
         ->and($this->clara->can('gestionarNotas', $postulacion))->toBeTrue();
 });
 
-it('abre el detalle de la empresa desde el enlace del panel', function () {
+it('lleva desde el panel a la lista de Empresas ya filtrada por nombre, sin filtro de estado', function () {
     actuarComo($this->admin);
 
-    Livewire::withQueryParams(['ver' => $this->vela->id])
+    Livewire::withQueryParams(['q' => 'Vela'])
         ->test(EmpresasListado::class)
-        ->assertSet('mostrarDetalle', true)
-        ->assertSet('empresaSeleccionada', $this->vela->id);
+        ->assertSet('busqueda', 'Vela')
+        ->assertSet('mostrarDetalle', false)
+        ->assertSee('Vela Studio')
+        ->assertDontSeeHtml('wire:click="filtrarEstado(');
 });
 
 it('saca de inmediato a quien pertenece a una empresa suspendida y le dice por qué', function () {

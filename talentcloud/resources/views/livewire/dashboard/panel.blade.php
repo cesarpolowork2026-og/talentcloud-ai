@@ -38,7 +38,7 @@
                         'clave' => $plan->value,
                         'etiqueta' => $plan->etiqueta(),
                         'valor' => $plataforma->empresasConPlan($plan),
-                        'detalle' => collect($plataforma->nombresConPlan($plan))->map(fn (array $e) => ['texto' => $e['nombre'], 'url' => route('empresas.index', ['ver' => $e['id']])])->all(),
+                        'detalle' => collect($plataforma->nombresConPlan($plan))->map(fn (array $e) => ['texto' => $e['nombre'], 'url' => route('empresas.index', ['q' => $e['nombre']])])->all(),
                     ])->all()"
                 />
             </x-ui.card>
