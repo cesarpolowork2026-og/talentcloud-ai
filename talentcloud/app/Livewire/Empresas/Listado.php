@@ -57,6 +57,12 @@ class Listado extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Empresa::class);
+
+        // «Aplicar plan» del panel de la plataforma: /empresas?cambiar-plan={id} abre el cambio con el plan solicitado propuesto.
+        $cambiar = request()->query('cambiar-plan');
+        if (is_numeric($cambiar)) {
+            $this->abrirCambioDePlan((int) $cambiar);
+        }
     }
 
     /** @return list<string> */

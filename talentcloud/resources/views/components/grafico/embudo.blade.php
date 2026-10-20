@@ -27,13 +27,13 @@
             <div class="embudo-etapa">
                 {{ $fila['etiqueta'] }}
                 @if ($fila['conversion'] !== null)
-                    <span class="embudo-conversion">{{ $fila['conversion'] }} % de la etapa anterior</span>
+                    <span class="embudo-conversion">{{ $fila['total'] > 0 && $fila['conversion'] === 0 ? '<1' : $fila['conversion'] }} % de la etapa anterior</span>
                 @endif
             </div>
             <div class="embudo-forma" style="--embudo-color: var(--viz-ord-{{ min(5, $i + 1) }}); --embudo-forma: {{ $forma }}; --orden: {{ $i }};" aria-hidden="true"></div>
             <div class="embudo-cifra">
                 {{ number_format($fila['total'], 0, ',', ' ') }}
-                <small>{{ $fila['porcentaje'] }} % del total</small>
+                <small>{{ $fila['total'] > 0 && $fila['porcentaje'] === 0 ? '<1' : $fila['porcentaje'] }} % del total</small>
             </div>
         </li>
     @endforeach

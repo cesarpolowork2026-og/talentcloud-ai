@@ -21,7 +21,7 @@
     @else
         <x-ui.actualizable><x-ui.table>
             <x-slot:head>
-                <th>Hoja</th><th>Tipo</th><th>Consumidor</th><th>Presentada</th><th>Fecha límite</th><th>Estado</th>
+                <th>Hoja</th><th>Tipo</th><th>Consumidor</th><th>Presentada</th><th>Fecha límite</th><th>Estado</th><th>Acción</th>
             </x-slot:head>
             @foreach ($filas as $fila)
                 <tr wire:key="reclamacion-{{ $fila->id }}">
@@ -39,6 +39,14 @@
                         @endif
                     </td>
                     <td><x-ui.estado :valor="$fila->estado" /></td>
+                    <td class="whitespace-nowrap">
+                        {{-- Responder se hace en la hoja: el botón la abre con el formulario de respuesta (las respondidas, en lectura). --}}
+                        @if ($fila->estado === App\Enums\EstadoReclamacion::Pendiente)
+                            <x-ui.button size="sm" variant="primary" wire:click="verDetalle({{ $fila->id }})">Responder</x-ui.button>
+                        @else
+                            <x-ui.button size="sm" wire:click="verDetalle({{ $fila->id }})">Ver respuesta</x-ui.button>
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </x-ui.table>

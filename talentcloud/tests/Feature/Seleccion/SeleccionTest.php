@@ -75,6 +75,15 @@ it('abre desde el menú la vacante activa más reciente', function () {
     $this->get('/kanban')->assertOk()->assertSee('Selección · Desarrollador Backend');
 });
 
+it('abre la vacante con más postulaciones en curso y no una recién creada y vacía', function () {
+    // Más reciente que la de Backend, pero sin nadie que revisar.
+    Vacante::factory()->deEmpresa($this->nimbus)->create(['titulo' => 'Diseñador', 'updated_at' => now()->addMinute()]);
+
+    $this->get('/seleccion')->assertOk()
+        ->assertSee('Selección · Desarrollador Backend')
+        ->assertDontSee('Selección · Diseñador');
+});
+
 it('muestra un estado vacío si no hay vacantes activas', function () {
     $this->backend->update(['estado' => EstadoVacante::Cerrada]);
 

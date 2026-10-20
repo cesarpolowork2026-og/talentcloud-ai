@@ -36,17 +36,19 @@
             @if ($plataforma->solicitudesDePlan->isNotEmpty())
                 <x-ui.card class="mb-4">
                     <div class="card-kicker">Solicitudes de cambio de plan</div>
-                    <p class="m-0 text-13 text-neutral-700">Coordina el pago con la empresa y aplica el plan con «Cambiar plan» en Empresas; eso atiende la solicitud.</p>
+                    <p class="m-0 text-13 text-neutral-700">Coordina el pago con la empresa y pulsa «Aplicar plan»: se abre el cambio de plan con el plan solicitado ya propuesto, y al confirmarlo la solicitud se atiende.</p>
                     <x-ui.table>
                         <x-slot:head>
-                            <th>Empresa</th><th>Plan actual</th><th>Solicita</th><th>Fecha</th>
+                            <th>Empresa</th><th>Plan actual</th><th>Solicita</th><th>Fecha</th><th>Acción</th>
                         </x-slot:head>
-                        @foreach ($plataforma->solicitudesDePlan as $empresa)
-                            <tr wire:key="solicitud-{{ $empresa->id }}">
-                                <td>{{ $empresa->nombre }}</td>
-                                <td>{{ $empresa->etiquetaDelPlan() }}</td>
-                                <td>{{ $empresa->plan_solicitado?->etiqueta() }}</td>
-                                <td>{{ \App\Support\Formato::fechaCorta($empresa->plan_solicitado_at) }}</td>
+                        {{-- Variables propias del bucle: `$empresa` y `$uso` las usa más abajo la tarjeta «Tu plan» de una empresa. --}}
+                        @foreach ($plataforma->solicitudesDePlan as $solicitante)
+                            <tr wire:key="solicitud-{{ $solicitante->id }}">
+                                <td>{{ $solicitante->nombre }}</td>
+                                <td>{{ $solicitante->etiquetaDelPlan() }}</td>
+                                <td>{{ $solicitante->plan_solicitado?->etiqueta() }}</td>
+                                <td>{{ \App\Support\Formato::fechaCorta($solicitante->plan_solicitado_at) }}</td>
+                                <td><x-ui.button size="sm" variant="primary" :href="route('empresas.index', ['cambiar-plan' => $solicitante->id])" wire:navigate>Aplicar plan</x-ui.button></td>
                             </tr>
                         @endforeach
                     </x-ui.table>
@@ -83,13 +85,13 @@
                             <th>Empresa</th><th>Plan</th><th>Vacantes activas</th><th>Usuarios e invitaciones</th><th>IA este mes</th>
                         </x-slot:head>
                         @foreach ($plataforma->cercaDelLimite as $fila)
-                            @php($uso = $fila['uso'])
+                            @php($usoDeLaFila = $fila['uso'])
                             <tr wire:key="limite-{{ $fila['empresa']->id }}">
                                 <td>{{ $fila['empresa']->nombre }}</td>
-                                <td>{{ $uso->etiquetaDelPlan() }}</td>
-                                <td>{{ $uso->vacantesActivas }} {{ $uso->limiteVacantes() === null ? '· sin límite' : 'de '.$uso->limiteVacantes() }}</td>
-                                <td>{{ $uso->usuariosActivos + $uso->invitacionesPendientes }} {{ $uso->limiteUsuarios() === null ? '· sin límite' : 'de '.$uso->limiteUsuarios() }}</td>
-                                <td>{{ $uso->postulacionesConIa }} {{ $uso->cupoIa() === null ? '· sin límite' : 'de '.$uso->cupoIa() }}</td>
+                                <td>{{ $usoDeLaFila->etiquetaDelPlan() }}</td>
+                                <td>{{ $usoDeLaFila->vacantesActivas }} {{ $usoDeLaFila->limiteVacantes() === null ? '· sin límite' : 'de '.$usoDeLaFila->limiteVacantes() }}</td>
+                                <td>{{ $usoDeLaFila->usuariosActivos + $usoDeLaFila->invitacionesPendientes }} {{ $usoDeLaFila->limiteUsuarios() === null ? '· sin límite' : 'de '.$usoDeLaFila->limiteUsuarios() }}</td>
+                                <td>{{ $usoDeLaFila->postulacionesConIa }} {{ $usoDeLaFila->cupoIa() === null ? '· sin límite' : 'de '.$usoDeLaFila->cupoIa() }}</td>
                             </tr>
                         @endforeach
                     </x-ui.table>
@@ -318,7 +320,8 @@
         @if ($embudo->total === 0)
             <x-ui.empty-state icon="funnel" :message="'No hay postulaciones en los últimos '.$embudo->dias.' días.'" />
         @else
-            <div class="grid items-stretch gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+            {{-- items-start: la tarjeta del embudo mide lo que su contenido, no la altura de la columna de la derecha (dejaba un vacío debajo). --}}
+            <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
                 <x-ui.card class="!bg-white">
                     <x-grafico.embudo :etapas="collect($embudo->etapas)->map(fn (array $f) => [
                         'clave' => $f['etapa']->value,
@@ -327,8 +330,9 @@
                         'porcentaje' => $f['porcentaje'],
                         'conversion' => $f['conversion'],
                     ])->all()" />
-                    @if ($embudo->conversionTotal() !== null)
-                        <p class="m-0 text-14 text-neutral-800">De cada 100 postulaciones del periodo, <span class="font-semibold">{{ $embudo->conversionTotal() }}</span> {{ $embudo->conversionTotal() === 1 ? 'llegó' : 'llegaron' }} a {{ $embudo->etapas[array_key_last($embudo->etapas)]['etapa']->etiqueta() }}.</p>
+                    @php($conversion = $embudo->conversionTotalTexto())
+                    @if ($conversion !== null)
+                        <p class="m-0 text-14 text-neutral-800">De cada 100 postulaciones del periodo, <span class="font-semibold">{{ $conversion }}</span> {{ in_array($conversion, ['1', 'menos de 1'], true) ? 'llegó' : 'llegaron' }} a {{ $embudo->etapas[array_key_last($embudo->etapas)]['etapa']->etiqueta() }}.</p>
                     @endif
                     <p class="m-0 text-13 text-neutral-700">
                         {{ $embudo->descartadas }} {{ $embudo->descartadas === 1 ? 'descartada' : 'descartadas' }} por la empresa y {{ $embudo->retiradas }} {{ $embudo->retiradas === 1 ? 'retirada' : 'retiradas' }} por el candidato: cuentan en las etapas a las que llegaron antes.

@@ -178,6 +178,20 @@ it('cuenta días hábiles sin fines de semana ni feriados, Semana Santa incluida
 
 // — Atención por el admin SaaS —
 
+it('cada hoja tiene un botón visible: «Responder» si está pendiente y «Ver respuesta» si ya se respondió', function () {
+    llenarHojaDeReclamacion()->call('presentar');
+    $hoja = Reclamacion::sole();
+    actuarComo($this->admin);
+
+    Livewire::test(Listado::class)
+        ->assertSee('Responder')
+        ->assertDontSee('Ver respuesta')
+        ->call('verDetalle', $hoja->id)
+        ->set('respuesta', 'Revisamos tu caso y anulamos el cobro duplicado; verás la devolución en 5 días.')
+        ->call('responder')
+        ->assertSee('Ver respuesta');
+});
+
 it('el admin ve la hoja y registra la respuesta, que se envía al consumidor una sola vez', function () {
     llenarHojaDeReclamacion()->call('presentar');
     $hoja = Reclamacion::sole();

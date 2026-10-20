@@ -84,9 +84,16 @@ class Central extends Component
     {
         $this->authorize('viewAny', Vacante::class);
 
-        // /kanban sin vacante: la activa con movimiento más reciente, como el enlace del prototipo.
+        // /seleccion sin vacante: la activa con más postulaciones en curso (donde hay algo que revisar) y, a igualdad, la de
+        // movimiento más reciente. Solo por «modificada más recientemente» abría una vacante recién creada y vacía.
         $vacante ??= Vacante::query()
             ->whereIn('estado', [EstadoVacante::Abierta, EstadoVacante::EnRevision])
+            ->orderByDesc(
+                Postulacion::query()
+                    ->selectRaw('count(*)')
+                    ->whereColumn('postulaciones.vacante_id', 'vacantes.id')
+                    ->whereNotIn('etapa', [EtapaPostulacion::Contratado->value, EtapaPostulacion::Descartado->value])
+            )
             ->orderByDesc('updated_at')
             ->first();
 

@@ -39,6 +39,28 @@ final readonly class EmbudoDeSeleccionData
         return $this->total === 0 || $ultima === null ? null : (int) round($ultima['total'] * 100 / $this->total);
     }
 
+    /**
+     * La misma conversión para mostrarla sin engañar: con el 0,4 % de 1 664 postulaciones, «0» sería falso. «menos de 1»
+     * por debajo de 1, un decimal hasta 10 y entero desde ahí.
+     */
+    public function conversionTotalTexto(): ?string
+    {
+        $ultima = $this->etapas[array_key_last($this->etapas)] ?? null;
+
+        if ($this->total === 0 || $ultima === null) {
+            return null;
+        }
+
+        $porcentaje = $ultima['total'] * 100 / $this->total;
+
+        return match (true) {
+            $ultima['total'] === 0 => '0',
+            $porcentaje < 1 => 'menos de 1',
+            $porcentaje < 10 => number_format($porcentaje, 1, ',', ''),
+            default => (string) (int) round($porcentaje),
+        };
+    }
+
     public function postulacionesDe(OrigenPostulacion $origen): int
     {
         return $this->porOrigen[$origen->value] ?? 0;
