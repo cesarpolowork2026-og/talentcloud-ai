@@ -8,7 +8,8 @@
 
     <x-ui.listado-controles
         placeholder="Buscar empresa…"
-        :estados="$this->opcionesEstado()"
+        {{-- Mientras se busca por nombre, el filtro por estado sobra: la fila ya dice el estado de cada empresa. --}}
+        :estados="$busqueda === '' ? $this->opcionesEstado() : []"
         :estado-actual="$estado"
         :ordenes="$this->opcionesOrden()"
         :direccion="$direccion"

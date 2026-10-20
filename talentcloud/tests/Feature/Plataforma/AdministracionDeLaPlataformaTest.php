@@ -263,3 +263,17 @@ it('saca de inmediato a quien pertenece a una empresa suspendida y le dice por q
         ->assertRedirect(route('login'))
         ->assertSessionHas('status', VerificarAcceso::EMPRESA_SUSPENDIDA);
 });
+
+it('oculta el filtro por estado al buscar una empresa y lo reinicia', function () {
+    actuarComo($this->admin);
+
+    Livewire::test(EmpresasListado::class)
+        ->assertSee('Suspendida')
+        ->call('filtrarEstado', 'suspendida')
+        ->set('busqueda', 'vela')
+        ->assertSet('estado', '')
+        ->assertSee('Vela Studio')
+        ->assertDontSeeHtml('wire:click="filtrarEstado(')
+        ->set('busqueda', '')
+        ->assertSeeHtml('wire:click="filtrarEstado(');
+});

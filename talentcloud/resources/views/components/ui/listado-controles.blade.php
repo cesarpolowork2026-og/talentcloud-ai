@@ -21,7 +21,8 @@
     />
 
     @if ($estados)
-        <div class="flex flex-wrap gap-2" role="group" aria-label="{{ $etiquetaEstados }}">
+        <div class="flex flex-wrap items-center gap-2" role="group" aria-label="{{ $etiquetaEstados }}">
+            <span class="text-13 text-neutral-600" aria-hidden="true">Filtrar:</span>
             @foreach (['' => 'Todas'] + $estados as $valor => $etiqueta)
                 <button
                     type="button"

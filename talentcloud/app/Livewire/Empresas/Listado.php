@@ -72,6 +72,16 @@ class Listado extends Component
         }
     }
 
+    /** Al buscar por nombre se oculta el filtro por estado; si había uno elegido, se reinicia para que no quede aplicado sin verse. */
+    public function updatedBusqueda(): void
+    {
+        $this->resetPage();
+
+        if ($this->busqueda !== '') {
+            $this->estado = '';
+        }
+    }
+
     /** @return list<string> */
     protected function camposBusqueda(): array
     {
