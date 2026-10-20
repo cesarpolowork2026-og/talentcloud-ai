@@ -35,7 +35,8 @@
             <p class="field-error -mt-3 mb-4 text-14" role="alert">{{ $message }}</p>
         @enderror
 
-        @if (! $editable)
+        {{-- Cerrada = nadie la mueve; abierta pero sin edición (admin SaaS) ya lo dice el aviso de supervisión. --}}
+        @if ($vacanteCerrada)
             <p class="-mt-3 mb-4 text-13 text-neutral-600">La vacante está cerrada: la selección es de solo lectura.</p>
         @endif
 

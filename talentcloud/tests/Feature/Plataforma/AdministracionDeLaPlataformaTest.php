@@ -7,6 +7,7 @@ use App\Livewire\Competencias\Listado as Competencias;
 use App\Livewire\Dashboard\Panel;
 use App\Livewire\Empresas\Listado as EmpresasListado;
 use App\Livewire\Plataforma\Auditoria as RegistroDeAcciones;
+use App\Livewire\Seleccion\Central;
 use App\Livewire\Usuarios\Listado as Usuarios;
 use App\Livewire\Vacantes\Detalle;
 use App\Models\Auditoria;
@@ -310,4 +311,16 @@ it('sugiere al fusionar primero las competencias parecidas y filtra por nombre o
         ->and(array_column($buscar('tableau'), 'etiqueta'))->toBe(['Zeta']);
 
     $componente->assertSee('Esta acción no se puede deshacer');
+});
+
+it('no dice que una vacante abierta está cerrada cuando el admin solo la supervisa', function () {
+    actuarComo($this->admin);
+
+    Livewire::test(Central::class, ['vacante' => $this->vacante])
+        ->assertDontSee('La vacante está cerrada');
+
+    $this->vacante->forceFill(['estado' => EstadoVacante::Cerrada])->save();
+
+    Livewire::test(Central::class, ['vacante' => $this->vacante->fresh()])
+        ->assertSee('La vacante está cerrada');
 });

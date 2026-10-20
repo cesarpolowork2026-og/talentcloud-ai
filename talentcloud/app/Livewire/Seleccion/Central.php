@@ -233,6 +233,7 @@ class Central extends Component
             'activas' => $todas - (int) ($totales[EtapaPostulacion::Descartado->value]->total ?? 0),
             // Mismo criterio que PostulacionPolicy@update: personal de la empresa de la vacante.
             'editable' => $vacante->estado !== EstadoVacante::Cerrada && $this->usuario()->can('update', $vacante),
+            'vacanteCerrada' => $vacante->estado === EstadoVacante::Cerrada,
             'seleccionada' => $seleccionada,
             // "Evaluar" solo cuando se puede (entrevista realizada, no retirada, aún sin evaluar por mí).
             'puedeEvaluar' => $seleccionada !== null && $this->puedeEvaluar($seleccionada),
