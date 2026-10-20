@@ -20,10 +20,14 @@
                 <x-ui.stat label="Empresas activas" :value="$plataforma->empresasActivas" highlight />
                 <x-ui.stat label="Suspendidas" :value="$plataforma->empresasSuspendidas" />
                 <x-ui.stat :label="'En prueba '.PlanEmpresa::PLAN_DE_PRUEBA->etiqueta()" :value="$plataforma->enPrueba" />
-                <x-ui.stat label="Ingreso mensual estimado" :value="($plataforma->ingresoConEnterprise ? 'desde ' : '').$soles($plataforma->ingresoMensual)" />
+                <x-ui.stat label="Ingreso mensual de referencia" :value="$soles($plataforma->ingresoMensual)" />
             </div>
             <p class="-mt-2 mb-4 text-13 text-neutral-700">
-                El ingreso estimado suma el precio mensual (sin IGV) del plan contratado de cada empresa activa; las pruebas aún no pagan{{ $plataforma->ingresoConEnterprise ? ' y Enterprise se cuenta con su precio «desde», porque se cotiza' : '' }}. Es una referencia, no una cifra de facturación.
+                Suma el precio de lista mensual (sin IGV) de Starter y Pro de las empresas activas; las pruebas aún no pagan.
+                @if ($plataforma->enterpriseSinPrecio > 0)
+                    {{ $plataforma->enterpriseSinPrecio === 1 ? '1 empresa Enterprise queda' : $plataforma->enterpriseSinPrecio.' empresas Enterprise quedan' }} por cotizar y no suma.
+                @endif
+                Es una referencia, no lo cobrado: el ingreso real se verá cuando se active el cobro en línea.
             </p>
 
             <x-ui.card class="mb-4 !bg-white">

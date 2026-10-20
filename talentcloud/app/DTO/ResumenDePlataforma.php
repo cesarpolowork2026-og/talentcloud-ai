@@ -31,7 +31,7 @@ final readonly class ResumenDePlataforma
         public int $vacantesActivas = 0,
         public int $postulacionesDelMes = 0,
         public int $ingresoMensual = 0,
-        public bool $ingresoConEnterprise = false,
+        public int $enterpriseSinPrecio = 0,
         public array $crecimiento = [],
         public int $trabajosFallidos = 0,
         public int $trabajosEnCola = 0,

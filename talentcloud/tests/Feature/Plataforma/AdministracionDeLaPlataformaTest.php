@@ -191,7 +191,7 @@ it('el panel muestra ingresos estimados, crecimiento, estado del sistema y últi
 
     // Pro: S/ 349 al mes.
     Livewire::test(Panel::class)
-        ->assertSee('Ingreso mensual estimado')
+        ->assertSee('Ingreso mensual de referencia')
         ->assertSee('S/ 349')
         ->assertSee('Postulaciones por semana')
         ->assertSee('Empresas nuevas por semana')

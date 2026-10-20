@@ -77,9 +77,9 @@ class PanelDePlataforma
             postulantes: User::role(Rol::Postulante->value)->count(),
             vacantesActivas: Vacante::query()->whereIn('estado', EstadoVacante::activos())->count(),
             postulacionesDelMes: Postulacion::query()->where('created_at', '>=', Carbon::now()->startOfMonth())->count(),
-            // Estimado: lo que sumarían las empresas activas con su plan contratado (las pruebas aún no pagan).
-            ingresoMensual: $activas->sum(fn (Empresa $e) => $e->plan->precioMensual()),
-            ingresoConEnterprise: $activas->contains(fn (Empresa $e) => $e->plan->seCotiza()),
+            // Referencia con precios de lista: Enterprise se cotiza y no suma; las pruebas aún no pagan.
+            ingresoMensual: $activas->reject(fn (Empresa $e) => $e->plan->seCotiza())->sum(fn (Empresa $e) => $e->plan->precioMensual()),
+            enterpriseSinPrecio: $activas->filter(fn (Empresa $e) => $e->plan->seCotiza())->count(),
             crecimiento: $this->crecimiento(),
             trabajosFallidos: DB::table('failed_jobs')->count(),
             trabajosEnCola: DB::table('jobs')->count(),
