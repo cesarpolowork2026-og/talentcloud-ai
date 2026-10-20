@@ -3,6 +3,7 @@
 namespace App\Livewire\Empleos;
 
 use App\Repositories\Contracts\VacanteRepository;
+use App\Support\DatosEstructurados;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -33,7 +34,11 @@ class Detalle extends Component
 
         return view('livewire.empleos.detalle', ['vacante' => $vacante])
             ->title($vacante->titulo ?? 'Empleo')
-            ->layoutData(['descripcion' => $vacante === null ? null
-                : $vacante->titulo.' en '.$vacante->empresa?->nombre.' · '.$vacante->lugarYModalidad().'. Postula con tu CV en TalentCloud AI.']);
+            ->layoutData([
+                'descripcion' => $vacante === null ? null
+                    : $vacante->titulo.' en '.$vacante->empresa?->nombre.' · '.$vacante->lugarYModalidad().'. Postula con tu CV en TalentCloud AI.',
+                // La oferta para Google for Jobs: solo de una vacante pública (cerrada o suspendida no llega aquí).
+                'jsonld' => $vacante === null ? null : DatosEstructurados::json(DatosEstructurados::ofertaDeEmpleo($vacante)),
+            ]);
     }
 }

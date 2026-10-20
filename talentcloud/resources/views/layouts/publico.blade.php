@@ -10,6 +10,9 @@
     @isset($descripcion)
         <meta name="description" content="{{ $descripcion }}">
     @endisset
+    @isset($jsonld)
+        <script type="application/ld+json">{!! $jsonld !!}</script>
+    @endisset
 </head>
 <body class="antialiased">
 <div class="flex min-h-screen flex-col bg-bg">

@@ -22,6 +22,9 @@
     @include('partials.head', ['title' => request()->routeIs('inicio') ? null : ($title ?? null), 'compartir' => $descripcionDelSitio])
     <meta name="description" content="{{ $descripcionDelSitio }}">
     <link rel="canonical" href="{{ route('inicio') }}">
+    @if (request()->routeIs('inicio'))
+        <script type="application/ld+json">{!! \App\Support\DatosEstructurados::json(\App\Support\DatosEstructurados::organizacionYSitio()) !!}</script>
+    @endif
 </head>
 <body class="antialiased">
 <div class="presentacion min-h-screen bg-bg" x-data="{ seccion: 'inicio' }">
