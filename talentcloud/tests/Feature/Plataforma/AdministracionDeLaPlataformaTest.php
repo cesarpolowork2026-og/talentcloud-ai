@@ -324,3 +324,12 @@ it('no dice que una vacante abierta está cerrada cuando el admin solo la superv
     Livewire::test(Central::class, ['vacante' => $this->vacante->fresh()])
         ->assertSee('La vacante está cerrada');
 });
+
+it('explica al admin que supervisa una vacante abierta y no que está cerrada', function () {
+    actuarComo($this->admin);
+
+    Livewire::test(Detalle::class, ['vacante' => $this->vacante])
+        ->assertSee('Solo la empresa puede modificar esta vacante')
+        ->assertDontSee('Una vacante cerrada no se puede modificar')
+        ->assertDontSee('Guardar cambios');
+});

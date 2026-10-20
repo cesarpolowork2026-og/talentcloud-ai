@@ -121,7 +121,7 @@
                     <x-ui.button type="submit" variant="primary" wire:loading.attr="disabled">Guardar cambios</x-ui.button>
                     <x-ui.action-message on="vacante-guardada" />
                 @else
-                    <p class="card-body">Una vacante cerrada no se puede modificar.</p>
+                    <p class="card-body">{{ $vacante->estado->esEditable() ? 'Solo la empresa puede modificar esta vacante: tú la estás supervisando.' : 'Una vacante cerrada no se puede modificar.' }}</p>
                 @endif
             </form>
         </x-ui.card>
