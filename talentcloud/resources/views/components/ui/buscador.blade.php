@@ -1,12 +1,13 @@
 {{--
     Buscador con resultados del servidor (combobox accesible): reemplaza a un <select> cuando las opciones
     pueden ser miles (vacantes, postulaciones). Lógica: buscadorRemoto (app.js).
+    enLinea: la lista ocupa su lugar en el flujo (para diálogos); por defecto flota sobre el contenido.
     metodo: método del componente de Livewire que recibe el texto y devuelve hasta 20 [{id, etiqueta, detalle}].
     modelo: propiedad de Livewire que guarda el id elegido (opcional).
     etiqueta: texto de la elección actual. vacio: texto de la opción «ninguna» (por ejemplo «Todas las vacantes»).
     Al elegir lanza el evento «elegido» ({ id, etiqueta }): <x-ui.buscador x-on:elegido="…" />.
 --}}
-@props(['id', 'metodo', 'modelo' => null, 'etiqueta' => '', 'vacio' => null, 'placeholder' => 'Escribe para buscar…', 'error' => null])
+@props(['id', 'metodo', 'modelo' => null, 'etiqueta' => '', 'vacio' => null, 'placeholder' => 'Escribe para buscar…', 'error' => null, 'enLinea' => false])
 
 <div
     x-data="buscadorRemoto({ metodo: @js($metodo), modelo: @js($modelo), etiqueta: @js($etiqueta), vacio: @js($vacio) })"
@@ -38,7 +39,12 @@
         id="{{ $id }}-lista"
         role="listbox"
         aria-label="Resultados"
-        class="absolute left-0 right-0 z-20 m-0 mt-1 max-h-72 min-w-[260px] list-none overflow-auto rounded border border-divider bg-surface p-1 shadow-md"
+        @class([
+            'm-0 mt-1 list-none overflow-auto rounded border border-divider bg-surface p-1',
+            // En línea (dentro de un diálogo) la lista empuja el contenido en vez de quedar recortada por él.
+            'max-h-56' => $enLinea,
+            'absolute left-0 right-0 z-20 max-h-72 min-w-[260px] shadow-md' => ! $enLinea,
+        ])
         x-show="abierto"
         x-cloak
     >

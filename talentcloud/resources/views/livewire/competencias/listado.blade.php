@@ -74,7 +74,7 @@
     </x-ui.dialog>
 
     {{-- Fusionar duplicados --}}
-    <x-ui.dialog wire:model="mostrarFusion" :title="'Fusionar '.($seleccionada?->nombre ?? '')" max-width="480px">
+    <x-ui.dialog wire:model="mostrarFusion" :title="'Fusionar '.($seleccionada?->nombre ?? '')" ancho="540px">
         <form wire:submit="fusionar" id="form-fusion" class="grid gap-3">
             <p class="m-0 text-14">«{{ $seleccionada?->nombre }}» se eliminará y su nombre quedará como sinónimo de la competencia que conserves.</p>
             @if ($usosDeLaSeleccionada)
@@ -86,7 +86,7 @@
                 </p>
             @endif
             <x-ui.field label="Competencia que se conserva" for="fusion-destino" error="destinoId" hint="Escribe para buscar por nombre o sinónimo. Las parecidas aparecen primero.">
-                <x-ui.buscador id="fusion-destino" metodo="buscarDestinos" modelo="destinoId" placeholder="Busca la competencia que se conserva…" error="destinoId" wire:key="buscador-fusion-{{ $seleccionada?->id }}" />
+                <x-ui.buscador id="fusion-destino" metodo="buscarDestinos" modelo="destinoId" placeholder="Busca la competencia que se conserva…" error="destinoId" :en-linea="true" wire:key="buscador-fusion-{{ $seleccionada?->id }}" />
             </x-ui.field>
         </form>
         <x-slot:actions>

@@ -127,16 +127,18 @@ class Listado extends Component
         $this->authorize('update', $origen);
 
         $clave = Competencia::normalizar($texto);
-        $palabras = fn (Competencia $c): array => collect([$c->nombre, ...$c->sinonimos])
+        $palabras = fn (array $textos): array => collect($textos)
             ->flatMap(fn (string $t) => explode(' ', Competencia::normalizar($t)))
             ->filter(fn (string $p) => mb_strlen($p) >= 4)
             ->unique()->values()->all();
-        $deOrigen = $palabras($origen);
+        // Se compara el nombre de la que se fusiona con el nombre y los sinónimos de las demás (no sus sinónimos:
+        // «Google Analytics» haría parecida a toda competencia de Google).
+        $deOrigen = $palabras([$origen->nombre]);
 
         $candidatas = Competencia::query()->whereKeyNot($origen->id)->orderBy('nombre')->get()
             ->map(fn (Competencia $c) => [
                 'competencia' => $c,
-                'parecida' => array_intersect($deOrigen, $palabras($c)) !== [],
+                'parecida' => array_intersect($deOrigen, $palabras([$c->nombre, ...$c->sinonimos])) !== [],
                 'texto' => collect([$c->nombre, ...$c->sinonimos])->map(fn (string $t) => Competencia::normalizar($t))->implode(' | '),
             ])
             ->when($clave !== '', fn ($lista) => $lista->filter(fn (array $f) => str_contains($f['texto'], $clave)))
