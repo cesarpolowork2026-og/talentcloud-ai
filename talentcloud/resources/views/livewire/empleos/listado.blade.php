@@ -20,6 +20,7 @@
             @endforeach
         </div>
 
-        {{ $filas->links() }}
+        {{-- Enlaces reales a ?page=N: sin ellos, un buscador solo vería la primera página. --}}
+        {{ $filas->withPath(route('empleos.index'))->links('pagination.publica') }}
     @endif
 </div>
