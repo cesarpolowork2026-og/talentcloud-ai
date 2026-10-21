@@ -44,6 +44,7 @@ use Database\Seeders\Demo\CvsDeDemostracion;
 use Database\Seeders\Demo\CvsDeOtrasEmpresas;
 use Database\Seeders\Demo\DocumentosDePrueba;
 use Database\Seeders\Demo\HistoriaDeOtrasEmpresas;
+use Database\Seeders\Demo\PerfilesDeEmpresasDeDemostracion;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
@@ -92,6 +93,7 @@ class DemoSeeder extends Seeder
             app(TenantContext::class)->ejecutarGlobal(function () {
                 $this->sembrar();
                 CondicionesDeDemostracion::aplicar();
+                PerfilesDeEmpresasDeDemostracion::aplicar();
             });
         } finally {
             Carbon::setTestNow($relojAnterior);

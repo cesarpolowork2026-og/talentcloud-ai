@@ -19,6 +19,10 @@
             · Publicada el {{ \App\Support\Formato::fechaCorta($vacante->publicada_at) }}
         @endif
     </p>
+    {{-- Lo que más pesa al comparar ofertas: el sueldo y la jornada, si la empresa los indicó. --}}
+    @if ($vacante->sueldoEnTexto() || $vacante->jornada)
+        <p class="m-0 text-14 font-semibold text-neutral-800">{{ collect([$vacante->sueldoEnTexto(), $vacante->jornada?->etiqueta()])->filter()->implode(' · ') }}</p>
+    @endif
 
     @if ($obligatorios->isNotEmpty())
         <div class="card-meta flex-wrap" role="group" aria-label="Requisitos obligatorios">

@@ -313,3 +313,15 @@ it('si la vacante a la que postuló cierra mientras la mira, lleva a sus postula
         ->assertSee('Tu postulación sigue en «Mis postulaciones», con su estado.')
         ->assertSee('Ver mis postulaciones');
 });
+
+it('la tarjeta del listado muestra el sueldo y la jornada solo si la empresa los indicó', function () {
+    app(TenantContext::class)->ejecutarGlobal(function () {
+        $this->backend->forceFill(['jornada' => 'completa', 'sueldo_minimo' => 1500, 'sueldo_maximo' => 2000])->save();
+    });
+
+    $html = Livewire::test(Vacantes::class)->html();
+
+    expect($html)->toContain('S/ 1 500 – 2 000 al mes · Tiempo completo')
+        // «Product Designer» no indicó nada: no aparece ninguna línea de sueldo en su tarjeta.
+        ->and(substr_count($html, ' al mes'))->toBe(1);
+});

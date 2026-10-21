@@ -33,7 +33,9 @@ use App\Services\Registro\RegistrarPostulante;
 use App\Services\Vacantes\CambiarEstadoVacante;
 use App\Services\Vacantes\OperacionNoPermitida;
 use App\Tenancy\TenantContext;
+use Database\Seeders\Demo\CondicionesDeDemostracion;
 use Database\Seeders\Demo\DocumentosDePrueba;
+use Database\Seeders\Demo\PerfilesDeEmpresasDeDemostracion;
 use Database\Seeders\Demo\Volumen\CatalogoDeVacantes;
 use Database\Seeders\Demo\Volumen\GeneradorDePersonas;
 use Illuminate\Database\Seeder;
@@ -101,7 +103,11 @@ class VolumenDeDemostracionSeeder extends Seeder
         $inicio = microtime(true);
 
         try {
-            app(TenantContext::class)->ejecutarGlobal(fn () => $this->sembrar());
+            app(TenantContext::class)->ejecutarGlobal(function () {
+                $this->sembrar();
+                CondicionesDeDemostracion::aplicar();
+                PerfilesDeEmpresasDeDemostracion::aplicar();
+            });
         } catch (Throwable $e) {
             $this->command->error('El volumen quedó a medias: '.$e->getMessage().'. Vuelve a empezar con php artisan migrate:fresh --seed');
 
