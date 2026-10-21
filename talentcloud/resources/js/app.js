@@ -224,9 +224,9 @@ document.addEventListener('alpine:init', () => {
      * `modelo`: propiedad de Livewire que guarda el id elegido (opcional). Al elegir lanza el
      * evento `elegido` con { id, etiqueta }; con `vacio` se puede volver a «ninguna».
      */
-    window.Alpine.data('buscadorRemoto', ({ metodo, modelo = null, etiqueta = '', vacio = null }) => ({
-        texto: etiqueta,
-        elegida: etiqueta,
+    window.Alpine.data('buscadorRemoto', ({ metodo, modelo = null, vacio = null }) => ({
+        texto: '',
+        elegida: '',
         opciones: [],
         abierto: false,
         activa: -1,
@@ -235,6 +235,9 @@ document.addEventListener('alpine:init', () => {
         pausa: null,
 
         init() {
+            // Elección inicial: la etiqueta que el servidor pintó al cargar.
+            this.texto = this.elegida = this.$el.dataset.etiqueta ?? '';
+
             // El servidor puede vaciar la elección (por ejemplo, al reiniciar un formulario).
             if (modelo) {
                 this.$watch(() => this.$wire.get(modelo), (valor) => {
@@ -254,10 +257,25 @@ document.addEventListener('alpine:init', () => {
         },
 
         abrir() {
-            this.abierto = true;
-            if (this.opciones.length === 0) {
-                this.buscar();
+            // Foco y clic llegan juntos al entrar con el puntero: una sola petición.
+            if (this.abierto && this.cargando) {
+                return;
             }
+
+            this.abierto = true;
+            // Siempre se vuelve a pedir la lista: una anterior, filtrada por un texto que no se llegó a elegir,
+            // ya no traería la opción «ninguna» (p. ej. «Todas las vacantes»).
+            this.buscar();
+        },
+
+        cerrar() {
+            if (! this.abierto) {
+                return;
+            }
+
+            this.abierto = false;
+            // Lo escrito y no elegido se descarta: el campo vuelve a mostrar la elección vigente.
+            this.texto = this.elegida;
         },
 
         async buscar() {

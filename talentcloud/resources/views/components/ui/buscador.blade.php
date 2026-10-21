@@ -10,8 +10,10 @@
 @props(['id', 'metodo', 'modelo' => null, 'etiqueta' => '', 'vacio' => null, 'placeholder' => 'Escribe para buscar…', 'error' => null, 'enLinea' => false])
 
 <div
-    x-data="buscadorRemoto({ metodo: @js($metodo), modelo: @js($modelo), etiqueta: @js($etiqueta), vacio: @js($vacio) })"
-    x-on:click.outside="abierto = false"
+    {{-- La etiqueta va aparte: si cambiara el atributo x-data al elegir, Livewire reiniciaría el componente y lo dejaría sin respuesta. --}}
+    x-data="buscadorRemoto({ metodo: @js($metodo), modelo: @js($modelo), vacio: @js($vacio) })"
+    data-etiqueta="{{ $etiqueta }}"
+    x-on:click.outside="cerrar()"
     {{ $attributes->class('relative') }}
 >
     <input
@@ -29,10 +31,11 @@
         @if ($error && $errors->has($error)) aria-invalid="true" @endif
         x-on:input="escribir()"
         x-on:focus="abrir()"
+        x-on:click="if (! abierto) abrir()"
         x-on:keydown.arrow-down.prevent="mover(1)"
         x-on:keydown.arrow-up.prevent="mover(-1)"
         x-on:keydown.enter.prevent="confirmar()"
-        x-on:keydown.escape="if (abierto) { $event.stopPropagation(); abierto = false }"
+        x-on:keydown.escape="if (abierto) { $event.stopPropagation(); cerrar() }"
     >
 
     <ul

@@ -3,6 +3,7 @@
 use App\Livewire\Forms\LoginForm;
 use App\Support\Navegacion;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Volt\Component;
@@ -16,9 +17,16 @@ new #[Layout('layouts.presentacion')] #[Title('Iniciar sesión')] class extends 
      */
     public function login(): void
     {
-        $this->validate();
+        try {
+            $this->validate();
 
-        $this->form->authenticate();
+            $this->form->authenticate();
+        } catch (ValidationException $e) {
+            // El formulario vuelve a quedar disponible (ver «entrando» en la vista) y muestra el error.
+            $this->dispatch('acceso-rechazado');
+
+            throw $e;
+        }
 
         Session::regenerate();
 
@@ -37,7 +45,12 @@ new #[Layout('layouts.presentacion')] #[Title('Iniciar sesión')] class extends 
         <p class="mb-4 text-14 text-accent-700" role="status">{{ session('status') }}</p>
     @endif
 
-    <form wire:submit="login" class="grid gap-4">
+    {{--
+        «entrando»: desde que se envía hasta que llega la pantalla siguiente pasan 2–3 s (validar la contraseña y cargar
+        el dashboard) y wire:loading solo cubre la primera parte. Sin este estado el diálogo parecía quieto y la gente
+        pulsaba el fondo. Solo un rechazo de las credenciales lo apaga.
+    --}}
+    <form wire:submit="login" class="grid gap-4" x-data="{ entrando: false }" x-on:submit="entrando = true" x-on:acceso-rechazado.window="entrando = false" x-bind:aria-busy="entrando.toString()">
         <x-ui.field label="Correo electrónico" for="email" error="form.email">
             <x-ui.input wire:model="form.email" id="email" type="email" placeholder="tu@correo.com" error="form.email" required :autofocus="request()->routeIs('login')" autocomplete="username" />
         </x-ui.field>
@@ -53,7 +66,11 @@ new #[Layout('layouts.presentacion')] #[Title('Iniciar sesión')] class extends 
             @endif
         </div>
 
-        <x-ui.button type="submit" variant="primary" block wire:loading.attr="disabled">Iniciar sesión</x-ui.button>
+        <x-ui.button type="submit" variant="primary" block wire:loading.attr="disabled" x-bind:disabled="entrando">
+            <span x-show="! entrando">Iniciar sesión</span>
+            <span x-show="entrando" x-cloak>Ingresando…</span>
+        </x-ui.button>
+        <p class="sr-only" role="status" x-text="entrando ? 'Ingresando, espera un momento.' : ''"></p>
     </form>
 
     {{-- Crear cuenta: las dos puertas de entrada, con el mismo peso. --}}
