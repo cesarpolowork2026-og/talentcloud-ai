@@ -19,6 +19,20 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
+--
+
+-- *not* creating schema, since initdb creates it
+
+
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON SCHEMA public IS '';
+
+
+--
 -- Name: unaccent; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -64,7 +78,7 @@ CREATE TABLE public.actividades (
     sujeto_id bigint,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
-    CONSTRAINT actividades_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['postulacion.etapa'::character varying, 'cv.analizado'::character varying, 'evaluacion.aprobada'::character varying, 'entrevista.programada'::character varying, 'entrevista.cancelada'::character varying, 'entrevista.reprogramada'::character varying, 'postulacion.nota'::character varying, 'vacante.creada'::character varying, 'postulacion.propia'::character varying, 'postulacion.registrada'::character varying, 'empresa.plan'::character varying, 'empresa.plan_solicitado'::character varying, 'postulacion.retirada'::character varying])::text[])))
+    CONSTRAINT actividades_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['postulacion.etapa'::character varying, 'evaluacion.aprobada'::character varying, 'entrevista.programada'::character varying, 'entrevista.cancelada'::character varying, 'entrevista.reprogramada'::character varying, 'postulacion.nota'::character varying, 'vacante.creada'::character varying, 'postulacion.propia'::character varying, 'postulacion.registrada'::character varying, 'empresa.plan'::character varying, 'empresa.plan_solicitado'::character varying, 'postulacion.retirada'::character varying])::text[])))
 );
 
 
@@ -85,6 +99,40 @@ CREATE SEQUENCE public.actividades_id_seq
 --
 
 ALTER SEQUENCE public.actividades_id_seq OWNED BY public.actividades.id;
+
+
+--
+-- Name: auditoria; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.auditoria (
+    id bigint NOT NULL,
+    usuario_id bigint,
+    usuario_nombre character varying(120) NOT NULL,
+    accion character varying(40) NOT NULL,
+    descripcion text NOT NULL,
+    empresa_id bigint,
+    created_at timestamp(0) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: auditoria_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.auditoria_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: auditoria_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.auditoria_id_seq OWNED BY public.auditoria.id;
 
 
 --
@@ -118,13 +166,10 @@ CREATE TABLE public.candidato_competencia (
     candidato_id bigint NOT NULL,
     competencia_id bigint NOT NULL,
     fuente character varying(20) DEFAULT 'manual'::character varying NOT NULL,
-    anios numeric(4,1),
-    evidencia text,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
     empresa_id bigint,
-    CONSTRAINT candidato_competencia_anios_check CHECK (((anios IS NULL) OR (anios >= (0)::numeric))),
-    CONSTRAINT candidato_competencia_fuente_check CHECK (((fuente)::text = ANY ((ARRAY['manual'::character varying, 'extraccion'::character varying])::text[])))
+    CONSTRAINT candidato_competencia_fuente_check CHECK (((fuente)::text = 'manual'::text))
 );
 
 
@@ -219,42 +264,6 @@ ALTER SEQUENCE public.competencias_id_seq OWNED BY public.competencias.id;
 
 
 --
--- Name: cv_fragmentos; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.cv_fragmentos (
-    id bigint NOT NULL,
-    cv_id bigint NOT NULL,
-    seccion character varying(40),
-    orden smallint DEFAULT '0'::smallint NOT NULL,
-    texto text NOT NULL,
-    embedding public.vector(384),
-    created_at timestamp(0) without time zone,
-    updated_at timestamp(0) without time zone,
-    embedding_modelo character varying(120)
-);
-
-
---
--- Name: cv_fragmentos_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.cv_fragmentos_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: cv_fragmentos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.cv_fragmentos_id_seq OWNED BY public.cv_fragmentos.id;
-
-
---
 -- Name: cvs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -268,13 +277,12 @@ CREATE TABLE public.cvs (
     mime character varying(120) NOT NULL,
     tamano integer NOT NULL,
     texto_extraido text,
-    datos_estructurados jsonb,
     estado_procesamiento character varying(20) DEFAULT 'pendiente'::character varying NOT NULL,
     error text,
     procesado_at timestamp(0) without time zone,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
-    CONSTRAINT cvs_estado_procesamiento_check CHECK (((estado_procesamiento)::text = ANY ((ARRAY['pendiente'::character varying, 'procesando'::character varying, 'procesado'::character varying, 'error'::character varying])::text[]))),
+    CONSTRAINT cvs_estado_procesamiento_check CHECK (((estado_procesamiento)::text = ANY (ARRAY[('pendiente'::character varying)::text, ('procesando'::character varying)::text, ('procesado'::character varying)::text, ('error'::character varying)::text]))),
     CONSTRAINT cvs_tamano_check CHECK ((tamano >= 0))
 );
 
@@ -322,11 +330,14 @@ CREATE TABLE public.empresas (
     suscripcion_periodicidad character varying(10),
     suscripcion_renueva_at timestamp(0) without time zone,
     suscripcion_cancela_al_final boolean DEFAULT false NOT NULL,
-    CONSTRAINT empresas_estado_check CHECK (((estado)::text = ANY ((ARRAY['activa'::character varying, 'suspendida'::character varying])::text[]))),
-    CONSTRAINT empresas_plan_check CHECK (((plan)::text = ANY ((ARRAY['gratis'::character varying, 'starter'::character varying, 'pro'::character varying, 'enterprise'::character varying])::text[]))),
-    CONSTRAINT empresas_plan_solicitado_check CHECK (((plan_solicitado IS NULL) OR ((plan_solicitado)::text = ANY ((ARRAY['gratis'::character varying, 'starter'::character varying, 'pro'::character varying, 'enterprise'::character varying])::text[])))),
-    CONSTRAINT empresas_suscripcion_estado_check CHECK (((suscripcion_estado IS NULL) OR ((suscripcion_estado)::text = ANY ((ARRAY['activa'::character varying, 'pago_pendiente'::character varying, 'incompleta'::character varying, 'terminada'::character varying])::text[])))),
-    CONSTRAINT empresas_suscripcion_periodicidad_check CHECK (((suscripcion_periodicidad IS NULL) OR ((suscripcion_periodicidad)::text = ANY ((ARRAY['mensual'::character varying, 'anual'::character varying])::text[]))))
+    plan_vence_at timestamp(0) without time zone,
+    plan_aviso_pronto_para timestamp(0) without time zone,
+    plan_aviso_vencido_para timestamp(0) without time zone,
+    CONSTRAINT empresas_estado_check CHECK (((estado)::text = ANY (ARRAY[('activa'::character varying)::text, ('suspendida'::character varying)::text]))),
+    CONSTRAINT empresas_plan_check CHECK (((plan)::text = ANY (ARRAY[('gratis'::character varying)::text, ('starter'::character varying)::text, ('pro'::character varying)::text, ('enterprise'::character varying)::text]))),
+    CONSTRAINT empresas_plan_solicitado_check CHECK (((plan_solicitado IS NULL) OR ((plan_solicitado)::text = ANY (ARRAY[('gratis'::character varying)::text, ('starter'::character varying)::text, ('pro'::character varying)::text, ('enterprise'::character varying)::text])))),
+    CONSTRAINT empresas_suscripcion_estado_check CHECK (((suscripcion_estado IS NULL) OR ((suscripcion_estado)::text = ANY (ARRAY[('activa'::character varying)::text, ('pago_pendiente'::character varying)::text, ('incompleta'::character varying)::text, ('terminada'::character varying)::text])))),
+    CONSTRAINT empresas_suscripcion_periodicidad_check CHECK (((suscripcion_periodicidad IS NULL) OR ((suscripcion_periodicidad)::text = ANY (ARRAY[('mensual'::character varying)::text, ('anual'::character varying)::text]))))
 );
 
 
@@ -367,8 +378,8 @@ CREATE TABLE public.entrevistas (
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
     CONSTRAINT entrevistas_duracion_check CHECK ((duracion_min > 0)),
-    CONSTRAINT entrevistas_estado_check CHECK (((estado)::text = ANY ((ARRAY['pendiente'::character varying, 'confirmada'::character varying, 'completada'::character varying, 'cancelada'::character varying])::text[]))),
-    CONSTRAINT entrevistas_modalidad_check CHECK (((modalidad)::text = ANY ((ARRAY['videollamada'::character varying, 'presencial'::character varying, 'telefonica'::character varying])::text[])))
+    CONSTRAINT entrevistas_estado_check CHECK (((estado)::text = ANY (ARRAY[('pendiente'::character varying)::text, ('confirmada'::character varying)::text, ('completada'::character varying)::text, ('cancelada'::character varying)::text]))),
+    CONSTRAINT entrevistas_modalidad_check CHECK (((modalidad)::text = ANY (ARRAY[('videollamada'::character varying)::text, ('presencial'::character varying)::text, ('telefonica'::character varying)::text])))
 );
 
 
@@ -406,7 +417,7 @@ CREATE TABLE public.evaluaciones (
     estado character varying(20) DEFAULT 'pendiente'::character varying NOT NULL,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
-    CONSTRAINT evaluaciones_estado_check CHECK (((estado)::text = ANY ((ARRAY['pendiente'::character varying, 'en_revision'::character varying, 'aprobado'::character varying, 'rechazado'::character varying])::text[]))),
+    CONSTRAINT evaluaciones_estado_check CHECK (((estado)::text = ANY (ARRAY[('pendiente'::character varying)::text, ('en_revision'::character varying)::text, ('aprobado'::character varying)::text, ('rechazado'::character varying)::text]))),
     CONSTRAINT evaluaciones_puntaje_check CHECK (((puntaje IS NULL) OR ((puntaje >= (0)::numeric) AND (puntaje <= (10)::numeric))))
 );
 
@@ -491,7 +502,7 @@ CREATE TABLE public.invitaciones (
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
     nombre character varying(255),
-    CONSTRAINT invitaciones_rol_check CHECK (((rol)::text = ANY ((ARRAY['admin'::character varying, 'empresa'::character varying, 'reclutador'::character varying, 'postulante'::character varying])::text[])))
+    CONSTRAINT invitaciones_rol_check CHECK (((rol)::text = ANY (ARRAY[('admin'::character varying)::text, ('empresa'::character varying)::text, ('reclutador'::character varying)::text, ('postulante'::character varying)::text])))
 );
 
 
@@ -564,41 +575,6 @@ CREATE SEQUENCE public.jobs_id_seq
 --
 
 ALTER SEQUENCE public.jobs_id_seq OWNED BY public.jobs.id;
-
-
---
--- Name: match_feedback; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.match_feedback (
-    id bigint NOT NULL,
-    empresa_id bigint NOT NULL,
-    postulacion_id bigint NOT NULL,
-    requisito_id bigint NOT NULL,
-    user_id bigint,
-    comentario text,
-    created_at timestamp(0) without time zone,
-    updated_at timestamp(0) without time zone
-);
-
-
---
--- Name: match_feedback_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.match_feedback_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: match_feedback_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.match_feedback_id_seq OWNED BY public.match_feedback.id;
 
 
 --
@@ -757,7 +733,7 @@ CREATE TABLE public.postulacion_etapas (
     postulacion_id bigint NOT NULL,
     etapa character varying(20) NOT NULL,
     desde timestamp(0) without time zone NOT NULL,
-    CONSTRAINT postulacion_etapas_etapa_check CHECK (((etapa)::text = ANY ((ARRAY['postulado'::character varying, 'en_revision'::character varying, 'entrevista'::character varying, 'oferta'::character varying, 'contratado'::character varying, 'descartado'::character varying])::text[])))
+    CONSTRAINT postulacion_etapas_etapa_check CHECK (((etapa)::text = ANY (ARRAY[('postulado'::character varying)::text, ('en_revision'::character varying)::text, ('entrevista'::character varying)::text, ('oferta'::character varying)::text, ('contratado'::character varying)::text, ('descartado'::character varying)::text])))
 );
 
 
@@ -793,27 +769,15 @@ CREATE TABLE public.postulaciones (
     etapa character varying(20) DEFAULT 'postulado'::character varying NOT NULL,
     orden integer DEFAULT 0 NOT NULL,
     etapa_cambiada_at timestamp(0) without time zone,
-    match_score numeric(5,2),
-    match_detalle jsonb,
-    match_motor character varying(10),
-    match_calculado_at timestamp(0) without time zone,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
     estado_avisado character varying(20),
     origen character varying(20) DEFAULT 'equipo'::character varying NOT NULL,
     retirada_at timestamp(0) without time zone,
-    ia_cupo_at timestamp(0) without time zone,
-    ia_sin_cupo boolean DEFAULT false NOT NULL,
-    requisitos_total smallint,
-    requisitos_cubiertos smallint,
-    obligatorios_faltantes smallint,
-    CONSTRAINT postulaciones_estado_avisado_check CHECK (((estado_avisado IS NULL) OR ((estado_avisado)::text = ANY ((ARRAY['postulado'::character varying, 'en_revision'::character varying, 'entrevista'::character varying, 'contratado'::character varying, 'no_seleccionado'::character varying, 'cerrada'::character varying, 'retirada'::character varying])::text[])))),
-    CONSTRAINT postulaciones_etapa_check CHECK (((etapa)::text = ANY ((ARRAY['postulado'::character varying, 'en_revision'::character varying, 'entrevista'::character varying, 'oferta'::character varying, 'contratado'::character varying, 'descartado'::character varying])::text[]))),
-    CONSTRAINT postulaciones_match_motor_check CHECK (((match_motor IS NULL) OR ((match_motor)::text = ANY ((ARRAY['http'::character varying, 'fake'::character varying])::text[])))),
-    CONSTRAINT postulaciones_match_score_check CHECK (((match_score IS NULL) OR ((match_score >= (0)::numeric) AND (match_score <= (100)::numeric)))),
+    CONSTRAINT postulaciones_estado_avisado_check CHECK (((estado_avisado IS NULL) OR ((estado_avisado)::text = ANY (ARRAY[('postulado'::character varying)::text, ('en_revision'::character varying)::text, ('entrevista'::character varying)::text, ('contratado'::character varying)::text, ('no_seleccionado'::character varying)::text, ('cerrada'::character varying)::text, ('retirada'::character varying)::text])))),
+    CONSTRAINT postulaciones_etapa_check CHECK (((etapa)::text = ANY (ARRAY[('postulado'::character varying)::text, ('en_revision'::character varying)::text, ('entrevista'::character varying)::text, ('oferta'::character varying)::text, ('contratado'::character varying)::text, ('descartado'::character varying)::text]))),
     CONSTRAINT postulaciones_orden_check CHECK ((orden >= 0)),
-    CONSTRAINT postulaciones_origen_check CHECK (((origen)::text = ANY ((ARRAY['equipo'::character varying, 'postulante'::character varying])::text[]))),
-    CONSTRAINT postulaciones_resumen_check CHECK (((requisitos_total IS NULL) OR ((requisitos_total >= 0) AND ((requisitos_cubiertos >= 0) AND (requisitos_cubiertos <= requisitos_total)) AND ((obligatorios_faltantes >= 0) AND (obligatorios_faltantes <= requisitos_total)))))
+    CONSTRAINT postulaciones_origen_check CHECK (((origen)::text = ANY (ARRAY[('equipo'::character varying)::text, ('postulante'::character varying)::text])))
 );
 
 
@@ -837,62 +801,6 @@ ALTER SEQUENCE public.postulaciones_id_seq OWNED BY public.postulaciones.id;
 
 
 --
--- Name: reclamaciones; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.reclamaciones (
-    id bigint NOT NULL,
-    numero integer NOT NULL,
-    tipo character varying(10) NOT NULL,
-    estado character varying(15) DEFAULT 'pendiente'::character varying NOT NULL,
-    nombre character varying(255) NOT NULL,
-    tipo_documento character varying(10) NOT NULL,
-    numero_documento character varying(15) NOT NULL,
-    domicilio character varying(255) NOT NULL,
-    telefono character varying(20),
-    email character varying(255) NOT NULL,
-    es_menor boolean DEFAULT false NOT NULL,
-    apoderado_nombre character varying(255),
-    apoderado_tipo_documento character varying(10),
-    apoderado_numero_documento character varying(15),
-    servicio character varying(255) NOT NULL,
-    monto numeric(10,2),
-    detalle text NOT NULL,
-    pedido text NOT NULL,
-    fecha_limite date NOT NULL,
-    respuesta text,
-    respondida_at timestamp(0) without time zone,
-    respondida_por bigint,
-    created_at timestamp(0) without time zone,
-    updated_at timestamp(0) without time zone,
-    CONSTRAINT reclamaciones_apoderado_tipo_documento_check CHECK (((apoderado_tipo_documento IS NULL) OR ((apoderado_tipo_documento)::text = ANY ((ARRAY['dni'::character varying, 'ce'::character varying, 'pasaporte'::character varying])::text[])))),
-    CONSTRAINT reclamaciones_estado_check CHECK (((estado)::text = ANY ((ARRAY['pendiente'::character varying, 'respondida'::character varying])::text[]))),
-    CONSTRAINT reclamaciones_monto_check CHECK (((monto IS NULL) OR (monto >= (0)::numeric))),
-    CONSTRAINT reclamaciones_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['reclamo'::character varying, 'queja'::character varying])::text[]))),
-    CONSTRAINT reclamaciones_tipo_documento_check CHECK (((tipo_documento)::text = ANY ((ARRAY['dni'::character varying, 'ce'::character varying, 'pasaporte'::character varying])::text[])))
-);
-
-
---
--- Name: reclamaciones_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.reclamaciones_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: reclamaciones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.reclamaciones_id_seq OWNED BY public.reclamaciones.id;
-
-
---
 -- Name: requisitos; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -906,13 +814,11 @@ CREATE TABLE public.requisitos (
     peso smallint DEFAULT '3'::smallint NOT NULL,
     anios_minimos smallint,
     orden smallint DEFAULT '0'::smallint NOT NULL,
-    embedding public.vector(384),
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
-    embedding_modelo character varying(120),
     CONSTRAINT requisitos_anios_minimos_check CHECK (((anios_minimos IS NULL) OR ((anios_minimos >= 0) AND (anios_minimos <= 40)))),
     CONSTRAINT requisitos_peso_check CHECK (((peso >= 1) AND (peso <= 5))),
-    CONSTRAINT requisitos_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['obligatorio'::character varying, 'deseable'::character varying])::text[])))
+    CONSTRAINT requisitos_tipo_check CHECK (((tipo)::text = ANY (ARRAY[('obligatorio'::character varying)::text, ('deseable'::character varying)::text])))
 );
 
 
@@ -1046,8 +952,13 @@ CREATE TABLE public.vacantes (
     cerrada_at timestamp(0) without time zone,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
-    CONSTRAINT vacantes_estado_check CHECK (((estado)::text = ANY ((ARRAY['borrador'::character varying, 'abierta'::character varying, 'en_revision'::character varying, 'cerrada'::character varying])::text[]))),
-    CONSTRAINT vacantes_modalidad_check CHECK (((modalidad)::text = ANY ((ARRAY['remoto'::character varying, 'presencial'::character varying, 'hibrido'::character varying])::text[]))),
+    jornada character varying(20),
+    sueldo_minimo integer,
+    sueldo_maximo integer,
+    CONSTRAINT vacantes_estado_check CHECK (((estado)::text = ANY (ARRAY[('borrador'::character varying)::text, ('abierta'::character varying)::text, ('en_revision'::character varying)::text, ('cerrada'::character varying)::text]))),
+    CONSTRAINT vacantes_jornada_check CHECK (((jornada IS NULL) OR ((jornada)::text = ANY ((ARRAY['completa'::character varying, 'parcial'::character varying])::text[])))),
+    CONSTRAINT vacantes_modalidad_check CHECK (((modalidad)::text = ANY (ARRAY[('remoto'::character varying)::text, ('presencial'::character varying)::text, ('hibrido'::character varying)::text]))),
+    CONSTRAINT vacantes_sueldo_check CHECK ((((sueldo_minimo IS NULL) OR ((sueldo_minimo >= 1) AND (sueldo_minimo <= 1000000))) AND ((sueldo_maximo IS NULL) OR ((sueldo_maximo >= 1) AND (sueldo_maximo <= 1000000))) AND ((sueldo_minimo IS NULL) OR (sueldo_maximo IS NULL) OR (sueldo_maximo >= sueldo_minimo)))),
     CONSTRAINT vacantes_ubicacion_check CHECK ((((modalidad)::text = 'remoto'::text) OR ((ubicacion IS NOT NULL) AND (btrim((ubicacion)::text) <> ''::text))))
 );
 
@@ -1079,6 +990,13 @@ ALTER TABLE ONLY public.actividades ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
+-- Name: auditoria id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auditoria ALTER COLUMN id SET DEFAULT nextval('public.auditoria_id_seq'::regclass);
+
+
+--
 -- Name: candidato_competencia id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1097,13 +1015,6 @@ ALTER TABLE ONLY public.candidatos ALTER COLUMN id SET DEFAULT nextval('public.c
 --
 
 ALTER TABLE ONLY public.competencias ALTER COLUMN id SET DEFAULT nextval('public.competencias_id_seq'::regclass);
-
-
---
--- Name: cv_fragmentos id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.cv_fragmentos ALTER COLUMN id SET DEFAULT nextval('public.cv_fragmentos_id_seq'::regclass);
 
 
 --
@@ -1156,13 +1067,6 @@ ALTER TABLE ONLY public.jobs ALTER COLUMN id SET DEFAULT nextval('public.jobs_id
 
 
 --
--- Name: match_feedback id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.match_feedback ALTER COLUMN id SET DEFAULT nextval('public.match_feedback_id_seq'::regclass);
-
-
---
 -- Name: migrations id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1195,13 +1099,6 @@ ALTER TABLE ONLY public.postulacion_etapas ALTER COLUMN id SET DEFAULT nextval('
 --
 
 ALTER TABLE ONLY public.postulaciones ALTER COLUMN id SET DEFAULT nextval('public.postulaciones_id_seq'::regclass);
-
-
---
--- Name: reclamaciones id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.reclamaciones ALTER COLUMN id SET DEFAULT nextval('public.reclamaciones_id_seq'::regclass);
 
 
 --
@@ -1238,6 +1135,14 @@ ALTER TABLE ONLY public.vacantes ALTER COLUMN id SET DEFAULT nextval('public.vac
 
 ALTER TABLE ONLY public.actividades
     ADD CONSTRAINT actividades_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: auditoria auditoria_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auditoria
+    ADD CONSTRAINT auditoria_pkey PRIMARY KEY (id);
 
 
 --
@@ -1294,14 +1199,6 @@ ALTER TABLE ONLY public.competencias
 
 ALTER TABLE ONLY public.competencias
     ADD CONSTRAINT competencias_pkey PRIMARY KEY (id);
-
-
---
--- Name: cv_fragmentos cv_fragmentos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.cv_fragmentos
-    ADD CONSTRAINT cv_fragmentos_pkey PRIMARY KEY (id);
 
 
 --
@@ -1417,22 +1314,6 @@ ALTER TABLE ONLY public.jobs
 
 
 --
--- Name: match_feedback match_feedback_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.match_feedback
-    ADD CONSTRAINT match_feedback_pkey PRIMARY KEY (id);
-
-
---
--- Name: match_feedback match_feedback_postulacion_id_requisito_id_user_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.match_feedback
-    ADD CONSTRAINT match_feedback_postulacion_id_requisito_id_user_id_unique UNIQUE (postulacion_id, requisito_id, user_id);
-
-
---
 -- Name: migrations migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1526,22 +1407,6 @@ ALTER TABLE ONLY public.postulaciones
 
 ALTER TABLE ONLY public.postulaciones
     ADD CONSTRAINT postulaciones_vacante_id_candidato_id_unique UNIQUE (vacante_id, candidato_id);
-
-
---
--- Name: reclamaciones reclamaciones_numero_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.reclamaciones
-    ADD CONSTRAINT reclamaciones_numero_unique UNIQUE (numero);
-
-
---
--- Name: reclamaciones reclamaciones_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.reclamaciones
-    ADD CONSTRAINT reclamaciones_pkey PRIMARY KEY (id);
 
 
 --
@@ -1647,10 +1512,31 @@ CREATE INDEX actividades_empresa_id_created_at_index ON public.actividades USING
 
 
 --
+-- Name: actividades_recientes_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX actividades_recientes_index ON public.actividades USING btree (created_at DESC, id DESC);
+
+
+--
 -- Name: actividades_sujeto_type_sujeto_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX actividades_sujeto_type_sujeto_id_index ON public.actividades USING btree (sujeto_type, sujeto_id);
+
+
+--
+-- Name: auditoria_accion_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX auditoria_accion_index ON public.auditoria USING btree (accion);
+
+
+--
+-- Name: auditoria_created_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX auditoria_created_at_index ON public.auditoria USING btree (created_at);
 
 
 --
@@ -1700,13 +1586,6 @@ CREATE INDEX candidatos_email_index ON public.candidatos USING btree (email);
 --
 
 CREATE INDEX candidatos_empresa_origen_id_index ON public.candidatos USING btree (empresa_origen_id);
-
-
---
--- Name: cv_fragmentos_cv_id_orden_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX cv_fragmentos_cv_id_orden_index ON public.cv_fragmentos USING btree (cv_id, orden);
 
 
 --
@@ -1784,27 +1663,6 @@ CREATE INDEX invitaciones_invitada_por_index ON public.invitaciones USING btree 
 --
 
 CREATE INDEX jobs_queue_index ON public.jobs USING btree (queue);
-
-
---
--- Name: match_feedback_empresa_id_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX match_feedback_empresa_id_index ON public.match_feedback USING btree (empresa_id);
-
-
---
--- Name: match_feedback_requisito_id_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX match_feedback_requisito_id_index ON public.match_feedback USING btree (requisito_id);
-
-
---
--- Name: match_feedback_user_id_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX match_feedback_user_id_index ON public.match_feedback USING btree (user_id);
 
 
 --
@@ -1892,38 +1750,10 @@ CREATE INDEX postulaciones_empresa_id_created_at_index ON public.postulaciones U
 
 
 --
--- Name: postulaciones_empresa_id_ia_cupo_at_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX postulaciones_empresa_id_ia_cupo_at_index ON public.postulaciones USING btree (empresa_id, ia_cupo_at);
-
-
---
 -- Name: postulaciones_tablero_index; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX postulaciones_tablero_index ON public.postulaciones USING btree (empresa_id, vacante_id, etapa, orden) INCLUDE (retirada_at, etapa_cambiada_at, created_at, match_score);
-
-
---
--- Name: postulaciones_vacante_match_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX postulaciones_vacante_match_index ON public.postulaciones USING btree (empresa_id, vacante_id, match_score DESC NULLS LAST, id);
-
-
---
--- Name: reclamaciones_estado_fecha_limite_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX reclamaciones_estado_fecha_limite_index ON public.reclamaciones USING btree (estado, fecha_limite);
-
-
---
--- Name: reclamaciones_respondida_por_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX reclamaciones_respondida_por_index ON public.reclamaciones USING btree (respondida_por);
+CREATE INDEX postulaciones_tablero_index ON public.postulaciones USING btree (empresa_id, vacante_id, etapa, orden) INCLUDE (retirada_at, etapa_cambiada_at, created_at);
 
 
 --
@@ -1976,6 +1806,13 @@ CREATE INDEX vacantes_empresa_id_estado_index ON public.vacantes USING btree (em
 
 
 --
+-- Name: vacantes_publicas_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX vacantes_publicas_index ON public.vacantes USING btree (publicada_at DESC, id) WHERE ((estado)::text = 'abierta'::text);
+
+
+--
 -- Name: actividades actividades_actor_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1989,6 +1826,22 @@ ALTER TABLE ONLY public.actividades
 
 ALTER TABLE ONLY public.actividades
     ADD CONSTRAINT actividades_empresa_id_foreign FOREIGN KEY (empresa_id) REFERENCES public.empresas(id) ON DELETE CASCADE;
+
+
+--
+-- Name: auditoria auditoria_empresa_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auditoria
+    ADD CONSTRAINT auditoria_empresa_id_foreign FOREIGN KEY (empresa_id) REFERENCES public.empresas(id) ON DELETE SET NULL;
+
+
+--
+-- Name: auditoria auditoria_usuario_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auditoria
+    ADD CONSTRAINT auditoria_usuario_id_foreign FOREIGN KEY (usuario_id) REFERENCES public.users(id) ON DELETE SET NULL;
 
 
 --
@@ -2029,14 +1882,6 @@ ALTER TABLE ONLY public.candidatos
 
 ALTER TABLE ONLY public.candidatos
     ADD CONSTRAINT candidatos_user_id_foreign FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
-
-
---
--- Name: cv_fragmentos cv_fragmentos_cv_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.cv_fragmentos
-    ADD CONSTRAINT cv_fragmentos_cv_id_foreign FOREIGN KEY (cv_id) REFERENCES public.cvs(id) ON DELETE CASCADE;
 
 
 --
@@ -2117,38 +1962,6 @@ ALTER TABLE ONLY public.invitaciones
 
 ALTER TABLE ONLY public.invitaciones
     ADD CONSTRAINT invitaciones_invitada_por_foreign FOREIGN KEY (invitada_por) REFERENCES public.users(id) ON DELETE SET NULL;
-
-
---
--- Name: match_feedback match_feedback_empresa_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.match_feedback
-    ADD CONSTRAINT match_feedback_empresa_id_foreign FOREIGN KEY (empresa_id) REFERENCES public.empresas(id) ON DELETE RESTRICT;
-
-
---
--- Name: match_feedback match_feedback_postulacion_id_empresa_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.match_feedback
-    ADD CONSTRAINT match_feedback_postulacion_id_empresa_foreign FOREIGN KEY (empresa_id, postulacion_id) REFERENCES public.postulaciones(empresa_id, id) ON DELETE CASCADE;
-
-
---
--- Name: match_feedback match_feedback_requisito_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.match_feedback
-    ADD CONSTRAINT match_feedback_requisito_id_foreign FOREIGN KEY (requisito_id) REFERENCES public.requisitos(id) ON DELETE CASCADE;
-
-
---
--- Name: match_feedback match_feedback_user_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.match_feedback
-    ADD CONSTRAINT match_feedback_user_id_foreign FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE SET NULL;
 
 
 --
@@ -2237,14 +2050,6 @@ ALTER TABLE ONLY public.postulaciones
 
 ALTER TABLE ONLY public.postulaciones
     ADD CONSTRAINT postulaciones_vacante_id_empresa_foreign FOREIGN KEY (empresa_id, vacante_id) REFERENCES public.vacantes(empresa_id, id) ON DELETE CASCADE;
-
-
---
--- Name: reclamaciones reclamaciones_respondida_por_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.reclamaciones
-    ADD CONSTRAINT reclamaciones_respondida_por_foreign FOREIGN KEY (respondida_por) REFERENCES public.users(id) ON DELETE SET NULL;
 
 
 --
