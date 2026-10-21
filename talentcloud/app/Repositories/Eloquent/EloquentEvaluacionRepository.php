@@ -24,17 +24,32 @@ class EloquentEvaluacionRepository implements EvaluacionRepository
 
     public function postulacionesPorEvaluar(User $evaluador, string $texto = '', int $limite = 20): Collection
     {
-        return Postulacion::query()
+        return $this->consultaPorEvaluar($evaluador)
             ->select(['id', 'empresa_id', 'vacante_id', 'candidato_id', 'etapa', 'retirada_at'])
             ->with(['candidato:id,nombre', 'vacante:id,titulo,empresa_id', 'vacante.empresa:id,nombre'])
-            // La misma regla que GuardarEvaluacion::verificarEvaluable().
-            ->whereNull('retirada_at')
-            ->whereHas('entrevistas', fn (Builder $q) => $q->where('estado', EstadoEntrevista::Completada))
-            ->whereDoesntHave('evaluaciones', fn (Builder $q) => $q->where('evaluador_id', $evaluador->id))
             ->when(trim($texto) !== '', fn (Builder $q) => $q->buscar($texto))
             ->orderByDesc('id')
             ->limit($limite)
             ->get();
+    }
+
+    public function contarPorEvaluar(User $evaluador): int
+    {
+        return $this->consultaPorEvaluar($evaluador)->count();
+    }
+
+    /**
+     * La misma regla que GuardarEvaluacion::verificarEvaluable(): una entrevista realizada, sin retirar y sin
+     * evaluación del usuario.
+     *
+     * @return Builder<Postulacion>
+     */
+    private function consultaPorEvaluar(User $evaluador): Builder
+    {
+        return Postulacion::query()
+            ->whereNull('retirada_at')
+            ->whereHas('entrevistas', fn (Builder $q) => $q->where('estado', EstadoEntrevista::Completada))
+            ->whereDoesntHave('evaluaciones', fn (Builder $q) => $q->where('evaluador_id', $evaluador->id));
     }
 
     public function existe(int $postulacionId, int $evaluadorId): bool

@@ -14,6 +14,7 @@ final readonly class ResumenDePlataforma
      * @param  array<string, int>  $porPlan  valor de PlanEmpresa => empresas activas con ese plan
      * @param  array<string, list<array{id: int, nombre: string}>>  $empresasPorPlan  valor de PlanEmpresa => esas mismas empresas, por nombre
      * @param  Collection<int, array{empresa: Empresa, uso: UsoDelPlan}>  $cercaDelLimite
+     * @param  Collection<int, Empresa>  $planesPorVencer  empresas activas con un plan asignado a mano que vence en pocos días o ya venció, por fecha
      * @param  Collection<int, Empresa>  $solicitudesDePlan  empresas activas que pidieron otro plan, la más antigua primero
      * @param  list<array{semana: string, empresas: int, postulaciones: int}>  $crecimiento  últimas semanas, de la más antigua a la actual
      * @param  Collection<int, Auditoria>  $ultimasAcciones
@@ -25,6 +26,7 @@ final readonly class ResumenDePlataforma
         public Collection $cercaDelLimite,
         public int $enPrueba = 0,
         public Collection $solicitudesDePlan = new Collection,
+        public Collection $planesPorVencer = new Collection,
         public array $empresasPorPlan = [],
         public int $usuariosDeEmpresas = 0,
         public int $postulantes = 0,

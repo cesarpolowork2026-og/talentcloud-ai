@@ -49,14 +49,18 @@ it('no supera el presupuesto de consultas de cada página', function () {
     $presupuestos = [
         'invitado' => ['/empleos' => 5, "/empleos/{$ids['abierta']}" => 5],
         'marta@nimbus.com' => [
-            // Dashboard: atención, ahorro, plan, actividad y el tiempo por etapa suman consultas fijas (ninguna por fila).
-            '/dashboard' => 22, '/vacantes' => 7, '/candidatos' => 12,
+            // Dashboard del reclutador, «Mi día»: sus conteos, su agenda, las entrevistas por cerrar, sus evaluaciones y la
+            // cola por revisar con sus relaciones, más las vacantes y la actividad (24 consultas fijas, ninguna por fila;
+            // con entrevistas por cerrar suma las 3 relaciones de su lista, también fijas).
+            '/dashboard' => 24, '/vacantes' => 7, '/candidatos' => 12,
             // Selección suma el análisis básico de las tarjetas: requisitos, sus competencias, los CV y las competencias
             // anotadas (4 consultas fijas para todo el tablero, no una por tarjeta).
             "/seleccion/{$ids['backend']}" => 15,
             '/entrevistas' => 12, // + el resumen de la agenda (una lectura)
             '/evaluaciones' => 11,
         ],
+        // Dashboard de gerencia: atención, ahorro, plan, actividad y el tiempo por etapa suman consultas fijas (ninguna por fila).
+        'admin@nimbus.com' => ['/dashboard' => 22],
         'admin@talentcloud.ai' => ['/dashboard' => 25, '/candidatos' => 14],
         'marco@correo.com' => ['/postulante/postulaciones' => 10, "/postulante/vacantes/{$ids['abierta']}" => 11],
     ];

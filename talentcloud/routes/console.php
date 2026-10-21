@@ -16,3 +16,6 @@ Artisan::command('inspire', function () {
 Schedule::command('auth:clear-resets')->dailyAt('03:00')->withoutOverlapping();       // tokens de restablecer contraseña vencidos
 Schedule::command('queue:prune-failed --hours=720')->dailyAt('03:10')->withoutOverlapping(); // trabajos fallidos de hace más de 30 días
 Schedule::command('talentcloud:limpiar-invitaciones')->dailyAt('03:20')->withoutOverlapping();
+
+// Avisos a las empresas: un plan asignado a mano que vence pronto (o venció hace poco) se avisa una sola vez por vencimiento.
+Schedule::command('talentcloud:avisar-vencimientos')->dailyAt('09:00')->withoutOverlapping();

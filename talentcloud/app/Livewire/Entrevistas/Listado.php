@@ -3,6 +3,7 @@
 namespace App\Livewire\Entrevistas;
 
 use App\DTO\NuevaEntrevistaData;
+use App\Enums\EstadoEntrevista;
 use App\Enums\ModalidadEntrevista;
 use App\Enums\Rol;
 use App\Livewire\Concerns\WithListado;
@@ -26,13 +27,20 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /** Pantalla "Entrevistas" (prototipo: isEntrevistas) + programar, confirmar y completar. */
 #[Title('Entrevistas')]
 class Listado extends Component
 {
-    use WithListado;
+    use WithListado {
+        hayFiltros as private hayFiltrosDelListado;
+    }
+
+    /** Solo las entrevistas que ya terminaron y siguen abiertas (por cerrar). */
+    #[Url(as: 'vencidas', except: false)]
+    public bool $vencidas = false;
 
     public const DURACIONES = [30 => '30 min', 45 => '45 min', 60 => '1 hora', 90 => '1 h 30 min'];
 
@@ -83,6 +91,28 @@ class Listado extends Component
     protected function camposBusqueda(): array
     {
         return ['postulacion.candidato.nombre', 'postulacion.vacante.titulo'];
+    }
+
+    /**
+     * Filtro por estado de la entrevista: Pendiente, Confirmada, Completada y Cancelada, en el orden del enum.
+     *
+     * @return array<string, string>
+     */
+    protected function opcionesEstado(): array
+    {
+        return EstadoEntrevista::opciones();
+    }
+
+    /** Una búsqueda, un estado o «por cerrar» elegidos: sin resultados con filtros no es lo mismo que una agenda vacía. */
+    public function hayFiltros(): bool
+    {
+        return $this->vencidas || $this->hayFiltrosDelListado();
+    }
+
+    public function alternarVencidas(): void
+    {
+        $this->vencidas = ! $this->vencidas;
+        $this->resetPage();
     }
 
     public function verDetalle(int $id): void
@@ -245,7 +275,7 @@ class Listado extends Component
 
         return view('livewire.entrevistas.listado', [
             'resumen' => $agenda->calcular(),
-            'filas' => $this->listar($entrevistas->consultaListado()->orderBy('inicia_at')),
+            'filas' => $this->listar($entrevistas->consultaListado()->when($this->vencidas, fn ($q) => $q->porCerrar())->orderBy('inicia_at')),
             // Admin SaaS: columna "Empresa" (ve las entrevistas de todas).
             'vistaGlobal' => app(TenantContext::class)->esGlobal(),
             'seleccionada' => $seleccionada,

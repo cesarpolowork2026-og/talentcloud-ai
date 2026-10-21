@@ -16,7 +16,8 @@ it('programa la limpieza diaria de tokens, trabajos fallidos e invitaciones venc
 
     expect($comandos)->toContain('auth:clear-resets')
         ->and($comandos)->toContain('queue:prune-failed')
-        ->and($comandos)->toContain('talentcloud:limpiar-invitaciones');
+        ->and($comandos)->toContain('talentcloud:limpiar-invitaciones')
+        ->and($comandos)->toContain('talentcloud:avisar-vencimientos');
 });
 
 it('borra solo las invitaciones vencidas hace más de 30 días y nunca aceptadas', function () {

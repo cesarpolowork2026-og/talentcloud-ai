@@ -15,7 +15,7 @@ class ResumenDeAgenda
     public const DIAS_PROXIMOS = 7;
 
     /**
-     * @return object{hoy: int, proximas: int, sin_confirmar: int}
+     * @return object{hoy: int, proximas: int, sin_confirmar: int, por_cerrar: int}
      */
     public function calcular(): object
     {
@@ -24,11 +24,13 @@ class ResumenDeAgenda
             ->selectRaw(
                 'COUNT(*) FILTER (WHERE inicia_at BETWEEN ? AND ? AND estado <> ?) AS hoy,
                 COUNT(*) FILTER (WHERE inicia_at >= ? AND inicia_at < ? AND estado IN (?, ?)) AS proximas,
-                COUNT(*) FILTER (WHERE inicia_at >= ? AND estado = ?) AS sin_confirmar',
+                COUNT(*) FILTER (WHERE inicia_at >= ? AND estado = ?) AS sin_confirmar,
+                COUNT(*) FILTER (WHERE estado IN (?, ?) AND '.Entrevista::SQL_TERMINA_AT.' < ?) AS por_cerrar',
                 [
                     now()->startOfDay(), now()->endOfDay(), EstadoEntrevista::Cancelada->value,
                     now(), now()->addDays(self::DIAS_PROXIMOS), EstadoEntrevista::Pendiente->value, EstadoEntrevista::Confirmada->value,
                     now(), EstadoEntrevista::Pendiente->value,
+                    EstadoEntrevista::Pendiente->value, EstadoEntrevista::Confirmada->value, now(),
                 ],
             )
             ->first();
@@ -37,6 +39,7 @@ class ResumenDeAgenda
             'hoy' => (int) ($cifras->hoy ?? 0),
             'proximas' => (int) ($cifras->proximas ?? 0),
             'sin_confirmar' => (int) ($cifras->sin_confirmar ?? 0),
+            'por_cerrar' => (int) ($cifras->por_cerrar ?? 0),
         ];
     }
 }

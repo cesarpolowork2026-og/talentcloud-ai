@@ -28,7 +28,8 @@ beforeEach(function () {
     $this->marta = User::factory()->deEmpresa($this->nimbus)->reclutador()->create();
     $this->backend = Vacante::factory()->deEmpresa($this->nimbus)->enEstado(EstadoVacante::Abierta)->create(['titulo' => 'Desarrollador Backend']);
 
-    actuarComo($this->marta);
+    // El embudo, la tendencia y la atención por vacante son del dashboard de gerencia (la cuenta de empresa).
+    actuarComo(User::factory()->deEmpresa($this->nimbus)->empresa()->create());
 });
 
 afterEach(fn () => Carbon::setTestNow());

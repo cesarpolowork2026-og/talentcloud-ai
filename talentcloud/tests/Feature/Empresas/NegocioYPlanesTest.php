@@ -248,6 +248,9 @@ it('da al admin SaaS el embudo de toda la plataforma', function () {
 });
 
 it('muestra el embudo en el dashboard y trata una vacante ajena como "todas"', function () {
+    // El embudo y el buscador de vacantes son del dashboard de gerencia (la cuenta de empresa); el reclutador ve «Mi día».
+    actuarComo($this->cuentaNimbus);
+
     moverEnEmbudo(postularParaEmbudo($this->backend), EtapaPostulacion::EnRevision);
 
     Livewire::test(Dashboard::class)

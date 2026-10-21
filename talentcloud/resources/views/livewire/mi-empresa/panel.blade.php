@@ -86,6 +86,11 @@
                         @endif
                     </p>
                 @endif
+                @if ($empresa->tieneVencimientoPropio())
+                    <p class="card-body text-14" @if ($empresa->planVencido() || $empresa->planVencePronto()) role="status" @endif>
+                        <x-empresas.vigencia-del-plan :empresa="$empresa" propia />
+                    </p>
+                @endif
                 @if ($empresa->enPrueba())
                     <p class="card-body text-14">
                         Tu prueba del plan {{ $uso->plan->etiqueta() }} termina el {{ \App\Support\Formato::fechaCorta($empresa->prueba_hasta) }}

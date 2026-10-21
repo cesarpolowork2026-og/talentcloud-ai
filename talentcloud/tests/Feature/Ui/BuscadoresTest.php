@@ -59,6 +59,9 @@ it('no ofrece las vacantes de otra empresa', function () {
 });
 
 it('el dashboard y «Postular a» usan buscadores y no incluyen todas las vacantes en la página', function () {
+    // El buscador de vacantes del embudo es del dashboard de gerencia (la cuenta de empresa); el reclutador ve «Mi día».
+    actuarComo(User::factory()->deEmpresa($this->nimbus)->empresa()->create());
+
     $html = Livewire::test(Panel::class)->html();
 
     expect($html)->toContain('role="combobox"')

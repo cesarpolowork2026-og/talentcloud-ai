@@ -59,6 +59,10 @@ class SincronizarSuscripcion
             $empresa->suscripcion_periodicidad = $suscripcion->periodicidad;
             $empresa->suscripcion_renueva_at = $suscripcion->renuevaAt;
             $empresa->suscripcion_cancela_al_final = $suscripcion->cancelaAlFinal;
+            // Con una suscripción en curso, su periodo manda: un vencimiento asignado a mano ya no aplica.
+            if ($vigente) {
+                $empresa->plan_vence_at = null;
+            }
 
             // contratar() termina la prueba: pagar durante la prueba da el plan pagado desde hoy.
             $cambia = $plan !== $anterior;

@@ -8,6 +8,7 @@ use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
 use App\Services\Dashboard\DashboardService;
 use App\Services\Dashboard\EmbudoDeSeleccion;
+use App\Services\Dashboard\MiDiaDelReclutadorService;
 use App\Services\Dashboard\TendenciaDePostulaciones;
 use App\Services\Empresas\LimitesDelPlan;
 use App\Services\Plataforma\PanelDePlataforma;
@@ -80,7 +81,7 @@ class Panel extends Component
         $this->mostrarVistaPrevia = true;
     }
 
-    public function render(DashboardService $dashboard, EmbudoDeSeleccion $embudo, VacanteRepository $vacantes, PanelDePlataforma $panel, LimitesDelPlan $limites, TendenciaDePostulaciones $tendencia): View
+    public function render(DashboardService $dashboard, EmbudoDeSeleccion $embudo, VacanteRepository $vacantes, PanelDePlataforma $panel, LimitesDelPlan $limites, TendenciaDePostulaciones $tendencia, MiDiaDelReclutadorService $miDia): View
     {
         // Un periodo que llegue por la dirección y no sea uno de los ofrecidos se trata como el de 30 días.
         $periodo = $this->periodoValido();
@@ -88,6 +89,8 @@ class Panel extends Component
         /** @var User $usuario */
         $usuario = auth()->user();
         $esAdmin = $usuario->tieneRol(Rol::Admin);
+        // El reclutador ve «Mi día»: lo suyo. Las métricas de gerencia, el embudo y el plan son de la cuenta de empresa.
+        $esReclutador = $usuario->tieneRol(Rol::Reclutador);
 
         // Un id que no es de una vacante visible se trata como "todas".
         $vacanteDelEmbudo = ctype_digit($this->vacanteDelEmbudo) ? $vacantes->buscar((int) $this->vacanteDelEmbudo) : null;
@@ -96,17 +99,20 @@ class Panel extends Component
             'plataforma' => $esAdmin ? CacheDeResumenes::recordar('plataforma', fn () => $panel->resumen(), 30) : null,
             'resumen' => $esAdmin ? null : $dashboard->resumen(),
             'periodo' => $periodo,
-            'tendencia' => $esAdmin ? null : $tendencia->calcular($periodo),
-            'embudo' => $esAdmin ? null : $embudo->calcular($vacanteDelEmbudo?->id, $periodo),
+            'miDia' => $esReclutador ? $miDia->calcular($usuario) : null,
+            'tendencia' => $esAdmin || $esReclutador ? null : $tendencia->calcular($periodo),
+            'embudo' => $esAdmin || $esReclutador ? null : $embudo->calcular($vacanteDelEmbudo?->id, $periodo),
             'etiquetaDeLaVacanteDelEmbudo' => $vacanteDelEmbudo ? Formato::vacante($vacanteDelEmbudo->loadMissing('empresa:id,nombre')) : '',
             // El plan es de la empresa: el admin SaaS ve la plataforma entera y no tiene uno propio.
-            'uso' => $esAdmin || $usuario->empresa === null ? null : CacheDeResumenes::recordar('uso-del-plan', fn () => $limites->uso($usuario->empresa), 30),
+            'uso' => $esAdmin || $esReclutador || $usuario->empresa === null ? null : CacheDeResumenes::recordar('uso-del-plan-'.$usuario->empresa->planVigente()->value, fn () => $limites->uso($usuario->empresa), 30),
             'empresa' => $esAdmin ? null : $usuario->empresa,
             'diasSinRevisar' => DashboardService::DIAS_SIN_REVISAR,
             'titulo' => $esAdmin ? 'Panel de la plataforma' : 'Dashboard',
             'subtitulo' => $esAdmin
                 ? 'Tus empresas cliente, los ingresos estimados, el crecimiento y el estado del sistema.'
-                : 'Resumen de la actividad de selección de '.$usuario->empresa?->nombre.'.',
+                : ($esReclutador
+                    ? 'Lo que te toca hoy en '.$usuario->empresa?->nombre.': tus entrevistas, tus evaluaciones y las postulaciones por revisar.'
+                    : 'Resumen de la actividad de selección de '.$usuario->empresa?->nombre.'.'),
             'seleccionada' => $this->vacanteSeleccionada && $this->mostrarVistaPrevia
                 ? $vacantes->buscar($this->vacanteSeleccionada)?->load('empresa')->loadCount('postulaciones')
                 : null,

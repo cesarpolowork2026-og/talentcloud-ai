@@ -78,6 +78,8 @@
                         {{ $seleccionada->etiquetaDelPlan() }}
                         @if ($seleccionada->enPrueba())
                             <span class="block text-13 font-normal text-neutral-700">Prueba hasta el {{ \App\Support\Formato::fechaCorta($seleccionada->prueba_hasta) }}; después, Gratis</span>
+                        @elseif ($seleccionada->tieneVencimientoPropio())
+                            <span class="block text-13 font-normal text-neutral-700"><x-empresas.vigencia-del-plan :empresa="$seleccionada" /></span>
                         @endif
                     </dd>
                 </div>
@@ -137,6 +139,12 @@
             <x-ui.field label="Plan" for="cambiar-plan" error="planNuevo" :hint="$planElegido?->descripcionDeLimites()">
                 <x-ui.select wire:model.live="planNuevo" id="cambiar-plan" :options="$planes" class="w-full" error="planNuevo" />
             </x-ui.field>
+            {{-- Gratis no vence; en un plan de pago asignado a mano la fecha es opcional (un contrato Enterprise puede no vencer). --}}
+            @if ($planNuevo !== \App\Enums\PlanEmpresa::Gratis->value)
+                <x-ui.field label="Vence el (opcional)" for="cambiar-plan-vence" error="planVenceEl" hint="Pasada esa fecha la empresa vuelve al plan Gratis. Déjalo vacío si el plan no vence.">
+                    <x-ui.input wire:model="planVenceEl" id="cambiar-plan-vence" type="date" :min="now()->addDay()->format('Y-m-d')" class="w-full" error="planVenceEl" />
+                </x-ui.field>
+            @endif
             @if ($seleccionada?->plan_solicitado)
                 <p class="m-0 text-14">La empresa solicitó el plan {{ $seleccionada->plan_solicitado->etiqueta() }} el {{ \App\Support\Formato::fechaCorta($seleccionada->plan_solicitado_at) }}. Aplícalo cuando el pago esté coordinado.</p>
             @endif

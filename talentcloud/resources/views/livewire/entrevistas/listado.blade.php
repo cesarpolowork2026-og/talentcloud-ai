@@ -16,9 +16,23 @@
         <x-ui.stat label="Hoy" :value="$resumen->hoy" highlight />
         <x-ui.stat label="Próximos {{ App\Services\Entrevistas\ResumenDeAgenda::DIAS_PROXIMOS }} días" :value="$resumen->proximas" />
         <x-ui.stat label="Por confirmar" :value="$resumen->sin_confirmar" />
+        {{-- Ya terminaron y siguen abiertas: hay que darlas por completadas (o cancelarlas) para poder evaluarlas. --}}
+        <x-ui.stat label="Por cerrar" :value="$resumen->por_cerrar" :highlight="$resumen->por_cerrar > 0" wire:click="alternarVencidas" :aria-pressed="$vencidas ? 'true' : 'false'" />
     </div>
 
-    <x-ui.listado-controles placeholder="Buscar candidato o vacante…" />
+    <x-ui.listado-controles
+        placeholder="Buscar candidato o vacante…"
+        etiqueta-estados="Filtrar por estado de la entrevista"
+        :estados="$this->opcionesEstado()"
+        :estado-actual="$estado"
+    />
+
+    @if ($vencidas)
+        <p class="-mt-2 mb-4 flex flex-wrap items-center gap-2 text-14" role="status">
+            Mostrando las entrevistas que ya terminaron y siguen abiertas. Complétalas o cancélalas para poder evaluarlas.
+            <button type="button" wire:click="alternarVencidas" class="text-accent-700 underline">Ver todas</button>
+        </p>
+    @endif
 
     @error('entrevista')
         <p class="field-error -mt-2 mb-4 text-14" role="alert">{{ $message }}</p>
@@ -48,7 +62,12 @@
                     @endif
                     <td>{{ $entrevista->entrevistador?->name }}</td>
                     <td class="text-neutral-600">{{ Formato::fechaHora($entrevista->inicia_at) }}</td>
-                    <td><x-ui.estado :valor="$entrevista->estado" /></td>
+                    <td>
+                        <x-ui.estado :valor="$entrevista->estado" />
+                        @if ($entrevista->estado->puedeCompletarse() && $entrevista->inicia_at->copy()->addMinutes($entrevista->duracion_min)->isPast())
+                            <x-ui.tag tone="accent-2" class="ml-1">Por cerrar</x-ui.tag>
+                        @endif
+                    </td>
                     <td>
                         {{-- Solo las acciones posibles: una realizada o cancelada no muestra botones apagados. --}}
                         @can('update', $entrevista)

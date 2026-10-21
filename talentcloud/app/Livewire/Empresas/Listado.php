@@ -17,7 +17,9 @@ use App\Services\Empresas\LimitesDelPlan;
 use App\Services\Equipo\InvitacionNoValida;
 use App\Services\Plataforma\RegistroDeAuditoria;
 use App\Services\Vacantes\OperacionNoPermitida;
+use App\Support\Formato;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -47,6 +49,9 @@ class Listado extends Component
     public bool $mostrarCambioDePlan = false;
 
     public string $planNuevo = '';
+
+    /** Vencimiento del plan asignado (Y-m-d); vacío = no vence. */
+    public string $planVenceEl = '';
 
     #[Locked]
     public ?int $empresaSeleccionada = null;
@@ -151,6 +156,10 @@ class Listado extends Component
         $this->empresaSeleccionada = $empresa->id;
         // Si la empresa pidió un plan, viene propuesto: atenderla es aplicarlo.
         $this->planNuevo = ($empresa->plan_solicitado ?? $empresa->plan)->value;
+        // Renovar el mismo plan propone su fecha actual; un plan distinto empieza sin vencimiento.
+        $this->planVenceEl = $this->planNuevo === $empresa->plan->value && $empresa->tieneVencimientoPropio()
+            ? $empresa->plan_vence_at->timezone(config('app.timezone'))->toDateString()
+            : '';
         $this->mostrarDetalle = false;
         $this->mostrarCambioDePlan = true;
     }
@@ -160,18 +169,27 @@ class Listado extends Component
         $empresa = $this->empresa((int) $this->empresaSeleccionada);
         $this->authorize('cambiarPlan', $empresa);
 
-        $datos = $this->validate(['planNuevo' => ['required', Rule::enum(PlanEmpresa::class)]], attributes: ['planNuevo' => 'plan']);
+        $datos = $this->validate([
+            'planNuevo' => ['required', Rule::enum(PlanEmpresa::class)],
+            'planVenceEl' => ['nullable', 'date_format:Y-m-d', 'after:today'],
+        ], attributes: ['planNuevo' => 'plan', 'planVenceEl' => 'vencimiento']);
 
         /** @var User $admin */
         $admin = auth()->user();
 
         $anterior = $empresa->plan->etiqueta();
+        // «Vence el 30 oct» incluye ese día: el plan rige hasta el final de la fecha, en la zona de la aplicación.
+        $venceAt = $datos['planVenceEl'] === null || $datos['planVenceEl'] === ''
+            ? null
+            : Carbon::createFromFormat('Y-m-d', $datos['planVenceEl'], config('app.timezone'))->endOfDay();
 
         try {
-            $cambiado = $cambiar->ejecutar($empresa, PlanEmpresa::from($datos['planNuevo']), $admin);
-            $auditoria->anotar($admin, RegistroDeAuditoria::PLAN_CAMBIADO, "Se cambió el plan de {$empresa->nombre}: de {$anterior} a {$cambiado->plan->etiqueta()}.", $empresa->id);
+            $cambiado = $cambiar->ejecutar($empresa, PlanEmpresa::from($datos['planNuevo']), $admin, $venceAt);
+            $vigencia = $cambiado->tieneVencimientoPropio() ? ', vigente hasta el '.Formato::fechaCorta($cambiado->plan_vence_at) : '';
+            $auditoria->anotar($admin, RegistroDeAuditoria::PLAN_CAMBIADO, "Se cambió el plan de {$empresa->nombre}: de {$anterior} a {$cambiado->plan->etiqueta()}{$vigencia}.", $empresa->id);
         } catch (OperacionNoPermitida $e) {
-            $this->addError('planNuevo', $e->getMessage());
+            // El servicio habla de «plan»; en este formulario ese campo se llama planNuevo.
+            $this->addError(in_array($e->campo, [null, 'plan'], true) ? 'planNuevo' : $e->campo, $e->getMessage());
 
             return;
         }

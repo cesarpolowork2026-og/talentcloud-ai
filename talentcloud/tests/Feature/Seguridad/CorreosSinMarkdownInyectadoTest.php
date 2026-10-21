@@ -4,6 +4,7 @@ use App\DTO\DatosDeEntrevista;
 use App\Models\Empresa;
 use App\Models\Invitacion;
 use App\Notifications\AvisoCambioDePlan;
+use App\Notifications\AvisoCorreoCambiado;
 use App\Notifications\AvisoDeEntrevista;
 use App\Notifications\AvisoEntrevistaReprogramada;
 use App\Notifications\AvisoEstadoDePostulacion;
@@ -11,6 +12,7 @@ use App\Notifications\AvisoNuevaPostulacion;
 use App\Notifications\AvisoPagoFallido;
 use App\Notifications\AvisoPostulacionRetirada;
 use App\Notifications\AvisoSolicitudDePlan;
+use App\Notifications\AvisoVencimientoDePlan;
 use App\Notifications\InvitacionRecibida;
 use App\Support\TextoDeCorreo;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -84,6 +86,8 @@ it('tampoco en los avisos de estado, entrevista, postulación, plan y pago', fun
         'cambio de plan' => [AvisoCambioDePlan::class, ['texto' => TEXTO_HOSTIL, 'limites' => TEXTO_HOSTIL, 'url' => 'https://app.example/x']],
         'solicitud de plan' => [AvisoSolicitudDePlan::class, ['texto' => TEXTO_HOSTIL, 'url' => 'https://app.example/x']],
         'pago fallido' => [AvisoPagoFallido::class, ['texto' => TEXTO_HOSTIL, 'url' => 'https://app.example/x']],
+        'correo cambiado' => [AvisoCorreoCambiado::class, ['texto' => TEXTO_HOSTIL, 'soporte' => TEXTO_HOSTIL]],
+        'plan por vencer' => [AvisoVencimientoDePlan::class, ['asunto' => 'Asunto', 'texto' => TEXTO_HOSTIL, 'consecuencia' => 'Texto fijo', 'url' => 'https://app.example/x']],
     ];
 });
 

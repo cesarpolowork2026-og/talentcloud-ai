@@ -171,7 +171,7 @@
                 <p class="card-body">Este candidato todavía no tiene CV.</p>
             @endif
 
-            @if ($puedeEditar)
+            @if ($puedeSubirCv)
                 <form wire:submit="subirCv" class="contents">
                     <x-ui.field label="{{ $cv ? 'Subir nuevo CV' : 'Subir CV' }} (PDF o Word)" for="detalle-cv" error="archivoCv">
                         <input type="file" wire:model="archivoCv" id="detalle-cv" accept=".pdf,.docx" class="input">

@@ -40,6 +40,9 @@ it('la zona actualizable se atenúa y anuncia «Actualizando…» solo para lo q
 });
 
 it('las listas con datos, el dashboard y el tablero usan la zona actualizable', function () {
+    // La zona del periodo es del dashboard de gerencia (la cuenta de empresa); el reclutador ve «Mi día».
+    actuarComo(User::factory()->deEmpresa($this->empresa)->empresa()->create());
+
     Postulacion::factory()->paraVacante($this->vacante)->create(); // da una fila a Vacantes y a Candidatos
 
     foreach (['vacantes', 'candidatos'] as $pantalla) {

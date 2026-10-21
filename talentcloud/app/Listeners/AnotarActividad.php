@@ -185,11 +185,15 @@ class AnotarActividad
     public function handlePlan(PlanEmpresaCambiado $evento): void
     {
         $empresa = $evento->empresa;
+        $vigencia = $empresa->tieneVencimientoPropio() ? ' Vigente hasta el '.Formato::fechaCorta($empresa->plan_vence_at).'.' : '';
+        $texto = $evento->anterior === $empresa->plan
+            ? "{$empresa->nombre} renovó el plan {$empresa->plan->etiqueta()}."
+            : "{$empresa->nombre} pasó del plan {$evento->anterior->etiqueta()} al plan {$empresa->plan->etiqueta()}.";
 
         $this->actividad->registrar(
             $empresa->id,
             TipoActividad::PlanCambiado,
-            "{$empresa->nombre} pasó del plan {$evento->anterior->etiqueta()} al plan {$empresa->plan->etiqueta()}.",
+            $texto.$vigencia,
             $empresa,
             $evento->actor,
         );

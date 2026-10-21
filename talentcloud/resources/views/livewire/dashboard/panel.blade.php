@@ -43,6 +43,29 @@
                 />
             </x-ui.card>
 
+            @if ($plataforma->planesPorVencer->isNotEmpty())
+                <x-ui.card class="mb-4">
+                    <div class="card-kicker">Planes por vencer</div>
+                    <p class="m-0 text-13 text-neutral-700">Planes asignados a mano que vencen en {{ \App\Models\Empresa::DIAS_DE_AVISO }} días o menos, o que ya vencieron y dejaron a la empresa en el plan Gratis. Coordina la renovación y aplícala con «Renovar».</p>
+                    <x-ui.table>
+                        <x-slot:head>
+                            <th>Empresa</th><th>Plan</th><th>Vencimiento</th><th>Acción</th>
+                        </x-slot:head>
+                        @foreach ($plataforma->planesPorVencer as $porVencer)
+                            <tr wire:key="por-vencer-{{ $porVencer->id }}">
+                                <td>{{ $porVencer->nombre }}</td>
+                                <td>{{ $porVencer->plan->etiqueta() }}</td>
+                                <td>
+                                    {{ \App\Support\Formato::fechaCorta($porVencer->plan_vence_at) }}
+                                    <x-ui.tag :tone="$porVencer->planVencido() ? 'accent-2' : 'outline'">{{ $porVencer->planVencido() ? 'Vencido' : 'Por vencer' }}</x-ui.tag>
+                                </td>
+                                <td><x-ui.button size="sm" variant="primary" :href="route('empresas.index', ['cambiar-plan' => $porVencer->id])" wire:navigate>Renovar</x-ui.button></td>
+                            </tr>
+                        @endforeach
+                    </x-ui.table>
+                </x-ui.card>
+            @endif
+
             @if ($plataforma->solicitudesDePlan->isNotEmpty())
                 <x-ui.card class="mb-4">
                     <div class="card-kicker">Solicitudes de cambio de plan</div>
@@ -170,6 +193,10 @@
         </section>
     @else
 
+    @if ($miDia)
+        <x-dashboard.mi-dia :dia="$miDia" />
+    @else
+
     {{-- Indicadores: lo que hay que mirar primero. --}}
     <div class="mb-6 grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <x-ui.stat label="Vacantes activas" :value="$resumen->vacantesActivas" />
@@ -223,6 +250,9 @@
                 <x-ui.card :kicker="'Tu plan · '.$empresa->etiquetaDelPlan()">
                     @if ($empresa->enPrueba())
                         <p class="m-0 text-13 text-neutral-800">Te {{ $empresa->diasDePrueba() === 1 ? 'queda 1 día' : 'quedan '.$empresa->diasDePrueba().' días' }} de prueba del plan {{ App\Enums\PlanEmpresa::PLAN_DE_PRUEBA->etiqueta() }}.</p>
+                    @endif
+                    @if ($empresa->planVencido() || $empresa->planVencePronto())
+                        <p class="m-0 text-13 text-neutral-800"><x-empresas.vigencia-del-plan :empresa="$empresa" propia /></p>
                     @endif
                     <x-empresas.uso-del-plan :uso="$uso" />
                     <div class="flex flex-wrap gap-2">
@@ -296,6 +326,8 @@
         </x-ui.actualizable>
     </section>
 
+    @endif
+
     <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <section aria-labelledby="vacantes-titulo">
             <h2 id="vacantes-titulo" class="mb-3 text-16">Vacantes en curso</h2>
@@ -333,7 +365,8 @@
         <livewire:dashboard.actividad-reciente />
     </div>
 
-    {{-- Embudo de selección (ampliación: no está en el prototipo) --}}
+    {{-- Embudo de selección (ampliación: no está en el prototipo). Es de gerencia: el reclutador ve «Mi día». --}}
+    @unless ($miDia)
     <section class="mt-8" aria-labelledby="embudo-titulo">
         <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
             <div>
@@ -418,6 +451,7 @@
         @endif
         </x-ui.actualizable>
     </section>
+    @endunless
 
     @endif
 

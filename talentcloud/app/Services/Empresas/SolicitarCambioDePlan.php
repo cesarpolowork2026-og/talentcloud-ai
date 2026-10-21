@@ -23,10 +23,12 @@ class SolicitarCambioDePlan
     {
         DB::transaction(function () use ($empresa, $plan): void {
             $fila = Empresa::query()->lockForUpdate()->findOrFail($empresa->id);
+            // Un plan asignado a mano que ya venció cuenta como Gratis: pedirlo de nuevo es pedir su renovación.
+            $contratado = $fila->planContratado();
 
             // Con cobro en línea, Starter y Pro se pagan y una suscripción se cancela en su portal;
             // a mano solo se pide lo que se cotiza (Enterprise) o dejar un contrato Enterprise.
-            if (CobroEnLinea::habilitado() && $plan->sePagaEnLinea() && $fila->plan !== PlanEmpresa::Enterprise) {
+            if (CobroEnLinea::habilitado() && $plan->sePagaEnLinea() && $contratado !== PlanEmpresa::Enterprise) {
                 throw new OperacionNoPermitida('El plan '.$plan->etiqueta().' se contrata pagando en línea.', 'plan');
             }
 
@@ -34,11 +36,11 @@ class SolicitarCambioDePlan
                 throw new OperacionNoPermitida('Para pasar al plan Gratis, cancela tu suscripción en «Gestionar suscripción».', 'plan');
             }
 
-            if ($fila->plan === $plan && ! $fila->enPrueba()) {
+            if ($contratado === $plan && ! $fila->enPrueba()) {
                 throw new OperacionNoPermitida('Tu empresa ya tiene el plan '.$plan->etiqueta().'.', 'plan');
             }
 
-            if ($fila->plan === $plan) {
+            if ($contratado === $plan) {
                 // Durante la prueba, el contratado es Gratis: pedirlo no cambia nada.
                 throw new OperacionNoPermitida('Al terminar la prueba tu empresa pasará al plan '.$plan->etiqueta().' sin hacer nada.', 'plan');
             }

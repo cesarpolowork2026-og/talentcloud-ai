@@ -2,6 +2,8 @@
 
 use App\Models\Candidato;
 use App\Models\User;
+use App\Notifications\AvisoCorreoCambiado;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Volt\Volt;
 
 test('profile page is displayed', function () {
@@ -35,6 +37,7 @@ test('profile information can be updated', function () {
     $component = Volt::test('profile.update-profile-information-form')
         ->set('name', 'Test User')
         ->set('email', 'test@example.com')
+        ->set('password_actual', 'password')
         ->set('notificaciones_email', false)
         ->call('updateProfileInformation');
 
@@ -59,6 +62,7 @@ test('el postulante que cambia su nombre o correo actualiza su ficha de candidat
     Volt::test('profile.update-profile-information-form')
         ->set('name', 'Marco A. Díaz')
         ->set('email', 'marco.diaz@correo.com')
+        ->set('password_actual', 'password')
         ->call('updateProfileInformation')
         ->assertHasNoErrors();
 
@@ -126,4 +130,67 @@ test('correct password must be provided to delete account', function () {
         ->assertNoRedirect();
 
     $this->assertNotNull($user->fresh());
+});
+
+// — Cambiar el correo: contraseña actual y aviso al correo anterior —
+
+test('cambiar el correo exige la contraseña actual', function () {
+    $user = User::factory()->reclutador()->create(['email' => 'rocio@empresa.com']);
+    $this->actingAs($user);
+
+    Volt::test('profile.update-profile-information-form')
+        ->set('email', 'nuevo@empresa.com')
+        ->call('updateProfileInformation')
+        ->assertHasErrors(['password_actual' => 'required'])
+        ->set('password_actual', 'no-es-la-contraseña')
+        ->call('updateProfileInformation')
+        ->assertHasErrors(['password_actual' => 'current_password']);
+
+    expect($user->fresh()->email)->toBe('rocio@empresa.com');
+});
+
+test('con la contraseña correcta cambia el correo y avisa al correo anterior', function () {
+    Notification::fake();
+    $user = User::factory()->reclutador()->create(['email' => 'rocio@empresa.com']);
+    $this->actingAs($user);
+
+    Volt::test('profile.update-profile-information-form')
+        ->set('email', 'rocio.nueva@gmail.com')
+        ->set('password_actual', 'password')
+        ->call('updateProfileInformation')
+        ->assertHasNoErrors()
+        ->assertSet('password_actual', '');
+
+    expect($user->fresh()->email)->toBe('rocio.nueva@gmail.com')
+        ->and($user->fresh()->email_verified_at)->toBeNull();
+
+    // El aviso va al correo ANTERIOR y muestra el nuevo a medias.
+    Notification::assertSentOnDemand(AvisoCorreoCambiado::class, function (AvisoCorreoCambiado $aviso, array $canales, object $destino) {
+        return $destino->routes['mail'] === 'rocio@empresa.com'
+            && $canales === ['mail']
+            && str_contains($aviso->texto, 'ro***@gmail.com')
+            && ! str_contains($aviso->texto, 'rocio.nueva');
+    });
+});
+
+test('cambiar solo el nombre no pide contraseña ni avisa a nadie', function () {
+    Notification::fake();
+    $user = User::factory()->reclutador()->create();
+    $this->actingAs($user);
+
+    Volt::test('profile.update-profile-information-form')
+        ->set('name', 'Otro Nombre')
+        ->call('updateProfileInformation')
+        ->assertHasNoErrors();
+
+    expect($user->fresh()->name)->toBe('Otro Nombre');
+    Notification::assertNothingSent();
+});
+
+test('la pantalla pide la contraseña solo cuando el correo cambia', function () {
+    $this->actingAs(User::factory()->reclutador()->create());
+
+    $html = $this->get('/profile')->assertOk()->getContent();
+
+    expect($html)->toContain('id="password_actual"')->and($html)->toContain('x-show="$wire.email.trim().toLowerCase() !== $wire.correo_guardado.toLowerCase()"');
 });

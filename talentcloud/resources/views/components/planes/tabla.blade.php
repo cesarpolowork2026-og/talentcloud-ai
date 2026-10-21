@@ -24,7 +24,7 @@
     @foreach (\App\Enums\PlanEmpresa::cases() as $plan)
         @php
             $recomendado = $plan === \App\Enums\PlanEmpresa::Pro;
-            $esSuPlan = $empresa !== null && $empresa->plan === $plan;
+            $esSuPlan = $empresa !== null && $empresa->planContratado() === $plan;
             // A más precio, un fondo más intenso: degradados claros donde manda el teal de la marca y que
             // se funden hacia menta (Starter) o lila (Pro y, más marcado, Enterprise). Texto oscuro en todas.
             // Clases escritas completas para que Tailwind las genere.
@@ -80,7 +80,7 @@
                         <x-ui.button size="sm" variant="secondary" wire:click="gestionarSuscripcion" wire:loading.attr="disabled">
                             {{ $plan === \App\Enums\PlanEmpresa::Gratis ? 'Cancelar suscripción' : 'Cambiar al plan '.$plan->etiqueta() }}
                         </x-ui.button>
-                    @elseif ($cobro && $plan->sePagaEnLinea() && $empresa->plan !== \App\Enums\PlanEmpresa::Enterprise)
+                    @elseif ($cobro && $plan->sePagaEnLinea() && $empresa->planContratado() !== \App\Enums\PlanEmpresa::Enterprise)
                         <div class="grid gap-2">
                             @foreach (\App\Enums\Periodicidad::cases() as $periodicidad)
                                 <x-ui.button size="sm" :variant="$recomendado && $periodicidad === \App\Enums\Periodicidad::Mensual ? 'primary' : 'secondary'" wire:click="contratarPlan('{{ $plan->value }}', '{{ $periodicidad->value }}')" wire:loading.attr="disabled">

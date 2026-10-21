@@ -13,6 +13,7 @@ use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Services\Entrevistas\ResumenDeAgenda;
 use App\Tenancy\TenantContext;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
@@ -286,4 +287,126 @@ it('muestra al admin SaaS las entrevistas de todas las empresas', function () {
 
 it('no deja entrar al postulante', function () {
     $this->actingAs(User::factory()->postulante()->create())->get('/entrevistas')->assertForbidden();
+});
+
+it('filtra la lista por el estado de la entrevista', function () {
+    // Setup: Elena, pendiente. Se suman una confirmada, una completada y una cancelada.
+    $otra = fn (string $nombre, EstadoEntrevista $estado, string $inicia) => Entrevista::factory()->create([
+        'postulacion_id' => Postulacion::factory()->paraVacante($this->backend)->create([
+            'candidato_id' => Candidato::factory()->create(['nombre' => $nombre])->id,
+        ])->id,
+        'entrevistador_id' => $this->marta->id,
+        'inicia_at' => $inicia,
+        'estado' => $estado,
+    ]);
+    $otra('Carla Confirmada', EstadoEntrevista::Confirmada, '2026-09-26 10:00');
+    $otra('Hugo Hecho', EstadoEntrevista::Completada, '2026-09-20 10:00');
+    $otra('Cecilia Cancelada', EstadoEntrevista::Cancelada, '2026-09-27 10:00');
+
+    Livewire::test(Listado::class)
+        ->assertSee('Filtrar por estado de la entrevista', false)
+        ->assertSee('Pendiente')->assertSee('Confirmada')->assertSee('Completada')->assertSee('Cancelada')
+        // Sin filtro, todas.
+        ->assertSee('Elena Ruiz')->assertSee('Carla Confirmada')->assertSee('Hugo Hecho')->assertSee('Cecilia Cancelada')
+        ->call('filtrarEstado', 'pendiente')
+        ->assertSet('estado', 'pendiente')
+        ->assertSee('Elena Ruiz')->assertDontSee('Carla Confirmada')->assertDontSee('Hugo Hecho')->assertDontSee('Cecilia Cancelada')
+        ->call('filtrarEstado', 'confirmada')
+        ->assertSee('Carla Confirmada')->assertDontSee('Elena Ruiz')
+        ->call('filtrarEstado', 'completada')
+        ->assertSee('Hugo Hecho')->assertDontSee('Carla Confirmada')
+        ->call('filtrarEstado', 'cancelada')
+        ->assertSee('Cecilia Cancelada')->assertDontSee('Hugo Hecho')
+        ->call('filtrarEstado', '')
+        ->assertSee('Elena Ruiz')->assertSee('Cecilia Cancelada');
+});
+
+it('el filtro por estado combina con la búsqueda y dice cuándo no hay resultados', function () {
+    Entrevista::factory()->create(['postulacion_id' => $this->sofia->id, 'entrevistador_id' => $this->marta->id, 'inicia_at' => '2026-09-26 10:00', 'estado' => EstadoEntrevista::Confirmada]);
+
+    Livewire::test(Listado::class)
+        ->call('filtrarEstado', 'confirmada')
+        ->set('busqueda', 'Sofía')
+        ->assertSee('Sofía Nieto')->assertDontSee('Elena Ruiz')
+        ->set('busqueda', 'Elena')
+        ->assertSee('No se encontraron entrevistas.');
+});
+
+it('ignora un estado manipulado en la URL', function () {
+    $this->get('/entrevistas?estado=hackeado')->assertOk()->assertSee('Elena Ruiz');
+});
+
+// — Entrevistas por cerrar: ya terminaron y siguen abiertas —
+
+/** Entrevistas de Marta en distintos momentos respecto de «ahora» (2026-09-24 09:00). */
+function entrevistasParaCerrar(): array
+{
+    $en = fn (string $candidato, EstadoEntrevista $estado, string $inicia, int $duracion = 45) => Entrevista::factory()->create([
+        'postulacion_id' => Postulacion::factory()->paraVacante(test()->backend)->create([
+            'candidato_id' => Candidato::factory()->create(['nombre' => $candidato])->id,
+        ])->id,
+        'entrevistador_id' => test()->marta->id,
+        'inicia_at' => $inicia,
+        'duracion_min' => $duracion,
+        'estado' => $estado,
+    ]);
+
+    return [
+        'vencida pendiente' => $en('Vera Vencida', EstadoEntrevista::Pendiente, '2026-09-23 10:00'),
+        'vencida confirmada' => $en('Carlos Cerrar', EstadoEntrevista::Confirmada, '2026-09-24 07:00'),
+        'en curso' => $en('Enzo EnCurso', EstadoEntrevista::Confirmada, '2026-09-24 08:30'),   // termina a las 09:15: aún no
+        'recién terminada' => $en('Rita Recién', EstadoEntrevista::Confirmada, '2026-09-24 08:00'), // termina a las 08:45: sí
+        'futura' => $en('Fabio Futuro', EstadoEntrevista::Pendiente, '2026-09-24 15:00'),
+        'completada' => $en('Hugo Hecho', EstadoEntrevista::Completada, '2026-09-20 10:00'),
+        'cancelada' => $en('Cecilia Cancelada', EstadoEntrevista::Cancelada, '2026-09-21 10:00'),
+    ];
+}
+
+it('«por cerrar» son las pendientes o confirmadas que ya terminaron, no las que están en curso', function () {
+    entrevistasParaCerrar();
+
+    $nombres = Entrevista::query()->porCerrar()->with('postulacion.candidato')->get()
+        ->map(fn (Entrevista $e) => $e->postulacion->candidato->nombre)->sort()->values()->all();
+
+    expect($nombres)->toBe(['Carlos Cerrar', 'Rita Recién', 'Vera Vencida']);
+});
+
+it('la agenda cuenta cuántas entrevistas de la empresa hay por cerrar', function () {
+    entrevistasParaCerrar();
+
+    expect(app(ResumenDeAgenda::class)->calcular()->por_cerrar)->toBe(3);
+});
+
+it('la pantalla muestra «Por cerrar», marca las filas y filtra con un clic', function () {
+    entrevistasParaCerrar();
+
+    $html = Livewire::test(Listado::class)
+        ->assertSee('Por cerrar')
+        ->assertSee('Fabio Futuro')->assertSee('Hugo Hecho')
+        ->call('alternarVencidas')
+        ->assertSet('vencidas', true)
+        ->assertSee('Vera Vencida')->assertSee('Carlos Cerrar')->assertSee('Rita Recién')
+        ->assertDontSee('Fabio Futuro')->assertDontSee('Hugo Hecho')->assertDontSee('Enzo EnCurso')->assertDontSee('Cecilia Cancelada')
+        ->assertSee('Mostrando las entrevistas que ya terminaron y siguen abiertas')
+        ->html();
+
+    // Cada fila abierta y vencida lleva su marca.
+    expect(substr_count($html, 'Por cerrar</span>'))->toBeGreaterThanOrEqual(3);
+
+    Livewire::test(Listado::class)->call('alternarVencidas')->call('alternarVencidas')->assertSet('vencidas', false)->assertSee('Fabio Futuro');
+});
+
+it('sin entrevistas por cerrar, el filtro lo dice en lugar de mostrar la agenda libre', function () {
+    Livewire::test(Listado::class)->call('alternarVencidas')->assertSee('No se encontraron entrevistas.');
+});
+
+it('el filtro por cerrar llega por la dirección y se combina con el de estado', function () {
+    entrevistasParaCerrar();
+
+    $this->get('/entrevistas?vencidas=1')->assertOk()->assertSee('Vera Vencida')->assertDontSee('Fabio Futuro');
+
+    Livewire::test(Listado::class)
+        ->call('alternarVencidas')
+        ->call('filtrarEstado', 'pendiente')
+        ->assertSee('Vera Vencida')->assertDontSee('Carlos Cerrar');
 });

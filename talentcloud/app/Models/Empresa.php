@@ -21,6 +21,9 @@ use Illuminate\Support\Facades\Cache;
  * @property string $nombre
  * @property PlanEmpresa $plan plan contratado (durante la prueba, Gratis)
  * @property Carbon|null $prueba_hasta
+ * @property Carbon|null $plan_vence_at vencimiento de un plan asignado a mano (null = no vence)
+ * @property Carbon|null $plan_aviso_pronto_para vencimiento al que se refería el aviso «vence pronto» ya enviado
+ * @property Carbon|null $plan_aviso_vencido_para vencimiento al que se refería el aviso «venció» ya enviado
  * @property PlanEmpresa|null $plan_solicitado
  * @property Carbon|null $plan_solicitado_at
  * @property EstadoEmpresa $estado
@@ -39,6 +42,9 @@ class Empresa extends Model
 
     /** Pasos del checklist de bienvenida del prototipo. */
     public const PASOS_ONBOARDING = ['perfil', 'vacante', 'invitar'];
+
+    /** Con cuántos días de anticipación se avisa que un plan asignado a mano está por vencer. */
+    public const DIAS_DE_AVISO = 15;
 
     protected $fillable = [
         'nombre',
@@ -88,6 +94,9 @@ class Empresa extends Model
         return [
             'plan' => PlanEmpresa::class,
             'prueba_hasta' => 'datetime',
+            'plan_vence_at' => 'datetime',
+            'plan_aviso_pronto_para' => 'datetime',
+            'plan_aviso_vencido_para' => 'datetime',
             'plan_solicitado' => PlanEmpresa::class,
             'plan_solicitado_at' => 'datetime',
             'estado' => EstadoEmpresa::class,
@@ -133,11 +142,50 @@ class Empresa extends Model
 
     /**
      * Plan cuyos límites rigen hoy: el de prueba mientras dure la prueba y, después,
-     * el contratado. La prueba vence sola, sin tareas programadas.
+     * el contratado. La prueba y el plan asignado a mano vencen solos, sin tareas programadas.
      */
     public function planVigente(): PlanEmpresa
     {
-        return $this->enPrueba() ? PlanEmpresa::PLAN_DE_PRUEBA : $this->plan;
+        return $this->enPrueba() ? PlanEmpresa::PLAN_DE_PRUEBA : $this->planContratado();
+    }
+
+    /** El plan contratado que sigue en pie: el guardado, o Gratis si su vencimiento ya pasó. */
+    public function planContratado(): PlanEmpresa
+    {
+        return $this->planVencido() ? PlanEmpresa::Gratis : $this->plan;
+    }
+
+    /**
+     * ¿El plan asignado a mano ya venció? Un plan sin fecha no vence, y uno pagado con tarjeta lo gobierna
+     * la pasarela (suscripcion_renueva_at), no esta fecha.
+     */
+    public function planVencido(): bool
+    {
+        return $this->tieneVencimientoPropio() && $this->plan_vence_at->isPast();
+    }
+
+    /** ¿Tiene un plan de pago con fecha de vencimiento por venir (o ya pasada)? Excluye suscripciones y la prueba. */
+    public function tieneVencimientoPropio(): bool
+    {
+        return $this->plan !== PlanEmpresa::Gratis
+            && $this->plan_vence_at !== null
+            && ! $this->tieneSuscripcionVigente();
+    }
+
+    /** ¿El plan vence en los próximos DIAS_DE_AVISO días (sin haber vencido aún)? */
+    public function planVencePronto(): bool
+    {
+        return $this->tieneVencimientoPropio()
+            && ! $this->planVencido()
+            && $this->plan_vence_at->lte(now()->addDays(self::DIAS_DE_AVISO));
+    }
+
+    /** Días que le quedan al plan, contando el de hoy (0 si no tiene vencimiento o ya venció). */
+    public function diasParaVencer(): int
+    {
+        return $this->tieneVencimientoPropio() && ! $this->planVencido()
+            ? max(1, (int) ceil(now()->diffInDays($this->plan_vence_at)))
+            : 0;
     }
 
     public function enPrueba(): bool
@@ -151,19 +199,21 @@ class Empresa extends Model
         return $this->enPrueba() ? max(1, (int) ceil(now()->diffInDays($this->prueba_hasta))) : 0;
     }
 
-    /** "Pro (prueba)" durante la prueba; si no, el plan contratado. */
+    /** "Pro (prueba)" durante la prueba; si no, el plan contratado que sigue en pie. */
     public function etiquetaDelPlan(): string
     {
-        return $this->enPrueba() ? PlanEmpresa::PLAN_DE_PRUEBA->etiqueta().' (prueba)' : $this->plan->etiqueta();
+        return $this->enPrueba() ? PlanEmpresa::PLAN_DE_PRUEBA->etiqueta().' (prueba)' : $this->planContratado()->etiqueta();
     }
 
     /**
      * Fija el plan contratado: termina la prueba y atiende la solicitud de plan, si
      * la había. Lo usan el admin SaaS (CambiarPlanEmpresa) y el cobro en línea.
+     * `$venceAt` solo tiene sentido en un plan de pago asignado a mano; Gratis y los pagados con tarjeta no lo llevan.
      */
-    public function contratar(PlanEmpresa $plan): void
+    public function contratar(PlanEmpresa $plan, ?Carbon $venceAt = null): void
     {
         $this->plan = $plan;
+        $this->plan_vence_at = $plan === PlanEmpresa::Gratis ? null : $venceAt;
         $this->prueba_hasta = null;
         $this->plan_solicitado = null;
         $this->plan_solicitado_at = null;

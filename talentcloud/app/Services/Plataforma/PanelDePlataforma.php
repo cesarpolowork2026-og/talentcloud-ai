@@ -54,8 +54,8 @@ class PanelDePlataforma
         return new ResumenDePlataforma(
             empresasActivas: $activas->count(),
             empresasSuspendidas: $empresas->count() - $activas->count(),
-            porPlan: $activas->countBy(fn (Empresa $e) => $e->plan->value)->all(),
-            empresasPorPlan: $activas->groupBy(fn (Empresa $e) => $e->plan->value)
+            porPlan: $activas->countBy(fn (Empresa $e) => $e->planContratado()->value)->all(),
+            empresasPorPlan: $activas->groupBy(fn (Empresa $e) => $e->planContratado()->value)
                 ->map(fn (Collection $grupo) => $grupo->map(fn (Empresa $e) => ['id' => $e->id, 'nombre' => $e->nombre])->values()->all())
                 ->all(),
             cercaDelLimite: $activas
@@ -69,6 +69,10 @@ class PanelDePlataforma
                 ->filter(fn (array $fila) => $fila['uso']->cercaDelLimite())
                 ->values(),
             enPrueba: $activas->filter(fn (Empresa $e) => $e->enPrueba())->count(),
+            planesPorVencer: $activas
+                ->filter(fn (Empresa $e) => $e->planVencido() || $e->planVencePronto())
+                ->sortBy(fn (Empresa $e) => $e->plan_vence_at)
+                ->values(),
             solicitudesDePlan: $activas
                 ->filter(fn (Empresa $e) => $e->plan_solicitado !== null)
                 ->sortBy(fn (Empresa $e) => $e->plan_solicitado_at)
@@ -77,9 +81,9 @@ class PanelDePlataforma
             postulantes: User::role(Rol::Postulante->value)->count(),
             vacantesActivas: Vacante::query()->whereIn('estado', EstadoVacante::activos())->count(),
             postulacionesDelMes: Postulacion::query()->where('created_at', '>=', Carbon::now()->startOfMonth())->count(),
-            // Referencia con precios de lista: Enterprise se cotiza y no suma; las pruebas aún no pagan.
-            ingresoMensual: $activas->reject(fn (Empresa $e) => $e->plan->seCotiza())->sum(fn (Empresa $e) => $e->plan->precioMensual()),
-            enterpriseSinPrecio: $activas->filter(fn (Empresa $e) => $e->plan->seCotiza())->count(),
+            // Referencia con precios de lista: Enterprise se cotiza y no suma; las pruebas aún no pagan ni los planes vencidos.
+            ingresoMensual: $activas->reject(fn (Empresa $e) => $e->planContratado()->seCotiza())->sum(fn (Empresa $e) => $e->planContratado()->precioMensual()),
+            enterpriseSinPrecio: $activas->filter(fn (Empresa $e) => $e->planContratado()->seCotiza())->count(),
             crecimiento: $this->crecimiento(),
             trabajosFallidos: DB::table('failed_jobs')->count(),
             trabajosEnCola: DB::table('jobs')->count(),

@@ -13,6 +13,10 @@ new class extends Component
 {
     public string $name = '';
     public string $email = '';
+    /** Solo se exige al cambiar el correo: quien lo cambia debe conocer la contraseña de la cuenta. */
+    public string $password_actual = '';
+    /** El correo guardado en la cuenta: la pantalla pide la contraseña solo cuando el escrito es otro. */
+    public string $correo_guardado = '';
     public bool $notificaciones_email = true;
 
     // Ficha de candidato (solo postulantes): lo que ven las empresas junto a su nombre.
@@ -26,7 +30,7 @@ new class extends Component
     public function mount(): void
     {
         $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
+        $this->email = $this->correo_guardado = Auth::user()->email;
         $this->notificaciones_email = Auth::user()->notificaciones_email;
 
         $candidato = Auth::user()->candidato;
@@ -43,19 +47,25 @@ new class extends Component
         /** @var User $user */
         $user = Auth::user();
 
+        $cambiaElCorreo = mb_strtolower(trim($this->email)) !== mb_strtolower($user->email);
+
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'password_actual' => $cambiaElCorreo ? ['required', 'string', 'current_password'] : ['nullable'],
             'notificaciones_email' => ['boolean'],
             'titular' => ['nullable', 'string', 'max:120'],
             'telefono' => ['nullable', 'string', 'max:40', 'regex:/^[0-9+()\s.-]*$/'],
-        ], ['telefono.regex' => 'El teléfono solo puede tener números, espacios y los signos + ( ) . -'], ['titular' => 'titular', 'telefono' => 'teléfono']);
+        ], ['telefono.regex' => 'El teléfono solo puede tener números, espacios y los signos + ( ) . -'], ['titular' => 'titular', 'telefono' => 'teléfono', 'password_actual' => 'contraseña actual']);
 
         $ficha = $user->candidato !== null
             ? new FichaDelPostulante(trim($validated['titular'] ?? '') ?: null, trim($validated['telefono'] ?? '') ?: null)
             : null;
 
         $actualizar->ejecutar($user, $validated['name'], $validated['email'], $validated['notificaciones_email'], $ficha);
+
+        $this->reset('password_actual');
+        $this->correo_guardado = $user->email;
 
         $this->dispatch('profile-updated', name: $user->name);
     }
@@ -81,6 +91,8 @@ new class extends Component
 
 {{-- Tarjeta de Mi perfil del prototipo: nombre, correo y notificaciones por correo (y, para el postulante, titular y teléfono). --}}
 <x-ui.card class="!p-6">
+    <h2 class="mb-4 text-16">Datos de la cuenta</h2>
+
     <form wire:submit="updateProfileInformation" class="contents">
         <div class="grid gap-4">
             <x-ui.field label="Nombre" for="name" error="name">
@@ -100,6 +112,13 @@ new class extends Component
                     @endif
                 @endif
             </x-ui.field>
+
+            {{-- Cambiar el correo cambia a dónde llegan los avisos y la recuperación de la cuenta: se pide la contraseña. --}}
+            <div x-show="$wire.email.trim().toLowerCase() !== $wire.correo_guardado.toLowerCase()" x-cloak>
+                <x-ui.field label="Contraseña actual" for="password_actual" error="password_actual" hint="La pedimos porque cambiaste el correo. Avisaremos también al correo anterior.">
+                    <x-ui.input wire:model="password_actual" id="password_actual" type="password" error="password_actual" autocomplete="current-password" />
+                </x-ui.field>
+            </div>
 
             @if ($esPostulante)
                 <x-ui.field label="Titular" for="titular" error="titular" hint="Una línea sobre ti que las empresas ven junto a tu nombre.">

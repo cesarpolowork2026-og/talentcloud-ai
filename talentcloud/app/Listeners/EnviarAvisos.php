@@ -7,12 +7,15 @@ use App\Enums\EtapaPostulacion;
 use App\Enums\Rol;
 use App\Events\CandidatoSePostulo;
 use App\Events\ContrasenaCambiada;
+use App\Events\CorreoCambiado;
 use App\Events\EntrevistaCancelada;
 use App\Events\EntrevistaProgramada;
 use App\Events\EntrevistaReprogramada;
 use App\Events\PagoFallido;
 use App\Events\PlanEmpresaCambiado;
+use App\Events\PlanPorVencer;
 use App\Events\PlanSolicitado;
+use App\Events\PlanVencido;
 use App\Events\PostulacionCambioDeEtapa;
 use App\Events\PostulacionRetirada;
 use App\Events\VacanteCerrada;
@@ -25,16 +28,20 @@ use App\Models\User;
 use App\Models\Vacante;
 use App\Notifications\AvisoCambioDePlan;
 use App\Notifications\AvisoContrasenaCambiada;
+use App\Notifications\AvisoCorreoCambiado;
 use App\Notifications\AvisoDeEntrevista;
 use App\Notifications\AvisoEntrevistaReprogramada;
 use App\Notifications\AvisoNuevaPostulacion;
 use App\Notifications\AvisoPagoFallido;
 use App\Notifications\AvisoPostulacionRetirada;
 use App\Notifications\AvisoSolicitudDePlan;
+use App\Notifications\AvisoVencimientoDePlan;
 use App\Services\Avisos\AvisoAlCandidato;
+use App\Support\Formato;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Notification as Notificaciones;
 
 /**
  * Notificaciones (campana y correo según preferencia): entrevistas programadas
@@ -137,6 +144,13 @@ class EnviarAvisos
         $evento->usuario->notify(AvisoContrasenaCambiada::ahora());
     }
 
+    /** El correo cambió desde «Mi perfil»: aviso de seguridad al correo anterior, que ya no es el de la cuenta. */
+    public function handleCorreoCambiado(CorreoCambiado $evento): void
+    {
+        Notificaciones::route('mail', $evento->correoAnterior)
+            ->notify(AvisoCorreoCambiado::de($evento->usuario->email, (string) config('talentcloud.soporte.correo')));
+    }
+
     /** La contraseña se restableció con el enlace de recuperación: el mismo aviso. */
     public function handleContrasenaRestablecida(PasswordReset $evento): void
     {
@@ -147,7 +161,29 @@ class EnviarAvisos
     public function handlePlan(PlanEmpresaCambiado $evento): void
     {
         $empresa = $evento->empresa;
-        $aviso = AvisoCambioDePlan::de($empresa->nombre, $empresa->plan->etiqueta(), $empresa->plan->descripcionDeLimites(), route('mi-empresa'));
+        $plan = $empresa->plan;
+        $vence = $empresa->tieneVencimientoPropio() ? Formato::fechaCorta($empresa->plan_vence_at) : null;
+        $aviso = $evento->anterior === $plan
+            ? AvisoCambioDePlan::renovado($empresa->nombre, $plan->etiqueta(), $plan->descripcionDeLimites(), route('mi-empresa'), $vence)
+            : AvisoCambioDePlan::de($empresa->nombre, $plan->etiqueta(), $plan->descripcionDeLimites(), route('mi-empresa'), $vence);
+
+        $this->cuentasDeEmpresa($empresa)->each(fn (User $u) => $u->notify($aviso));
+    }
+
+    /** Al plan asignado a mano le quedan pocos días: la cuenta de empresa coordina la renovación. */
+    public function handlePlanPorVencer(PlanPorVencer $evento): void
+    {
+        $empresa = $evento->empresa;
+        $aviso = AvisoVencimientoDePlan::porVencer($empresa->nombre, $empresa->plan->etiqueta(), Formato::fechaCorta($empresa->plan_vence_at), $empresa->diasParaVencer(), route('mi-empresa'));
+
+        $this->cuentasDeEmpresa($empresa)->each(fn (User $u) => $u->notify($aviso));
+    }
+
+    /** Venció el plan asignado a mano: ahora rige el Gratis. */
+    public function handlePlanVencido(PlanVencido $evento): void
+    {
+        $empresa = $evento->empresa;
+        $aviso = AvisoVencimientoDePlan::vencido($empresa->nombre, $empresa->plan->etiqueta(), Formato::fechaCorta($empresa->plan_vence_at), route('mi-empresa'));
 
         $this->cuentasDeEmpresa($empresa)->each(fn (User $u) => $u->notify($aviso));
     }

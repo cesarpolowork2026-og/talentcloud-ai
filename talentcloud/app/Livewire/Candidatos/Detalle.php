@@ -97,7 +97,7 @@ class Detalle extends Component
     public function subirCv(SubirCv $cvs): void
     {
         $candidato = $this->candidato();
-        $this->authorize('update', $candidato);
+        $this->authorize('subirCv', $candidato);
 
         $this->validate([
             'archivoCv' => ['required', 'file', 'mimes:'.implode(',', config('talentcloud.cvs.mimes')), 'max:'.config('talentcloud.cvs.max_kb')],
@@ -171,6 +171,8 @@ class Detalle extends Component
                 ? $candidato->postulaciones->mapWithKeys(fn (Postulacion $p) => [$p->empresa_id => (string) $p->vacante?->empresa?->nombre])->sort()->all()
                 : [],
             'puedeEditar' => auth()->user()?->can('update', $candidato) ?? false,
+            // El CV actual es global (lo ven todas las empresas del candidato): solo lo cambia quien lo registró.
+            'puedeSubirCv' => auth()->user()?->can('subirCv', $candidato) ?? false,
             // En la vista global (admin SaaS), agrupadas por empresa.
             'vacantesDisponibles' => OpcionesPorEmpresa::de(
                 Vacante::with('empresa:id,nombre')

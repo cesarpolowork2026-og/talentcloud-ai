@@ -22,9 +22,21 @@ class AvisoCambioDePlan extends Notification implements ShouldQueue
         $this->afterCommit();
     }
 
-    public static function de(string $empresa, string $plan, string $limites, string $url): self
+    /** `$vence`: fecha ya formateada hasta la que rige el plan, si lo asignó el admin con vencimiento. */
+    public static function de(string $empresa, string $plan, string $limites, string $url, ?string $vence = null): self
     {
-        return new self("{$empresa} pasó al plan {$plan}.", $limites, $url);
+        return new self("{$empresa} pasó al plan {$plan}.".self::vigencia($vence), $limites, $url);
+    }
+
+    /** El mismo plan con una nueva fecha de vencimiento (o sin ella). */
+    public static function renovado(string $empresa, string $plan, string $limites, string $url, ?string $vence = null): self
+    {
+        return new self("El plan {$plan} de {$empresa} se renovó.".self::vigencia($vence), $limites, $url);
+    }
+
+    private static function vigencia(?string $vence): string
+    {
+        return $vence === null ? '' : " Vigente hasta el {$vence}.";
     }
 
     /**

@@ -26,6 +26,9 @@ interface EvaluacionRepository
      */
     public function postulacionesPorEvaluar(User $evaluador, string $texto = '', int $limite = 20): Collection;
 
+    /** Cuántas postulaciones tiene el usuario por evaluar (la misma regla que `postulacionesPorEvaluar`). */
+    public function contarPorEvaluar(User $evaluador): int;
+
     public function existe(int $postulacionId, int $evaluadorId): bool;
 
     /**
