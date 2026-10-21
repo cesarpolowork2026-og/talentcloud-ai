@@ -13,6 +13,7 @@ use App\Models\Requisito;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Services\Postulaciones\AnalisisBasicoDeRequisitos;
+use App\Services\Postulaciones\PostularCandidato;
 use App\Support\BuscadorDeTerminos;
 use App\Tenancy\TenantContext;
 use Livewire\Livewire;
@@ -167,4 +168,77 @@ it('el texto del CV se escapa: un CV con HTML no inyecta marcado', function () {
     $html = Livewire::test(Detalle::class, ['postulacion' => $p])->html();
 
     expect($html)->not->toContain('<script>alert(1)</script>')->and($html)->toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+});
+
+// — El CV de una postulación es el que se envió, no el último que subió el candidato —
+
+/** Una postulación enviada con un CV y, después, otro CV más reciente del mismo candidato. */
+function postulacionConCvNuevoDespues(string $textoEnviado, string $textoNuevo): Postulacion
+{
+    $candidato = Candidato::factory()->create(['nombre' => 'Elena Ruiz']);
+    $enviado = Cv::factory()->procesado($textoEnviado)->create(['candidato_id' => $candidato->id, 'nombre_original' => 'CV_enviado.pdf']);
+    $postulacion = Postulacion::factory()->paraVacante(test()->vacante)->create(['candidato_id' => $candidato->id, 'cv_id' => $enviado->id, 'etapa' => EtapaPostulacion::Postulado, 'orden' => 0]);
+    Cv::factory()->procesado($textoNuevo)->create(['candidato_id' => $candidato->id, 'nombre_original' => 'CV_nuevo.pdf']);
+
+    return $postulacion;
+}
+
+it('la ficha de la postulación muestra el CV enviado y avisa que hay uno más reciente', function () {
+    $p = postulacionConCvNuevoDespues('Trabajo con Laravel y Postgres.', 'Ahora solo Docker.');
+    $enviado = Cv::find($p->cv_id);
+    $nuevo = Cv::where('candidato_id', $p->candidato_id)->where('nombre_original', 'CV_nuevo.pdf')->firstOrFail();
+
+    Livewire::test(Detalle::class, ['postulacion' => $p])
+        ->assertSee('CV_enviado.pdf')
+        ->assertSee('Es el CV con el que postuló')
+        ->assertSee('CV_nuevo.pdf') // solo en el aviso
+        ->assertSeeHtml(route('cvs.descargar', $enviado))
+        ->assertDontSeeHtml(route('cvs.descargar', $nuevo))
+        // El análisis y el texto salen del CV enviado: Laravel y PostgreSQL sí, Docker (del CV nuevo) no.
+        ->assertSee('Cubre 2 de 4 requisitos')
+        ->assertSee('Trabajo con Laravel y Postgres.')
+        ->assertDontSee('Ahora solo Docker.');
+});
+
+it('el análisis del tablero usa el CV enviado de cada postulación', function () {
+    $p = postulacionConCvNuevoDespues('Trabajo con Laravel y Postgres.', 'Ahora solo Docker.');
+
+    $cobertura = app(AnalisisBasicoDeRequisitos::class)->paraCandidatos($this->vacante, [$p->candidato_id])[$p->candidato_id];
+
+    expect($cobertura->cubiertos())->toBe(2)
+        ->and($cobertura->items[2]['cubierto'])->toBeFalse(); // Docker solo está en el CV nuevo
+
+    Livewire::test(Central::class, ['vacante' => $this->vacante])->assertSee('Cubre 2 de 4 requisitos');
+});
+
+it('si el CV enviado no tiene texto no se usa el de otro CV del candidato', function () {
+    $candidato = Candidato::factory()->create();
+    $ilegible = Cv::factory()->conError()->create(['candidato_id' => $candidato->id]);
+    Postulacion::factory()->paraVacante($this->vacante)->create(['candidato_id' => $candidato->id, 'cv_id' => $ilegible->id, 'orden' => 0]);
+    Cv::factory()->procesado('Laravel, Postgres, Docker y Java.')->create(['candidato_id' => $candidato->id]);
+
+    $cobertura = app(AnalisisBasicoDeRequisitos::class)->paraCandidatos($this->vacante, [$candidato->id])[$candidato->id];
+
+    expect($cobertura->conCv)->toBeFalse()->and($cobertura->cubiertos())->toBe(0);
+});
+
+it('una postulación sin CV registrado muestra el actual del candidato', function () {
+    $candidato = Candidato::factory()->create();
+    $cv = Cv::factory()->procesado('Laravel y Docker.')->create(['candidato_id' => $candidato->id, 'nombre_original' => 'CV_actual.pdf']);
+    $p = Postulacion::factory()->paraVacante($this->vacante)->create(['candidato_id' => $candidato->id, 'cv_id' => null, 'orden' => 0]);
+
+    Livewire::test(Detalle::class, ['postulacion' => $p])
+        ->assertSee('CV_actual.pdf')
+        ->assertDontSee('Es el CV con el que postuló')
+        ->assertSeeHtml(route('cvs.descargar', $cv));
+});
+
+it('al postular queda registrado el último CV del candidato', function () {
+    $candidato = Candidato::factory()->create();
+    Cv::factory()->procesado('Antes.')->create(['candidato_id' => $candidato->id]);
+    $ultimo = Cv::factory()->procesado('Ahora.')->create(['candidato_id' => $candidato->id]);
+
+    $postulacion = app(PostularCandidato::class)->ejecutar($this->vacante, $candidato);
+
+    expect($postulacion->cv_id)->toBe($ultimo->id);
 });

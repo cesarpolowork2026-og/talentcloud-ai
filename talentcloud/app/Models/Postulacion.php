@@ -71,6 +71,15 @@ class Postulacion extends Model
     }
 
     /**
+     * El CV que la empresa debe ver en esta postulación: el enviado y, si no quedó registrado (una postulación anterior a
+     * ese registro o un CV que se borró), el actual del candidato. Requiere cargadas `cv` y `candidato.cvActual`.
+     */
+    public function cvEnviado(): ?Cv
+    {
+        return $this->cv ?? $this->candidato?->cvActual;
+    }
+
+    /**
      * @return BelongsTo<Vacante, $this>
      */
     public function vacante(): BelongsTo
@@ -107,6 +116,9 @@ class Postulacion extends Model
     }
 
     /**
+     * El CV con el que se envió la postulación. Queda registrado al postular para que las empresas vean siempre ese
+     * archivo, aunque el candidato suba otro después.
+     *
      * @return BelongsTo<Cv, $this>
      */
     public function cv(): BelongsTo

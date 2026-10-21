@@ -34,6 +34,7 @@ class Detalle extends Component
         // Con el filtro por empresa, una postulación de otra empresa no se encuentra.
         $postulacion = Postulacion::query()
             ->with([
+                'cv' => Cv::ligero(),
                 'candidato.cvActual' => Cv::ligero(),
                 'vacante.empresa',
                 'vacante.requisitos.competencia',
@@ -44,10 +45,10 @@ class Detalle extends Component
 
         abort_if($postulacion === null, 404);
 
-        // El texto completo del CV (la relación «ligera» solo trae un extracto) para el análisis y para leerlo en pantalla.
-        $texto = $postulacion->candidato?->cvActual
-            ? (string) Cv::query()->whereKey($postulacion->candidato->cvActual->id)->value('texto_extraido')
-            : '';
+        // El CV con el que se postuló (no el último que subió el candidato). La relación «ligera» solo trae un extracto: el
+        // texto completo se lee aparte, para el análisis y para leerlo en pantalla.
+        $cv = $postulacion->cvEnviado();
+        $texto = $cv ? (string) Cv::query()->whereKey($cv->id)->value('texto_extraido') : '';
         $cobertura = $analisis->para(
             $postulacion->vacante,
             $texto,
@@ -56,6 +57,11 @@ class Detalle extends Component
         $terminos = collect($cobertura->items)->flatMap(fn (array $i) => $analisis->terminos($i['requisito']))->all();
 
         return view('livewire.postulaciones.detalle', [
+            'cv' => $cv,
+            // Subió otro CV después de postular: se avisa, el de esta postulación sigue siendo el enviado.
+            'cvMasReciente' => $cv !== null && $postulacion->candidato?->cvActual !== null && $postulacion->candidato->cvActual->id !== $cv->id
+                ? $postulacion->candidato->cvActual
+                : null,
             'cobertura' => $cobertura,
             'textoDelCv' => $texto,
             'tramosDelCv' => BuscadorDeTerminos::tramos($texto, $terminos),

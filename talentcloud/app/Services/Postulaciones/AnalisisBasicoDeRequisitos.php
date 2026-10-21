@@ -48,12 +48,21 @@ class AnalisisBasicoDeRequisitos
             return [];
         }
 
-        $textos = DB::table('cvs')
-            ->selectRaw('DISTINCT ON (candidato_id) candidato_id, texto_extraido')
-            ->whereIn('candidato_id', $candidatoIds)
-            ->orderBy('candidato_id')
-            ->orderByDesc('id')
-            ->pluck('texto_extraido', 'candidato_id');
+        // El texto del CV con el que postuló cada persona; si la postulación no lo registró, el de su último CV. Es la
+        // misma regla de Postulacion::cvEnviado(), en una sola consulta para todo el tablero.
+        $textos = DB::table('postulaciones as p')
+            ->leftJoin('cvs as enviado', 'enviado.id', '=', 'p.cv_id')
+            ->leftJoinSub(
+                DB::table('cvs')->selectRaw('DISTINCT ON (candidato_id) candidato_id, texto_extraido')->orderBy('candidato_id')->orderByDesc('id'),
+                'ultimo',
+                'ultimo.candidato_id',
+                '=',
+                'p.candidato_id',
+            )
+            ->where('p.vacante_id', $vacante->id)
+            ->whereIn('p.candidato_id', $candidatoIds)
+            ->selectRaw('p.candidato_id, CASE WHEN p.cv_id IS NOT NULL THEN enviado.texto_extraido ELSE ultimo.texto_extraido END AS texto')
+            ->pluck('texto', 'candidato_id');
 
         $anotadas = $this->anotadas($candidatoIds);
 

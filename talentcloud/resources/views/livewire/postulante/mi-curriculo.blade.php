@@ -34,7 +34,7 @@
 
     <x-ui.dialog wire:model="mostrarSubida" :title="$cv ? 'Subir nuevo CV' : 'Subir tu CV'" max-width="480px">
         <form wire:submit="subir" id="form-mi-cv" class="grid gap-3">
-            <p class="m-0">El nuevo archivo reemplazará al que tienes ahora en tus próximas postulaciones.</p>
+            <p class="m-0">El nuevo archivo se usará en tus próximas postulaciones. Las que ya enviaste conservan el CV con el que postulaste.</p>
             <x-ui.field label="Archivo (PDF o Word, hasta 5 MB)" for="mi-cv" error="archivoCv">
                 <input type="file" wire:model="archivoCv" id="mi-cv" accept=".pdf,.docx" class="input">
                 <p class="field-hint" wire:loading wire:target="archivoCv" role="status">Subiendo archivo…</p>

@@ -65,7 +65,7 @@ class PostularCandidato
         $postulacion = new Postulacion([
             'vacante_id' => $vacante->id,
             'candidato_id' => $candidato->id,
-            'cv_id' => $candidato->cvs()->latest()->value('id'),
+            'cv_id' => $candidato->cvs()->orderByDesc('id')->value('id'),
             'etapa' => EtapaPostulacion::Postulado,
             'orden' => $orden,
             'etapa_cambiada_at' => now(),

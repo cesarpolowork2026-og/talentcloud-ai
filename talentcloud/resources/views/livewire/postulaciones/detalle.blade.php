@@ -2,7 +2,6 @@
 <div>
     @php($candidato = $postulacion->candidato)
     @php($vacante = $postulacion->vacante)
-    @php($cv = $candidato?->cvActual)
 
     <x-ui.page-header title="Postulación" :subtitle="$candidato?->nombre.' — '.$vacante?->titulo.' · '.$vacante?->empresa?->nombre">
         <x-slot:breadcrumbs>
@@ -43,6 +42,9 @@
                 <div>
                     <x-ui.button size="sm" :href="route('cvs.descargar', $cv)">Descargar CV</x-ui.button>
                 </div>
+                @if ($cvMasReciente)
+                    <p class="m-0 text-13 text-neutral-700">Es el CV con el que postuló. Después subió otro ({{ $cvMasReciente->nombre_original }}, {{ \App\Support\Formato::fechaCorta($cvMasReciente->created_at) }}): está en su ficha de candidato.</p>
+                @endif
             @else
                 <p class="m-0 text-14 text-neutral-700">Este candidato todavía no tiene un CV cargado.</p>
             @endif
