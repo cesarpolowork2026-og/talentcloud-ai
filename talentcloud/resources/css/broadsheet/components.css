@@ -168,6 +168,15 @@
   .dialog-backdrop-desenfocado { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
   /* TalentCloud: en el diálogo de acceso, el título «Iniciar sesión» va centrado y 1 px mayor (21 px). */
   .dialog-backdrop-desenfocado .dialog-title { text-align: center; font-size: 21px; }
+  /* TalentCloud: la ✕ de un diálogo que solo se cierra con ella (arriba a la derecha; área de 32 px). */
+  .dialog-aspa {
+    position: absolute; top: var(--space-2); right: var(--space-2);
+    display: grid; place-items: center; width: 32px; height: 32px;
+    padding: 0; border: 0; border-radius: var(--radius-md); background: transparent;
+    color: var(--color-neutral-700); cursor: pointer;
+  }
+  @media (hover: hover) { .dialog-aspa:hover { background: var(--color-neutral-100); color: var(--color-text); } }
+  .dialog-aspa:focus-visible { outline: 2px solid var(--color-accent-700); outline-offset: 2px; }
 
   .dialog-backdrop {
     position: fixed; inset: 0; display: grid; place-items: center;

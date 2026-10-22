@@ -202,11 +202,12 @@
 
     <x-presentacion.pie />
 
-    {{-- Iniciar sesión: ventana superpuesta; foco atrapado dentro, Esc o clic fuera para cerrar. --}}
+    {{-- Iniciar sesión: ventana superpuesta; foco atrapado dentro; se cierra con la ✕ de arriba a la derecha o con Esc, no con un clic en el fondo. --}}
     <x-ui.dialog
         name="acceso"
         title="Iniciar sesión"
         max-width="440px"
+        aspa
         class="dialog-backdrop-desenfocado"
         :x-init="request()->routeIs('login') ? '$nextTick(() => open = true)' : false"
     >
