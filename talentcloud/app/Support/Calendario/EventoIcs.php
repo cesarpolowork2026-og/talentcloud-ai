@@ -28,6 +28,7 @@ final class EventoIcs
             'Entrevistador: '.$entrevista->entrevistador?->name,
             'Modalidad: '.$entrevista->modalidad->etiqueta(),
             $enlace ? "Enlace: {$enlace}" : null,
+            $entrevista->lugar ? $entrevista->modalidad->etiquetaDelLugar().': '.$entrevista->lugar : null,
             $entrevista->notas ? 'Notas: '.$entrevista->notas : null,
             'Generado por TalentCloud AI.',
         ]), $enlace);
@@ -46,6 +47,7 @@ final class EventoIcs
             "Empresa: {$empresa}",
             'Modalidad: '.$entrevista->modalidad->etiqueta(),
             $enlace ? "Enlace: {$enlace}" : null,
+            $entrevista->lugar ? $entrevista->modalidad->etiquetaDelLugar().': '.$entrevista->lugar : null,
             'Generado por TalentCloud AI.',
         ]), $enlace);
     }
@@ -71,7 +73,7 @@ final class EventoIcs
             'DTEND:'.self::fecha($fin),
             'SUMMARY:'.self::escapar($resumen),
             'DESCRIPTION:'.self::escapar(implode("\n", $descripcion)),
-            'LOCATION:'.self::escapar($enlace ?? $entrevista->modalidad->etiqueta()),
+            'LOCATION:'.self::escapar($entrevista->lugar ?: ($enlace ?? $entrevista->modalidad->etiqueta())),
             'STATUS:'.match ($entrevista->estado) {
                 EstadoEntrevista::Cancelada => 'CANCELLED',
                 EstadoEntrevista::Pendiente => 'TENTATIVE',

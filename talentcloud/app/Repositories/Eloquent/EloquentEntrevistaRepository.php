@@ -43,7 +43,7 @@ class EloquentEntrevistaRepository implements EntrevistaRepository
     private function consultaDelCandidato(Candidato $candidato): Builder
     {
         return Entrevista::sinFiltroDeEmpresa()
-            ->select(['id', 'empresa_id', 'postulacion_id', 'inicia_at', 'duracion_min', 'modalidad', 'enlace', 'estado'])
+            ->select(['id', 'empresa_id', 'postulacion_id', 'inicia_at', 'duracion_min', 'modalidad', 'enlace', 'lugar', 'estado'])
             ->whereIn('postulacion_id', $candidato->postulacionesEnTodasLasEmpresas()->select('postulaciones.id'));
     }
 

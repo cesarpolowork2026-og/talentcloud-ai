@@ -4,7 +4,6 @@ namespace App\Services\Entrevistas;
 
 use App\DTO\NuevaEntrevistaData;
 use App\Enums\EtapaPostulacion;
-use App\Enums\ModalidadEntrevista;
 use App\Events\EntrevistaProgramada;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
@@ -36,7 +35,9 @@ class ProgramarEntrevista
             throw new OperacionNoPermitida('La entrevista debe ser en una fecha y hora futuras.', 'iniciaAt');
         }
 
-        $entrevista = DB::transaction(function () use ($datos, $postulacion) {
+        $contacto = ContactoDeEntrevista::para($datos->modalidad, $datos->enlace, $datos->lugar);
+
+        $entrevista = DB::transaction(function () use ($datos, $postulacion, $contacto) {
             // Bloquea al entrevistador: dos programaciones a la vez no pasan ambas la comprobación de agenda.
             $entrevistador = User::whereKey($datos->entrevistadorId)->lockForUpdate()->first();
             $this->reglas->verificarEntrevistador($entrevistador, $postulacion);
@@ -50,8 +51,9 @@ class ProgramarEntrevista
                 'inicia_at' => $datos->iniciaAt,
                 'duracion_min' => $datos->duracionMin,
                 'modalidad' => $datos->modalidad,
-                // El enlace solo tiene sentido en una videollamada.
-                'enlace' => $datos->modalidad === ModalidadEntrevista::Videollamada ? $datos->enlace : null,
+                // El enlace solo en una videollamada; la dirección o el teléfono, en las demás.
+                'enlace' => $contacto['enlace'],
+                'lugar' => $contacto['lugar'],
                 'notas' => $datos->notas,
             ]);
         });

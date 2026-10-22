@@ -377,6 +377,7 @@ CREATE TABLE public.entrevistas (
     notas text,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
+    lugar character varying(255),
     CONSTRAINT entrevistas_duracion_check CHECK ((duracion_min > 0)),
     CONSTRAINT entrevistas_estado_check CHECK (((estado)::text = ANY (ARRAY[('pendiente'::character varying)::text, ('confirmada'::character varying)::text, ('completada'::character varying)::text, ('cancelada'::character varying)::text]))),
     CONSTRAINT entrevistas_modalidad_check CHECK (((modalidad)::text = ANY (ARRAY[('videollamada'::character varying)::text, ('presencial'::character varying)::text, ('telefonica'::character varying)::text])))
@@ -12139,623 +12140,623 @@ COPY public.empresas (id, nombre, sector, sitio_web, descripcion, plan, estado, 
 -- Data for Name: entrevistas; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.entrevistas (id, empresa_id, postulacion_id, entrevistador_id, inicia_at, duracion_min, modalidad, enlace, estado, notas, created_at, updated_at) FROM stdin;
-16	4	25	9	2026-10-02 15:00:00	45	videollamada	https://meet.google.com/demo-25	completada	\N	2026-09-29 14:30:00	2026-10-02 16:00:00
-1	4	1	9	2026-08-25 10:00:00	45	videollamada	https://meet.google.com/demo-1	completada	\N	2026-08-22 11:15:00	2026-08-25 11:00:00
-2	4	2	9	2026-08-25 15:00:00	45	videollamada	https://meet.google.com/demo-2	completada	\N	2026-08-22 11:30:00	2026-08-25 16:00:00
-17	5	33	11	2026-10-03 15:00:00	45	videollamada	https://meet.google.com/demo-33	completada	\N	2026-09-30 15:15:00	2026-10-03 16:00:00
-3	5	4	11	2026-09-01 11:00:00	45	videollamada	https://meet.google.com/demo-4	completada	\N	2026-08-29 11:15:00	2026-09-01 11:50:00
-4	5	5	11	2026-09-02 11:00:00	45	videollamada	https://meet.google.com/demo-5	completada	\N	2026-08-29 11:30:00	2026-09-02 11:50:00
-18	1	20	3	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-20	completada	\N	2026-10-02 10:00:00	2026-10-05 10:50:00
-19	5	19	11	2026-10-12 11:00:00	45	videollamada	https://meet.google.com/demo-19	pendiente	\N	2026-10-05 11:15:00	2026-10-05 11:15:00
-5	6	10	14	2026-09-06 10:00:00	45	videollamada	https://meet.google.com/demo-10	completada	\N	2026-09-04 11:15:00	2026-09-06 11:00:00
-6	6	11	14	2026-09-06 15:00:00	45	videollamada	https://meet.google.com/demo-11	completada	\N	2026-09-04 11:20:00	2026-09-06 16:00:00
-7	5	8	11	2026-09-11 15:00:00	45	videollamada	https://meet.google.com/demo-8	completada	\N	2026-09-08 16:15:00	2026-09-11 16:00:00
-8	5	9	11	2026-09-16 16:00:00	45	videollamada	https://meet.google.com/demo-9	completada	\N	2026-09-13 11:30:00	2026-09-16 16:50:00
-9	4	24	9	2026-09-22 11:00:00	45	videollamada	https://meet.google.com/demo-24	completada	\N	2026-09-19 11:15:00	2026-09-22 11:50:00
-20	2	27	6	2026-10-14 10:00:00	45	videollamada	https://meet.google.com/demo-27	confirmada	\N	2026-10-06 12:00:00	2026-10-07 09:00:00
-10	1	31	3	2026-09-26 11:00:00	45	videollamada	https://meet.google.com/demo-31	cancelada	\N	2026-09-23 10:00:00	2026-09-25 09:00:00
-11	5	18	11	2026-09-26 11:30:00	45	videollamada	https://meet.google.com/demo-18	completada	\N	2026-09-23 11:15:00	2026-09-26 12:30:00
-21	5	34	11	2026-10-14 16:00:00	45	videollamada	https://meet.google.com/demo-34	confirmada	\N	2026-10-06 15:15:00	2026-10-07 15:15:00
-22	6	37	14	2026-10-13 10:00:00	45	videollamada	https://meet.google.com/demo-37	confirmada	\N	2026-10-06 16:15:00	2026-10-07 16:15:00
-12	1	31	4	2026-09-28 09:30:00	45	videollamada	https://meet.google.com/demo-31	completada	\N	2026-09-25 09:30:00	2026-09-28 10:30:00
-23	6	38	14	2026-10-15 11:00:00	45	videollamada	https://meet.google.com/demo-38	pendiente	\N	2026-10-08 16:15:00	2026-10-08 16:15:00
-33	1	81	3	2026-08-31 13:00:00	45	videollamada	https://meet.google.com/demo-81	completada	\N	2026-08-29 13:15:00	2026-08-31 13:50:00
-13	1	22	3	2026-10-01 11:00:00	45	videollamada	https://meet.google.com/demo-22	completada	\N	2026-09-27 10:00:00	2026-10-01 11:50:00
-14	6	29	14	2026-10-01 15:00:00	45	videollamada	https://meet.google.com/demo-29	completada	\N	2026-09-28 15:15:00	2026-10-01 15:50:00
-15	6	30	14	2026-10-01 16:00:00	45	videollamada	https://meet.google.com/demo-30	completada	\N	2026-09-28 15:20:00	2026-10-01 16:50:00
-24	4	26	9	2026-10-13 10:00:00	45	videollamada	https://meet.google.com/demo-26	confirmada	\N	2026-10-09 11:15:00	2026-10-09 17:30:00
-25	1	20	4	2026-10-13 15:00:00	45	videollamada	https://meet.google.com/demo-20	pendiente	\N	2026-10-10 16:00:00	2026-10-10 16:00:00
-26	1	43	4	2026-08-25 09:00:00	45	videollamada	https://meet.google.com/demo-43	completada	\N	2026-08-21 09:15:00	2026-08-25 09:50:00
-27	1	50	4	2026-08-24 16:00:00	45	videollamada	https://meet.google.com/demo-50	completada	\N	2026-08-21 16:00:00	2026-08-24 16:50:00
-28	1	53	4	2026-08-31 09:00:00	45	videollamada	https://meet.google.com/demo-53	completada	\N	2026-08-23 15:30:00	2026-08-31 09:50:00
-29	1	56	3	2026-08-27 15:00:00	45	videollamada	https://meet.google.com/demo-56	completada	\N	2026-08-21 15:00:00	2026-08-27 15:50:00
-30	1	61	4	2026-08-25 17:00:00	45	videollamada	https://meet.google.com/demo-61	completada	\N	2026-08-23 17:15:00	2026-08-25 17:50:00
-31	1	66	3	2026-08-31 09:00:00	45	videollamada	https://meet.google.com/demo-66	completada	\N	2026-08-26 11:30:00	2026-08-31 09:50:00
-32	1	79	3	2026-09-04 09:00:00	45	videollamada	https://meet.google.com/demo-79	completada	\N	2026-08-30 09:30:00	2026-09-04 09:50:00
-34	1	87	4	2026-09-02 15:00:00	45	videollamada	https://meet.google.com/demo-87	completada	\N	2026-08-30 15:30:00	2026-09-02 15:50:00
-35	1	88	4	2026-09-07 09:00:00	45	videollamada	https://meet.google.com/demo-88	completada	\N	2026-08-30 14:30:00	2026-09-07 09:50:00
-36	1	91	4	2026-09-03 11:00:00	45	videollamada	https://meet.google.com/demo-91	completada	\N	2026-08-31 11:30:00	2026-09-03 11:50:00
-37	1	97	4	2026-09-08 13:00:00	45	videollamada	https://meet.google.com/demo-97	completada	\N	2026-09-03 13:00:00	2026-09-08 13:50:00
-38	1	100	4	2026-09-07 10:00:00	45	videollamada	https://meet.google.com/demo-100	completada	\N	2026-09-04 17:45:00	2026-09-07 10:50:00
-39	1	103	4	2026-09-07 11:00:00	45	videollamada	https://meet.google.com/demo-103	completada	\N	2026-09-04 14:30:00	2026-09-07 11:50:00
-40	1	105	4	2026-09-09 15:00:00	45	videollamada	https://meet.google.com/demo-105	completada	\N	2026-09-06 15:00:00	2026-09-09 15:50:00
-41	1	107	4	2026-09-14 09:00:00	45	videollamada	https://meet.google.com/demo-107	completada	\N	2026-09-09 10:45:00	2026-09-14 09:50:00
-42	1	110	4	2026-09-14 10:00:00	45	videollamada	https://meet.google.com/demo-110	completada	\N	2026-09-09 09:45:00	2026-09-14 10:50:00
-43	1	125	3	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-125	completada	\N	2026-09-15 12:45:00	2026-09-21 09:50:00
-44	1	127	4	2026-09-22 17:00:00	45	videollamada	https://meet.google.com/demo-127	completada	\N	2026-09-17 17:00:00	2026-09-22 17:50:00
-45	1	128	4	2026-09-22 14:00:00	45	videollamada	https://meet.google.com/demo-128	completada	\N	2026-09-16 14:15:00	2026-09-22 14:50:00
-46	1	134	4	2026-09-02 10:00:00	45	videollamada	https://meet.google.com/demo-134	completada	\N	2026-08-27 10:15:00	2026-09-02 10:50:00
-47	1	139	4	2026-08-31 16:00:00	45	videollamada	https://meet.google.com/demo-139	completada	\N	2026-08-26 16:30:00	2026-08-31 16:50:00
-48	1	140	4	2026-09-02 09:00:00	45	videollamada	https://meet.google.com/demo-140	completada	\N	2026-08-28 09:15:00	2026-09-02 09:50:00
-49	1	147	4	2026-08-31 10:00:00	45	videollamada	https://meet.google.com/demo-147	completada	\N	2026-08-27 12:00:00	2026-08-31 10:50:00
-50	1	153	4	2026-09-02 11:00:00	45	videollamada	https://meet.google.com/demo-153	completada	\N	2026-08-28 09:00:00	2026-09-02 11:50:00
-51	1	157	4	2026-09-01 15:00:00	45	videollamada	https://meet.google.com/demo-157	completada	\N	2026-08-30 15:00:00	2026-09-01 15:50:00
-52	1	171	4	2026-09-10 11:00:00	45	videollamada	https://meet.google.com/demo-171	completada	\N	2026-09-05 11:00:00	2026-09-10 11:50:00
-53	1	177	3	2026-09-14 17:00:00	45	videollamada	https://meet.google.com/demo-177	completada	\N	2026-09-12 17:30:00	2026-09-14 17:50:00
-54	1	181	3	2026-09-22 11:00:00	45	videollamada	https://meet.google.com/demo-181	completada	\N	2026-09-17 11:45:00	2026-09-22 11:50:00
-55	1	182	3	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-182	completada	\N	2026-09-16 13:30:00	2026-09-21 10:50:00
-56	1	185	3	2026-09-24 11:00:00	45	videollamada	https://meet.google.com/demo-185	completada	\N	2026-09-21 11:00:00	2026-09-24 11:50:00
-57	1	189	3	2026-09-04 14:00:00	45	videollamada	https://meet.google.com/demo-189	completada	\N	2026-08-30 14:30:00	2026-09-04 14:50:00
-58	1	192	4	2026-09-04 10:00:00	45	videollamada	https://meet.google.com/demo-192	completada	\N	2026-09-01 10:00:00	2026-09-04 10:50:00
-59	1	196	4	2026-09-09 17:00:00	45	videollamada	https://meet.google.com/demo-196	completada	\N	2026-09-05 17:15:00	2026-09-09 17:50:00
-60	1	200	4	2026-09-14 11:00:00	45	videollamada	https://meet.google.com/demo-200	completada	\N	2026-09-11 12:00:00	2026-09-14 11:50:00
-61	1	203	3	2026-09-16 14:00:00	45	videollamada	https://meet.google.com/demo-203	completada	\N	2026-09-13 14:30:00	2026-09-16 14:50:00
-62	1	208	4	2026-09-16 15:00:00	45	videollamada	https://meet.google.com/demo-208	completada	\N	2026-09-14 15:45:00	2026-09-16 15:50:00
-63	1	211	4	2026-09-23 17:00:00	45	videollamada	https://meet.google.com/demo-211	completada	\N	2026-09-18 17:00:00	2026-09-23 17:50:00
-64	1	217	4	2026-09-17 12:00:00	45	videollamada	https://meet.google.com/demo-217	completada	\N	2026-09-11 12:30:00	2026-09-17 12:50:00
-65	1	224	3	2026-09-16 12:00:00	45	videollamada	https://meet.google.com/demo-224	completada	\N	2026-09-11 12:00:00	2026-09-16 12:50:00
-66	1	228	4	2026-09-18 14:00:00	45	videollamada	https://meet.google.com/demo-228	completada	\N	2026-09-12 14:00:00	2026-09-18 14:50:00
-67	1	234	3	2026-09-16 15:00:00	45	videollamada	https://meet.google.com/demo-234	completada	\N	2026-09-12 15:30:00	2026-09-16 15:50:00
-68	1	235	3	2026-09-14 16:00:00	45	videollamada	https://meet.google.com/demo-235	completada	\N	2026-09-12 16:45:00	2026-09-14 16:50:00
-69	1	238	3	2026-09-21 11:00:00	45	videollamada	https://meet.google.com/demo-238	completada	\N	2026-09-14 09:45:00	2026-09-21 11:50:00
-70	1	239	3	2026-09-18 10:00:00	45	videollamada	https://meet.google.com/demo-239	completada	\N	2026-09-14 10:15:00	2026-09-18 10:50:00
-71	1	243	3	2026-09-21 12:00:00	45	videollamada	https://meet.google.com/demo-243	completada	\N	2026-09-18 16:15:00	2026-09-21 12:50:00
-72	1	245	3	2026-09-24 17:00:00	45	videollamada	https://meet.google.com/demo-245	completada	\N	2026-09-18 17:45:00	2026-09-24 17:50:00
-73	1	247	3	2026-09-18 11:00:00	45	videollamada	https://meet.google.com/demo-247	completada	\N	2026-09-16 11:15:00	2026-09-18 11:50:00
-74	1	248	3	2026-09-24 12:00:00	45	videollamada	https://meet.google.com/demo-248	completada	\N	2026-09-19 12:30:00	2026-09-24 12:50:00
-75	1	252	4	2026-09-21 16:00:00	45	videollamada	https://meet.google.com/demo-252	completada	\N	2026-09-18 16:15:00	2026-09-21 16:50:00
-76	1	271	3	2026-09-30 15:00:00	45	videollamada	https://meet.google.com/demo-271	completada	\N	2026-09-28 15:00:00	2026-09-30 15:50:00
-77	1	274	3	2026-10-02 10:00:00	45	videollamada	https://meet.google.com/demo-274	completada	\N	2026-09-30 10:00:00	2026-10-02 10:50:00
-78	1	275	3	2026-10-08 11:00:00	45	videollamada	https://meet.google.com/demo-275	completada	\N	2026-10-02 11:15:00	2026-10-08 11:50:00
-79	1	277	4	2026-10-06 15:00:00	45	videollamada	https://meet.google.com/demo-277	completada	\N	2026-10-01 15:45:00	2026-10-06 15:50:00
-80	1	280	4	2026-10-09 11:00:00	45	videollamada	https://meet.google.com/demo-280	completada	\N	2026-10-03 11:30:00	2026-10-09 11:50:00
-81	1	282	4	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-282	completada	\N	2026-10-03 10:15:00	2026-10-05 10:50:00
-82	1	283	4	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-283	completada	\N	2026-10-05 13:30:00	2026-10-12 09:50:00
-83	1	288	4	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-288	confirmada	\N	2026-10-08 16:45:00	2026-10-08 17:45:00
-84	1	301	3	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-301	confirmada	\N	2026-10-12 10:00:00	2026-10-12 11:00:00
-85	1	306	4	2026-09-23 09:00:00	45	videollamada	https://meet.google.com/demo-306	completada	\N	2026-09-16 17:45:00	2026-09-23 09:50:00
-86	1	310	3	2026-09-21 13:00:00	45	videollamada	https://meet.google.com/demo-310	completada	\N	2026-09-15 16:45:00	2026-09-21 13:50:00
-87	1	314	4	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-314	completada	\N	2026-09-15 17:45:00	2026-09-21 09:50:00
-88	1	315	3	2026-09-17 17:00:00	45	videollamada	https://meet.google.com/demo-315	completada	\N	2026-09-15 17:45:00	2026-09-17 17:50:00
-89	1	316	4	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-316	completada	\N	2026-09-16 12:15:00	2026-09-21 10:50:00
-90	1	318	3	2026-09-23 09:00:00	45	videollamada	https://meet.google.com/demo-318	completada	\N	2026-09-18 09:00:00	2026-09-23 09:50:00
-91	1	323	4	2026-09-21 17:00:00	45	videollamada	https://meet.google.com/demo-323	completada	\N	2026-09-17 17:30:00	2026-09-21 17:50:00
-92	1	326	3	2026-09-22 12:00:00	45	videollamada	https://meet.google.com/demo-326	completada	\N	2026-09-19 11:30:00	2026-09-22 12:50:00
-93	1	329	4	2026-09-28 11:00:00	45	videollamada	https://meet.google.com/demo-329	completada	\N	2026-09-20 15:30:00	2026-09-28 11:50:00
-94	1	335	4	2026-09-28 12:00:00	45	videollamada	https://meet.google.com/demo-335	completada	\N	2026-09-20 09:30:00	2026-09-28 12:50:00
-95	1	337	4	2026-09-28 13:00:00	45	videollamada	https://meet.google.com/demo-337	completada	\N	2026-09-22 09:15:00	2026-09-28 13:50:00
-96	1	338	4	2026-09-28 14:00:00	45	videollamada	https://meet.google.com/demo-338	completada	\N	2026-09-21 12:00:00	2026-09-28 14:50:00
-97	1	339	3	2026-09-28 09:00:00	45	videollamada	https://meet.google.com/demo-339	completada	\N	2026-09-22 12:30:00	2026-09-28 09:50:00
-98	1	340	4	2026-09-25 16:00:00	45	videollamada	https://meet.google.com/demo-340	completada	\N	2026-09-22 16:30:00	2026-09-25 16:50:00
-99	1	343	4	2026-09-24 16:00:00	45	videollamada	https://meet.google.com/demo-343	completada	\N	2026-09-22 16:00:00	2026-09-24 16:50:00
-100	1	350	4	2026-09-28 15:00:00	45	videollamada	https://meet.google.com/demo-350	completada	\N	2026-09-24 12:00:00	2026-09-28 15:50:00
-101	1	355	3	2026-09-29 12:00:00	45	videollamada	https://meet.google.com/demo-355	completada	\N	2026-09-26 12:30:00	2026-09-29 12:50:00
-102	1	363	4	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-363	completada	\N	2026-09-30 09:00:00	2026-10-05 09:50:00
-103	1	373	4	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-373	pendiente	\N	2026-10-10 14:30:00	2026-10-10 14:30:00
-104	1	375	3	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-375	confirmada	\N	2026-10-11 17:30:00	2026-10-11 18:30:00
-105	1	379	3	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-379	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-106	1	380	4	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-380	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-107	1	388	3	2026-09-23 10:00:00	45	videollamada	https://meet.google.com/demo-388	completada	\N	2026-09-19 10:45:00	2026-09-23 10:50:00
-108	1	392	4	2026-09-23 10:00:00	45	videollamada	https://meet.google.com/demo-392	completada	\N	2026-09-20 17:45:00	2026-09-23 10:50:00
-109	1	393	4	2026-09-24 17:00:00	45	videollamada	https://meet.google.com/demo-393	completada	\N	2026-09-20 17:30:00	2026-09-24 17:50:00
-110	1	402	3	2026-09-24 14:00:00	45	videollamada	https://meet.google.com/demo-402	completada	\N	2026-09-22 14:00:00	2026-09-24 14:50:00
-111	1	406	4	2026-09-28 16:00:00	45	videollamada	https://meet.google.com/demo-406	completada	\N	2026-09-24 13:00:00	2026-09-28 16:50:00
-112	1	410	4	2026-09-29 17:00:00	45	videollamada	https://meet.google.com/demo-410	completada	\N	2026-09-24 17:45:00	2026-09-29 17:50:00
-113	1	421	3	2026-10-05 16:00:00	45	videollamada	https://meet.google.com/demo-421	completada	\N	2026-09-29 16:15:00	2026-10-05 16:50:00
-114	1	425	3	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-425	completada	\N	2026-10-01 13:15:00	2026-10-05 09:50:00
-115	1	427	4	2026-10-08 15:00:00	45	videollamada	https://meet.google.com/demo-427	completada	\N	2026-10-03 15:30:00	2026-10-08 15:50:00
-116	1	428	3	2026-10-09 14:00:00	45	videollamada	https://meet.google.com/demo-428	completada	\N	2026-10-03 14:45:00	2026-10-09 14:50:00
-117	1	434	4	2026-10-12 10:00:00	45	videollamada	https://meet.google.com/demo-434	completada	\N	2026-10-05 11:30:00	2026-10-12 10:50:00
-118	1	438	3	2026-10-08 14:00:00	45	videollamada	https://meet.google.com/demo-438	completada	\N	2026-10-03 14:30:00	2026-10-08 14:50:00
-119	1	443	4	2026-10-12 11:00:00	45	videollamada	https://meet.google.com/demo-443	completada	\N	2026-10-05 17:30:00	2026-10-12 11:50:00
-120	1	444	3	2026-10-22 09:00:00	45	videollamada	https://meet.google.com/demo-444	confirmada	\N	2026-10-07 13:30:00	2026-10-07 14:30:00
-121	1	455	3	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-455	pendiente	\N	2026-10-12 10:00:00	2026-10-12 10:00:00
-122	1	457	4	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-457	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-123	1	459	3	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-459	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-124	1	465	3	2026-09-28 10:00:00	45	videollamada	https://meet.google.com/demo-465	completada	\N	2026-09-23 11:15:00	2026-09-28 10:50:00
-125	1	466	3	2026-09-28 11:00:00	45	videollamada	https://meet.google.com/demo-466	completada	\N	2026-09-24 14:30:00	2026-09-28 11:50:00
-126	1	467	3	2026-10-01 10:00:00	45	videollamada	https://meet.google.com/demo-467	completada	\N	2026-09-26 10:30:00	2026-10-01 10:50:00
-127	1	483	3	2026-10-06 10:00:00	45	videollamada	https://meet.google.com/demo-483	completada	\N	2026-09-30 10:45:00	2026-10-06 10:50:00
-128	1	491	3	2026-10-07 14:00:00	45	videollamada	https://meet.google.com/demo-491	completada	\N	2026-10-02 14:00:00	2026-10-07 14:50:00
-129	1	505	4	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-505	confirmada	\N	2026-10-08 15:45:00	2026-10-08 16:45:00
-130	1	506	4	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-506	pendiente	\N	2026-10-08 10:15:00	2026-10-08 10:15:00
-131	1	512	4	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-512	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-132	1	538	3	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-538	pendiente	\N	2026-10-10 15:45:00	2026-10-10 15:45:00
-133	1	539	4	2026-10-21 11:00:00	45	videollamada	https://meet.google.com/demo-539	confirmada	\N	2026-10-10 11:00:00	2026-10-10 12:00:00
-134	1	540	3	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-540	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-135	1	542	4	2026-10-05 11:00:00	45	videollamada	https://meet.google.com/demo-542	completada	\N	2026-10-02 10:00:00	2026-10-05 11:50:00
-136	1	548	3	2026-10-09 15:00:00	45	videollamada	https://meet.google.com/demo-548	completada	\N	2026-10-04 15:15:00	2026-10-09 15:50:00
-137	1	551	4	2026-10-12 17:00:00	45	videollamada	https://meet.google.com/demo-551	completada	\N	2026-10-06 17:30:00	2026-10-12 17:50:00
-138	1	555	4	2026-10-07 11:00:00	45	videollamada	https://meet.google.com/demo-555	completada	\N	2026-10-05 11:15:00	2026-10-07 11:50:00
-139	1	557	3	2026-10-12 17:00:00	45	videollamada	https://meet.google.com/demo-557	completada	\N	2026-10-07 17:15:00	2026-10-12 17:50:00
-140	1	558	3	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-558	completada	\N	2026-10-05 14:30:00	2026-10-12 09:50:00
-141	1	560	3	2026-10-12 10:00:00	45	videollamada	https://meet.google.com/demo-560	completada	\N	2026-10-07 15:00:00	2026-10-12 10:50:00
-142	1	575	3	2026-10-20 10:00:00	45	videollamada	https://meet.google.com/demo-575	confirmada	\N	2026-10-08 12:45:00	2026-10-08 13:45:00
-143	1	576	4	2026-10-16 10:00:00	45	videollamada	https://meet.google.com/demo-576	pendiente	\N	2026-10-09 14:00:00	2026-10-09 14:00:00
-144	1	580	4	2026-10-21 12:00:00	45	videollamada	https://meet.google.com/demo-580	confirmada	\N	2026-10-10 13:45:00	2026-10-10 14:45:00
-145	1	583	3	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-583	confirmada	\N	2026-10-11 10:00:00	2026-10-11 11:00:00
-146	1	587	3	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-587	confirmada	\N	2026-10-11 11:45:00	2026-10-11 12:45:00
-147	1	588	4	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-588	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-148	2	600	6	2026-08-25 16:00:00	45	videollamada	https://meet.google.com/demo-600	completada	\N	2026-08-23 16:45:00	2026-08-25 16:50:00
-149	2	603	6	2026-08-31 09:00:00	45	videollamada	https://meet.google.com/demo-603	completada	\N	2026-08-24 11:00:00	2026-08-31 09:50:00
-150	2	604	6	2026-08-28 14:00:00	45	videollamada	https://meet.google.com/demo-604	completada	\N	2026-08-23 14:30:00	2026-08-28 14:50:00
-151	2	611	6	2026-08-31 12:00:00	45	videollamada	https://meet.google.com/demo-611	completada	\N	2026-08-26 12:15:00	2026-08-31 12:50:00
-152	2	623	6	2026-09-07 09:00:00	45	videollamada	https://meet.google.com/demo-623	completada	\N	2026-08-31 17:45:00	2026-09-07 09:50:00
-153	2	625	6	2026-09-07 10:00:00	45	videollamada	https://meet.google.com/demo-625	completada	\N	2026-08-31 12:15:00	2026-09-07 10:50:00
-154	2	639	6	2026-09-14 09:00:00	45	videollamada	https://meet.google.com/demo-639	completada	\N	2026-09-11 09:45:00	2026-09-14 09:50:00
-155	2	641	6	2026-09-18 14:00:00	45	videollamada	https://meet.google.com/demo-641	completada	\N	2026-09-12 14:15:00	2026-09-18 14:50:00
-156	2	643	6	2026-09-17 13:00:00	45	videollamada	https://meet.google.com/demo-643	completada	\N	2026-09-15 13:45:00	2026-09-17 13:50:00
-157	2	647	6	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-647	completada	\N	2026-09-18 14:15:00	2026-09-21 09:50:00
-158	2	649	6	2026-08-27 16:00:00	45	videollamada	https://meet.google.com/demo-649	completada	\N	2026-08-23 16:00:00	2026-08-27 16:50:00
-159	2	651	6	2026-08-25 10:00:00	45	videollamada	https://meet.google.com/demo-651	completada	\N	2026-08-23 10:45:00	2026-08-25 10:50:00
-160	2	673	6	2026-09-01 11:00:00	45	videollamada	https://meet.google.com/demo-673	completada	\N	2026-08-27 11:45:00	2026-09-01 11:50:00
-161	2	679	6	2026-09-03 15:00:00	45	videollamada	https://meet.google.com/demo-679	completada	\N	2026-08-28 15:30:00	2026-09-03 15:50:00
-162	2	681	6	2026-09-07 11:00:00	45	videollamada	https://meet.google.com/demo-681	completada	\N	2026-08-31 10:00:00	2026-09-07 11:50:00
-163	2	682	6	2026-09-02 11:00:00	45	videollamada	https://meet.google.com/demo-682	completada	\N	2026-08-29 11:00:00	2026-09-02 11:50:00
-164	2	687	6	2026-09-07 12:00:00	45	videollamada	https://meet.google.com/demo-687	completada	\N	2026-09-01 13:30:00	2026-09-07 12:50:00
-165	2	689	6	2026-09-08 11:00:00	45	videollamada	https://meet.google.com/demo-689	completada	\N	2026-09-02 11:15:00	2026-09-08 11:50:00
-166	2	705	6	2026-09-11 17:00:00	45	videollamada	https://meet.google.com/demo-705	completada	\N	2026-09-07 17:00:00	2026-09-11 17:50:00
-167	2	706	6	2026-09-14 10:00:00	45	videollamada	https://meet.google.com/demo-706	completada	\N	2026-09-09 10:45:00	2026-09-14 10:50:00
-168	2	712	6	2026-09-16 09:00:00	45	videollamada	https://meet.google.com/demo-712	completada	\N	2026-09-12 09:15:00	2026-09-16 09:50:00
-169	2	718	6	2026-09-17 10:00:00	45	videollamada	https://meet.google.com/demo-718	completada	\N	2026-09-13 10:30:00	2026-09-17 10:50:00
-170	2	722	6	2026-09-18 15:00:00	45	videollamada	https://meet.google.com/demo-722	completada	\N	2026-09-13 15:30:00	2026-09-18 15:50:00
-171	2	723	6	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-723	completada	\N	2026-09-14 13:45:00	2026-09-21 10:50:00
-172	2	726	6	2026-09-17 14:00:00	45	videollamada	https://meet.google.com/demo-726	completada	\N	2026-09-15 14:00:00	2026-09-17 14:50:00
-173	2	730	6	2026-09-04 14:00:00	45	videollamada	https://meet.google.com/demo-730	completada	\N	2026-08-31 14:15:00	2026-09-04 14:50:00
-174	2	739	6	2026-09-11 11:00:00	45	videollamada	https://meet.google.com/demo-739	completada	\N	2026-09-09 11:30:00	2026-09-11 11:50:00
-175	2	742	6	2026-09-14 14:00:00	45	videollamada	https://meet.google.com/demo-742	completada	\N	2026-09-12 14:15:00	2026-09-14 14:50:00
-176	2	743	6	2026-09-18 16:00:00	45	videollamada	https://meet.google.com/demo-743	completada	\N	2026-09-13 16:00:00	2026-09-18 16:50:00
-177	2	745	6	2026-09-21 11:00:00	45	videollamada	https://meet.google.com/demo-745	completada	\N	2026-09-14 16:30:00	2026-09-21 11:50:00
-178	2	748	6	2026-09-21 15:00:00	45	videollamada	https://meet.google.com/demo-748	completada	\N	2026-09-19 15:00:00	2026-09-21 15:50:00
-179	2	750	6	2026-09-21 16:00:00	45	videollamada	https://meet.google.com/demo-750	completada	\N	2026-09-18 16:45:00	2026-09-21 16:50:00
-180	2	755	6	2026-09-14 12:00:00	45	videollamada	https://meet.google.com/demo-755	completada	\N	2026-09-11 12:45:00	2026-09-14 12:50:00
-181	2	756	6	2026-09-15 16:00:00	45	videollamada	https://meet.google.com/demo-756	completada	\N	2026-09-12 16:15:00	2026-09-15 16:50:00
-182	2	757	6	2026-09-14 11:00:00	45	videollamada	https://meet.google.com/demo-757	completada	\N	2026-09-11 10:45:00	2026-09-14 11:50:00
-183	2	758	6	2026-09-21 12:00:00	45	videollamada	https://meet.google.com/demo-758	completada	\N	2026-09-13 09:15:00	2026-09-21 12:50:00
-184	2	760	6	2026-09-15 17:00:00	45	videollamada	https://meet.google.com/demo-760	completada	\N	2026-09-11 17:45:00	2026-09-15 17:50:00
-185	2	761	6	2026-09-16 15:00:00	45	videollamada	https://meet.google.com/demo-761	completada	\N	2026-09-13 15:45:00	2026-09-16 15:50:00
-186	2	763	6	2026-09-17 15:00:00	45	videollamada	https://meet.google.com/demo-763	completada	\N	2026-09-14 14:15:00	2026-09-17 15:50:00
-187	2	764	6	2026-09-15 10:00:00	45	videollamada	https://meet.google.com/demo-764	completada	\N	2026-09-13 10:30:00	2026-09-15 10:50:00
-188	2	768	6	2026-09-18 17:00:00	45	videollamada	https://meet.google.com/demo-768	completada	\N	2026-09-14 16:15:00	2026-09-18 17:50:00
-189	2	770	6	2026-09-21 13:00:00	45	videollamada	https://meet.google.com/demo-770	completada	\N	2026-09-16 09:00:00	2026-09-21 13:50:00
-190	2	772	6	2026-09-17 16:00:00	45	videollamada	https://meet.google.com/demo-772	completada	\N	2026-09-15 15:30:00	2026-09-17 16:50:00
-191	2	781	6	2026-09-21 17:00:00	45	videollamada	https://meet.google.com/demo-781	completada	\N	2026-09-18 16:45:00	2026-09-21 17:50:00
-192	2	784	6	2026-09-22 09:00:00	45	videollamada	https://meet.google.com/demo-784	completada	\N	2026-09-18 09:45:00	2026-09-22 09:50:00
-193	2	797	6	2026-09-28 17:00:00	45	videollamada	https://meet.google.com/demo-797	completada	\N	2026-09-22 17:45:00	2026-09-28 17:50:00
-194	2	802	6	2026-09-30 12:00:00	45	videollamada	https://meet.google.com/demo-802	completada	\N	2026-09-24 12:00:00	2026-09-30 12:50:00
-195	2	807	6	2026-10-02 17:00:00	45	videollamada	https://meet.google.com/demo-807	completada	\N	2026-09-28 17:00:00	2026-10-02 17:50:00
-196	2	817	6	2026-10-09 16:00:00	45	videollamada	https://meet.google.com/demo-817	completada	\N	2026-10-03 16:00:00	2026-10-09 16:50:00
-197	2	821	6	2026-10-09 17:00:00	45	videollamada	https://meet.google.com/demo-821	completada	\N	2026-10-07 16:15:00	2026-10-09 17:50:00
-198	2	834	6	2026-09-21 14:00:00	45	videollamada	https://meet.google.com/demo-834	completada	\N	2026-09-17 16:00:00	2026-09-21 14:50:00
-199	2	840	6	2026-09-22 10:00:00	45	videollamada	https://meet.google.com/demo-840	completada	\N	2026-09-17 15:15:00	2026-09-22 10:50:00
-200	2	845	6	2026-09-25 11:00:00	45	videollamada	https://meet.google.com/demo-845	completada	\N	2026-09-20 11:45:00	2026-09-25 11:50:00
-201	2	851	6	2026-09-28 12:00:00	45	videollamada	https://meet.google.com/demo-851	completada	\N	2026-09-22 12:45:00	2026-09-28 12:50:00
-202	2	857	6	2026-09-24 14:00:00	45	videollamada	https://meet.google.com/demo-857	completada	\N	2026-09-21 14:15:00	2026-09-24 14:50:00
-203	2	858	6	2026-09-29 11:00:00	45	videollamada	https://meet.google.com/demo-858	completada	\N	2026-09-23 11:30:00	2026-09-29 11:50:00
-204	2	863	6	2026-09-29 16:00:00	45	videollamada	https://meet.google.com/demo-863	completada	\N	2026-09-23 16:30:00	2026-09-29 16:50:00
-205	2	864	6	2026-09-29 09:00:00	45	videollamada	https://meet.google.com/demo-864	completada	\N	2026-09-23 17:45:00	2026-09-29 09:50:00
-206	2	870	6	2026-09-30 10:00:00	45	videollamada	https://meet.google.com/demo-870	completada	\N	2026-09-28 10:45:00	2026-09-30 10:50:00
-207	2	872	6	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-872	completada	\N	2026-09-28 11:00:00	2026-10-05 09:50:00
-208	2	878	6	2026-10-05 11:00:00	45	videollamada	https://meet.google.com/demo-878	completada	\N	2026-10-02 11:45:00	2026-10-05 11:50:00
-209	2	882	6	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-882	completada	\N	2026-10-05 15:00:00	2026-10-12 09:50:00
-210	2	897	6	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-897	confirmada	\N	2026-10-11 17:30:00	2026-10-11 18:30:00
-211	2	898	6	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-898	confirmada	\N	2026-10-10 10:15:00	2026-10-10 11:15:00
-212	2	901	6	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-901	pendiente	\N	2026-10-12 12:00:00	2026-10-12 12:00:00
-213	2	905	6	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-905	pendiente	\N	2026-10-12 09:45:00	2026-10-12 09:45:00
-214	2	907	6	2026-09-28 09:00:00	45	videollamada	https://meet.google.com/demo-907	completada	\N	2026-09-22 16:00:00	2026-09-28 09:50:00
-215	2	908	6	2026-09-28 10:00:00	45	videollamada	https://meet.google.com/demo-908	completada	\N	2026-09-23 15:15:00	2026-09-28 10:50:00
-216	2	909	6	2026-09-25 12:00:00	45	videollamada	https://meet.google.com/demo-909	completada	\N	2026-09-22 11:00:00	2026-09-25 12:50:00
-217	2	910	6	2026-09-28 11:00:00	45	videollamada	https://meet.google.com/demo-910	completada	\N	2026-09-22 09:15:00	2026-09-28 11:50:00
-218	2	916	6	2026-09-28 13:00:00	45	videollamada	https://meet.google.com/demo-916	completada	\N	2026-09-25 13:30:00	2026-09-28 13:50:00
-219	2	918	6	2026-09-30 11:00:00	45	videollamada	https://meet.google.com/demo-918	completada	\N	2026-09-27 10:15:00	2026-09-30 11:50:00
-220	2	921	6	2026-09-30 13:00:00	45	videollamada	https://meet.google.com/demo-921	completada	\N	2026-09-28 13:45:00	2026-09-30 13:50:00
-221	2	926	6	2026-10-08 14:00:00	45	videollamada	https://meet.google.com/demo-926	completada	\N	2026-10-02 14:30:00	2026-10-08 14:50:00
-222	2	930	6	2026-10-09 14:00:00	45	videollamada	https://meet.google.com/demo-930	completada	\N	2026-10-03 14:30:00	2026-10-09 14:50:00
-223	2	946	6	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-946	completada	\N	2026-10-01 10:45:00	2026-10-05 10:50:00
-224	2	947	6	2026-10-07 13:00:00	45	videollamada	https://meet.google.com/demo-947	completada	\N	2026-10-01 13:15:00	2026-10-07 13:50:00
-225	2	950	6	2026-10-05 12:00:00	45	videollamada	https://meet.google.com/demo-950	completada	\N	2026-09-29 11:30:00	2026-10-05 12:50:00
-226	2	951	6	2026-10-05 13:00:00	45	videollamada	https://meet.google.com/demo-951	completada	\N	2026-09-30 09:00:00	2026-10-05 13:50:00
-227	2	957	6	2026-10-05 14:00:00	45	videollamada	https://meet.google.com/demo-957	completada	\N	2026-10-01 09:30:00	2026-10-05 14:50:00
-228	2	981	6	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-981	pendiente	\N	2026-10-07 17:45:00	2026-10-07 17:45:00
-229	2	985	6	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-985	confirmada	\N	2026-10-09 16:15:00	2026-10-09 17:15:00
-230	2	993	6	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-993	confirmada	\N	2026-10-12 09:30:00	2026-10-12 10:30:00
-231	2	1006	6	2026-10-21 11:00:00	45	videollamada	https://meet.google.com/demo-1006	confirmada	\N	2026-10-08 15:00:00	2026-10-08 16:00:00
-232	2	1007	6	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-1007	confirmada	\N	2026-10-08 09:30:00	2026-10-08 10:30:00
-233	2	1016	6	2026-10-14 11:00:00	45	videollamada	https://meet.google.com/demo-1016	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-234	2	1017	6	2026-10-19 12:00:00	45	videollamada	https://meet.google.com/demo-1017	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-235	2	1024	6	2026-10-20 10:00:00	45	videollamada	https://meet.google.com/demo-1024	confirmada	\N	2026-10-08 14:30:00	2026-10-08 15:30:00
-236	2	1025	6	2026-10-16 10:00:00	45	videollamada	https://meet.google.com/demo-1025	confirmada	\N	2026-10-09 16:15:00	2026-10-09 17:15:00
-237	2	1028	6	2026-10-19 13:00:00	45	videollamada	https://meet.google.com/demo-1028	confirmada	\N	2026-10-09 09:30:00	2026-10-09 10:30:00
-238	2	1030	6	2026-10-21 12:00:00	45	videollamada	https://meet.google.com/demo-1030	confirmada	\N	2026-10-09 11:15:00	2026-10-09 12:15:00
-239	2	1031	6	2026-10-16 11:00:00	45	videollamada	https://meet.google.com/demo-1031	pendiente	\N	2026-10-09 11:15:00	2026-10-09 11:15:00
-240	2	1033	6	2026-10-19 14:00:00	45	videollamada	https://meet.google.com/demo-1033	confirmada	\N	2026-10-09 14:15:00	2026-10-09 15:15:00
-241	2	1034	6	2026-10-14 12:00:00	45	videollamada	https://meet.google.com/demo-1034	confirmada	\N	2026-10-09 10:45:00	2026-10-09 11:45:00
-242	2	1038	6	2026-10-14 13:00:00	45	videollamada	https://meet.google.com/demo-1038	pendiente	\N	2026-10-11 10:30:00	2026-10-11 10:30:00
-243	2	1047	6	2026-10-22 09:00:00	45	videollamada	https://meet.google.com/demo-1047	confirmada	\N	2026-10-12 13:30:00	2026-10-12 14:30:00
-244	2	1049	6	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-1049	pendiente	\N	2026-10-11 10:45:00	2026-10-11 10:45:00
-245	2	1061	6	2026-10-15 10:00:00	45	videollamada	https://meet.google.com/demo-1061	pendiente	\N	2026-10-13 11:45:00	2026-10-13 11:45:00
-246	2	1067	6	2026-10-15 11:00:00	45	videollamada	https://meet.google.com/demo-1067	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-247	2	1069	6	2026-10-15 12:00:00	45	videollamada	https://meet.google.com/demo-1069	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-248	5	1073	11	2026-08-26 15:00:00	45	videollamada	https://meet.google.com/demo-1073	completada	\N	2026-08-24 15:15:00	2026-08-26 15:50:00
-249	5	1078	11	2026-08-31 09:00:00	45	videollamada	https://meet.google.com/demo-1078	completada	\N	2026-08-24 15:15:00	2026-08-31 09:50:00
-250	5	1081	11	2026-09-01 13:00:00	45	videollamada	https://meet.google.com/demo-1081	completada	\N	2026-08-29 13:00:00	2026-09-01 13:50:00
-251	5	1082	11	2026-09-02 10:00:00	45	videollamada	https://meet.google.com/demo-1082	completada	\N	2026-08-29 10:00:00	2026-09-02 10:50:00
-252	5	1090	11	2026-09-07 09:00:00	45	videollamada	https://meet.google.com/demo-1090	completada	\N	2026-09-03 15:15:00	2026-09-07 09:50:00
-253	5	1104	11	2026-09-21 12:00:00	45	videollamada	https://meet.google.com/demo-1104	completada	\N	2026-09-18 12:30:00	2026-09-21 12:50:00
-254	5	1106	11	2026-09-24 17:00:00	45	videollamada	https://meet.google.com/demo-1106	completada	\N	2026-09-18 17:30:00	2026-09-24 17:50:00
-255	5	1107	11	2026-08-31 10:00:00	45	videollamada	https://meet.google.com/demo-1107	completada	\N	2026-08-25 10:30:00	2026-08-31 10:50:00
-256	5	1109	11	2026-09-02 14:00:00	45	videollamada	https://meet.google.com/demo-1109	completada	\N	2026-08-29 14:30:00	2026-09-02 14:50:00
-257	5	1119	11	2026-09-07 15:00:00	45	videollamada	https://meet.google.com/demo-1119	completada	\N	2026-09-04 15:45:00	2026-09-07 15:50:00
-258	5	1123	11	2026-09-14 09:00:00	45	videollamada	https://meet.google.com/demo-1123	completada	\N	2026-09-09 14:00:00	2026-09-14 09:50:00
-259	5	1128	11	2026-09-21 11:00:00	45	videollamada	https://meet.google.com/demo-1128	completada	\N	2026-09-15 11:15:00	2026-09-21 11:50:00
-260	5	1133	11	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-1133	completada	\N	2026-09-15 13:00:00	2026-09-21 09:50:00
-261	5	1137	11	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-1137	completada	\N	2026-09-17 14:30:00	2026-09-21 10:50:00
-262	5	1143	11	2026-09-23 09:00:00	45	videollamada	https://meet.google.com/demo-1143	completada	\N	2026-09-17 09:15:00	2026-09-23 09:50:00
-263	5	1148	11	2026-09-22 13:00:00	45	videollamada	https://meet.google.com/demo-1148	completada	\N	2026-09-18 13:15:00	2026-09-22 13:50:00
-264	5	1150	11	2026-09-18 16:00:00	45	videollamada	https://meet.google.com/demo-1150	completada	\N	2026-09-16 16:00:00	2026-09-18 16:50:00
-265	5	1153	11	2026-09-21 13:00:00	45	videollamada	https://meet.google.com/demo-1153	completada	\N	2026-09-17 09:00:00	2026-09-21 13:50:00
-266	5	1155	11	2026-09-22 11:00:00	45	videollamada	https://meet.google.com/demo-1155	completada	\N	2026-09-17 11:15:00	2026-09-22 11:50:00
-267	5	1162	11	2026-09-21 14:00:00	45	videollamada	https://meet.google.com/demo-1162	completada	\N	2026-09-18 13:30:00	2026-09-21 14:50:00
-268	5	1166	11	2026-09-25 09:00:00	45	videollamada	https://meet.google.com/demo-1166	completada	\N	2026-09-19 09:45:00	2026-09-25 09:50:00
-269	5	1167	11	2026-09-28 09:00:00	45	videollamada	https://meet.google.com/demo-1167	completada	\N	2026-09-20 15:45:00	2026-09-28 09:50:00
-270	5	1175	11	2026-09-28 11:00:00	45	videollamada	https://meet.google.com/demo-1175	completada	\N	2026-09-23 11:30:00	2026-09-28 11:50:00
-271	5	1179	11	2026-09-28 10:00:00	45	videollamada	https://meet.google.com/demo-1179	completada	\N	2026-09-22 16:00:00	2026-09-28 10:50:00
-272	5	1180	11	2026-09-25 15:00:00	45	videollamada	https://meet.google.com/demo-1180	completada	\N	2026-09-23 15:00:00	2026-09-25 15:50:00
-273	5	1185	11	2026-09-28 12:00:00	45	videollamada	https://meet.google.com/demo-1185	completada	\N	2026-09-22 15:30:00	2026-09-28 12:50:00
-274	5	1187	11	2026-10-01 14:00:00	45	videollamada	https://meet.google.com/demo-1187	completada	\N	2026-09-25 14:00:00	2026-10-01 14:50:00
-275	5	1189	11	2026-09-29 16:00:00	45	videollamada	https://meet.google.com/demo-1189	completada	\N	2026-09-25 16:00:00	2026-09-29 16:50:00
-276	5	1200	11	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-1200	completada	\N	2026-09-28 13:30:00	2026-10-05 09:50:00
-277	5	1202	11	2026-10-02 14:00:00	45	videollamada	https://meet.google.com/demo-1202	completada	\N	2026-09-26 14:15:00	2026-10-02 14:50:00
-278	5	1208	11	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-1208	completada	\N	2026-09-29 13:45:00	2026-10-05 10:50:00
-279	5	1209	11	2026-10-01 17:00:00	45	videollamada	https://meet.google.com/demo-1209	completada	\N	2026-09-27 17:00:00	2026-10-01 17:50:00
-280	5	1221	11	2026-10-05 11:00:00	45	videollamada	https://meet.google.com/demo-1221	completada	\N	2026-10-03 09:45:00	2026-10-05 11:50:00
-281	5	1229	11	2026-10-09 17:00:00	45	videollamada	https://meet.google.com/demo-1229	completada	\N	2026-10-03 17:45:00	2026-10-09 17:50:00
-282	5	1235	11	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-1235	completada	\N	2026-10-06 09:45:00	2026-10-12 09:50:00
-283	5	1236	11	2026-10-08 12:00:00	45	videollamada	https://meet.google.com/demo-1236	completada	\N	2026-10-05 12:45:00	2026-10-08 12:50:00
-284	5	1242	11	2026-10-12 10:00:00	45	videollamada	https://meet.google.com/demo-1242	completada	\N	2026-10-07 14:15:00	2026-10-12 10:50:00
-285	5	1243	11	2026-10-09 11:00:00	45	videollamada	https://meet.google.com/demo-1243	completada	\N	2026-10-05 11:30:00	2026-10-09 11:50:00
-286	5	1246	11	2026-10-22 09:00:00	45	videollamada	https://meet.google.com/demo-1246	confirmada	\N	2026-10-07 17:30:00	2026-10-07 18:30:00
-287	5	1248	11	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-1248	pendiente	\N	2026-10-06 09:30:00	2026-10-06 09:30:00
-288	5	1251	11	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-1251	confirmada	\N	2026-10-08 12:15:00	2026-10-08 13:15:00
-289	5	1260	11	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-1260	confirmada	\N	2026-10-10 12:15:00	2026-10-10 13:15:00
-290	5	1262	11	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-1262	pendiente	\N	2026-10-11 13:45:00	2026-10-11 13:45:00
-291	5	1266	11	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-1266	pendiente	\N	2026-10-10 17:30:00	2026-10-10 17:30:00
-292	5	1271	11	2026-10-19 12:00:00	45	videollamada	https://meet.google.com/demo-1271	confirmada	\N	2026-10-11 09:15:00	2026-10-11 10:15:00
-293	5	1272	11	2026-10-19 13:00:00	45	videollamada	https://meet.google.com/demo-1272	confirmada	\N	2026-10-12 16:45:00	2026-10-12 17:45:00
-294	5	1277	11	2026-10-19 14:00:00	45	videollamada	https://meet.google.com/demo-1277	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-295	5	1278	11	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-1278	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-296	5	1282	11	2026-09-25 10:00:00	45	videollamada	https://meet.google.com/demo-1282	completada	\N	2026-09-19 17:15:00	2026-09-25 10:50:00
-297	5	1283	11	2026-09-21 15:00:00	45	videollamada	https://meet.google.com/demo-1283	completada	\N	2026-09-18 10:00:00	2026-09-21 15:50:00
-298	5	1286	11	2026-09-28 13:00:00	45	videollamada	https://meet.google.com/demo-1286	completada	\N	2026-09-20 11:30:00	2026-09-28 13:50:00
-299	5	1293	11	2026-09-24 13:00:00	45	videollamada	https://meet.google.com/demo-1293	completada	\N	2026-09-20 13:30:00	2026-09-24 13:50:00
-300	5	1299	11	2026-09-28 14:00:00	45	videollamada	https://meet.google.com/demo-1299	completada	\N	2026-09-21 15:15:00	2026-09-28 14:50:00
-301	5	1300	11	2026-09-28 15:00:00	45	videollamada	https://meet.google.com/demo-1300	completada	\N	2026-09-21 15:15:00	2026-09-28 15:50:00
-302	5	1304	11	2026-09-25 17:00:00	45	videollamada	https://meet.google.com/demo-1304	completada	\N	2026-09-20 17:00:00	2026-09-25 17:50:00
-303	5	1305	11	2026-09-25 14:00:00	45	videollamada	https://meet.google.com/demo-1305	completada	\N	2026-09-22 14:30:00	2026-09-25 14:50:00
-304	5	1323	11	2026-09-28 16:00:00	45	videollamada	https://meet.google.com/demo-1323	completada	\N	2026-09-23 10:15:00	2026-09-28 16:50:00
-305	5	1325	11	2026-10-01 09:00:00	45	videollamada	https://meet.google.com/demo-1325	completada	\N	2026-09-25 09:45:00	2026-10-01 09:50:00
-306	5	1326	11	2026-09-28 17:00:00	45	videollamada	https://meet.google.com/demo-1326	completada	\N	2026-09-24 09:45:00	2026-09-28 17:50:00
-307	5	1327	11	2026-09-29 17:00:00	45	videollamada	https://meet.google.com/demo-1327	completada	\N	2026-09-25 16:30:00	2026-09-29 17:50:00
-308	5	1330	11	2026-10-02 15:00:00	45	videollamada	https://meet.google.com/demo-1330	completada	\N	2026-09-27 15:15:00	2026-10-02 15:50:00
-309	5	1333	11	2026-10-05 12:00:00	45	videollamada	https://meet.google.com/demo-1333	completada	\N	2026-09-27 13:00:00	2026-10-05 12:50:00
-310	5	1335	11	2026-09-29 09:00:00	45	videollamada	https://meet.google.com/demo-1335	completada	\N	2026-09-25 15:00:00	2026-09-29 09:50:00
-311	5	1338	11	2026-09-29 10:00:00	45	videollamada	https://meet.google.com/demo-1338	completada	\N	2026-09-25 09:15:00	2026-09-29 10:50:00
-312	5	1347	11	2026-10-05 13:00:00	45	videollamada	https://meet.google.com/demo-1347	completada	\N	2026-09-29 13:00:00	2026-10-05 13:50:00
-313	5	1350	11	2026-10-02 16:00:00	45	videollamada	https://meet.google.com/demo-1350	completada	\N	2026-09-29 16:00:00	2026-10-02 16:50:00
-314	5	1363	11	2026-10-05 14:00:00	45	videollamada	https://meet.google.com/demo-1363	completada	\N	2026-09-30 12:00:00	2026-10-05 14:50:00
-315	5	1374	11	2026-10-06 13:00:00	45	videollamada	https://meet.google.com/demo-1374	completada	\N	2026-10-03 13:30:00	2026-10-06 13:50:00
-316	5	1380	11	2026-10-06 12:00:00	45	videollamada	https://meet.google.com/demo-1380	completada	\N	2026-10-03 12:45:00	2026-10-06 12:50:00
-317	5	1385	11	2026-10-07 13:00:00	45	videollamada	https://meet.google.com/demo-1385	completada	\N	2026-10-05 13:45:00	2026-10-07 13:50:00
-318	5	1392	11	2026-10-12 12:00:00	45	videollamada	https://meet.google.com/demo-1392	completada	\N	2026-10-06 13:00:00	2026-10-12 12:50:00
-319	5	1393	11	2026-10-12 13:00:00	45	videollamada	https://meet.google.com/demo-1393	completada	\N	2026-10-06 09:00:00	2026-10-12 13:50:00
-320	5	1398	11	2026-10-22 10:00:00	45	videollamada	https://meet.google.com/demo-1398	confirmada	\N	2026-10-08 12:45:00	2026-10-08 13:45:00
-321	5	1400	11	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-1400	pendiente	\N	2026-10-08 09:30:00	2026-10-08 09:30:00
-322	5	1406	11	2026-10-19 15:00:00	45	videollamada	https://meet.google.com/demo-1406	confirmada	\N	2026-10-09 12:45:00	2026-10-09 13:45:00
-323	5	1408	11	2026-10-22 11:00:00	45	videollamada	https://meet.google.com/demo-1408	confirmada	\N	2026-10-10 11:45:00	2026-10-10 12:45:00
-324	5	1422	11	2026-10-19 16:00:00	45	videollamada	https://meet.google.com/demo-1422	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-325	5	1424	11	2026-10-22 12:00:00	45	videollamada	https://meet.google.com/demo-1424	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-326	5	1426	11	2026-10-21 11:00:00	45	videollamada	https://meet.google.com/demo-1426	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-327	5	1430	11	2026-09-30 13:00:00	45	videollamada	https://meet.google.com/demo-1430	completada	\N	2026-09-28 13:30:00	2026-09-30 13:50:00
-328	5	1435	11	2026-10-02 11:00:00	45	videollamada	https://meet.google.com/demo-1435	completada	\N	2026-09-30 11:45:00	2026-10-02 11:50:00
-329	5	1438	11	2026-10-05 15:00:00	45	videollamada	https://meet.google.com/demo-1438	completada	\N	2026-09-30 13:00:00	2026-10-05 15:50:00
-330	5	1442	11	2026-10-05 16:00:00	45	videollamada	https://meet.google.com/demo-1442	completada	\N	2026-09-30 14:00:00	2026-10-05 16:50:00
-331	5	1447	11	2026-10-05 17:00:00	45	videollamada	https://meet.google.com/demo-1447	completada	\N	2026-09-30 12:15:00	2026-10-05 17:50:00
-332	5	1449	11	2026-10-06 09:00:00	45	videollamada	https://meet.google.com/demo-1449	completada	\N	2026-10-01 09:30:00	2026-10-06 09:50:00
-333	5	1458	11	2026-10-09 09:00:00	45	videollamada	https://meet.google.com/demo-1458	completada	\N	2026-10-04 09:15:00	2026-10-09 09:50:00
-334	5	1464	11	2026-10-08 17:00:00	45	videollamada	https://meet.google.com/demo-1464	completada	\N	2026-10-06 17:45:00	2026-10-08 17:50:00
-335	5	1473	11	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-1473	confirmada	\N	2026-10-06 14:15:00	2026-10-06 15:15:00
-336	5	1480	11	2026-10-19 17:00:00	45	videollamada	https://meet.google.com/demo-1480	pendiente	\N	2026-10-08 11:00:00	2026-10-08 11:00:00
-337	5	1481	11	2026-10-22 13:00:00	45	videollamada	https://meet.google.com/demo-1481	confirmada	\N	2026-10-09 16:00:00	2026-10-09 17:00:00
-338	5	1482	11	2026-10-20 10:00:00	45	videollamada	https://meet.google.com/demo-1482	pendiente	\N	2026-10-10 13:15:00	2026-10-10 13:15:00
-339	5	1491	11	2026-10-20 11:00:00	45	videollamada	https://meet.google.com/demo-1491	confirmada	\N	2026-10-13 10:45:00	2026-10-13 11:45:00
-340	5	1494	11	2026-10-20 12:00:00	45	videollamada	https://meet.google.com/demo-1494	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-341	5	1506	11	2026-10-21 12:00:00	45	videollamada	https://meet.google.com/demo-1506	pendiente	\N	2026-10-08 12:30:00	2026-10-08 12:30:00
-342	5	1511	11	2026-10-22 14:00:00	45	videollamada	https://meet.google.com/demo-1511	confirmada	\N	2026-10-09 12:15:00	2026-10-09 13:15:00
-343	5	1512	11	2026-10-20 13:00:00	45	videollamada	https://meet.google.com/demo-1512	confirmada	\N	2026-10-08 17:30:00	2026-10-08 18:30:00
-344	5	1518	11	2026-10-20 14:00:00	45	videollamada	https://meet.google.com/demo-1518	pendiente	\N	2026-10-09 14:30:00	2026-10-09 14:30:00
-345	5	1525	11	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-1525	pendiente	\N	2026-10-09 10:30:00	2026-10-09 10:30:00
-346	5	1532	11	2026-10-20 15:00:00	45	videollamada	https://meet.google.com/demo-1532	confirmada	\N	2026-10-10 15:00:00	2026-10-10 16:00:00
-347	5	1533	11	2026-10-20 16:00:00	45	videollamada	https://meet.google.com/demo-1533	confirmada	\N	2026-10-10 12:00:00	2026-10-10 13:00:00
-348	5	1534	11	2026-10-14 10:00:00	45	videollamada	https://meet.google.com/demo-1534	confirmada	\N	2026-10-11 12:45:00	2026-10-11 13:45:00
-349	5	1539	11	2026-10-22 15:00:00	45	videollamada	https://meet.google.com/demo-1539	confirmada	\N	2026-10-11 10:30:00	2026-10-11 11:30:00
-350	5	1544	11	2026-10-20 17:00:00	45	videollamada	https://meet.google.com/demo-1544	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-351	4	1553	9	2026-08-25 12:00:00	45	videollamada	https://meet.google.com/demo-1553	completada	\N	2026-08-22 12:00:00	2026-08-25 12:50:00
-352	4	1554	9	2026-08-24 16:00:00	45	videollamada	https://meet.google.com/demo-1554	completada	\N	2026-08-20 16:00:00	2026-08-24 16:50:00
-353	4	1557	9	2026-08-24 09:00:00	45	videollamada	https://meet.google.com/demo-1557	completada	\N	2026-08-20 16:00:00	2026-08-24 09:50:00
-354	4	1559	9	2026-08-24 11:00:00	45	videollamada	https://meet.google.com/demo-1559	completada	\N	2026-08-21 11:45:00	2026-08-24 11:50:00
-355	4	1562	9	2026-08-24 10:00:00	45	videollamada	https://meet.google.com/demo-1562	completada	\N	2026-08-21 12:15:00	2026-08-24 10:50:00
-356	4	1566	9	2026-08-28 09:00:00	45	videollamada	https://meet.google.com/demo-1566	completada	\N	2026-08-23 09:30:00	2026-08-28 09:50:00
-357	4	1567	9	2026-08-26 12:00:00	45	videollamada	https://meet.google.com/demo-1567	completada	\N	2026-08-23 12:30:00	2026-08-26 12:50:00
-358	4	1569	9	2026-08-28 12:00:00	45	videollamada	https://meet.google.com/demo-1569	completada	\N	2026-08-22 12:30:00	2026-08-28 12:50:00
-359	4	1570	9	2026-08-28 10:00:00	45	videollamada	https://meet.google.com/demo-1570	completada	\N	2026-08-23 09:00:00	2026-08-28 10:50:00
-360	4	1579	9	2026-08-31 09:00:00	45	videollamada	https://meet.google.com/demo-1579	completada	\N	2026-08-24 09:00:00	2026-08-31 09:50:00
-361	4	1583	9	2026-08-27 10:00:00	45	videollamada	https://meet.google.com/demo-1583	completada	\N	2026-08-22 10:00:00	2026-08-27 10:50:00
-362	4	1602	9	2026-08-31 10:00:00	45	videollamada	https://meet.google.com/demo-1602	completada	\N	2026-08-25 10:00:00	2026-08-31 10:50:00
-363	4	1604	9	2026-08-31 11:00:00	45	videollamada	https://meet.google.com/demo-1604	completada	\N	2026-08-27 12:00:00	2026-08-31 11:50:00
-364	4	1608	9	2026-08-31 12:00:00	45	videollamada	https://meet.google.com/demo-1608	completada	\N	2026-08-26 10:45:00	2026-08-31 12:50:00
-365	4	1610	9	2026-09-01 13:00:00	45	videollamada	https://meet.google.com/demo-1610	completada	\N	2026-08-27 13:45:00	2026-09-01 13:50:00
-366	4	1612	9	2026-08-31 16:00:00	45	videollamada	https://meet.google.com/demo-1612	completada	\N	2026-08-26 16:45:00	2026-08-31 16:50:00
-367	4	1614	9	2026-09-03 11:00:00	45	videollamada	https://meet.google.com/demo-1614	completada	\N	2026-08-28 11:45:00	2026-09-03 11:50:00
-368	4	1619	9	2026-09-02 10:00:00	45	videollamada	https://meet.google.com/demo-1619	completada	\N	2026-08-28 10:00:00	2026-09-02 10:50:00
-369	4	1624	9	2026-09-07 09:00:00	45	videollamada	https://meet.google.com/demo-1624	completada	\N	2026-08-31 10:45:00	2026-09-07 09:50:00
-370	4	1625	9	2026-09-02 11:00:00	45	videollamada	https://meet.google.com/demo-1625	completada	\N	2026-08-29 11:30:00	2026-09-02 11:50:00
-371	4	1627	9	2026-09-01 11:00:00	45	videollamada	https://meet.google.com/demo-1627	completada	\N	2026-08-29 11:30:00	2026-09-01 11:50:00
-372	4	1628	9	2026-09-07 10:00:00	45	videollamada	https://meet.google.com/demo-1628	completada	\N	2026-08-31 10:30:00	2026-09-07 10:50:00
-373	4	1634	9	2026-09-04 12:00:00	45	videollamada	https://meet.google.com/demo-1634	completada	\N	2026-09-01 12:00:00	2026-09-04 12:50:00
-374	4	1635	9	2026-09-04 14:00:00	45	videollamada	https://meet.google.com/demo-1635	completada	\N	2026-09-01 14:45:00	2026-09-04 14:50:00
-375	4	1636	9	2026-09-02 13:00:00	45	videollamada	https://meet.google.com/demo-1636	completada	\N	2026-08-30 13:15:00	2026-09-02 13:50:00
-376	4	1638	9	2026-09-07 14:00:00	45	videollamada	https://meet.google.com/demo-1638	completada	\N	2026-09-01 14:00:00	2026-09-07 14:50:00
-377	4	1640	9	2026-09-07 11:00:00	45	videollamada	https://meet.google.com/demo-1640	completada	\N	2026-09-01 12:45:00	2026-09-07 11:50:00
-378	4	1649	9	2026-09-07 17:00:00	45	videollamada	https://meet.google.com/demo-1649	completada	\N	2026-09-01 17:15:00	2026-09-07 17:50:00
-379	4	1656	9	2026-09-07 12:00:00	45	videollamada	https://meet.google.com/demo-1656	completada	\N	2026-09-03 13:00:00	2026-09-07 12:50:00
-380	4	1662	9	2026-09-08 09:00:00	45	videollamada	https://meet.google.com/demo-1662	completada	\N	2026-09-05 09:15:00	2026-09-08 09:50:00
-381	4	1663	9	2026-09-11 16:00:00	45	videollamada	https://meet.google.com/demo-1663	completada	\N	2026-09-05 16:00:00	2026-09-11 16:50:00
-382	4	1667	9	2026-09-08 17:00:00	45	videollamada	https://meet.google.com/demo-1667	completada	\N	2026-09-06 17:15:00	2026-09-08 17:50:00
-383	4	1679	9	2026-09-10 12:00:00	45	videollamada	https://meet.google.com/demo-1679	completada	\N	2026-09-08 12:15:00	2026-09-10 12:50:00
-384	4	1683	9	2026-09-11 09:00:00	45	videollamada	https://meet.google.com/demo-1683	completada	\N	2026-09-09 09:30:00	2026-09-11 09:50:00
-385	4	1686	9	2026-09-14 09:00:00	45	videollamada	https://meet.google.com/demo-1686	completada	\N	2026-09-10 14:45:00	2026-09-14 09:50:00
-386	4	1689	9	2026-09-17 16:00:00	45	videollamada	https://meet.google.com/demo-1689	completada	\N	2026-09-12 16:30:00	2026-09-17 16:50:00
-387	4	1694	9	2026-09-15 13:00:00	45	videollamada	https://meet.google.com/demo-1694	completada	\N	2026-09-12 13:15:00	2026-09-15 13:50:00
-388	4	1696	9	2026-09-15 14:00:00	45	videollamada	https://meet.google.com/demo-1696	completada	\N	2026-09-13 14:00:00	2026-09-15 14:50:00
-389	4	1700	9	2026-09-17 12:00:00	45	videollamada	https://meet.google.com/demo-1700	completada	\N	2026-09-13 12:00:00	2026-09-17 12:50:00
-390	4	1701	9	2026-09-17 10:00:00	45	videollamada	https://meet.google.com/demo-1701	completada	\N	2026-09-14 10:30:00	2026-09-17 10:50:00
-391	4	1708	9	2026-09-22 17:00:00	45	videollamada	https://meet.google.com/demo-1708	completada	\N	2026-09-16 17:45:00	2026-09-22 17:50:00
-392	4	1713	9	2026-09-24 12:00:00	45	videollamada	https://meet.google.com/demo-1713	completada	\N	2026-09-18 12:30:00	2026-09-24 12:50:00
-393	4	1715	9	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-1715	completada	\N	2026-09-16 13:15:00	2026-09-21 09:50:00
-394	4	1719	9	2026-08-31 13:00:00	45	videollamada	https://meet.google.com/demo-1719	completada	\N	2026-08-27 10:15:00	2026-08-31 13:50:00
-395	4	1721	9	2026-09-01 17:00:00	45	videollamada	https://meet.google.com/demo-1721	completada	\N	2026-08-27 17:45:00	2026-09-01 17:50:00
-396	4	1722	9	2026-09-01 09:00:00	45	videollamada	https://meet.google.com/demo-1722	completada	\N	2026-08-27 09:30:00	2026-09-01 09:50:00
-397	4	1732	9	2026-09-02 09:00:00	45	videollamada	https://meet.google.com/demo-1732	completada	\N	2026-08-28 09:45:00	2026-09-02 09:50:00
-398	4	1740	9	2026-09-08 10:00:00	45	videollamada	https://meet.google.com/demo-1740	completada	\N	2026-09-03 09:30:00	2026-09-08 10:50:00
-399	4	1747	9	2026-09-08 11:00:00	45	videollamada	https://meet.google.com/demo-1747	completada	\N	2026-09-04 09:00:00	2026-09-08 11:50:00
-400	4	1749	9	2026-09-08 12:00:00	45	videollamada	https://meet.google.com/demo-1749	completada	\N	2026-09-05 09:30:00	2026-09-08 12:50:00
-401	4	1750	9	2026-09-09 13:00:00	45	videollamada	https://meet.google.com/demo-1750	completada	\N	2026-09-05 13:45:00	2026-09-09 13:50:00
-402	4	1756	9	2026-09-14 10:00:00	45	videollamada	https://meet.google.com/demo-1756	completada	\N	2026-09-07 16:30:00	2026-09-14 10:50:00
-403	4	1759	9	2026-09-14 11:00:00	45	videollamada	https://meet.google.com/demo-1759	completada	\N	2026-09-08 12:15:00	2026-09-14 11:50:00
-404	4	1761	9	2026-09-11 13:00:00	45	videollamada	https://meet.google.com/demo-1761	completada	\N	2026-09-08 13:15:00	2026-09-11 13:50:00
-405	4	1766	9	2026-09-16 15:00:00	45	videollamada	https://meet.google.com/demo-1766	completada	\N	2026-09-10 15:15:00	2026-09-16 15:50:00
-406	4	1767	9	2026-09-15 11:00:00	45	videollamada	https://meet.google.com/demo-1767	completada	\N	2026-09-11 11:30:00	2026-09-15 11:50:00
-407	4	1768	9	2026-09-14 17:00:00	45	videollamada	https://meet.google.com/demo-1768	completada	\N	2026-09-12 17:45:00	2026-09-14 17:50:00
-408	4	1769	9	2026-09-15 12:00:00	45	videollamada	https://meet.google.com/demo-1769	completada	\N	2026-09-12 11:00:00	2026-09-15 12:50:00
-409	4	1770	9	2026-09-16 17:00:00	45	videollamada	https://meet.google.com/demo-1770	completada	\N	2026-09-12 17:30:00	2026-09-16 17:50:00
-410	4	1774	9	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-1774	completada	\N	2026-09-13 14:15:00	2026-09-21 10:50:00
-411	4	1776	9	2026-09-17 09:00:00	45	videollamada	https://meet.google.com/demo-1776	completada	\N	2026-09-15 09:00:00	2026-09-17 09:50:00
-412	4	1777	9	2026-09-21 11:00:00	45	videollamada	https://meet.google.com/demo-1777	completada	\N	2026-09-15 12:30:00	2026-09-21 11:50:00
-413	4	1780	9	2026-09-22 15:00:00	45	videollamada	https://meet.google.com/demo-1780	completada	\N	2026-09-17 15:15:00	2026-09-22 15:50:00
-414	4	1782	9	2026-09-21 14:00:00	45	videollamada	https://meet.google.com/demo-1782	completada	\N	2026-09-18 14:45:00	2026-09-21 14:50:00
-415	4	1785	9	2026-09-25 09:00:00	45	videollamada	https://meet.google.com/demo-1785	completada	\N	2026-09-20 09:00:00	2026-09-25 09:50:00
-416	4	1792	9	2026-09-07 13:00:00	45	videollamada	https://meet.google.com/demo-1792	completada	\N	2026-08-31 12:00:00	2026-09-07 13:50:00
-417	4	1804	9	2026-09-07 15:00:00	45	videollamada	https://meet.google.com/demo-1804	completada	\N	2026-09-03 12:15:00	2026-09-07 15:50:00
-418	4	1807	9	2026-09-14 12:00:00	45	videollamada	https://meet.google.com/demo-1807	completada	\N	2026-09-06 14:30:00	2026-09-14 12:50:00
-419	4	1817	9	2026-09-14 13:00:00	45	videollamada	https://meet.google.com/demo-1817	completada	\N	2026-09-11 13:30:00	2026-09-14 13:50:00
-420	4	1818	9	2026-09-14 14:00:00	45	videollamada	https://meet.google.com/demo-1818	completada	\N	2026-09-12 09:15:00	2026-09-14 14:50:00
-421	4	1819	9	2026-09-16 16:00:00	45	videollamada	https://meet.google.com/demo-1819	completada	\N	2026-09-12 16:45:00	2026-09-16 16:50:00
-422	4	1821	9	2026-09-16 10:00:00	45	videollamada	https://meet.google.com/demo-1821	completada	\N	2026-09-14 10:15:00	2026-09-16 10:50:00
-423	4	1823	9	2026-09-21 12:00:00	45	videollamada	https://meet.google.com/demo-1823	completada	\N	2026-09-17 13:45:00	2026-09-21 12:50:00
-424	4	1826	9	2026-09-22 16:00:00	45	videollamada	https://meet.google.com/demo-1826	completada	\N	2026-09-18 15:45:00	2026-09-22 16:50:00
-425	4	1832	9	2026-09-09 10:00:00	45	videollamada	https://meet.google.com/demo-1832	completada	\N	2026-09-05 10:15:00	2026-09-09 10:50:00
-426	4	1834	9	2026-09-09 09:00:00	45	videollamada	https://meet.google.com/demo-1834	completada	\N	2026-09-06 17:00:00	2026-09-09 09:50:00
-427	4	1837	9	2026-09-15 10:00:00	45	videollamada	https://meet.google.com/demo-1837	completada	\N	2026-09-12 10:15:00	2026-09-15 10:50:00
-428	4	1859	9	2026-09-11 14:00:00	45	videollamada	https://meet.google.com/demo-1859	completada	\N	2026-09-09 14:00:00	2026-09-11 14:50:00
-429	4	1866	9	2026-09-14 15:00:00	45	videollamada	https://meet.google.com/demo-1866	completada	\N	2026-09-11 16:00:00	2026-09-14 15:50:00
-430	4	1867	9	2026-09-14 16:00:00	45	videollamada	https://meet.google.com/demo-1867	completada	\N	2026-09-11 11:15:00	2026-09-14 16:50:00
-431	4	1872	9	2026-09-21 13:00:00	45	videollamada	https://meet.google.com/demo-1872	completada	\N	2026-09-15 11:30:00	2026-09-21 13:50:00
-432	4	1885	9	2026-09-23 10:00:00	45	videollamada	https://meet.google.com/demo-1885	completada	\N	2026-09-18 10:00:00	2026-09-23 10:50:00
-433	4	1904	9	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-1904	completada	\N	2026-09-27 16:00:00	2026-10-05 09:50:00
-434	4	1916	9	2026-09-29 10:00:00	45	videollamada	https://meet.google.com/demo-1916	completada	\N	2026-09-27 10:15:00	2026-09-29 10:50:00
-435	4	1918	9	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-1918	completada	\N	2026-09-28 13:45:00	2026-10-05 10:50:00
-436	4	1922	9	2026-10-05 11:00:00	45	videollamada	https://meet.google.com/demo-1922	completada	\N	2026-09-29 15:15:00	2026-10-05 11:50:00
-437	4	1923	9	2026-10-05 12:00:00	45	videollamada	https://meet.google.com/demo-1923	completada	\N	2026-09-29 15:45:00	2026-10-05 12:50:00
-438	4	1929	9	2026-10-05 13:00:00	45	videollamada	https://meet.google.com/demo-1929	completada	\N	2026-09-29 11:30:00	2026-10-05 13:50:00
-439	4	1931	9	2026-10-06 13:00:00	45	videollamada	https://meet.google.com/demo-1931	completada	\N	2026-09-30 13:00:00	2026-10-06 13:50:00
-440	4	1932	9	2026-10-05 14:00:00	45	videollamada	https://meet.google.com/demo-1932	completada	\N	2026-09-29 11:00:00	2026-10-05 14:50:00
-441	4	1936	9	2026-10-05 15:00:00	45	videollamada	https://meet.google.com/demo-1936	completada	\N	2026-09-28 10:00:00	2026-10-05 15:50:00
-442	4	1941	9	2026-10-01 13:00:00	45	videollamada	https://meet.google.com/demo-1941	completada	\N	2026-09-29 13:30:00	2026-10-01 13:50:00
-443	4	1949	9	2026-10-05 17:00:00	45	videollamada	https://meet.google.com/demo-1949	completada	\N	2026-09-29 17:45:00	2026-10-05 17:50:00
-444	4	1950	9	2026-10-05 16:00:00	45	videollamada	https://meet.google.com/demo-1950	completada	\N	2026-09-29 12:30:00	2026-10-05 16:50:00
-445	4	1961	9	2026-10-07 14:00:00	45	videollamada	https://meet.google.com/demo-1961	completada	\N	2026-10-01 14:30:00	2026-10-07 14:50:00
-446	4	1962	9	2026-10-06 09:00:00	45	videollamada	https://meet.google.com/demo-1962	completada	\N	2026-10-02 11:30:00	2026-10-06 09:50:00
-447	4	1965	9	2026-10-07 13:00:00	45	videollamada	https://meet.google.com/demo-1965	completada	\N	2026-10-03 13:15:00	2026-10-07 13:50:00
-448	4	1980	9	2026-10-09 15:00:00	45	videollamada	https://meet.google.com/demo-1980	completada	\N	2026-10-05 15:30:00	2026-10-09 15:50:00
-449	4	1991	9	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-1991	confirmada	\N	2026-10-07 15:00:00	2026-10-07 16:00:00
-450	4	1994	9	2026-10-14 10:00:00	45	videollamada	https://meet.google.com/demo-1994	confirmada	\N	2026-10-08 09:30:00	2026-10-08 10:30:00
-451	4	1997	9	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-1997	confirmada	\N	2026-10-08 16:15:00	2026-10-08 17:15:00
-452	4	2000	9	2026-10-14 11:00:00	45	videollamada	https://meet.google.com/demo-2000	pendiente	\N	2026-10-08 09:15:00	2026-10-08 09:15:00
-453	4	2011	9	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-2011	pendiente	\N	2026-10-12 11:30:00	2026-10-12 11:30:00
-454	4	2012	9	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-2012	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-455	4	2013	9	2026-10-22 09:00:00	45	videollamada	https://meet.google.com/demo-2013	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-456	4	2019	9	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-2019	completada	\N	2026-10-05 13:30:00	2026-10-12 09:50:00
-457	4	2023	9	2026-10-08 14:00:00	45	videollamada	https://meet.google.com/demo-2023	completada	\N	2026-10-05 14:00:00	2026-10-08 14:50:00
-458	4	2026	9	2026-10-07 16:00:00	45	videollamada	https://meet.google.com/demo-2026	completada	\N	2026-10-05 16:15:00	2026-10-07 16:50:00
-459	4	2029	9	2026-10-12 10:00:00	45	videollamada	https://meet.google.com/demo-2029	completada	\N	2026-10-05 17:15:00	2026-10-12 10:50:00
-460	4	2030	9	2026-10-12 11:00:00	45	videollamada	https://meet.google.com/demo-2030	completada	\N	2026-10-05 09:15:00	2026-10-12 11:50:00
-461	4	2034	9	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-2034	confirmada	\N	2026-10-07 13:15:00	2026-10-07 14:15:00
-462	4	2043	9	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-2043	confirmada	\N	2026-10-08 10:30:00	2026-10-08 11:30:00
-463	4	2044	9	2026-10-15 10:00:00	45	videollamada	https://meet.google.com/demo-2044	pendiente	\N	2026-10-08 12:30:00	2026-10-08 12:30:00
-464	4	2059	9	2026-10-19 12:00:00	45	videollamada	https://meet.google.com/demo-2059	confirmada	\N	2026-10-12 10:15:00	2026-10-12 11:15:00
-465	4	2060	9	2026-10-19 13:00:00	45	videollamada	https://meet.google.com/demo-2060	confirmada	\N	2026-10-11 15:15:00	2026-10-11 16:15:00
-466	6	2080	14	2026-09-02 15:00:00	45	videollamada	https://meet.google.com/demo-2080	completada	\N	2026-08-29 15:15:00	2026-09-02 15:50:00
-467	6	2103	14	2026-09-15 15:00:00	45	videollamada	https://meet.google.com/demo-2103	completada	\N	2026-09-09 15:15:00	2026-09-15 15:50:00
-468	6	2111	14	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-2111	completada	\N	2026-09-13 11:15:00	2026-09-21 09:50:00
-469	6	2113	14	2026-09-17 13:00:00	45	videollamada	https://meet.google.com/demo-2113	completada	\N	2026-09-14 13:45:00	2026-09-17 13:50:00
-470	6	2120	14	2026-09-24 12:00:00	45	videollamada	https://meet.google.com/demo-2120	completada	\N	2026-09-21 12:00:00	2026-09-24 12:50:00
-471	6	2134	14	2026-09-18 16:00:00	45	videollamada	https://meet.google.com/demo-2134	completada	\N	2026-09-13 16:45:00	2026-09-18 16:50:00
-472	6	2137	14	2026-09-21 17:00:00	45	videollamada	https://meet.google.com/demo-2137	completada	\N	2026-09-18 17:30:00	2026-09-21 17:50:00
-473	6	2139	14	2026-09-04 11:00:00	45	videollamada	https://meet.google.com/demo-2139	completada	\N	2026-08-29 11:00:00	2026-09-04 11:50:00
-474	6	2141	14	2026-09-02 14:00:00	45	videollamada	https://meet.google.com/demo-2141	completada	\N	2026-08-30 14:45:00	2026-09-02 14:50:00
-475	6	2145	14	2026-09-07 16:00:00	45	videollamada	https://meet.google.com/demo-2145	completada	\N	2026-09-01 16:00:00	2026-09-07 16:50:00
-476	6	2153	14	2026-09-07 17:00:00	45	videollamada	https://meet.google.com/demo-2153	completada	\N	2026-09-02 16:45:00	2026-09-07 17:50:00
-477	6	2159	14	2026-09-08 09:00:00	45	videollamada	https://meet.google.com/demo-2159	completada	\N	2026-09-04 09:30:00	2026-09-08 09:50:00
-478	6	2169	14	2026-09-09 11:00:00	45	videollamada	https://meet.google.com/demo-2169	completada	\N	2026-09-06 11:30:00	2026-09-09 11:50:00
-479	6	2175	14	2026-09-14 09:00:00	45	videollamada	https://meet.google.com/demo-2175	completada	\N	2026-09-07 09:00:00	2026-09-14 09:50:00
-480	6	2176	14	2026-09-11 17:00:00	45	videollamada	https://meet.google.com/demo-2176	completada	\N	2026-09-08 17:00:00	2026-09-11 17:50:00
-481	6	2177	14	2026-09-09 15:00:00	45	videollamada	https://meet.google.com/demo-2177	completada	\N	2026-09-07 15:30:00	2026-09-09 15:50:00
-482	6	2182	14	2026-09-14 11:00:00	45	videollamada	https://meet.google.com/demo-2182	completada	\N	2026-09-09 11:30:00	2026-09-14 11:50:00
-483	6	2184	14	2026-09-16 12:00:00	45	videollamada	https://meet.google.com/demo-2184	completada	\N	2026-09-13 12:00:00	2026-09-16 12:50:00
-484	6	2186	14	2026-09-15 16:00:00	45	videollamada	https://meet.google.com/demo-2186	completada	\N	2026-09-12 16:15:00	2026-09-15 16:50:00
-485	6	2190	14	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-2190	completada	\N	2026-09-14 15:15:00	2026-09-21 10:50:00
-486	6	2191	14	2026-09-15 09:00:00	45	videollamada	https://meet.google.com/demo-2191	completada	\N	2026-09-13 09:00:00	2026-09-15 09:50:00
-487	6	2195	14	2026-09-18 13:00:00	45	videollamada	https://meet.google.com/demo-2195	completada	\N	2026-09-15 13:00:00	2026-09-18 13:50:00
-488	6	2213	14	2026-09-15 14:00:00	45	videollamada	https://meet.google.com/demo-2213	completada	\N	2026-09-11 14:15:00	2026-09-15 14:50:00
-489	6	2218	14	2026-09-21 11:00:00	45	videollamada	https://meet.google.com/demo-2218	completada	\N	2026-09-17 10:00:00	2026-09-21 11:50:00
-490	6	2221	14	2026-09-24 10:00:00	45	videollamada	https://meet.google.com/demo-2221	completada	\N	2026-09-21 10:30:00	2026-09-24 10:50:00
-491	6	2224	14	2026-09-25 11:00:00	45	videollamada	https://meet.google.com/demo-2224	completada	\N	2026-09-21 11:30:00	2026-09-25 11:50:00
-492	6	2227	14	2026-09-25 09:00:00	45	videollamada	https://meet.google.com/demo-2227	completada	\N	2026-09-23 09:45:00	2026-09-25 09:50:00
-493	6	2228	14	2026-09-28 09:00:00	45	videollamada	https://meet.google.com/demo-2228	completada	\N	2026-09-23 11:30:00	2026-09-28 09:50:00
-494	6	2231	14	2026-09-24 11:00:00	45	videollamada	https://meet.google.com/demo-2231	completada	\N	2026-09-22 11:15:00	2026-09-24 11:50:00
-495	6	2236	14	2026-09-25 16:00:00	45	videollamada	https://meet.google.com/demo-2236	completada	\N	2026-09-22 16:45:00	2026-09-25 16:50:00
-496	6	2237	14	2026-09-25 10:00:00	45	videollamada	https://meet.google.com/demo-2237	completada	\N	2026-09-22 10:15:00	2026-09-25 10:50:00
-497	6	2243	14	2026-09-28 10:00:00	45	videollamada	https://meet.google.com/demo-2243	completada	\N	2026-09-23 09:00:00	2026-09-28 10:50:00
-498	6	2244	14	2026-09-28 11:00:00	45	videollamada	https://meet.google.com/demo-2244	completada	\N	2026-09-25 17:00:00	2026-09-28 11:50:00
-499	6	2252	14	2026-09-30 10:00:00	45	videollamada	https://meet.google.com/demo-2252	completada	\N	2026-09-25 10:15:00	2026-09-30 10:50:00
-500	6	2253	14	2026-09-30 13:00:00	45	videollamada	https://meet.google.com/demo-2253	completada	\N	2026-09-25 13:00:00	2026-09-30 13:50:00
-501	6	2256	14	2026-10-01 12:00:00	45	videollamada	https://meet.google.com/demo-2256	completada	\N	2026-09-25 12:45:00	2026-10-01 12:50:00
-502	6	2264	14	2026-09-29 17:00:00	45	videollamada	https://meet.google.com/demo-2264	completada	\N	2026-09-25 17:15:00	2026-09-29 17:50:00
-503	6	2268	14	2026-10-02 17:00:00	45	videollamada	https://meet.google.com/demo-2268	completada	\N	2026-09-26 17:15:00	2026-10-02 17:50:00
-504	6	2271	14	2026-09-30 15:00:00	45	videollamada	https://meet.google.com/demo-2271	completada	\N	2026-09-27 15:15:00	2026-09-30 15:50:00
-505	6	2272	14	2026-09-30 11:00:00	45	videollamada	https://meet.google.com/demo-2272	completada	\N	2026-09-26 11:15:00	2026-09-30 11:50:00
-506	6	2276	14	2026-09-28 12:00:00	45	videollamada	https://meet.google.com/demo-2276	completada	\N	2026-09-26 09:15:00	2026-09-28 12:50:00
-507	6	2289	14	2026-10-01 11:00:00	45	videollamada	https://meet.google.com/demo-2289	completada	\N	2026-09-29 11:45:00	2026-10-01 11:50:00
-508	6	2296	14	2026-10-07 15:00:00	45	videollamada	https://meet.google.com/demo-2296	completada	\N	2026-10-02 15:30:00	2026-10-07 15:50:00
-509	6	2298	14	2026-10-07 11:00:00	45	videollamada	https://meet.google.com/demo-2298	completada	\N	2026-10-01 11:30:00	2026-10-07 11:50:00
-510	6	2308	14	2026-10-07 09:00:00	45	videollamada	https://meet.google.com/demo-2308	completada	\N	2026-10-04 09:00:00	2026-10-07 09:50:00
-511	6	2309	14	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-2309	completada	\N	2026-10-02 10:45:00	2026-10-05 10:50:00
-512	6	2310	14	2026-10-07 10:00:00	45	videollamada	https://meet.google.com/demo-2310	completada	\N	2026-10-05 09:00:00	2026-10-07 10:50:00
-513	6	2317	14	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-2317	completada	\N	2026-10-06 16:30:00	2026-10-12 09:50:00
-514	6	2321	14	2026-10-12 14:00:00	45	videollamada	https://meet.google.com/demo-2321	completada	\N	2026-10-06 14:45:00	2026-10-12 14:50:00
-515	6	2326	14	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-2326	pendiente	\N	2026-10-08 16:30:00	2026-10-08 16:30:00
-516	6	2327	14	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-2327	confirmada	\N	2026-10-07 16:45:00	2026-10-07 17:45:00
-517	6	2328	14	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-2328	confirmada	\N	2026-10-08 12:45:00	2026-10-08 13:45:00
-518	6	2330	14	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-2330	confirmada	\N	2026-10-09 15:00:00	2026-10-09 16:00:00
-519	6	2333	14	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-2333	pendiente	\N	2026-10-09 17:15:00	2026-10-09 17:15:00
-520	6	2339	14	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-2339	confirmada	\N	2026-10-10 10:30:00	2026-10-10 11:30:00
-521	6	2341	14	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-2341	pendiente	\N	2026-10-11 16:30:00	2026-10-11 16:30:00
-522	6	2343	14	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-2343	pendiente	\N	2026-10-11 13:15:00	2026-10-11 13:15:00
-523	6	2345	14	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-2345	pendiente	\N	2026-10-11 13:00:00	2026-10-11 13:00:00
-524	6	2348	14	2026-10-19 12:00:00	45	videollamada	https://meet.google.com/demo-2348	pendiente	\N	2026-10-12 15:30:00	2026-10-12 15:30:00
-525	6	2349	14	2026-10-14 10:00:00	45	videollamada	https://meet.google.com/demo-2349	confirmada	\N	2026-10-11 11:30:00	2026-10-11 12:30:00
-526	6	2352	14	2026-10-22 09:00:00	45	videollamada	https://meet.google.com/demo-2352	pendiente	\N	2026-10-12 09:30:00	2026-10-12 09:30:00
-527	6	2355	14	2026-10-22 10:00:00	45	videollamada	https://meet.google.com/demo-2355	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-528	6	2360	14	2026-10-07 12:00:00	45	videollamada	https://meet.google.com/demo-2360	completada	\N	2026-10-01 10:30:00	2026-10-07 12:50:00
-529	6	2362	14	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-2362	completada	\N	2026-10-01 09:45:00	2026-10-05 09:50:00
-530	6	2369	14	2026-10-09 12:00:00	45	videollamada	https://meet.google.com/demo-2369	completada	\N	2026-10-03 12:00:00	2026-10-09 12:50:00
-531	6	2372	14	2026-10-12 10:00:00	45	videollamada	https://meet.google.com/demo-2372	completada	\N	2026-10-05 09:00:00	2026-10-12 10:50:00
-532	6	2373	14	2026-10-09 16:00:00	45	videollamada	https://meet.google.com/demo-2373	completada	\N	2026-10-06 16:45:00	2026-10-09 16:50:00
-533	6	2374	14	2026-10-12 11:00:00	45	videollamada	https://meet.google.com/demo-2374	completada	\N	2026-10-05 11:30:00	2026-10-12 11:50:00
-534	6	2385	14	2026-10-22 11:00:00	45	videollamada	https://meet.google.com/demo-2385	pendiente	\N	2026-10-07 11:00:00	2026-10-07 11:00:00
-535	6	2387	14	2026-10-14 11:00:00	45	videollamada	https://meet.google.com/demo-2387	pendiente	\N	2026-10-07 13:30:00	2026-10-07 13:30:00
-536	6	2389	14	2026-10-19 13:00:00	45	videollamada	https://meet.google.com/demo-2389	pendiente	\N	2026-10-08 16:00:00	2026-10-08 16:00:00
-537	6	2392	14	2026-10-19 14:00:00	45	videollamada	https://meet.google.com/demo-2392	pendiente	\N	2026-10-09 16:45:00	2026-10-09 16:45:00
-538	6	2402	14	2026-10-20 10:00:00	45	videollamada	https://meet.google.com/demo-2402	confirmada	\N	2026-10-09 15:30:00	2026-10-09 16:30:00
-539	6	2403	14	2026-10-19 15:00:00	45	videollamada	https://meet.google.com/demo-2403	confirmada	\N	2026-10-08 14:15:00	2026-10-08 15:15:00
-540	6	2408	14	2026-10-19 16:00:00	45	videollamada	https://meet.google.com/demo-2408	pendiente	\N	2026-10-10 17:30:00	2026-10-10 17:30:00
-541	6	2409	14	2026-10-19 17:00:00	45	videollamada	https://meet.google.com/demo-2409	confirmada	\N	2026-10-10 14:00:00	2026-10-10 15:00:00
-542	6	2415	14	2026-10-20 11:00:00	45	videollamada	https://meet.google.com/demo-2415	pendiente	\N	2026-10-10 17:00:00	2026-10-10 17:00:00
-543	6	2423	14	2026-10-20 12:00:00	45	videollamada	https://meet.google.com/demo-2423	confirmada	\N	2026-10-11 16:30:00	2026-10-11 17:30:00
-544	6	2426	14	2026-10-21 11:00:00	45	videollamada	https://meet.google.com/demo-2426	pendiente	\N	2026-10-11 11:00:00	2026-10-11 11:00:00
-545	6	2434	14	2026-10-16 10:00:00	45	videollamada	https://meet.google.com/demo-2434	pendiente	\N	2026-10-13 11:00:00	2026-10-13 11:00:00
-546	6	2436	14	2026-10-20 13:00:00	45	videollamada	https://meet.google.com/demo-2436	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-547	7	2452	22	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-2452	confirmada	\N	2026-10-11 11:15:00	2026-10-11 12:15:00
-548	7	2454	22	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-2454	confirmada	\N	2026-10-10 15:45:00	2026-10-10 16:45:00
-549	7	2462	22	2026-10-22 09:00:00	45	videollamada	https://meet.google.com/demo-2462	confirmada	\N	2026-10-11 11:15:00	2026-10-11 12:15:00
-550	7	2465	22	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-2465	confirmada	\N	2026-10-11 09:00:00	2026-10-11 10:00:00
-551	7	2469	22	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-2469	pendiente	\N	2026-10-11 16:45:00	2026-10-11 16:45:00
-552	7	2470	22	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-2470	pendiente	\N	2026-10-11 17:30:00	2026-10-11 17:30:00
-553	7	2478	22	2026-10-15 10:00:00	45	videollamada	https://meet.google.com/demo-2478	pendiente	\N	2026-10-12 12:45:00	2026-10-12 12:45:00
-554	7	2481	22	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-2481	pendiente	\N	2026-10-11 09:15:00	2026-10-11 09:15:00
-555	7	2490	22	2026-10-19 12:00:00	45	videollamada	https://meet.google.com/demo-2490	pendiente	\N	2026-10-11 15:00:00	2026-10-11 15:00:00
-556	7	2491	22	2026-10-20 10:00:00	45	videollamada	https://meet.google.com/demo-2491	confirmada	\N	2026-10-12 16:15:00	2026-10-12 17:15:00
-557	7	2499	22	2026-10-20 11:00:00	45	videollamada	https://meet.google.com/demo-2499	pendiente	\N	2026-10-12 09:00:00	2026-10-12 09:00:00
-558	7	2510	22	2026-10-15 11:00:00	45	videollamada	https://meet.google.com/demo-2510	pendiente	\N	2026-10-12 12:00:00	2026-10-12 12:00:00
-559	7	2511	22	2026-10-19 13:00:00	45	videollamada	https://meet.google.com/demo-2511	confirmada	\N	2026-10-12 11:15:00	2026-10-12 12:15:00
-560	7	2515	22	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-2515	confirmada	\N	2026-10-12 12:30:00	2026-10-12 13:30:00
-561	7	2518	22	2026-10-15 12:00:00	45	videollamada	https://meet.google.com/demo-2518	confirmada	\N	2026-10-12 14:30:00	2026-10-12 15:30:00
-562	7	2522	22	2026-10-22 10:00:00	45	videollamada	https://meet.google.com/demo-2522	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-563	7	2524	22	2026-10-19 14:00:00	45	videollamada	https://meet.google.com/demo-2524	pendiente	\N	2026-10-12 14:15:00	2026-10-12 14:15:00
-564	7	2532	22	2026-10-19 15:00:00	45	videollamada	https://meet.google.com/demo-2532	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-565	7	2543	22	2026-10-19 16:00:00	45	videollamada	https://meet.google.com/demo-2543	pendiente	\N	2026-10-12 11:45:00	2026-10-12 11:45:00
-566	7	2546	22	2026-10-19 17:00:00	45	videollamada	https://meet.google.com/demo-2546	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-567	7	2548	22	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-2548	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-568	7	2560	22	2026-10-20 12:00:00	45	videollamada	https://meet.google.com/demo-2560	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-569	7	2572	22	2026-10-20 13:00:00	45	videollamada	https://meet.google.com/demo-2572	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-570	7	2573	22	2026-10-21 11:00:00	45	videollamada	https://meet.google.com/demo-2573	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-571	7	2584	22	2026-10-14 10:00:00	45	videollamada	https://meet.google.com/demo-2584	pendiente	\N	2026-10-10 16:15:00	2026-10-10 16:15:00
-572	7	2587	22	2026-10-20 14:00:00	45	videollamada	https://meet.google.com/demo-2587	pendiente	\N	2026-10-10 15:30:00	2026-10-10 15:30:00
-573	7	2588	22	2026-10-15 13:00:00	45	videollamada	https://meet.google.com/demo-2588	pendiente	\N	2026-10-10 12:30:00	2026-10-10 12:30:00
-574	7	2590	22	2026-10-20 15:00:00	45	videollamada	https://meet.google.com/demo-2590	confirmada	\N	2026-10-10 17:30:00	2026-10-10 18:30:00
-575	7	2593	22	2026-10-15 14:00:00	45	videollamada	https://meet.google.com/demo-2593	pendiente	\N	2026-10-10 15:15:00	2026-10-10 15:15:00
-576	7	2609	22	2026-10-20 16:00:00	45	videollamada	https://meet.google.com/demo-2609	confirmada	\N	2026-10-11 17:15:00	2026-10-11 18:15:00
-577	7	2615	22	2026-10-20 17:00:00	45	videollamada	https://meet.google.com/demo-2615	pendiente	\N	2026-10-12 09:15:00	2026-10-12 09:15:00
-578	7	2617	22	2026-10-21 12:00:00	45	videollamada	https://meet.google.com/demo-2617	pendiente	\N	2026-10-12 17:15:00	2026-10-12 17:15:00
-579	7	2618	22	2026-10-21 13:00:00	45	videollamada	https://meet.google.com/demo-2618	pendiente	\N	2026-10-12 12:15:00	2026-10-12 12:15:00
-580	7	2635	22	2026-10-15 15:00:00	45	videollamada	https://meet.google.com/demo-2635	confirmada	\N	2026-10-12 10:15:00	2026-10-12 11:15:00
-581	7	2638	22	2026-10-21 14:00:00	45	videollamada	https://meet.google.com/demo-2638	confirmada	\N	2026-10-13 09:15:00	2026-10-13 10:15:00
-582	7	2639	22	2026-10-21 15:00:00	45	videollamada	https://meet.google.com/demo-2639	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-583	7	2641	22	2026-10-22 11:00:00	45	videollamada	https://meet.google.com/demo-2641	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-584	7	2645	22	2026-10-14 11:00:00	45	videollamada	https://meet.google.com/demo-2645	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-585	7	2648	22	2026-10-15 16:00:00	45	videollamada	https://meet.google.com/demo-2648	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-586	7	2654	22	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-2654	confirmada	\N	2026-10-11 12:15:00	2026-10-11 13:15:00
-587	7	2659	22	2026-10-21 16:00:00	45	videollamada	https://meet.google.com/demo-2659	pendiente	\N	2026-10-11 17:30:00	2026-10-11 17:30:00
-588	7	2664	22	2026-10-21 17:00:00	45	videollamada	https://meet.google.com/demo-2664	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-589	7	2665	22	2026-10-22 12:00:00	45	videollamada	https://meet.google.com/demo-2665	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-590	7	2667	22	2026-10-15 17:00:00	45	videollamada	https://meet.google.com/demo-2667	confirmada	\N	2026-10-12 09:45:00	2026-10-12 10:45:00
-591	7	2669	22	2026-10-22 13:00:00	45	videollamada	https://meet.google.com/demo-2669	confirmada	\N	2026-10-12 15:00:00	2026-10-12 16:00:00
-592	7	2673	22	2026-10-22 14:00:00	45	videollamada	https://meet.google.com/demo-2673	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-593	7	2674	22	2026-10-16 10:00:00	45	videollamada	https://meet.google.com/demo-2674	confirmada	\N	2026-10-12 12:15:00	2026-10-12 13:15:00
-594	7	2675	22	2026-10-22 15:00:00	45	videollamada	https://meet.google.com/demo-2675	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-595	7	2676	22	2026-10-22 16:00:00	45	videollamada	https://meet.google.com/demo-2676	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-596	7	2678	22	2026-10-22 17:00:00	45	videollamada	https://meet.google.com/demo-2678	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-597	7	2683	22	2026-10-23 09:00:00	45	videollamada	https://meet.google.com/demo-2683	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-598	7	2685	22	2026-10-16 11:00:00	45	videollamada	https://meet.google.com/demo-2685	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-599	7	2689	22	2026-10-23 10:00:00	45	videollamada	https://meet.google.com/demo-2689	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-600	7	2691	22	2026-10-23 11:00:00	45	videollamada	https://meet.google.com/demo-2691	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-601	7	2700	22	2026-10-16 12:00:00	45	videollamada	https://meet.google.com/demo-2700	confirmada	\N	2026-10-12 10:00:00	2026-10-12 11:00:00
-602	7	2705	22	2026-10-16 13:00:00	45	videollamada	https://meet.google.com/demo-2705	pendiente	\N	2026-10-12 10:15:00	2026-10-12 10:15:00
-603	7	2713	22	2026-10-23 12:00:00	45	videollamada	https://meet.google.com/demo-2713	pendiente	\N	2026-10-13 10:45:00	2026-10-13 10:45:00
-604	7	2718	22	2026-10-16 14:00:00	45	videollamada	https://meet.google.com/demo-2718	confirmada	\N	2026-10-12 10:00:00	2026-10-12 11:00:00
-605	7	2724	22	2026-10-23 13:00:00	45	videollamada	https://meet.google.com/demo-2724	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-606	7	2725	22	2026-10-23 14:00:00	45	videollamada	https://meet.google.com/demo-2725	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-607	7	2734	22	2026-10-23 15:00:00	45	videollamada	https://meet.google.com/demo-2734	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-608	7	2745	22	2026-10-23 16:00:00	45	videollamada	https://meet.google.com/demo-2745	pendiente	\N	2026-10-13 10:45:00	2026-10-13 10:45:00
-609	7	2746	22	2026-10-14 12:00:00	45	videollamada	https://meet.google.com/demo-2746	confirmada	\N	2026-10-12 10:30:00	2026-10-12 11:30:00
-610	7	2747	22	2026-10-23 17:00:00	45	videollamada	https://meet.google.com/demo-2747	confirmada	\N	2026-10-12 14:15:00	2026-10-12 15:15:00
-611	7	2755	22	2026-10-26 09:00:00	45	videollamada	https://meet.google.com/demo-2755	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-612	7	2778	22	2026-10-26 10:00:00	45	videollamada	https://meet.google.com/demo-2778	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-613	7	2787	22	2026-10-26 11:00:00	45	videollamada	https://meet.google.com/demo-2787	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-614	7	2792	22	2026-10-16 15:00:00	45	videollamada	https://meet.google.com/demo-2792	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-615	7	2797	22	2026-10-26 12:00:00	45	videollamada	https://meet.google.com/demo-2797	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
-616	7	2801	22	2026-10-26 13:00:00	45	videollamada	https://meet.google.com/demo-2801	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21
+COPY public.entrevistas (id, empresa_id, postulacion_id, entrevistador_id, inicia_at, duracion_min, modalidad, enlace, estado, notas, created_at, updated_at, lugar) FROM stdin;
+16	4	25	9	2026-10-02 15:00:00	45	videollamada	https://meet.google.com/demo-25	completada	\N	2026-09-29 14:30:00	2026-10-02 16:00:00	\N
+1	4	1	9	2026-08-25 10:00:00	45	videollamada	https://meet.google.com/demo-1	completada	\N	2026-08-22 11:15:00	2026-08-25 11:00:00	\N
+2	4	2	9	2026-08-25 15:00:00	45	videollamada	https://meet.google.com/demo-2	completada	\N	2026-08-22 11:30:00	2026-08-25 16:00:00	\N
+17	5	33	11	2026-10-03 15:00:00	45	videollamada	https://meet.google.com/demo-33	completada	\N	2026-09-30 15:15:00	2026-10-03 16:00:00	\N
+3	5	4	11	2026-09-01 11:00:00	45	videollamada	https://meet.google.com/demo-4	completada	\N	2026-08-29 11:15:00	2026-09-01 11:50:00	\N
+4	5	5	11	2026-09-02 11:00:00	45	videollamada	https://meet.google.com/demo-5	completada	\N	2026-08-29 11:30:00	2026-09-02 11:50:00	\N
+18	1	20	3	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-20	completada	\N	2026-10-02 10:00:00	2026-10-05 10:50:00	\N
+19	5	19	11	2026-10-12 11:00:00	45	videollamada	https://meet.google.com/demo-19	pendiente	\N	2026-10-05 11:15:00	2026-10-05 11:15:00	\N
+5	6	10	14	2026-09-06 10:00:00	45	videollamada	https://meet.google.com/demo-10	completada	\N	2026-09-04 11:15:00	2026-09-06 11:00:00	\N
+6	6	11	14	2026-09-06 15:00:00	45	videollamada	https://meet.google.com/demo-11	completada	\N	2026-09-04 11:20:00	2026-09-06 16:00:00	\N
+7	5	8	11	2026-09-11 15:00:00	45	videollamada	https://meet.google.com/demo-8	completada	\N	2026-09-08 16:15:00	2026-09-11 16:00:00	\N
+8	5	9	11	2026-09-16 16:00:00	45	videollamada	https://meet.google.com/demo-9	completada	\N	2026-09-13 11:30:00	2026-09-16 16:50:00	\N
+9	4	24	9	2026-09-22 11:00:00	45	videollamada	https://meet.google.com/demo-24	completada	\N	2026-09-19 11:15:00	2026-09-22 11:50:00	\N
+20	2	27	6	2026-10-14 10:00:00	45	videollamada	https://meet.google.com/demo-27	confirmada	\N	2026-10-06 12:00:00	2026-10-07 09:00:00	\N
+10	1	31	3	2026-09-26 11:00:00	45	videollamada	https://meet.google.com/demo-31	cancelada	\N	2026-09-23 10:00:00	2026-09-25 09:00:00	\N
+11	5	18	11	2026-09-26 11:30:00	45	videollamada	https://meet.google.com/demo-18	completada	\N	2026-09-23 11:15:00	2026-09-26 12:30:00	\N
+21	5	34	11	2026-10-14 16:00:00	45	videollamada	https://meet.google.com/demo-34	confirmada	\N	2026-10-06 15:15:00	2026-10-07 15:15:00	\N
+22	6	37	14	2026-10-13 10:00:00	45	videollamada	https://meet.google.com/demo-37	confirmada	\N	2026-10-06 16:15:00	2026-10-07 16:15:00	\N
+12	1	31	4	2026-09-28 09:30:00	45	videollamada	https://meet.google.com/demo-31	completada	\N	2026-09-25 09:30:00	2026-09-28 10:30:00	\N
+23	6	38	14	2026-10-15 11:00:00	45	videollamada	https://meet.google.com/demo-38	pendiente	\N	2026-10-08 16:15:00	2026-10-08 16:15:00	\N
+33	1	81	3	2026-08-31 13:00:00	45	videollamada	https://meet.google.com/demo-81	completada	\N	2026-08-29 13:15:00	2026-08-31 13:50:00	\N
+13	1	22	3	2026-10-01 11:00:00	45	videollamada	https://meet.google.com/demo-22	completada	\N	2026-09-27 10:00:00	2026-10-01 11:50:00	\N
+14	6	29	14	2026-10-01 15:00:00	45	videollamada	https://meet.google.com/demo-29	completada	\N	2026-09-28 15:15:00	2026-10-01 15:50:00	\N
+15	6	30	14	2026-10-01 16:00:00	45	videollamada	https://meet.google.com/demo-30	completada	\N	2026-09-28 15:20:00	2026-10-01 16:50:00	\N
+24	4	26	9	2026-10-13 10:00:00	45	videollamada	https://meet.google.com/demo-26	confirmada	\N	2026-10-09 11:15:00	2026-10-09 17:30:00	\N
+25	1	20	4	2026-10-13 15:00:00	45	videollamada	https://meet.google.com/demo-20	pendiente	\N	2026-10-10 16:00:00	2026-10-10 16:00:00	\N
+26	1	43	4	2026-08-25 09:00:00	45	videollamada	https://meet.google.com/demo-43	completada	\N	2026-08-21 09:15:00	2026-08-25 09:50:00	\N
+27	1	50	4	2026-08-24 16:00:00	45	videollamada	https://meet.google.com/demo-50	completada	\N	2026-08-21 16:00:00	2026-08-24 16:50:00	\N
+28	1	53	4	2026-08-31 09:00:00	45	videollamada	https://meet.google.com/demo-53	completada	\N	2026-08-23 15:30:00	2026-08-31 09:50:00	\N
+29	1	56	3	2026-08-27 15:00:00	45	videollamada	https://meet.google.com/demo-56	completada	\N	2026-08-21 15:00:00	2026-08-27 15:50:00	\N
+30	1	61	4	2026-08-25 17:00:00	45	videollamada	https://meet.google.com/demo-61	completada	\N	2026-08-23 17:15:00	2026-08-25 17:50:00	\N
+31	1	66	3	2026-08-31 09:00:00	45	videollamada	https://meet.google.com/demo-66	completada	\N	2026-08-26 11:30:00	2026-08-31 09:50:00	\N
+32	1	79	3	2026-09-04 09:00:00	45	videollamada	https://meet.google.com/demo-79	completada	\N	2026-08-30 09:30:00	2026-09-04 09:50:00	\N
+34	1	87	4	2026-09-02 15:00:00	45	videollamada	https://meet.google.com/demo-87	completada	\N	2026-08-30 15:30:00	2026-09-02 15:50:00	\N
+35	1	88	4	2026-09-07 09:00:00	45	videollamada	https://meet.google.com/demo-88	completada	\N	2026-08-30 14:30:00	2026-09-07 09:50:00	\N
+36	1	91	4	2026-09-03 11:00:00	45	videollamada	https://meet.google.com/demo-91	completada	\N	2026-08-31 11:30:00	2026-09-03 11:50:00	\N
+37	1	97	4	2026-09-08 13:00:00	45	videollamada	https://meet.google.com/demo-97	completada	\N	2026-09-03 13:00:00	2026-09-08 13:50:00	\N
+38	1	100	4	2026-09-07 10:00:00	45	videollamada	https://meet.google.com/demo-100	completada	\N	2026-09-04 17:45:00	2026-09-07 10:50:00	\N
+39	1	103	4	2026-09-07 11:00:00	45	videollamada	https://meet.google.com/demo-103	completada	\N	2026-09-04 14:30:00	2026-09-07 11:50:00	\N
+40	1	105	4	2026-09-09 15:00:00	45	videollamada	https://meet.google.com/demo-105	completada	\N	2026-09-06 15:00:00	2026-09-09 15:50:00	\N
+41	1	107	4	2026-09-14 09:00:00	45	videollamada	https://meet.google.com/demo-107	completada	\N	2026-09-09 10:45:00	2026-09-14 09:50:00	\N
+42	1	110	4	2026-09-14 10:00:00	45	videollamada	https://meet.google.com/demo-110	completada	\N	2026-09-09 09:45:00	2026-09-14 10:50:00	\N
+43	1	125	3	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-125	completada	\N	2026-09-15 12:45:00	2026-09-21 09:50:00	\N
+44	1	127	4	2026-09-22 17:00:00	45	videollamada	https://meet.google.com/demo-127	completada	\N	2026-09-17 17:00:00	2026-09-22 17:50:00	\N
+45	1	128	4	2026-09-22 14:00:00	45	videollamada	https://meet.google.com/demo-128	completada	\N	2026-09-16 14:15:00	2026-09-22 14:50:00	\N
+46	1	134	4	2026-09-02 10:00:00	45	videollamada	https://meet.google.com/demo-134	completada	\N	2026-08-27 10:15:00	2026-09-02 10:50:00	\N
+47	1	139	4	2026-08-31 16:00:00	45	videollamada	https://meet.google.com/demo-139	completada	\N	2026-08-26 16:30:00	2026-08-31 16:50:00	\N
+48	1	140	4	2026-09-02 09:00:00	45	videollamada	https://meet.google.com/demo-140	completada	\N	2026-08-28 09:15:00	2026-09-02 09:50:00	\N
+49	1	147	4	2026-08-31 10:00:00	45	videollamada	https://meet.google.com/demo-147	completada	\N	2026-08-27 12:00:00	2026-08-31 10:50:00	\N
+50	1	153	4	2026-09-02 11:00:00	45	videollamada	https://meet.google.com/demo-153	completada	\N	2026-08-28 09:00:00	2026-09-02 11:50:00	\N
+51	1	157	4	2026-09-01 15:00:00	45	videollamada	https://meet.google.com/demo-157	completada	\N	2026-08-30 15:00:00	2026-09-01 15:50:00	\N
+52	1	171	4	2026-09-10 11:00:00	45	videollamada	https://meet.google.com/demo-171	completada	\N	2026-09-05 11:00:00	2026-09-10 11:50:00	\N
+53	1	177	3	2026-09-14 17:00:00	45	videollamada	https://meet.google.com/demo-177	completada	\N	2026-09-12 17:30:00	2026-09-14 17:50:00	\N
+54	1	181	3	2026-09-22 11:00:00	45	videollamada	https://meet.google.com/demo-181	completada	\N	2026-09-17 11:45:00	2026-09-22 11:50:00	\N
+55	1	182	3	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-182	completada	\N	2026-09-16 13:30:00	2026-09-21 10:50:00	\N
+56	1	185	3	2026-09-24 11:00:00	45	videollamada	https://meet.google.com/demo-185	completada	\N	2026-09-21 11:00:00	2026-09-24 11:50:00	\N
+57	1	189	3	2026-09-04 14:00:00	45	videollamada	https://meet.google.com/demo-189	completada	\N	2026-08-30 14:30:00	2026-09-04 14:50:00	\N
+58	1	192	4	2026-09-04 10:00:00	45	videollamada	https://meet.google.com/demo-192	completada	\N	2026-09-01 10:00:00	2026-09-04 10:50:00	\N
+59	1	196	4	2026-09-09 17:00:00	45	videollamada	https://meet.google.com/demo-196	completada	\N	2026-09-05 17:15:00	2026-09-09 17:50:00	\N
+60	1	200	4	2026-09-14 11:00:00	45	videollamada	https://meet.google.com/demo-200	completada	\N	2026-09-11 12:00:00	2026-09-14 11:50:00	\N
+61	1	203	3	2026-09-16 14:00:00	45	videollamada	https://meet.google.com/demo-203	completada	\N	2026-09-13 14:30:00	2026-09-16 14:50:00	\N
+62	1	208	4	2026-09-16 15:00:00	45	videollamada	https://meet.google.com/demo-208	completada	\N	2026-09-14 15:45:00	2026-09-16 15:50:00	\N
+63	1	211	4	2026-09-23 17:00:00	45	videollamada	https://meet.google.com/demo-211	completada	\N	2026-09-18 17:00:00	2026-09-23 17:50:00	\N
+64	1	217	4	2026-09-17 12:00:00	45	videollamada	https://meet.google.com/demo-217	completada	\N	2026-09-11 12:30:00	2026-09-17 12:50:00	\N
+65	1	224	3	2026-09-16 12:00:00	45	videollamada	https://meet.google.com/demo-224	completada	\N	2026-09-11 12:00:00	2026-09-16 12:50:00	\N
+66	1	228	4	2026-09-18 14:00:00	45	videollamada	https://meet.google.com/demo-228	completada	\N	2026-09-12 14:00:00	2026-09-18 14:50:00	\N
+67	1	234	3	2026-09-16 15:00:00	45	videollamada	https://meet.google.com/demo-234	completada	\N	2026-09-12 15:30:00	2026-09-16 15:50:00	\N
+68	1	235	3	2026-09-14 16:00:00	45	videollamada	https://meet.google.com/demo-235	completada	\N	2026-09-12 16:45:00	2026-09-14 16:50:00	\N
+69	1	238	3	2026-09-21 11:00:00	45	videollamada	https://meet.google.com/demo-238	completada	\N	2026-09-14 09:45:00	2026-09-21 11:50:00	\N
+70	1	239	3	2026-09-18 10:00:00	45	videollamada	https://meet.google.com/demo-239	completada	\N	2026-09-14 10:15:00	2026-09-18 10:50:00	\N
+71	1	243	3	2026-09-21 12:00:00	45	videollamada	https://meet.google.com/demo-243	completada	\N	2026-09-18 16:15:00	2026-09-21 12:50:00	\N
+72	1	245	3	2026-09-24 17:00:00	45	videollamada	https://meet.google.com/demo-245	completada	\N	2026-09-18 17:45:00	2026-09-24 17:50:00	\N
+73	1	247	3	2026-09-18 11:00:00	45	videollamada	https://meet.google.com/demo-247	completada	\N	2026-09-16 11:15:00	2026-09-18 11:50:00	\N
+74	1	248	3	2026-09-24 12:00:00	45	videollamada	https://meet.google.com/demo-248	completada	\N	2026-09-19 12:30:00	2026-09-24 12:50:00	\N
+75	1	252	4	2026-09-21 16:00:00	45	videollamada	https://meet.google.com/demo-252	completada	\N	2026-09-18 16:15:00	2026-09-21 16:50:00	\N
+76	1	271	3	2026-09-30 15:00:00	45	videollamada	https://meet.google.com/demo-271	completada	\N	2026-09-28 15:00:00	2026-09-30 15:50:00	\N
+77	1	274	3	2026-10-02 10:00:00	45	videollamada	https://meet.google.com/demo-274	completada	\N	2026-09-30 10:00:00	2026-10-02 10:50:00	\N
+78	1	275	3	2026-10-08 11:00:00	45	videollamada	https://meet.google.com/demo-275	completada	\N	2026-10-02 11:15:00	2026-10-08 11:50:00	\N
+79	1	277	4	2026-10-06 15:00:00	45	videollamada	https://meet.google.com/demo-277	completada	\N	2026-10-01 15:45:00	2026-10-06 15:50:00	\N
+80	1	280	4	2026-10-09 11:00:00	45	videollamada	https://meet.google.com/demo-280	completada	\N	2026-10-03 11:30:00	2026-10-09 11:50:00	\N
+81	1	282	4	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-282	completada	\N	2026-10-03 10:15:00	2026-10-05 10:50:00	\N
+82	1	283	4	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-283	completada	\N	2026-10-05 13:30:00	2026-10-12 09:50:00	\N
+83	1	288	4	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-288	confirmada	\N	2026-10-08 16:45:00	2026-10-08 17:45:00	\N
+84	1	301	3	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-301	confirmada	\N	2026-10-12 10:00:00	2026-10-12 11:00:00	\N
+85	1	306	4	2026-09-23 09:00:00	45	videollamada	https://meet.google.com/demo-306	completada	\N	2026-09-16 17:45:00	2026-09-23 09:50:00	\N
+86	1	310	3	2026-09-21 13:00:00	45	videollamada	https://meet.google.com/demo-310	completada	\N	2026-09-15 16:45:00	2026-09-21 13:50:00	\N
+87	1	314	4	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-314	completada	\N	2026-09-15 17:45:00	2026-09-21 09:50:00	\N
+88	1	315	3	2026-09-17 17:00:00	45	videollamada	https://meet.google.com/demo-315	completada	\N	2026-09-15 17:45:00	2026-09-17 17:50:00	\N
+89	1	316	4	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-316	completada	\N	2026-09-16 12:15:00	2026-09-21 10:50:00	\N
+90	1	318	3	2026-09-23 09:00:00	45	videollamada	https://meet.google.com/demo-318	completada	\N	2026-09-18 09:00:00	2026-09-23 09:50:00	\N
+91	1	323	4	2026-09-21 17:00:00	45	videollamada	https://meet.google.com/demo-323	completada	\N	2026-09-17 17:30:00	2026-09-21 17:50:00	\N
+92	1	326	3	2026-09-22 12:00:00	45	videollamada	https://meet.google.com/demo-326	completada	\N	2026-09-19 11:30:00	2026-09-22 12:50:00	\N
+93	1	329	4	2026-09-28 11:00:00	45	videollamada	https://meet.google.com/demo-329	completada	\N	2026-09-20 15:30:00	2026-09-28 11:50:00	\N
+94	1	335	4	2026-09-28 12:00:00	45	videollamada	https://meet.google.com/demo-335	completada	\N	2026-09-20 09:30:00	2026-09-28 12:50:00	\N
+95	1	337	4	2026-09-28 13:00:00	45	videollamada	https://meet.google.com/demo-337	completada	\N	2026-09-22 09:15:00	2026-09-28 13:50:00	\N
+96	1	338	4	2026-09-28 14:00:00	45	videollamada	https://meet.google.com/demo-338	completada	\N	2026-09-21 12:00:00	2026-09-28 14:50:00	\N
+97	1	339	3	2026-09-28 09:00:00	45	videollamada	https://meet.google.com/demo-339	completada	\N	2026-09-22 12:30:00	2026-09-28 09:50:00	\N
+98	1	340	4	2026-09-25 16:00:00	45	videollamada	https://meet.google.com/demo-340	completada	\N	2026-09-22 16:30:00	2026-09-25 16:50:00	\N
+99	1	343	4	2026-09-24 16:00:00	45	videollamada	https://meet.google.com/demo-343	completada	\N	2026-09-22 16:00:00	2026-09-24 16:50:00	\N
+100	1	350	4	2026-09-28 15:00:00	45	videollamada	https://meet.google.com/demo-350	completada	\N	2026-09-24 12:00:00	2026-09-28 15:50:00	\N
+101	1	355	3	2026-09-29 12:00:00	45	videollamada	https://meet.google.com/demo-355	completada	\N	2026-09-26 12:30:00	2026-09-29 12:50:00	\N
+102	1	363	4	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-363	completada	\N	2026-09-30 09:00:00	2026-10-05 09:50:00	\N
+103	1	373	4	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-373	pendiente	\N	2026-10-10 14:30:00	2026-10-10 14:30:00	\N
+104	1	375	3	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-375	confirmada	\N	2026-10-11 17:30:00	2026-10-11 18:30:00	\N
+105	1	379	3	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-379	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+106	1	380	4	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-380	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+107	1	388	3	2026-09-23 10:00:00	45	videollamada	https://meet.google.com/demo-388	completada	\N	2026-09-19 10:45:00	2026-09-23 10:50:00	\N
+108	1	392	4	2026-09-23 10:00:00	45	videollamada	https://meet.google.com/demo-392	completada	\N	2026-09-20 17:45:00	2026-09-23 10:50:00	\N
+109	1	393	4	2026-09-24 17:00:00	45	videollamada	https://meet.google.com/demo-393	completada	\N	2026-09-20 17:30:00	2026-09-24 17:50:00	\N
+110	1	402	3	2026-09-24 14:00:00	45	videollamada	https://meet.google.com/demo-402	completada	\N	2026-09-22 14:00:00	2026-09-24 14:50:00	\N
+111	1	406	4	2026-09-28 16:00:00	45	videollamada	https://meet.google.com/demo-406	completada	\N	2026-09-24 13:00:00	2026-09-28 16:50:00	\N
+112	1	410	4	2026-09-29 17:00:00	45	videollamada	https://meet.google.com/demo-410	completada	\N	2026-09-24 17:45:00	2026-09-29 17:50:00	\N
+113	1	421	3	2026-10-05 16:00:00	45	videollamada	https://meet.google.com/demo-421	completada	\N	2026-09-29 16:15:00	2026-10-05 16:50:00	\N
+114	1	425	3	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-425	completada	\N	2026-10-01 13:15:00	2026-10-05 09:50:00	\N
+115	1	427	4	2026-10-08 15:00:00	45	videollamada	https://meet.google.com/demo-427	completada	\N	2026-10-03 15:30:00	2026-10-08 15:50:00	\N
+116	1	428	3	2026-10-09 14:00:00	45	videollamada	https://meet.google.com/demo-428	completada	\N	2026-10-03 14:45:00	2026-10-09 14:50:00	\N
+117	1	434	4	2026-10-12 10:00:00	45	videollamada	https://meet.google.com/demo-434	completada	\N	2026-10-05 11:30:00	2026-10-12 10:50:00	\N
+118	1	438	3	2026-10-08 14:00:00	45	videollamada	https://meet.google.com/demo-438	completada	\N	2026-10-03 14:30:00	2026-10-08 14:50:00	\N
+119	1	443	4	2026-10-12 11:00:00	45	videollamada	https://meet.google.com/demo-443	completada	\N	2026-10-05 17:30:00	2026-10-12 11:50:00	\N
+121	1	455	3	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-455	pendiente	\N	2026-10-12 10:00:00	2026-10-12 10:00:00	\N
+122	1	457	4	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-457	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+123	1	459	3	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-459	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+124	1	465	3	2026-09-28 10:00:00	45	videollamada	https://meet.google.com/demo-465	completada	\N	2026-09-23 11:15:00	2026-09-28 10:50:00	\N
+125	1	466	3	2026-09-28 11:00:00	45	videollamada	https://meet.google.com/demo-466	completada	\N	2026-09-24 14:30:00	2026-09-28 11:50:00	\N
+126	1	467	3	2026-10-01 10:00:00	45	videollamada	https://meet.google.com/demo-467	completada	\N	2026-09-26 10:30:00	2026-10-01 10:50:00	\N
+127	1	483	3	2026-10-06 10:00:00	45	videollamada	https://meet.google.com/demo-483	completada	\N	2026-09-30 10:45:00	2026-10-06 10:50:00	\N
+128	1	491	3	2026-10-07 14:00:00	45	videollamada	https://meet.google.com/demo-491	completada	\N	2026-10-02 14:00:00	2026-10-07 14:50:00	\N
+129	1	505	4	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-505	confirmada	\N	2026-10-08 15:45:00	2026-10-08 16:45:00	\N
+130	1	506	4	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-506	pendiente	\N	2026-10-08 10:15:00	2026-10-08 10:15:00	\N
+131	1	512	4	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-512	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+132	1	538	3	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-538	pendiente	\N	2026-10-10 15:45:00	2026-10-10 15:45:00	\N
+133	1	539	4	2026-10-21 11:00:00	45	videollamada	https://meet.google.com/demo-539	confirmada	\N	2026-10-10 11:00:00	2026-10-10 12:00:00	\N
+134	1	540	3	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-540	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+135	1	542	4	2026-10-05 11:00:00	45	videollamada	https://meet.google.com/demo-542	completada	\N	2026-10-02 10:00:00	2026-10-05 11:50:00	\N
+136	1	548	3	2026-10-09 15:00:00	45	videollamada	https://meet.google.com/demo-548	completada	\N	2026-10-04 15:15:00	2026-10-09 15:50:00	\N
+137	1	551	4	2026-10-12 17:00:00	45	videollamada	https://meet.google.com/demo-551	completada	\N	2026-10-06 17:30:00	2026-10-12 17:50:00	\N
+138	1	555	4	2026-10-07 11:00:00	45	videollamada	https://meet.google.com/demo-555	completada	\N	2026-10-05 11:15:00	2026-10-07 11:50:00	\N
+139	1	557	3	2026-10-12 17:00:00	45	videollamada	https://meet.google.com/demo-557	completada	\N	2026-10-07 17:15:00	2026-10-12 17:50:00	\N
+140	1	558	3	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-558	completada	\N	2026-10-05 14:30:00	2026-10-12 09:50:00	\N
+141	1	560	3	2026-10-12 10:00:00	45	videollamada	https://meet.google.com/demo-560	completada	\N	2026-10-07 15:00:00	2026-10-12 10:50:00	\N
+142	1	575	3	2026-10-20 10:00:00	45	videollamada	https://meet.google.com/demo-575	confirmada	\N	2026-10-08 12:45:00	2026-10-08 13:45:00	\N
+143	1	576	4	2026-10-16 10:00:00	45	videollamada	https://meet.google.com/demo-576	pendiente	\N	2026-10-09 14:00:00	2026-10-09 14:00:00	\N
+144	1	580	4	2026-10-21 12:00:00	45	videollamada	https://meet.google.com/demo-580	confirmada	\N	2026-10-10 13:45:00	2026-10-10 14:45:00	\N
+145	1	583	3	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-583	confirmada	\N	2026-10-11 10:00:00	2026-10-11 11:00:00	\N
+146	1	587	3	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-587	confirmada	\N	2026-10-11 11:45:00	2026-10-11 12:45:00	\N
+147	1	588	4	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-588	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+148	2	600	6	2026-08-25 16:00:00	45	videollamada	https://meet.google.com/demo-600	completada	\N	2026-08-23 16:45:00	2026-08-25 16:50:00	\N
+149	2	603	6	2026-08-31 09:00:00	45	videollamada	https://meet.google.com/demo-603	completada	\N	2026-08-24 11:00:00	2026-08-31 09:50:00	\N
+150	2	604	6	2026-08-28 14:00:00	45	videollamada	https://meet.google.com/demo-604	completada	\N	2026-08-23 14:30:00	2026-08-28 14:50:00	\N
+151	2	611	6	2026-08-31 12:00:00	45	videollamada	https://meet.google.com/demo-611	completada	\N	2026-08-26 12:15:00	2026-08-31 12:50:00	\N
+152	2	623	6	2026-09-07 09:00:00	45	videollamada	https://meet.google.com/demo-623	completada	\N	2026-08-31 17:45:00	2026-09-07 09:50:00	\N
+153	2	625	6	2026-09-07 10:00:00	45	videollamada	https://meet.google.com/demo-625	completada	\N	2026-08-31 12:15:00	2026-09-07 10:50:00	\N
+154	2	639	6	2026-09-14 09:00:00	45	videollamada	https://meet.google.com/demo-639	completada	\N	2026-09-11 09:45:00	2026-09-14 09:50:00	\N
+155	2	641	6	2026-09-18 14:00:00	45	videollamada	https://meet.google.com/demo-641	completada	\N	2026-09-12 14:15:00	2026-09-18 14:50:00	\N
+156	2	643	6	2026-09-17 13:00:00	45	videollamada	https://meet.google.com/demo-643	completada	\N	2026-09-15 13:45:00	2026-09-17 13:50:00	\N
+157	2	647	6	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-647	completada	\N	2026-09-18 14:15:00	2026-09-21 09:50:00	\N
+158	2	649	6	2026-08-27 16:00:00	45	videollamada	https://meet.google.com/demo-649	completada	\N	2026-08-23 16:00:00	2026-08-27 16:50:00	\N
+159	2	651	6	2026-08-25 10:00:00	45	videollamada	https://meet.google.com/demo-651	completada	\N	2026-08-23 10:45:00	2026-08-25 10:50:00	\N
+160	2	673	6	2026-09-01 11:00:00	45	videollamada	https://meet.google.com/demo-673	completada	\N	2026-08-27 11:45:00	2026-09-01 11:50:00	\N
+161	2	679	6	2026-09-03 15:00:00	45	videollamada	https://meet.google.com/demo-679	completada	\N	2026-08-28 15:30:00	2026-09-03 15:50:00	\N
+162	2	681	6	2026-09-07 11:00:00	45	videollamada	https://meet.google.com/demo-681	completada	\N	2026-08-31 10:00:00	2026-09-07 11:50:00	\N
+163	2	682	6	2026-09-02 11:00:00	45	videollamada	https://meet.google.com/demo-682	completada	\N	2026-08-29 11:00:00	2026-09-02 11:50:00	\N
+164	2	687	6	2026-09-07 12:00:00	45	videollamada	https://meet.google.com/demo-687	completada	\N	2026-09-01 13:30:00	2026-09-07 12:50:00	\N
+165	2	689	6	2026-09-08 11:00:00	45	videollamada	https://meet.google.com/demo-689	completada	\N	2026-09-02 11:15:00	2026-09-08 11:50:00	\N
+166	2	705	6	2026-09-11 17:00:00	45	videollamada	https://meet.google.com/demo-705	completada	\N	2026-09-07 17:00:00	2026-09-11 17:50:00	\N
+167	2	706	6	2026-09-14 10:00:00	45	videollamada	https://meet.google.com/demo-706	completada	\N	2026-09-09 10:45:00	2026-09-14 10:50:00	\N
+168	2	712	6	2026-09-16 09:00:00	45	videollamada	https://meet.google.com/demo-712	completada	\N	2026-09-12 09:15:00	2026-09-16 09:50:00	\N
+169	2	718	6	2026-09-17 10:00:00	45	videollamada	https://meet.google.com/demo-718	completada	\N	2026-09-13 10:30:00	2026-09-17 10:50:00	\N
+170	2	722	6	2026-09-18 15:00:00	45	videollamada	https://meet.google.com/demo-722	completada	\N	2026-09-13 15:30:00	2026-09-18 15:50:00	\N
+171	2	723	6	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-723	completada	\N	2026-09-14 13:45:00	2026-09-21 10:50:00	\N
+172	2	726	6	2026-09-17 14:00:00	45	videollamada	https://meet.google.com/demo-726	completada	\N	2026-09-15 14:00:00	2026-09-17 14:50:00	\N
+173	2	730	6	2026-09-04 14:00:00	45	videollamada	https://meet.google.com/demo-730	completada	\N	2026-08-31 14:15:00	2026-09-04 14:50:00	\N
+174	2	739	6	2026-09-11 11:00:00	45	videollamada	https://meet.google.com/demo-739	completada	\N	2026-09-09 11:30:00	2026-09-11 11:50:00	\N
+175	2	742	6	2026-09-14 14:00:00	45	videollamada	https://meet.google.com/demo-742	completada	\N	2026-09-12 14:15:00	2026-09-14 14:50:00	\N
+176	2	743	6	2026-09-18 16:00:00	45	videollamada	https://meet.google.com/demo-743	completada	\N	2026-09-13 16:00:00	2026-09-18 16:50:00	\N
+177	2	745	6	2026-09-21 11:00:00	45	videollamada	https://meet.google.com/demo-745	completada	\N	2026-09-14 16:30:00	2026-09-21 11:50:00	\N
+178	2	748	6	2026-09-21 15:00:00	45	videollamada	https://meet.google.com/demo-748	completada	\N	2026-09-19 15:00:00	2026-09-21 15:50:00	\N
+179	2	750	6	2026-09-21 16:00:00	45	videollamada	https://meet.google.com/demo-750	completada	\N	2026-09-18 16:45:00	2026-09-21 16:50:00	\N
+180	2	755	6	2026-09-14 12:00:00	45	videollamada	https://meet.google.com/demo-755	completada	\N	2026-09-11 12:45:00	2026-09-14 12:50:00	\N
+181	2	756	6	2026-09-15 16:00:00	45	videollamada	https://meet.google.com/demo-756	completada	\N	2026-09-12 16:15:00	2026-09-15 16:50:00	\N
+182	2	757	6	2026-09-14 11:00:00	45	videollamada	https://meet.google.com/demo-757	completada	\N	2026-09-11 10:45:00	2026-09-14 11:50:00	\N
+183	2	758	6	2026-09-21 12:00:00	45	videollamada	https://meet.google.com/demo-758	completada	\N	2026-09-13 09:15:00	2026-09-21 12:50:00	\N
+184	2	760	6	2026-09-15 17:00:00	45	videollamada	https://meet.google.com/demo-760	completada	\N	2026-09-11 17:45:00	2026-09-15 17:50:00	\N
+185	2	761	6	2026-09-16 15:00:00	45	videollamada	https://meet.google.com/demo-761	completada	\N	2026-09-13 15:45:00	2026-09-16 15:50:00	\N
+186	2	763	6	2026-09-17 15:00:00	45	videollamada	https://meet.google.com/demo-763	completada	\N	2026-09-14 14:15:00	2026-09-17 15:50:00	\N
+187	2	764	6	2026-09-15 10:00:00	45	videollamada	https://meet.google.com/demo-764	completada	\N	2026-09-13 10:30:00	2026-09-15 10:50:00	\N
+188	2	768	6	2026-09-18 17:00:00	45	videollamada	https://meet.google.com/demo-768	completada	\N	2026-09-14 16:15:00	2026-09-18 17:50:00	\N
+189	2	770	6	2026-09-21 13:00:00	45	videollamada	https://meet.google.com/demo-770	completada	\N	2026-09-16 09:00:00	2026-09-21 13:50:00	\N
+190	2	772	6	2026-09-17 16:00:00	45	videollamada	https://meet.google.com/demo-772	completada	\N	2026-09-15 15:30:00	2026-09-17 16:50:00	\N
+191	2	781	6	2026-09-21 17:00:00	45	videollamada	https://meet.google.com/demo-781	completada	\N	2026-09-18 16:45:00	2026-09-21 17:50:00	\N
+192	2	784	6	2026-09-22 09:00:00	45	videollamada	https://meet.google.com/demo-784	completada	\N	2026-09-18 09:45:00	2026-09-22 09:50:00	\N
+193	2	797	6	2026-09-28 17:00:00	45	videollamada	https://meet.google.com/demo-797	completada	\N	2026-09-22 17:45:00	2026-09-28 17:50:00	\N
+194	2	802	6	2026-09-30 12:00:00	45	videollamada	https://meet.google.com/demo-802	completada	\N	2026-09-24 12:00:00	2026-09-30 12:50:00	\N
+195	2	807	6	2026-10-02 17:00:00	45	videollamada	https://meet.google.com/demo-807	completada	\N	2026-09-28 17:00:00	2026-10-02 17:50:00	\N
+196	2	817	6	2026-10-09 16:00:00	45	videollamada	https://meet.google.com/demo-817	completada	\N	2026-10-03 16:00:00	2026-10-09 16:50:00	\N
+197	2	821	6	2026-10-09 17:00:00	45	videollamada	https://meet.google.com/demo-821	completada	\N	2026-10-07 16:15:00	2026-10-09 17:50:00	\N
+198	2	834	6	2026-09-21 14:00:00	45	videollamada	https://meet.google.com/demo-834	completada	\N	2026-09-17 16:00:00	2026-09-21 14:50:00	\N
+199	2	840	6	2026-09-22 10:00:00	45	videollamada	https://meet.google.com/demo-840	completada	\N	2026-09-17 15:15:00	2026-09-22 10:50:00	\N
+200	2	845	6	2026-09-25 11:00:00	45	videollamada	https://meet.google.com/demo-845	completada	\N	2026-09-20 11:45:00	2026-09-25 11:50:00	\N
+201	2	851	6	2026-09-28 12:00:00	45	videollamada	https://meet.google.com/demo-851	completada	\N	2026-09-22 12:45:00	2026-09-28 12:50:00	\N
+202	2	857	6	2026-09-24 14:00:00	45	videollamada	https://meet.google.com/demo-857	completada	\N	2026-09-21 14:15:00	2026-09-24 14:50:00	\N
+203	2	858	6	2026-09-29 11:00:00	45	videollamada	https://meet.google.com/demo-858	completada	\N	2026-09-23 11:30:00	2026-09-29 11:50:00	\N
+204	2	863	6	2026-09-29 16:00:00	45	videollamada	https://meet.google.com/demo-863	completada	\N	2026-09-23 16:30:00	2026-09-29 16:50:00	\N
+205	2	864	6	2026-09-29 09:00:00	45	videollamada	https://meet.google.com/demo-864	completada	\N	2026-09-23 17:45:00	2026-09-29 09:50:00	\N
+206	2	870	6	2026-09-30 10:00:00	45	videollamada	https://meet.google.com/demo-870	completada	\N	2026-09-28 10:45:00	2026-09-30 10:50:00	\N
+207	2	872	6	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-872	completada	\N	2026-09-28 11:00:00	2026-10-05 09:50:00	\N
+208	2	878	6	2026-10-05 11:00:00	45	videollamada	https://meet.google.com/demo-878	completada	\N	2026-10-02 11:45:00	2026-10-05 11:50:00	\N
+209	2	882	6	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-882	completada	\N	2026-10-05 15:00:00	2026-10-12 09:50:00	\N
+210	2	897	6	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-897	confirmada	\N	2026-10-11 17:30:00	2026-10-11 18:30:00	\N
+211	2	898	6	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-898	confirmada	\N	2026-10-10 10:15:00	2026-10-10 11:15:00	\N
+212	2	901	6	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-901	pendiente	\N	2026-10-12 12:00:00	2026-10-12 12:00:00	\N
+213	2	905	6	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-905	pendiente	\N	2026-10-12 09:45:00	2026-10-12 09:45:00	\N
+214	2	907	6	2026-09-28 09:00:00	45	videollamada	https://meet.google.com/demo-907	completada	\N	2026-09-22 16:00:00	2026-09-28 09:50:00	\N
+215	2	908	6	2026-09-28 10:00:00	45	videollamada	https://meet.google.com/demo-908	completada	\N	2026-09-23 15:15:00	2026-09-28 10:50:00	\N
+216	2	909	6	2026-09-25 12:00:00	45	videollamada	https://meet.google.com/demo-909	completada	\N	2026-09-22 11:00:00	2026-09-25 12:50:00	\N
+217	2	910	6	2026-09-28 11:00:00	45	videollamada	https://meet.google.com/demo-910	completada	\N	2026-09-22 09:15:00	2026-09-28 11:50:00	\N
+218	2	916	6	2026-09-28 13:00:00	45	videollamada	https://meet.google.com/demo-916	completada	\N	2026-09-25 13:30:00	2026-09-28 13:50:00	\N
+219	2	918	6	2026-09-30 11:00:00	45	videollamada	https://meet.google.com/demo-918	completada	\N	2026-09-27 10:15:00	2026-09-30 11:50:00	\N
+220	2	921	6	2026-09-30 13:00:00	45	videollamada	https://meet.google.com/demo-921	completada	\N	2026-09-28 13:45:00	2026-09-30 13:50:00	\N
+221	2	926	6	2026-10-08 14:00:00	45	videollamada	https://meet.google.com/demo-926	completada	\N	2026-10-02 14:30:00	2026-10-08 14:50:00	\N
+222	2	930	6	2026-10-09 14:00:00	45	videollamada	https://meet.google.com/demo-930	completada	\N	2026-10-03 14:30:00	2026-10-09 14:50:00	\N
+223	2	946	6	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-946	completada	\N	2026-10-01 10:45:00	2026-10-05 10:50:00	\N
+224	2	947	6	2026-10-07 13:00:00	45	videollamada	https://meet.google.com/demo-947	completada	\N	2026-10-01 13:15:00	2026-10-07 13:50:00	\N
+225	2	950	6	2026-10-05 12:00:00	45	videollamada	https://meet.google.com/demo-950	completada	\N	2026-09-29 11:30:00	2026-10-05 12:50:00	\N
+226	2	951	6	2026-10-05 13:00:00	45	videollamada	https://meet.google.com/demo-951	completada	\N	2026-09-30 09:00:00	2026-10-05 13:50:00	\N
+227	2	957	6	2026-10-05 14:00:00	45	videollamada	https://meet.google.com/demo-957	completada	\N	2026-10-01 09:30:00	2026-10-05 14:50:00	\N
+228	2	981	6	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-981	pendiente	\N	2026-10-07 17:45:00	2026-10-07 17:45:00	\N
+229	2	985	6	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-985	confirmada	\N	2026-10-09 16:15:00	2026-10-09 17:15:00	\N
+230	2	993	6	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-993	confirmada	\N	2026-10-12 09:30:00	2026-10-12 10:30:00	\N
+231	2	1006	6	2026-10-21 11:00:00	45	videollamada	https://meet.google.com/demo-1006	confirmada	\N	2026-10-08 15:00:00	2026-10-08 16:00:00	\N
+232	2	1007	6	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-1007	confirmada	\N	2026-10-08 09:30:00	2026-10-08 10:30:00	\N
+233	2	1016	6	2026-10-14 11:00:00	45	videollamada	https://meet.google.com/demo-1016	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+234	2	1017	6	2026-10-19 12:00:00	45	videollamada	https://meet.google.com/demo-1017	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+235	2	1024	6	2026-10-20 10:00:00	45	videollamada	https://meet.google.com/demo-1024	confirmada	\N	2026-10-08 14:30:00	2026-10-08 15:30:00	\N
+236	2	1025	6	2026-10-16 10:00:00	45	videollamada	https://meet.google.com/demo-1025	confirmada	\N	2026-10-09 16:15:00	2026-10-09 17:15:00	\N
+237	2	1028	6	2026-10-19 13:00:00	45	videollamada	https://meet.google.com/demo-1028	confirmada	\N	2026-10-09 09:30:00	2026-10-09 10:30:00	\N
+238	2	1030	6	2026-10-21 12:00:00	45	videollamada	https://meet.google.com/demo-1030	confirmada	\N	2026-10-09 11:15:00	2026-10-09 12:15:00	\N
+239	2	1031	6	2026-10-16 11:00:00	45	videollamada	https://meet.google.com/demo-1031	pendiente	\N	2026-10-09 11:15:00	2026-10-09 11:15:00	\N
+240	2	1033	6	2026-10-19 14:00:00	45	videollamada	https://meet.google.com/demo-1033	confirmada	\N	2026-10-09 14:15:00	2026-10-09 15:15:00	\N
+241	2	1034	6	2026-10-14 12:00:00	45	videollamada	https://meet.google.com/demo-1034	confirmada	\N	2026-10-09 10:45:00	2026-10-09 11:45:00	\N
+242	2	1038	6	2026-10-14 13:00:00	45	videollamada	https://meet.google.com/demo-1038	pendiente	\N	2026-10-11 10:30:00	2026-10-11 10:30:00	\N
+243	2	1047	6	2026-10-22 09:00:00	45	videollamada	https://meet.google.com/demo-1047	confirmada	\N	2026-10-12 13:30:00	2026-10-12 14:30:00	\N
+244	2	1049	6	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-1049	pendiente	\N	2026-10-11 10:45:00	2026-10-11 10:45:00	\N
+245	2	1061	6	2026-10-15 10:00:00	45	videollamada	https://meet.google.com/demo-1061	pendiente	\N	2026-10-13 11:45:00	2026-10-13 11:45:00	\N
+246	2	1067	6	2026-10-15 11:00:00	45	videollamada	https://meet.google.com/demo-1067	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+247	2	1069	6	2026-10-15 12:00:00	45	videollamada	https://meet.google.com/demo-1069	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+248	5	1073	11	2026-08-26 15:00:00	45	videollamada	https://meet.google.com/demo-1073	completada	\N	2026-08-24 15:15:00	2026-08-26 15:50:00	\N
+249	5	1078	11	2026-08-31 09:00:00	45	videollamada	https://meet.google.com/demo-1078	completada	\N	2026-08-24 15:15:00	2026-08-31 09:50:00	\N
+250	5	1081	11	2026-09-01 13:00:00	45	videollamada	https://meet.google.com/demo-1081	completada	\N	2026-08-29 13:00:00	2026-09-01 13:50:00	\N
+251	5	1082	11	2026-09-02 10:00:00	45	videollamada	https://meet.google.com/demo-1082	completada	\N	2026-08-29 10:00:00	2026-09-02 10:50:00	\N
+252	5	1090	11	2026-09-07 09:00:00	45	videollamada	https://meet.google.com/demo-1090	completada	\N	2026-09-03 15:15:00	2026-09-07 09:50:00	\N
+253	5	1104	11	2026-09-21 12:00:00	45	videollamada	https://meet.google.com/demo-1104	completada	\N	2026-09-18 12:30:00	2026-09-21 12:50:00	\N
+254	5	1106	11	2026-09-24 17:00:00	45	videollamada	https://meet.google.com/demo-1106	completada	\N	2026-09-18 17:30:00	2026-09-24 17:50:00	\N
+255	5	1107	11	2026-08-31 10:00:00	45	videollamada	https://meet.google.com/demo-1107	completada	\N	2026-08-25 10:30:00	2026-08-31 10:50:00	\N
+256	5	1109	11	2026-09-02 14:00:00	45	videollamada	https://meet.google.com/demo-1109	completada	\N	2026-08-29 14:30:00	2026-09-02 14:50:00	\N
+257	5	1119	11	2026-09-07 15:00:00	45	videollamada	https://meet.google.com/demo-1119	completada	\N	2026-09-04 15:45:00	2026-09-07 15:50:00	\N
+258	5	1123	11	2026-09-14 09:00:00	45	videollamada	https://meet.google.com/demo-1123	completada	\N	2026-09-09 14:00:00	2026-09-14 09:50:00	\N
+259	5	1128	11	2026-09-21 11:00:00	45	videollamada	https://meet.google.com/demo-1128	completada	\N	2026-09-15 11:15:00	2026-09-21 11:50:00	\N
+260	5	1133	11	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-1133	completada	\N	2026-09-15 13:00:00	2026-09-21 09:50:00	\N
+261	5	1137	11	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-1137	completada	\N	2026-09-17 14:30:00	2026-09-21 10:50:00	\N
+262	5	1143	11	2026-09-23 09:00:00	45	videollamada	https://meet.google.com/demo-1143	completada	\N	2026-09-17 09:15:00	2026-09-23 09:50:00	\N
+263	5	1148	11	2026-09-22 13:00:00	45	videollamada	https://meet.google.com/demo-1148	completada	\N	2026-09-18 13:15:00	2026-09-22 13:50:00	\N
+264	5	1150	11	2026-09-18 16:00:00	45	videollamada	https://meet.google.com/demo-1150	completada	\N	2026-09-16 16:00:00	2026-09-18 16:50:00	\N
+265	5	1153	11	2026-09-21 13:00:00	45	videollamada	https://meet.google.com/demo-1153	completada	\N	2026-09-17 09:00:00	2026-09-21 13:50:00	\N
+266	5	1155	11	2026-09-22 11:00:00	45	videollamada	https://meet.google.com/demo-1155	completada	\N	2026-09-17 11:15:00	2026-09-22 11:50:00	\N
+267	5	1162	11	2026-09-21 14:00:00	45	videollamada	https://meet.google.com/demo-1162	completada	\N	2026-09-18 13:30:00	2026-09-21 14:50:00	\N
+268	5	1166	11	2026-09-25 09:00:00	45	videollamada	https://meet.google.com/demo-1166	completada	\N	2026-09-19 09:45:00	2026-09-25 09:50:00	\N
+269	5	1167	11	2026-09-28 09:00:00	45	videollamada	https://meet.google.com/demo-1167	completada	\N	2026-09-20 15:45:00	2026-09-28 09:50:00	\N
+270	5	1175	11	2026-09-28 11:00:00	45	videollamada	https://meet.google.com/demo-1175	completada	\N	2026-09-23 11:30:00	2026-09-28 11:50:00	\N
+271	5	1179	11	2026-09-28 10:00:00	45	videollamada	https://meet.google.com/demo-1179	completada	\N	2026-09-22 16:00:00	2026-09-28 10:50:00	\N
+272	5	1180	11	2026-09-25 15:00:00	45	videollamada	https://meet.google.com/demo-1180	completada	\N	2026-09-23 15:00:00	2026-09-25 15:50:00	\N
+273	5	1185	11	2026-09-28 12:00:00	45	videollamada	https://meet.google.com/demo-1185	completada	\N	2026-09-22 15:30:00	2026-09-28 12:50:00	\N
+274	5	1187	11	2026-10-01 14:00:00	45	videollamada	https://meet.google.com/demo-1187	completada	\N	2026-09-25 14:00:00	2026-10-01 14:50:00	\N
+275	5	1189	11	2026-09-29 16:00:00	45	videollamada	https://meet.google.com/demo-1189	completada	\N	2026-09-25 16:00:00	2026-09-29 16:50:00	\N
+276	5	1200	11	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-1200	completada	\N	2026-09-28 13:30:00	2026-10-05 09:50:00	\N
+277	5	1202	11	2026-10-02 14:00:00	45	videollamada	https://meet.google.com/demo-1202	completada	\N	2026-09-26 14:15:00	2026-10-02 14:50:00	\N
+278	5	1208	11	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-1208	completada	\N	2026-09-29 13:45:00	2026-10-05 10:50:00	\N
+279	5	1209	11	2026-10-01 17:00:00	45	videollamada	https://meet.google.com/demo-1209	completada	\N	2026-09-27 17:00:00	2026-10-01 17:50:00	\N
+280	5	1221	11	2026-10-05 11:00:00	45	videollamada	https://meet.google.com/demo-1221	completada	\N	2026-10-03 09:45:00	2026-10-05 11:50:00	\N
+281	5	1229	11	2026-10-09 17:00:00	45	videollamada	https://meet.google.com/demo-1229	completada	\N	2026-10-03 17:45:00	2026-10-09 17:50:00	\N
+282	5	1235	11	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-1235	completada	\N	2026-10-06 09:45:00	2026-10-12 09:50:00	\N
+283	5	1236	11	2026-10-08 12:00:00	45	videollamada	https://meet.google.com/demo-1236	completada	\N	2026-10-05 12:45:00	2026-10-08 12:50:00	\N
+284	5	1242	11	2026-10-12 10:00:00	45	videollamada	https://meet.google.com/demo-1242	completada	\N	2026-10-07 14:15:00	2026-10-12 10:50:00	\N
+285	5	1243	11	2026-10-09 11:00:00	45	videollamada	https://meet.google.com/demo-1243	completada	\N	2026-10-05 11:30:00	2026-10-09 11:50:00	\N
+286	5	1246	11	2026-10-22 09:00:00	45	videollamada	https://meet.google.com/demo-1246	confirmada	\N	2026-10-07 17:30:00	2026-10-07 18:30:00	\N
+287	5	1248	11	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-1248	pendiente	\N	2026-10-06 09:30:00	2026-10-06 09:30:00	\N
+288	5	1251	11	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-1251	confirmada	\N	2026-10-08 12:15:00	2026-10-08 13:15:00	\N
+289	5	1260	11	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-1260	confirmada	\N	2026-10-10 12:15:00	2026-10-10 13:15:00	\N
+290	5	1262	11	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-1262	pendiente	\N	2026-10-11 13:45:00	2026-10-11 13:45:00	\N
+291	5	1266	11	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-1266	pendiente	\N	2026-10-10 17:30:00	2026-10-10 17:30:00	\N
+292	5	1271	11	2026-10-19 12:00:00	45	videollamada	https://meet.google.com/demo-1271	confirmada	\N	2026-10-11 09:15:00	2026-10-11 10:15:00	\N
+293	5	1272	11	2026-10-19 13:00:00	45	videollamada	https://meet.google.com/demo-1272	confirmada	\N	2026-10-12 16:45:00	2026-10-12 17:45:00	\N
+294	5	1277	11	2026-10-19 14:00:00	45	videollamada	https://meet.google.com/demo-1277	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+295	5	1278	11	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-1278	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+296	5	1282	11	2026-09-25 10:00:00	45	videollamada	https://meet.google.com/demo-1282	completada	\N	2026-09-19 17:15:00	2026-09-25 10:50:00	\N
+297	5	1283	11	2026-09-21 15:00:00	45	videollamada	https://meet.google.com/demo-1283	completada	\N	2026-09-18 10:00:00	2026-09-21 15:50:00	\N
+298	5	1286	11	2026-09-28 13:00:00	45	videollamada	https://meet.google.com/demo-1286	completada	\N	2026-09-20 11:30:00	2026-09-28 13:50:00	\N
+299	5	1293	11	2026-09-24 13:00:00	45	videollamada	https://meet.google.com/demo-1293	completada	\N	2026-09-20 13:30:00	2026-09-24 13:50:00	\N
+300	5	1299	11	2026-09-28 14:00:00	45	videollamada	https://meet.google.com/demo-1299	completada	\N	2026-09-21 15:15:00	2026-09-28 14:50:00	\N
+301	5	1300	11	2026-09-28 15:00:00	45	videollamada	https://meet.google.com/demo-1300	completada	\N	2026-09-21 15:15:00	2026-09-28 15:50:00	\N
+302	5	1304	11	2026-09-25 17:00:00	45	videollamada	https://meet.google.com/demo-1304	completada	\N	2026-09-20 17:00:00	2026-09-25 17:50:00	\N
+303	5	1305	11	2026-09-25 14:00:00	45	videollamada	https://meet.google.com/demo-1305	completada	\N	2026-09-22 14:30:00	2026-09-25 14:50:00	\N
+304	5	1323	11	2026-09-28 16:00:00	45	videollamada	https://meet.google.com/demo-1323	completada	\N	2026-09-23 10:15:00	2026-09-28 16:50:00	\N
+305	5	1325	11	2026-10-01 09:00:00	45	videollamada	https://meet.google.com/demo-1325	completada	\N	2026-09-25 09:45:00	2026-10-01 09:50:00	\N
+306	5	1326	11	2026-09-28 17:00:00	45	videollamada	https://meet.google.com/demo-1326	completada	\N	2026-09-24 09:45:00	2026-09-28 17:50:00	\N
+307	5	1327	11	2026-09-29 17:00:00	45	videollamada	https://meet.google.com/demo-1327	completada	\N	2026-09-25 16:30:00	2026-09-29 17:50:00	\N
+308	5	1330	11	2026-10-02 15:00:00	45	videollamada	https://meet.google.com/demo-1330	completada	\N	2026-09-27 15:15:00	2026-10-02 15:50:00	\N
+309	5	1333	11	2026-10-05 12:00:00	45	videollamada	https://meet.google.com/demo-1333	completada	\N	2026-09-27 13:00:00	2026-10-05 12:50:00	\N
+310	5	1335	11	2026-09-29 09:00:00	45	videollamada	https://meet.google.com/demo-1335	completada	\N	2026-09-25 15:00:00	2026-09-29 09:50:00	\N
+311	5	1338	11	2026-09-29 10:00:00	45	videollamada	https://meet.google.com/demo-1338	completada	\N	2026-09-25 09:15:00	2026-09-29 10:50:00	\N
+312	5	1347	11	2026-10-05 13:00:00	45	videollamada	https://meet.google.com/demo-1347	completada	\N	2026-09-29 13:00:00	2026-10-05 13:50:00	\N
+313	5	1350	11	2026-10-02 16:00:00	45	videollamada	https://meet.google.com/demo-1350	completada	\N	2026-09-29 16:00:00	2026-10-02 16:50:00	\N
+314	5	1363	11	2026-10-05 14:00:00	45	videollamada	https://meet.google.com/demo-1363	completada	\N	2026-09-30 12:00:00	2026-10-05 14:50:00	\N
+315	5	1374	11	2026-10-06 13:00:00	45	videollamada	https://meet.google.com/demo-1374	completada	\N	2026-10-03 13:30:00	2026-10-06 13:50:00	\N
+316	5	1380	11	2026-10-06 12:00:00	45	videollamada	https://meet.google.com/demo-1380	completada	\N	2026-10-03 12:45:00	2026-10-06 12:50:00	\N
+317	5	1385	11	2026-10-07 13:00:00	45	videollamada	https://meet.google.com/demo-1385	completada	\N	2026-10-05 13:45:00	2026-10-07 13:50:00	\N
+318	5	1392	11	2026-10-12 12:00:00	45	videollamada	https://meet.google.com/demo-1392	completada	\N	2026-10-06 13:00:00	2026-10-12 12:50:00	\N
+319	5	1393	11	2026-10-12 13:00:00	45	videollamada	https://meet.google.com/demo-1393	completada	\N	2026-10-06 09:00:00	2026-10-12 13:50:00	\N
+321	5	1400	11	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-1400	pendiente	\N	2026-10-08 09:30:00	2026-10-08 09:30:00	\N
+322	5	1406	11	2026-10-19 15:00:00	45	videollamada	https://meet.google.com/demo-1406	confirmada	\N	2026-10-09 12:45:00	2026-10-09 13:45:00	\N
+323	5	1408	11	2026-10-22 11:00:00	45	videollamada	https://meet.google.com/demo-1408	confirmada	\N	2026-10-10 11:45:00	2026-10-10 12:45:00	\N
+324	5	1422	11	2026-10-19 16:00:00	45	videollamada	https://meet.google.com/demo-1422	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+325	5	1424	11	2026-10-22 12:00:00	45	videollamada	https://meet.google.com/demo-1424	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+326	5	1426	11	2026-10-21 11:00:00	45	videollamada	https://meet.google.com/demo-1426	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+327	5	1430	11	2026-09-30 13:00:00	45	videollamada	https://meet.google.com/demo-1430	completada	\N	2026-09-28 13:30:00	2026-09-30 13:50:00	\N
+328	5	1435	11	2026-10-02 11:00:00	45	videollamada	https://meet.google.com/demo-1435	completada	\N	2026-09-30 11:45:00	2026-10-02 11:50:00	\N
+329	5	1438	11	2026-10-05 15:00:00	45	videollamada	https://meet.google.com/demo-1438	completada	\N	2026-09-30 13:00:00	2026-10-05 15:50:00	\N
+330	5	1442	11	2026-10-05 16:00:00	45	videollamada	https://meet.google.com/demo-1442	completada	\N	2026-09-30 14:00:00	2026-10-05 16:50:00	\N
+331	5	1447	11	2026-10-05 17:00:00	45	videollamada	https://meet.google.com/demo-1447	completada	\N	2026-09-30 12:15:00	2026-10-05 17:50:00	\N
+332	5	1449	11	2026-10-06 09:00:00	45	videollamada	https://meet.google.com/demo-1449	completada	\N	2026-10-01 09:30:00	2026-10-06 09:50:00	\N
+333	5	1458	11	2026-10-09 09:00:00	45	videollamada	https://meet.google.com/demo-1458	completada	\N	2026-10-04 09:15:00	2026-10-09 09:50:00	\N
+334	5	1464	11	2026-10-08 17:00:00	45	videollamada	https://meet.google.com/demo-1464	completada	\N	2026-10-06 17:45:00	2026-10-08 17:50:00	\N
+335	5	1473	11	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-1473	confirmada	\N	2026-10-06 14:15:00	2026-10-06 15:15:00	\N
+336	5	1480	11	2026-10-19 17:00:00	45	videollamada	https://meet.google.com/demo-1480	pendiente	\N	2026-10-08 11:00:00	2026-10-08 11:00:00	\N
+337	5	1481	11	2026-10-22 13:00:00	45	videollamada	https://meet.google.com/demo-1481	confirmada	\N	2026-10-09 16:00:00	2026-10-09 17:00:00	\N
+338	5	1482	11	2026-10-20 10:00:00	45	videollamada	https://meet.google.com/demo-1482	pendiente	\N	2026-10-10 13:15:00	2026-10-10 13:15:00	\N
+339	5	1491	11	2026-10-20 11:00:00	45	videollamada	https://meet.google.com/demo-1491	confirmada	\N	2026-10-13 10:45:00	2026-10-13 11:45:00	\N
+340	5	1494	11	2026-10-20 12:00:00	45	videollamada	https://meet.google.com/demo-1494	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+341	5	1506	11	2026-10-21 12:00:00	45	videollamada	https://meet.google.com/demo-1506	pendiente	\N	2026-10-08 12:30:00	2026-10-08 12:30:00	\N
+342	5	1511	11	2026-10-22 14:00:00	45	videollamada	https://meet.google.com/demo-1511	confirmada	\N	2026-10-09 12:15:00	2026-10-09 13:15:00	\N
+343	5	1512	11	2026-10-20 13:00:00	45	videollamada	https://meet.google.com/demo-1512	confirmada	\N	2026-10-08 17:30:00	2026-10-08 18:30:00	\N
+344	5	1518	11	2026-10-20 14:00:00	45	videollamada	https://meet.google.com/demo-1518	pendiente	\N	2026-10-09 14:30:00	2026-10-09 14:30:00	\N
+345	5	1525	11	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-1525	pendiente	\N	2026-10-09 10:30:00	2026-10-09 10:30:00	\N
+346	5	1532	11	2026-10-20 15:00:00	45	videollamada	https://meet.google.com/demo-1532	confirmada	\N	2026-10-10 15:00:00	2026-10-10 16:00:00	\N
+347	5	1533	11	2026-10-20 16:00:00	45	videollamada	https://meet.google.com/demo-1533	confirmada	\N	2026-10-10 12:00:00	2026-10-10 13:00:00	\N
+348	5	1534	11	2026-10-14 10:00:00	45	videollamada	https://meet.google.com/demo-1534	confirmada	\N	2026-10-11 12:45:00	2026-10-11 13:45:00	\N
+349	5	1539	11	2026-10-22 15:00:00	45	videollamada	https://meet.google.com/demo-1539	confirmada	\N	2026-10-11 10:30:00	2026-10-11 11:30:00	\N
+350	5	1544	11	2026-10-20 17:00:00	45	videollamada	https://meet.google.com/demo-1544	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+351	4	1553	9	2026-08-25 12:00:00	45	videollamada	https://meet.google.com/demo-1553	completada	\N	2026-08-22 12:00:00	2026-08-25 12:50:00	\N
+352	4	1554	9	2026-08-24 16:00:00	45	videollamada	https://meet.google.com/demo-1554	completada	\N	2026-08-20 16:00:00	2026-08-24 16:50:00	\N
+353	4	1557	9	2026-08-24 09:00:00	45	videollamada	https://meet.google.com/demo-1557	completada	\N	2026-08-20 16:00:00	2026-08-24 09:50:00	\N
+354	4	1559	9	2026-08-24 11:00:00	45	videollamada	https://meet.google.com/demo-1559	completada	\N	2026-08-21 11:45:00	2026-08-24 11:50:00	\N
+355	4	1562	9	2026-08-24 10:00:00	45	videollamada	https://meet.google.com/demo-1562	completada	\N	2026-08-21 12:15:00	2026-08-24 10:50:00	\N
+356	4	1566	9	2026-08-28 09:00:00	45	videollamada	https://meet.google.com/demo-1566	completada	\N	2026-08-23 09:30:00	2026-08-28 09:50:00	\N
+357	4	1567	9	2026-08-26 12:00:00	45	videollamada	https://meet.google.com/demo-1567	completada	\N	2026-08-23 12:30:00	2026-08-26 12:50:00	\N
+358	4	1569	9	2026-08-28 12:00:00	45	videollamada	https://meet.google.com/demo-1569	completada	\N	2026-08-22 12:30:00	2026-08-28 12:50:00	\N
+359	4	1570	9	2026-08-28 10:00:00	45	videollamada	https://meet.google.com/demo-1570	completada	\N	2026-08-23 09:00:00	2026-08-28 10:50:00	\N
+360	4	1579	9	2026-08-31 09:00:00	45	videollamada	https://meet.google.com/demo-1579	completada	\N	2026-08-24 09:00:00	2026-08-31 09:50:00	\N
+361	4	1583	9	2026-08-27 10:00:00	45	videollamada	https://meet.google.com/demo-1583	completada	\N	2026-08-22 10:00:00	2026-08-27 10:50:00	\N
+362	4	1602	9	2026-08-31 10:00:00	45	videollamada	https://meet.google.com/demo-1602	completada	\N	2026-08-25 10:00:00	2026-08-31 10:50:00	\N
+363	4	1604	9	2026-08-31 11:00:00	45	videollamada	https://meet.google.com/demo-1604	completada	\N	2026-08-27 12:00:00	2026-08-31 11:50:00	\N
+364	4	1608	9	2026-08-31 12:00:00	45	videollamada	https://meet.google.com/demo-1608	completada	\N	2026-08-26 10:45:00	2026-08-31 12:50:00	\N
+365	4	1610	9	2026-09-01 13:00:00	45	videollamada	https://meet.google.com/demo-1610	completada	\N	2026-08-27 13:45:00	2026-09-01 13:50:00	\N
+366	4	1612	9	2026-08-31 16:00:00	45	videollamada	https://meet.google.com/demo-1612	completada	\N	2026-08-26 16:45:00	2026-08-31 16:50:00	\N
+367	4	1614	9	2026-09-03 11:00:00	45	videollamada	https://meet.google.com/demo-1614	completada	\N	2026-08-28 11:45:00	2026-09-03 11:50:00	\N
+368	4	1619	9	2026-09-02 10:00:00	45	videollamada	https://meet.google.com/demo-1619	completada	\N	2026-08-28 10:00:00	2026-09-02 10:50:00	\N
+369	4	1624	9	2026-09-07 09:00:00	45	videollamada	https://meet.google.com/demo-1624	completada	\N	2026-08-31 10:45:00	2026-09-07 09:50:00	\N
+370	4	1625	9	2026-09-02 11:00:00	45	videollamada	https://meet.google.com/demo-1625	completada	\N	2026-08-29 11:30:00	2026-09-02 11:50:00	\N
+371	4	1627	9	2026-09-01 11:00:00	45	videollamada	https://meet.google.com/demo-1627	completada	\N	2026-08-29 11:30:00	2026-09-01 11:50:00	\N
+372	4	1628	9	2026-09-07 10:00:00	45	videollamada	https://meet.google.com/demo-1628	completada	\N	2026-08-31 10:30:00	2026-09-07 10:50:00	\N
+373	4	1634	9	2026-09-04 12:00:00	45	videollamada	https://meet.google.com/demo-1634	completada	\N	2026-09-01 12:00:00	2026-09-04 12:50:00	\N
+374	4	1635	9	2026-09-04 14:00:00	45	videollamada	https://meet.google.com/demo-1635	completada	\N	2026-09-01 14:45:00	2026-09-04 14:50:00	\N
+375	4	1636	9	2026-09-02 13:00:00	45	videollamada	https://meet.google.com/demo-1636	completada	\N	2026-08-30 13:15:00	2026-09-02 13:50:00	\N
+376	4	1638	9	2026-09-07 14:00:00	45	videollamada	https://meet.google.com/demo-1638	completada	\N	2026-09-01 14:00:00	2026-09-07 14:50:00	\N
+377	4	1640	9	2026-09-07 11:00:00	45	videollamada	https://meet.google.com/demo-1640	completada	\N	2026-09-01 12:45:00	2026-09-07 11:50:00	\N
+378	4	1649	9	2026-09-07 17:00:00	45	videollamada	https://meet.google.com/demo-1649	completada	\N	2026-09-01 17:15:00	2026-09-07 17:50:00	\N
+379	4	1656	9	2026-09-07 12:00:00	45	videollamada	https://meet.google.com/demo-1656	completada	\N	2026-09-03 13:00:00	2026-09-07 12:50:00	\N
+380	4	1662	9	2026-09-08 09:00:00	45	videollamada	https://meet.google.com/demo-1662	completada	\N	2026-09-05 09:15:00	2026-09-08 09:50:00	\N
+381	4	1663	9	2026-09-11 16:00:00	45	videollamada	https://meet.google.com/demo-1663	completada	\N	2026-09-05 16:00:00	2026-09-11 16:50:00	\N
+382	4	1667	9	2026-09-08 17:00:00	45	videollamada	https://meet.google.com/demo-1667	completada	\N	2026-09-06 17:15:00	2026-09-08 17:50:00	\N
+383	4	1679	9	2026-09-10 12:00:00	45	videollamada	https://meet.google.com/demo-1679	completada	\N	2026-09-08 12:15:00	2026-09-10 12:50:00	\N
+384	4	1683	9	2026-09-11 09:00:00	45	videollamada	https://meet.google.com/demo-1683	completada	\N	2026-09-09 09:30:00	2026-09-11 09:50:00	\N
+385	4	1686	9	2026-09-14 09:00:00	45	videollamada	https://meet.google.com/demo-1686	completada	\N	2026-09-10 14:45:00	2026-09-14 09:50:00	\N
+386	4	1689	9	2026-09-17 16:00:00	45	videollamada	https://meet.google.com/demo-1689	completada	\N	2026-09-12 16:30:00	2026-09-17 16:50:00	\N
+387	4	1694	9	2026-09-15 13:00:00	45	videollamada	https://meet.google.com/demo-1694	completada	\N	2026-09-12 13:15:00	2026-09-15 13:50:00	\N
+388	4	1696	9	2026-09-15 14:00:00	45	videollamada	https://meet.google.com/demo-1696	completada	\N	2026-09-13 14:00:00	2026-09-15 14:50:00	\N
+389	4	1700	9	2026-09-17 12:00:00	45	videollamada	https://meet.google.com/demo-1700	completada	\N	2026-09-13 12:00:00	2026-09-17 12:50:00	\N
+390	4	1701	9	2026-09-17 10:00:00	45	videollamada	https://meet.google.com/demo-1701	completada	\N	2026-09-14 10:30:00	2026-09-17 10:50:00	\N
+391	4	1708	9	2026-09-22 17:00:00	45	videollamada	https://meet.google.com/demo-1708	completada	\N	2026-09-16 17:45:00	2026-09-22 17:50:00	\N
+392	4	1713	9	2026-09-24 12:00:00	45	videollamada	https://meet.google.com/demo-1713	completada	\N	2026-09-18 12:30:00	2026-09-24 12:50:00	\N
+393	4	1715	9	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-1715	completada	\N	2026-09-16 13:15:00	2026-09-21 09:50:00	\N
+394	4	1719	9	2026-08-31 13:00:00	45	videollamada	https://meet.google.com/demo-1719	completada	\N	2026-08-27 10:15:00	2026-08-31 13:50:00	\N
+395	4	1721	9	2026-09-01 17:00:00	45	videollamada	https://meet.google.com/demo-1721	completada	\N	2026-08-27 17:45:00	2026-09-01 17:50:00	\N
+396	4	1722	9	2026-09-01 09:00:00	45	videollamada	https://meet.google.com/demo-1722	completada	\N	2026-08-27 09:30:00	2026-09-01 09:50:00	\N
+397	4	1732	9	2026-09-02 09:00:00	45	videollamada	https://meet.google.com/demo-1732	completada	\N	2026-08-28 09:45:00	2026-09-02 09:50:00	\N
+398	4	1740	9	2026-09-08 10:00:00	45	videollamada	https://meet.google.com/demo-1740	completada	\N	2026-09-03 09:30:00	2026-09-08 10:50:00	\N
+399	4	1747	9	2026-09-08 11:00:00	45	videollamada	https://meet.google.com/demo-1747	completada	\N	2026-09-04 09:00:00	2026-09-08 11:50:00	\N
+400	4	1749	9	2026-09-08 12:00:00	45	videollamada	https://meet.google.com/demo-1749	completada	\N	2026-09-05 09:30:00	2026-09-08 12:50:00	\N
+401	4	1750	9	2026-09-09 13:00:00	45	videollamada	https://meet.google.com/demo-1750	completada	\N	2026-09-05 13:45:00	2026-09-09 13:50:00	\N
+402	4	1756	9	2026-09-14 10:00:00	45	videollamada	https://meet.google.com/demo-1756	completada	\N	2026-09-07 16:30:00	2026-09-14 10:50:00	\N
+403	4	1759	9	2026-09-14 11:00:00	45	videollamada	https://meet.google.com/demo-1759	completada	\N	2026-09-08 12:15:00	2026-09-14 11:50:00	\N
+404	4	1761	9	2026-09-11 13:00:00	45	videollamada	https://meet.google.com/demo-1761	completada	\N	2026-09-08 13:15:00	2026-09-11 13:50:00	\N
+405	4	1766	9	2026-09-16 15:00:00	45	videollamada	https://meet.google.com/demo-1766	completada	\N	2026-09-10 15:15:00	2026-09-16 15:50:00	\N
+406	4	1767	9	2026-09-15 11:00:00	45	videollamada	https://meet.google.com/demo-1767	completada	\N	2026-09-11 11:30:00	2026-09-15 11:50:00	\N
+407	4	1768	9	2026-09-14 17:00:00	45	videollamada	https://meet.google.com/demo-1768	completada	\N	2026-09-12 17:45:00	2026-09-14 17:50:00	\N
+408	4	1769	9	2026-09-15 12:00:00	45	videollamada	https://meet.google.com/demo-1769	completada	\N	2026-09-12 11:00:00	2026-09-15 12:50:00	\N
+409	4	1770	9	2026-09-16 17:00:00	45	videollamada	https://meet.google.com/demo-1770	completada	\N	2026-09-12 17:30:00	2026-09-16 17:50:00	\N
+410	4	1774	9	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-1774	completada	\N	2026-09-13 14:15:00	2026-09-21 10:50:00	\N
+411	4	1776	9	2026-09-17 09:00:00	45	videollamada	https://meet.google.com/demo-1776	completada	\N	2026-09-15 09:00:00	2026-09-17 09:50:00	\N
+412	4	1777	9	2026-09-21 11:00:00	45	videollamada	https://meet.google.com/demo-1777	completada	\N	2026-09-15 12:30:00	2026-09-21 11:50:00	\N
+413	4	1780	9	2026-09-22 15:00:00	45	videollamada	https://meet.google.com/demo-1780	completada	\N	2026-09-17 15:15:00	2026-09-22 15:50:00	\N
+414	4	1782	9	2026-09-21 14:00:00	45	videollamada	https://meet.google.com/demo-1782	completada	\N	2026-09-18 14:45:00	2026-09-21 14:50:00	\N
+415	4	1785	9	2026-09-25 09:00:00	45	videollamada	https://meet.google.com/demo-1785	completada	\N	2026-09-20 09:00:00	2026-09-25 09:50:00	\N
+416	4	1792	9	2026-09-07 13:00:00	45	videollamada	https://meet.google.com/demo-1792	completada	\N	2026-08-31 12:00:00	2026-09-07 13:50:00	\N
+417	4	1804	9	2026-09-07 15:00:00	45	videollamada	https://meet.google.com/demo-1804	completada	\N	2026-09-03 12:15:00	2026-09-07 15:50:00	\N
+418	4	1807	9	2026-09-14 12:00:00	45	videollamada	https://meet.google.com/demo-1807	completada	\N	2026-09-06 14:30:00	2026-09-14 12:50:00	\N
+419	4	1817	9	2026-09-14 13:00:00	45	videollamada	https://meet.google.com/demo-1817	completada	\N	2026-09-11 13:30:00	2026-09-14 13:50:00	\N
+420	4	1818	9	2026-09-14 14:00:00	45	videollamada	https://meet.google.com/demo-1818	completada	\N	2026-09-12 09:15:00	2026-09-14 14:50:00	\N
+421	4	1819	9	2026-09-16 16:00:00	45	videollamada	https://meet.google.com/demo-1819	completada	\N	2026-09-12 16:45:00	2026-09-16 16:50:00	\N
+422	4	1821	9	2026-09-16 10:00:00	45	videollamada	https://meet.google.com/demo-1821	completada	\N	2026-09-14 10:15:00	2026-09-16 10:50:00	\N
+423	4	1823	9	2026-09-21 12:00:00	45	videollamada	https://meet.google.com/demo-1823	completada	\N	2026-09-17 13:45:00	2026-09-21 12:50:00	\N
+424	4	1826	9	2026-09-22 16:00:00	45	videollamada	https://meet.google.com/demo-1826	completada	\N	2026-09-18 15:45:00	2026-09-22 16:50:00	\N
+425	4	1832	9	2026-09-09 10:00:00	45	videollamada	https://meet.google.com/demo-1832	completada	\N	2026-09-05 10:15:00	2026-09-09 10:50:00	\N
+426	4	1834	9	2026-09-09 09:00:00	45	videollamada	https://meet.google.com/demo-1834	completada	\N	2026-09-06 17:00:00	2026-09-09 09:50:00	\N
+427	4	1837	9	2026-09-15 10:00:00	45	videollamada	https://meet.google.com/demo-1837	completada	\N	2026-09-12 10:15:00	2026-09-15 10:50:00	\N
+428	4	1859	9	2026-09-11 14:00:00	45	videollamada	https://meet.google.com/demo-1859	completada	\N	2026-09-09 14:00:00	2026-09-11 14:50:00	\N
+429	4	1866	9	2026-09-14 15:00:00	45	videollamada	https://meet.google.com/demo-1866	completada	\N	2026-09-11 16:00:00	2026-09-14 15:50:00	\N
+430	4	1867	9	2026-09-14 16:00:00	45	videollamada	https://meet.google.com/demo-1867	completada	\N	2026-09-11 11:15:00	2026-09-14 16:50:00	\N
+431	4	1872	9	2026-09-21 13:00:00	45	videollamada	https://meet.google.com/demo-1872	completada	\N	2026-09-15 11:30:00	2026-09-21 13:50:00	\N
+432	4	1885	9	2026-09-23 10:00:00	45	videollamada	https://meet.google.com/demo-1885	completada	\N	2026-09-18 10:00:00	2026-09-23 10:50:00	\N
+433	4	1904	9	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-1904	completada	\N	2026-09-27 16:00:00	2026-10-05 09:50:00	\N
+434	4	1916	9	2026-09-29 10:00:00	45	videollamada	https://meet.google.com/demo-1916	completada	\N	2026-09-27 10:15:00	2026-09-29 10:50:00	\N
+435	4	1918	9	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-1918	completada	\N	2026-09-28 13:45:00	2026-10-05 10:50:00	\N
+436	4	1922	9	2026-10-05 11:00:00	45	videollamada	https://meet.google.com/demo-1922	completada	\N	2026-09-29 15:15:00	2026-10-05 11:50:00	\N
+437	4	1923	9	2026-10-05 12:00:00	45	videollamada	https://meet.google.com/demo-1923	completada	\N	2026-09-29 15:45:00	2026-10-05 12:50:00	\N
+438	4	1929	9	2026-10-05 13:00:00	45	videollamada	https://meet.google.com/demo-1929	completada	\N	2026-09-29 11:30:00	2026-10-05 13:50:00	\N
+439	4	1931	9	2026-10-06 13:00:00	45	videollamada	https://meet.google.com/demo-1931	completada	\N	2026-09-30 13:00:00	2026-10-06 13:50:00	\N
+440	4	1932	9	2026-10-05 14:00:00	45	videollamada	https://meet.google.com/demo-1932	completada	\N	2026-09-29 11:00:00	2026-10-05 14:50:00	\N
+441	4	1936	9	2026-10-05 15:00:00	45	videollamada	https://meet.google.com/demo-1936	completada	\N	2026-09-28 10:00:00	2026-10-05 15:50:00	\N
+442	4	1941	9	2026-10-01 13:00:00	45	videollamada	https://meet.google.com/demo-1941	completada	\N	2026-09-29 13:30:00	2026-10-01 13:50:00	\N
+443	4	1949	9	2026-10-05 17:00:00	45	videollamada	https://meet.google.com/demo-1949	completada	\N	2026-09-29 17:45:00	2026-10-05 17:50:00	\N
+444	4	1950	9	2026-10-05 16:00:00	45	videollamada	https://meet.google.com/demo-1950	completada	\N	2026-09-29 12:30:00	2026-10-05 16:50:00	\N
+445	4	1961	9	2026-10-07 14:00:00	45	videollamada	https://meet.google.com/demo-1961	completada	\N	2026-10-01 14:30:00	2026-10-07 14:50:00	\N
+446	4	1962	9	2026-10-06 09:00:00	45	videollamada	https://meet.google.com/demo-1962	completada	\N	2026-10-02 11:30:00	2026-10-06 09:50:00	\N
+447	4	1965	9	2026-10-07 13:00:00	45	videollamada	https://meet.google.com/demo-1965	completada	\N	2026-10-03 13:15:00	2026-10-07 13:50:00	\N
+448	4	1980	9	2026-10-09 15:00:00	45	videollamada	https://meet.google.com/demo-1980	completada	\N	2026-10-05 15:30:00	2026-10-09 15:50:00	\N
+449	4	1991	9	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-1991	confirmada	\N	2026-10-07 15:00:00	2026-10-07 16:00:00	\N
+450	4	1994	9	2026-10-14 10:00:00	45	videollamada	https://meet.google.com/demo-1994	confirmada	\N	2026-10-08 09:30:00	2026-10-08 10:30:00	\N
+451	4	1997	9	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-1997	confirmada	\N	2026-10-08 16:15:00	2026-10-08 17:15:00	\N
+452	4	2000	9	2026-10-14 11:00:00	45	videollamada	https://meet.google.com/demo-2000	pendiente	\N	2026-10-08 09:15:00	2026-10-08 09:15:00	\N
+453	4	2011	9	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-2011	pendiente	\N	2026-10-12 11:30:00	2026-10-12 11:30:00	\N
+454	4	2012	9	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-2012	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+456	4	2019	9	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-2019	completada	\N	2026-10-05 13:30:00	2026-10-12 09:50:00	\N
+457	4	2023	9	2026-10-08 14:00:00	45	videollamada	https://meet.google.com/demo-2023	completada	\N	2026-10-05 14:00:00	2026-10-08 14:50:00	\N
+458	4	2026	9	2026-10-07 16:00:00	45	videollamada	https://meet.google.com/demo-2026	completada	\N	2026-10-05 16:15:00	2026-10-07 16:50:00	\N
+459	4	2029	9	2026-10-12 10:00:00	45	videollamada	https://meet.google.com/demo-2029	completada	\N	2026-10-05 17:15:00	2026-10-12 10:50:00	\N
+460	4	2030	9	2026-10-12 11:00:00	45	videollamada	https://meet.google.com/demo-2030	completada	\N	2026-10-05 09:15:00	2026-10-12 11:50:00	\N
+461	4	2034	9	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-2034	confirmada	\N	2026-10-07 13:15:00	2026-10-07 14:15:00	\N
+462	4	2043	9	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-2043	confirmada	\N	2026-10-08 10:30:00	2026-10-08 11:30:00	\N
+463	4	2044	9	2026-10-15 10:00:00	45	videollamada	https://meet.google.com/demo-2044	pendiente	\N	2026-10-08 12:30:00	2026-10-08 12:30:00	\N
+464	4	2059	9	2026-10-19 12:00:00	45	videollamada	https://meet.google.com/demo-2059	confirmada	\N	2026-10-12 10:15:00	2026-10-12 11:15:00	\N
+465	4	2060	9	2026-10-19 13:00:00	45	videollamada	https://meet.google.com/demo-2060	confirmada	\N	2026-10-11 15:15:00	2026-10-11 16:15:00	\N
+466	6	2080	14	2026-09-02 15:00:00	45	videollamada	https://meet.google.com/demo-2080	completada	\N	2026-08-29 15:15:00	2026-09-02 15:50:00	\N
+467	6	2103	14	2026-09-15 15:00:00	45	videollamada	https://meet.google.com/demo-2103	completada	\N	2026-09-09 15:15:00	2026-09-15 15:50:00	\N
+468	6	2111	14	2026-09-21 09:00:00	45	videollamada	https://meet.google.com/demo-2111	completada	\N	2026-09-13 11:15:00	2026-09-21 09:50:00	\N
+469	6	2113	14	2026-09-17 13:00:00	45	videollamada	https://meet.google.com/demo-2113	completada	\N	2026-09-14 13:45:00	2026-09-17 13:50:00	\N
+470	6	2120	14	2026-09-24 12:00:00	45	videollamada	https://meet.google.com/demo-2120	completada	\N	2026-09-21 12:00:00	2026-09-24 12:50:00	\N
+471	6	2134	14	2026-09-18 16:00:00	45	videollamada	https://meet.google.com/demo-2134	completada	\N	2026-09-13 16:45:00	2026-09-18 16:50:00	\N
+472	6	2137	14	2026-09-21 17:00:00	45	videollamada	https://meet.google.com/demo-2137	completada	\N	2026-09-18 17:30:00	2026-09-21 17:50:00	\N
+473	6	2139	14	2026-09-04 11:00:00	45	videollamada	https://meet.google.com/demo-2139	completada	\N	2026-08-29 11:00:00	2026-09-04 11:50:00	\N
+474	6	2141	14	2026-09-02 14:00:00	45	videollamada	https://meet.google.com/demo-2141	completada	\N	2026-08-30 14:45:00	2026-09-02 14:50:00	\N
+475	6	2145	14	2026-09-07 16:00:00	45	videollamada	https://meet.google.com/demo-2145	completada	\N	2026-09-01 16:00:00	2026-09-07 16:50:00	\N
+476	6	2153	14	2026-09-07 17:00:00	45	videollamada	https://meet.google.com/demo-2153	completada	\N	2026-09-02 16:45:00	2026-09-07 17:50:00	\N
+477	6	2159	14	2026-09-08 09:00:00	45	videollamada	https://meet.google.com/demo-2159	completada	\N	2026-09-04 09:30:00	2026-09-08 09:50:00	\N
+478	6	2169	14	2026-09-09 11:00:00	45	videollamada	https://meet.google.com/demo-2169	completada	\N	2026-09-06 11:30:00	2026-09-09 11:50:00	\N
+479	6	2175	14	2026-09-14 09:00:00	45	videollamada	https://meet.google.com/demo-2175	completada	\N	2026-09-07 09:00:00	2026-09-14 09:50:00	\N
+480	6	2176	14	2026-09-11 17:00:00	45	videollamada	https://meet.google.com/demo-2176	completada	\N	2026-09-08 17:00:00	2026-09-11 17:50:00	\N
+481	6	2177	14	2026-09-09 15:00:00	45	videollamada	https://meet.google.com/demo-2177	completada	\N	2026-09-07 15:30:00	2026-09-09 15:50:00	\N
+482	6	2182	14	2026-09-14 11:00:00	45	videollamada	https://meet.google.com/demo-2182	completada	\N	2026-09-09 11:30:00	2026-09-14 11:50:00	\N
+483	6	2184	14	2026-09-16 12:00:00	45	videollamada	https://meet.google.com/demo-2184	completada	\N	2026-09-13 12:00:00	2026-09-16 12:50:00	\N
+484	6	2186	14	2026-09-15 16:00:00	45	videollamada	https://meet.google.com/demo-2186	completada	\N	2026-09-12 16:15:00	2026-09-15 16:50:00	\N
+485	6	2190	14	2026-09-21 10:00:00	45	videollamada	https://meet.google.com/demo-2190	completada	\N	2026-09-14 15:15:00	2026-09-21 10:50:00	\N
+486	6	2191	14	2026-09-15 09:00:00	45	videollamada	https://meet.google.com/demo-2191	completada	\N	2026-09-13 09:00:00	2026-09-15 09:50:00	\N
+487	6	2195	14	2026-09-18 13:00:00	45	videollamada	https://meet.google.com/demo-2195	completada	\N	2026-09-15 13:00:00	2026-09-18 13:50:00	\N
+488	6	2213	14	2026-09-15 14:00:00	45	videollamada	https://meet.google.com/demo-2213	completada	\N	2026-09-11 14:15:00	2026-09-15 14:50:00	\N
+489	6	2218	14	2026-09-21 11:00:00	45	videollamada	https://meet.google.com/demo-2218	completada	\N	2026-09-17 10:00:00	2026-09-21 11:50:00	\N
+490	6	2221	14	2026-09-24 10:00:00	45	videollamada	https://meet.google.com/demo-2221	completada	\N	2026-09-21 10:30:00	2026-09-24 10:50:00	\N
+491	6	2224	14	2026-09-25 11:00:00	45	videollamada	https://meet.google.com/demo-2224	completada	\N	2026-09-21 11:30:00	2026-09-25 11:50:00	\N
+492	6	2227	14	2026-09-25 09:00:00	45	videollamada	https://meet.google.com/demo-2227	completada	\N	2026-09-23 09:45:00	2026-09-25 09:50:00	\N
+493	6	2228	14	2026-09-28 09:00:00	45	videollamada	https://meet.google.com/demo-2228	completada	\N	2026-09-23 11:30:00	2026-09-28 09:50:00	\N
+494	6	2231	14	2026-09-24 11:00:00	45	videollamada	https://meet.google.com/demo-2231	completada	\N	2026-09-22 11:15:00	2026-09-24 11:50:00	\N
+495	6	2236	14	2026-09-25 16:00:00	45	videollamada	https://meet.google.com/demo-2236	completada	\N	2026-09-22 16:45:00	2026-09-25 16:50:00	\N
+496	6	2237	14	2026-09-25 10:00:00	45	videollamada	https://meet.google.com/demo-2237	completada	\N	2026-09-22 10:15:00	2026-09-25 10:50:00	\N
+497	6	2243	14	2026-09-28 10:00:00	45	videollamada	https://meet.google.com/demo-2243	completada	\N	2026-09-23 09:00:00	2026-09-28 10:50:00	\N
+498	6	2244	14	2026-09-28 11:00:00	45	videollamada	https://meet.google.com/demo-2244	completada	\N	2026-09-25 17:00:00	2026-09-28 11:50:00	\N
+499	6	2252	14	2026-09-30 10:00:00	45	videollamada	https://meet.google.com/demo-2252	completada	\N	2026-09-25 10:15:00	2026-09-30 10:50:00	\N
+500	6	2253	14	2026-09-30 13:00:00	45	videollamada	https://meet.google.com/demo-2253	completada	\N	2026-09-25 13:00:00	2026-09-30 13:50:00	\N
+501	6	2256	14	2026-10-01 12:00:00	45	videollamada	https://meet.google.com/demo-2256	completada	\N	2026-09-25 12:45:00	2026-10-01 12:50:00	\N
+502	6	2264	14	2026-09-29 17:00:00	45	videollamada	https://meet.google.com/demo-2264	completada	\N	2026-09-25 17:15:00	2026-09-29 17:50:00	\N
+503	6	2268	14	2026-10-02 17:00:00	45	videollamada	https://meet.google.com/demo-2268	completada	\N	2026-09-26 17:15:00	2026-10-02 17:50:00	\N
+504	6	2271	14	2026-09-30 15:00:00	45	videollamada	https://meet.google.com/demo-2271	completada	\N	2026-09-27 15:15:00	2026-09-30 15:50:00	\N
+505	6	2272	14	2026-09-30 11:00:00	45	videollamada	https://meet.google.com/demo-2272	completada	\N	2026-09-26 11:15:00	2026-09-30 11:50:00	\N
+506	6	2276	14	2026-09-28 12:00:00	45	videollamada	https://meet.google.com/demo-2276	completada	\N	2026-09-26 09:15:00	2026-09-28 12:50:00	\N
+507	6	2289	14	2026-10-01 11:00:00	45	videollamada	https://meet.google.com/demo-2289	completada	\N	2026-09-29 11:45:00	2026-10-01 11:50:00	\N
+508	6	2296	14	2026-10-07 15:00:00	45	videollamada	https://meet.google.com/demo-2296	completada	\N	2026-10-02 15:30:00	2026-10-07 15:50:00	\N
+509	6	2298	14	2026-10-07 11:00:00	45	videollamada	https://meet.google.com/demo-2298	completada	\N	2026-10-01 11:30:00	2026-10-07 11:50:00	\N
+510	6	2308	14	2026-10-07 09:00:00	45	videollamada	https://meet.google.com/demo-2308	completada	\N	2026-10-04 09:00:00	2026-10-07 09:50:00	\N
+511	6	2309	14	2026-10-05 10:00:00	45	videollamada	https://meet.google.com/demo-2309	completada	\N	2026-10-02 10:45:00	2026-10-05 10:50:00	\N
+512	6	2310	14	2026-10-07 10:00:00	45	videollamada	https://meet.google.com/demo-2310	completada	\N	2026-10-05 09:00:00	2026-10-07 10:50:00	\N
+513	6	2317	14	2026-10-12 09:00:00	45	videollamada	https://meet.google.com/demo-2317	completada	\N	2026-10-06 16:30:00	2026-10-12 09:50:00	\N
+514	6	2321	14	2026-10-12 14:00:00	45	videollamada	https://meet.google.com/demo-2321	completada	\N	2026-10-06 14:45:00	2026-10-12 14:50:00	\N
+515	6	2326	14	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-2326	pendiente	\N	2026-10-08 16:30:00	2026-10-08 16:30:00	\N
+516	6	2327	14	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-2327	confirmada	\N	2026-10-07 16:45:00	2026-10-07 17:45:00	\N
+517	6	2328	14	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-2328	confirmada	\N	2026-10-08 12:45:00	2026-10-08 13:45:00	\N
+518	6	2330	14	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-2330	confirmada	\N	2026-10-09 15:00:00	2026-10-09 16:00:00	\N
+519	6	2333	14	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-2333	pendiente	\N	2026-10-09 17:15:00	2026-10-09 17:15:00	\N
+520	6	2339	14	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-2339	confirmada	\N	2026-10-10 10:30:00	2026-10-10 11:30:00	\N
+521	6	2341	14	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-2341	pendiente	\N	2026-10-11 16:30:00	2026-10-11 16:30:00	\N
+522	6	2343	14	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-2343	pendiente	\N	2026-10-11 13:15:00	2026-10-11 13:15:00	\N
+523	6	2345	14	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-2345	pendiente	\N	2026-10-11 13:00:00	2026-10-11 13:00:00	\N
+524	6	2348	14	2026-10-19 12:00:00	45	videollamada	https://meet.google.com/demo-2348	pendiente	\N	2026-10-12 15:30:00	2026-10-12 15:30:00	\N
+525	6	2349	14	2026-10-14 10:00:00	45	videollamada	https://meet.google.com/demo-2349	confirmada	\N	2026-10-11 11:30:00	2026-10-11 12:30:00	\N
+526	6	2352	14	2026-10-22 09:00:00	45	videollamada	https://meet.google.com/demo-2352	pendiente	\N	2026-10-12 09:30:00	2026-10-12 09:30:00	\N
+527	6	2355	14	2026-10-22 10:00:00	45	videollamada	https://meet.google.com/demo-2355	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+528	6	2360	14	2026-10-07 12:00:00	45	videollamada	https://meet.google.com/demo-2360	completada	\N	2026-10-01 10:30:00	2026-10-07 12:50:00	\N
+529	6	2362	14	2026-10-05 09:00:00	45	videollamada	https://meet.google.com/demo-2362	completada	\N	2026-10-01 09:45:00	2026-10-05 09:50:00	\N
+530	6	2369	14	2026-10-09 12:00:00	45	videollamada	https://meet.google.com/demo-2369	completada	\N	2026-10-03 12:00:00	2026-10-09 12:50:00	\N
+531	6	2372	14	2026-10-12 10:00:00	45	videollamada	https://meet.google.com/demo-2372	completada	\N	2026-10-05 09:00:00	2026-10-12 10:50:00	\N
+532	6	2373	14	2026-10-09 16:00:00	45	videollamada	https://meet.google.com/demo-2373	completada	\N	2026-10-06 16:45:00	2026-10-09 16:50:00	\N
+533	6	2374	14	2026-10-12 11:00:00	45	videollamada	https://meet.google.com/demo-2374	completada	\N	2026-10-05 11:30:00	2026-10-12 11:50:00	\N
+534	6	2385	14	2026-10-22 11:00:00	45	videollamada	https://meet.google.com/demo-2385	pendiente	\N	2026-10-07 11:00:00	2026-10-07 11:00:00	\N
+535	6	2387	14	2026-10-14 11:00:00	45	videollamada	https://meet.google.com/demo-2387	pendiente	\N	2026-10-07 13:30:00	2026-10-07 13:30:00	\N
+536	6	2389	14	2026-10-19 13:00:00	45	videollamada	https://meet.google.com/demo-2389	pendiente	\N	2026-10-08 16:00:00	2026-10-08 16:00:00	\N
+537	6	2392	14	2026-10-19 14:00:00	45	videollamada	https://meet.google.com/demo-2392	pendiente	\N	2026-10-09 16:45:00	2026-10-09 16:45:00	\N
+538	6	2402	14	2026-10-20 10:00:00	45	videollamada	https://meet.google.com/demo-2402	confirmada	\N	2026-10-09 15:30:00	2026-10-09 16:30:00	\N
+539	6	2403	14	2026-10-19 15:00:00	45	videollamada	https://meet.google.com/demo-2403	confirmada	\N	2026-10-08 14:15:00	2026-10-08 15:15:00	\N
+540	6	2408	14	2026-10-19 16:00:00	45	videollamada	https://meet.google.com/demo-2408	pendiente	\N	2026-10-10 17:30:00	2026-10-10 17:30:00	\N
+541	6	2409	14	2026-10-19 17:00:00	45	videollamada	https://meet.google.com/demo-2409	confirmada	\N	2026-10-10 14:00:00	2026-10-10 15:00:00	\N
+542	6	2415	14	2026-10-20 11:00:00	45	videollamada	https://meet.google.com/demo-2415	pendiente	\N	2026-10-10 17:00:00	2026-10-10 17:00:00	\N
+543	6	2423	14	2026-10-20 12:00:00	45	videollamada	https://meet.google.com/demo-2423	confirmada	\N	2026-10-11 16:30:00	2026-10-11 17:30:00	\N
+544	6	2426	14	2026-10-21 11:00:00	45	videollamada	https://meet.google.com/demo-2426	pendiente	\N	2026-10-11 11:00:00	2026-10-11 11:00:00	\N
+545	6	2434	14	2026-10-16 10:00:00	45	videollamada	https://meet.google.com/demo-2434	pendiente	\N	2026-10-13 11:00:00	2026-10-13 11:00:00	\N
+546	6	2436	14	2026-10-20 13:00:00	45	videollamada	https://meet.google.com/demo-2436	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+547	7	2452	22	2026-10-21 09:00:00	45	videollamada	https://meet.google.com/demo-2452	confirmada	\N	2026-10-11 11:15:00	2026-10-11 12:15:00	\N
+548	7	2454	22	2026-10-15 09:00:00	45	videollamada	https://meet.google.com/demo-2454	confirmada	\N	2026-10-10 15:45:00	2026-10-10 16:45:00	\N
+549	7	2462	22	2026-10-22 09:00:00	45	videollamada	https://meet.google.com/demo-2462	confirmada	\N	2026-10-11 11:15:00	2026-10-11 12:15:00	\N
+550	7	2465	22	2026-10-19 09:00:00	45	videollamada	https://meet.google.com/demo-2465	confirmada	\N	2026-10-11 09:00:00	2026-10-11 10:00:00	\N
+551	7	2469	22	2026-10-20 09:00:00	45	videollamada	https://meet.google.com/demo-2469	pendiente	\N	2026-10-11 16:45:00	2026-10-11 16:45:00	\N
+552	7	2470	22	2026-10-19 10:00:00	45	videollamada	https://meet.google.com/demo-2470	pendiente	\N	2026-10-11 17:30:00	2026-10-11 17:30:00	\N
+553	7	2478	22	2026-10-15 10:00:00	45	videollamada	https://meet.google.com/demo-2478	pendiente	\N	2026-10-12 12:45:00	2026-10-12 12:45:00	\N
+554	7	2481	22	2026-10-19 11:00:00	45	videollamada	https://meet.google.com/demo-2481	pendiente	\N	2026-10-11 09:15:00	2026-10-11 09:15:00	\N
+555	7	2490	22	2026-10-19 12:00:00	45	videollamada	https://meet.google.com/demo-2490	pendiente	\N	2026-10-11 15:00:00	2026-10-11 15:00:00	\N
+556	7	2491	22	2026-10-20 10:00:00	45	videollamada	https://meet.google.com/demo-2491	confirmada	\N	2026-10-12 16:15:00	2026-10-12 17:15:00	\N
+557	7	2499	22	2026-10-20 11:00:00	45	videollamada	https://meet.google.com/demo-2499	pendiente	\N	2026-10-12 09:00:00	2026-10-12 09:00:00	\N
+558	7	2510	22	2026-10-15 11:00:00	45	videollamada	https://meet.google.com/demo-2510	pendiente	\N	2026-10-12 12:00:00	2026-10-12 12:00:00	\N
+559	7	2511	22	2026-10-19 13:00:00	45	videollamada	https://meet.google.com/demo-2511	confirmada	\N	2026-10-12 11:15:00	2026-10-12 12:15:00	\N
+560	7	2515	22	2026-10-14 09:00:00	45	videollamada	https://meet.google.com/demo-2515	confirmada	\N	2026-10-12 12:30:00	2026-10-12 13:30:00	\N
+561	7	2518	22	2026-10-15 12:00:00	45	videollamada	https://meet.google.com/demo-2518	confirmada	\N	2026-10-12 14:30:00	2026-10-12 15:30:00	\N
+562	7	2522	22	2026-10-22 10:00:00	45	videollamada	https://meet.google.com/demo-2522	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+563	7	2524	22	2026-10-19 14:00:00	45	videollamada	https://meet.google.com/demo-2524	pendiente	\N	2026-10-12 14:15:00	2026-10-12 14:15:00	\N
+564	7	2532	22	2026-10-19 15:00:00	45	videollamada	https://meet.google.com/demo-2532	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+565	7	2543	22	2026-10-19 16:00:00	45	videollamada	https://meet.google.com/demo-2543	pendiente	\N	2026-10-12 11:45:00	2026-10-12 11:45:00	\N
+566	7	2546	22	2026-10-19 17:00:00	45	videollamada	https://meet.google.com/demo-2546	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+567	7	2548	22	2026-10-21 10:00:00	45	videollamada	https://meet.google.com/demo-2548	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+568	7	2560	22	2026-10-20 12:00:00	45	videollamada	https://meet.google.com/demo-2560	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+569	7	2572	22	2026-10-20 13:00:00	45	videollamada	https://meet.google.com/demo-2572	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+570	7	2573	22	2026-10-21 11:00:00	45	videollamada	https://meet.google.com/demo-2573	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+571	7	2584	22	2026-10-14 10:00:00	45	videollamada	https://meet.google.com/demo-2584	pendiente	\N	2026-10-10 16:15:00	2026-10-10 16:15:00	\N
+572	7	2587	22	2026-10-20 14:00:00	45	videollamada	https://meet.google.com/demo-2587	pendiente	\N	2026-10-10 15:30:00	2026-10-10 15:30:00	\N
+573	7	2588	22	2026-10-15 13:00:00	45	videollamada	https://meet.google.com/demo-2588	pendiente	\N	2026-10-10 12:30:00	2026-10-10 12:30:00	\N
+574	7	2590	22	2026-10-20 15:00:00	45	videollamada	https://meet.google.com/demo-2590	confirmada	\N	2026-10-10 17:30:00	2026-10-10 18:30:00	\N
+575	7	2593	22	2026-10-15 14:00:00	45	videollamada	https://meet.google.com/demo-2593	pendiente	\N	2026-10-10 15:15:00	2026-10-10 15:15:00	\N
+576	7	2609	22	2026-10-20 16:00:00	45	videollamada	https://meet.google.com/demo-2609	confirmada	\N	2026-10-11 17:15:00	2026-10-11 18:15:00	\N
+577	7	2615	22	2026-10-20 17:00:00	45	videollamada	https://meet.google.com/demo-2615	pendiente	\N	2026-10-12 09:15:00	2026-10-12 09:15:00	\N
+578	7	2617	22	2026-10-21 12:00:00	45	videollamada	https://meet.google.com/demo-2617	pendiente	\N	2026-10-12 17:15:00	2026-10-12 17:15:00	\N
+579	7	2618	22	2026-10-21 13:00:00	45	videollamada	https://meet.google.com/demo-2618	pendiente	\N	2026-10-12 12:15:00	2026-10-12 12:15:00	\N
+580	7	2635	22	2026-10-15 15:00:00	45	videollamada	https://meet.google.com/demo-2635	confirmada	\N	2026-10-12 10:15:00	2026-10-12 11:15:00	\N
+581	7	2638	22	2026-10-21 14:00:00	45	videollamada	https://meet.google.com/demo-2638	confirmada	\N	2026-10-13 09:15:00	2026-10-13 10:15:00	\N
+582	7	2639	22	2026-10-21 15:00:00	45	videollamada	https://meet.google.com/demo-2639	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+583	7	2641	22	2026-10-22 11:00:00	45	videollamada	https://meet.google.com/demo-2641	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+584	7	2645	22	2026-10-14 11:00:00	45	videollamada	https://meet.google.com/demo-2645	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+585	7	2648	22	2026-10-15 16:00:00	45	videollamada	https://meet.google.com/demo-2648	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+586	7	2654	22	2026-10-16 09:00:00	45	videollamada	https://meet.google.com/demo-2654	confirmada	\N	2026-10-11 12:15:00	2026-10-11 13:15:00	\N
+587	7	2659	22	2026-10-21 16:00:00	45	videollamada	https://meet.google.com/demo-2659	pendiente	\N	2026-10-11 17:30:00	2026-10-11 17:30:00	\N
+588	7	2664	22	2026-10-21 17:00:00	45	videollamada	https://meet.google.com/demo-2664	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+589	7	2665	22	2026-10-22 12:00:00	45	videollamada	https://meet.google.com/demo-2665	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+590	7	2667	22	2026-10-15 17:00:00	45	videollamada	https://meet.google.com/demo-2667	confirmada	\N	2026-10-12 09:45:00	2026-10-12 10:45:00	\N
+591	7	2669	22	2026-10-22 13:00:00	45	videollamada	https://meet.google.com/demo-2669	confirmada	\N	2026-10-12 15:00:00	2026-10-12 16:00:00	\N
+593	7	2674	22	2026-10-16 10:00:00	45	videollamada	https://meet.google.com/demo-2674	confirmada	\N	2026-10-12 12:15:00	2026-10-12 13:15:00	\N
+594	7	2675	22	2026-10-22 15:00:00	45	videollamada	https://meet.google.com/demo-2675	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+597	7	2683	22	2026-10-23 09:00:00	45	videollamada	https://meet.google.com/demo-2683	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+598	7	2685	22	2026-10-16 11:00:00	45	videollamada	https://meet.google.com/demo-2685	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+599	7	2689	22	2026-10-23 10:00:00	45	videollamada	https://meet.google.com/demo-2689	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+601	7	2700	22	2026-10-16 12:00:00	45	videollamada	https://meet.google.com/demo-2700	confirmada	\N	2026-10-12 10:00:00	2026-10-12 11:00:00	\N
+602	7	2705	22	2026-10-16 13:00:00	45	videollamada	https://meet.google.com/demo-2705	pendiente	\N	2026-10-12 10:15:00	2026-10-12 10:15:00	\N
+603	7	2713	22	2026-10-23 12:00:00	45	videollamada	https://meet.google.com/demo-2713	pendiente	\N	2026-10-13 10:45:00	2026-10-13 10:45:00	\N
+604	7	2718	22	2026-10-16 14:00:00	45	videollamada	https://meet.google.com/demo-2718	confirmada	\N	2026-10-12 10:00:00	2026-10-12 11:00:00	\N
+605	7	2724	22	2026-10-23 13:00:00	45	videollamada	https://meet.google.com/demo-2724	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+606	7	2725	22	2026-10-23 14:00:00	45	videollamada	https://meet.google.com/demo-2725	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+607	7	2734	22	2026-10-23 15:00:00	45	videollamada	https://meet.google.com/demo-2734	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+609	7	2746	22	2026-10-14 12:00:00	45	videollamada	https://meet.google.com/demo-2746	confirmada	\N	2026-10-12 10:30:00	2026-10-12 11:30:00	\N
+610	7	2747	22	2026-10-23 17:00:00	45	videollamada	https://meet.google.com/demo-2747	confirmada	\N	2026-10-12 14:15:00	2026-10-12 15:15:00	\N
+611	7	2755	22	2026-10-26 09:00:00	45	videollamada	https://meet.google.com/demo-2755	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+613	7	2787	22	2026-10-26 11:00:00	45	videollamada	https://meet.google.com/demo-2787	pendiente	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+614	7	2792	22	2026-10-16 15:00:00	45	videollamada	https://meet.google.com/demo-2792	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+615	7	2797	22	2026-10-26 12:00:00	45	videollamada	https://meet.google.com/demo-2797	confirmada	\N	2026-10-13 12:01:21	2026-10-13 12:01:21	\N
+592	7	2673	22	2026-10-22 14:00:00	45	presencial	\N	confirmada	\N	2026-10-13 12:01:21	2026-10-21 18:46:14	Calle Mayor 410, Barranco, Lima
+595	7	2676	22	2026-10-22 16:00:00	45	telefonica	\N	pendiente	\N	2026-10-13 12:01:21	2026-10-21 18:46:14	Te llamaremos al teléfono de tu ficha en el horario acordado
+596	7	2678	22	2026-10-22 17:00:00	45	presencial	\N	confirmada	\N	2026-10-13 12:01:21	2026-10-21 18:46:14	Calle Mayor 410, Barranco, Lima
+600	7	2691	22	2026-10-23 11:00:00	45	presencial	\N	confirmada	\N	2026-10-13 12:01:21	2026-10-21 18:46:14	Calle Mayor 410, Barranco, Lima
+608	7	2745	22	2026-10-23 16:00:00	45	presencial	\N	pendiente	\N	2026-10-13 10:45:00	2026-10-21 18:46:14	Calle Mayor 410, Barranco, Lima
+612	7	2778	22	2026-10-26 10:00:00	45	presencial	\N	confirmada	\N	2026-10-13 12:01:21	2026-10-21 18:46:14	Calle Mayor 410, Barranco, Lima
+616	7	2801	22	2026-10-26 13:00:00	45	presencial	\N	confirmada	\N	2026-10-13 12:01:21	2026-10-21 18:46:14	Calle Mayor 410, Barranco, Lima
+120	1	444	3	2026-10-22 09:00:00	45	presencial	\N	confirmada	\N	2026-10-07 13:30:00	2026-10-21 18:46:13	Av. Javier Prado Este 2310, piso 8, San Borja, Lima
+455	4	2013	9	2026-10-22 09:00:00	45	telefonica	\N	confirmada	\N	2026-10-13 12:01:21	2026-10-21 18:46:13	Te llamaremos al teléfono de tu ficha en el horario acordado
+320	5	1398	11	2026-10-22 10:00:00	45	presencial	\N	confirmada	\N	2026-10-08 12:45:00	2026-10-21 18:46:13	Av. Larco 1150, piso 3, Miraflores, Lima
 \.
 
 
@@ -13261,6 +13262,7 @@ COPY public.migrations (id, migration, batch) FROM stdin;
 56	2026_10_21_100000_condiciones_de_la_vacante	8
 57	2026_10_21_110000_plan_vence_at_en_empresas	9
 58	2026_10_21_120000_avisos_de_vencimiento_del_plan	10
+91	2026_10_22_100000_lugar_de_la_entrevista	11
 \.
 
 
@@ -29800,7 +29802,6 @@ COPY public.users (id, name, email, email_verified_at, password, remember_token,
 267	Luis Ríos Vargas	luisrios317@correo.com	2026-10-02 16:29:19	$2y$04$gGVa8q4nxaDxMwsLjgoBWuAX1tUt7tkBYGvwL0zZPzO5Z99rttUMq	\N	2026-10-02 16:29:19	2026-10-02 16:29:19	t	\N	\N
 268	Andrés Bustamante Cáceres	andresbustamante318@correo.com	2026-10-02 23:33:02	$2y$04$.HI4JK23dvfjAfAxM1FBBeZilU0hIYwWZ0QwUI.MBh3AdOxGWWNg2	\N	2026-10-02 23:33:02	2026-10-02 23:33:02	t	\N	\N
 269	Cristian Peña Salas	cristianpena320@correo.com	2026-10-03 15:24:18	$2y$04$KATBiCLhhVs6fp59BAVnYOgfNa6aPHVfulKHcjOlfydXHQ0u6DV..	\N	2026-10-03 15:24:18	2026-10-03 15:24:18	t	\N	\N
-270	Mariana Condori Salas	marianacondori322@correo.com	2026-10-05 08:49:09	$2y$04$CO6NufX6NUkNCme4htKI4O8E.AO11Ys5lAXfM2ei9v.66849qcb1y	\N	2026-10-05 08:49:09	2026-10-05 08:49:09	t	\N	\N
 271	Brenda Roque Herrera	brendaroque323@correo.com	2026-10-07 03:36:45	$2y$04$2wNHDQEO1Ue7OW1GjyG.CuRvb6S//dP9/h9wAaNIV758ckep7GUNG	\N	2026-10-07 03:36:45	2026-10-07 03:36:45	t	\N	\N
 272	Marco López Chávez	marcolopez324@correo.com	2026-10-07 11:18:14	$2y$04$fcK1bUXGQW16OxsZAq03JeoHYpejWRUU/opVO3Z5tjp3VRSk30sVO	\N	2026-10-07 11:18:14	2026-10-07 11:18:14	t	\N	\N
 273	Rosa Navarro Campos	rosanavarro326@correo.com	2026-10-08 09:45:20	$2y$04$J.BEpRTUZDCfuNdr17LVo.c1k7mO8AiO4Ox.ghjW5z0bjiAfUVg9u	\N	2026-10-08 09:45:20	2026-10-08 09:45:20	t	\N	\N
@@ -31264,6 +31265,7 @@ COPY public.users (id, name, email, email_verified_at, password, remember_token,
 1734	Miguel Ramírez Paredes	miguelramirez2218@correo.com	2026-10-12 22:45:55	$2y$04$/qs4r/.wBmfjnccOjdaFDOj7nabstBdoeNtHYLcDPcKRBPP5pkmei	\N	2026-10-12 22:45:55	2026-10-12 22:45:55	t	\N	\N
 1735	Joaquín Cárdenas Valdivia	joaquincardenas2219@correo.com	2026-10-13 01:30:14	$2y$04$vXHtnYlDLFhFss9hIcQ8bOMCX0wlqpEz8kEVg8S9hE1.oSoOLp9gi	\N	2026-10-13 01:30:14	2026-10-13 01:30:14	t	\N	\N
 70	María Soto Carrasco	mariasoto57@correo.com	2026-09-02 03:53:33	$2y$12$4G8aXouiI/FrhnS3WL21POCRKFrV7Cp2SQhl9lwCooRupIhgNZAji	\N	2026-09-02 03:53:33	2026-10-15 12:30:16	t	\N	\N
+270	Mariana Condori Salas	marianacondori322@correo.com	2026-10-05 08:49:09	$2y$12$MNd.Rxvr8x.plAkLPEn5iubQphoR/LR74c.2gB3dWZVrueeCdA6t.	\N	2026-10-05 08:49:09	2026-10-21 18:46:37	t	\N	\N
 \.
 
 
@@ -31422,7 +31424,7 @@ SELECT pg_catalog.setval('public.jobs_id_seq', 2771, true);
 -- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.migrations_id_seq', 90, true);
+SELECT pg_catalog.setval('public.migrations_id_seq', 91, true);
 
 
 --

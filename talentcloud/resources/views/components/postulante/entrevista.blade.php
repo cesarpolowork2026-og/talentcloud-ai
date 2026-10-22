@@ -19,6 +19,12 @@
         <span class="text-13 text-neutral-800">{{ $vacante }}</span>
     @endif
     <span class="text-13 text-neutral-700">{{ $entrevista->modalidad->etiqueta() }} · {{ $entrevista->duracion_min }} min</span>
+    @if ($entrevista->lugar && $entrevista->estado !== EstadoEntrevista::Cancelada)
+        <span class="text-13 text-neutral-800"><strong>{{ $entrevista->modalidad->etiquetaDelLugar() }}:</strong> {{ $entrevista->lugar }}</span>
+    @elseif ($entrevista->modalidad->llevaLugar() && $entrevista->estado !== EstadoEntrevista::Cancelada)
+        {{-- Una entrevista anterior a este dato: se dice que la empresa lo confirmará, no se deja a la persona sin saber. --}}
+        <span class="text-13 text-neutral-700">{{ $entrevista->modalidad->exigeLugar() ? 'La empresa te confirmará la dirección.' : 'La empresa te llamará.' }}</span>
+    @endif
     @if ($enlace)
         <a href="{{ $enlace }}" target="_blank" rel="noopener noreferrer" class="text-13">Unirse a la videollamada</a>
     @endif

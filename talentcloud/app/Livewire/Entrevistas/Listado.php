@@ -67,6 +67,9 @@ class Listado extends Component
 
     public string $enlace = '';
 
+    /** Dirección (presencial) o teléfono/indicación (telefónica). */
+    public string $lugar = '';
+
     public string $notas = '';
 
     /** "Mover a la etapa Entrevista": marcado por defecto (el Kanban debe reflejar la entrevista). */
@@ -157,7 +160,7 @@ class Listado extends Component
         $this->authorize('create', Entrevista::class);
 
         $this->resetValidation();
-        $this->reset('postulacionId', 'entrevistadorId', 'iniciaAt', 'duracionMin', 'modalidad', 'enlace', 'notas', 'moverAEntrevista');
+        $this->reset('postulacionId', 'entrevistadorId', 'iniciaAt', 'duracionMin', 'modalidad', 'enlace', 'lugar', 'notas', 'moverAEntrevista');
         $this->postulacionId = $postulacionId ? (string) $postulacionId : '';
         // Por defecto, quien programa es el entrevistador (si es de la empresa).
         $this->entrevistadorId = $this->usuario()->empresa_id !== null ? (string) $this->usuario()->id : '';
@@ -183,6 +186,7 @@ class Listado extends Component
             'duracionMin' => ['required', Rule::in(array_keys(self::DURACIONES))],
             'modalidad' => ['required', Rule::enum(ModalidadEntrevista::class)],
             'enlace' => ['nullable', 'url:https,http', 'max:500'],
+            'lugar' => ['nullable', 'string', 'max:255'],
             'notas' => ['nullable', 'string', 'max:1000'],
         ], attributes: [
             'postulacionId' => 'candidato',
@@ -202,6 +206,7 @@ class Listado extends Component
                 enlace: $datos['enlace'] ?: null,
                 notas: $datos['notas'] ?: null,
                 moverAEntrevista: $this->moverAEntrevista,
+                lugar: $datos['lugar'] ?: null,
             ), $this->usuario());
         } catch (OperacionNoPermitida $e) {
             $this->addError($e->campo ?? 'postulacionId', $e->getMessage());
@@ -235,8 +240,12 @@ class Listado extends Component
         try {
             $reprogramar->ejecutar($entrevista, $datos);
         } catch (OperacionNoPermitida $e) {
-            // La fecha tiene su campo; el resto de reglas (estado, candidato, entrevistador) va arriba del formulario.
-            $this->addError($e->campo === 'iniciaAt' ? 'reprogramacion.iniciaAt' : 'reprogramacion', $e->getMessage());
+            // La fecha y el lugar tienen su campo; el resto de reglas (estado, candidato, entrevistador) va arriba del formulario.
+            $this->addError(match ($e->campo) {
+                'iniciaAt' => 'reprogramacion.iniciaAt',
+                'lugar' => 'reprogramacion.lugar',
+                default => 'reprogramacion',
+            }, $e->getMessage());
 
             return;
         }

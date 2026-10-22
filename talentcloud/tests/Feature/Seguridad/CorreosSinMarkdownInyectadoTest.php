@@ -73,7 +73,7 @@ it('tampoco en los avisos de estado, entrevista, postulación, plan y pago', fun
 })->with(function () {
     $datos = new DatosDeEntrevista(
         candidato: TEXTO_HOSTIL, vacante: TEXTO_HOSTIL, empresa: TEXTO_HOSTIL,
-        fecha: '14 oct · 10:00', duracionMin: 45, modalidad: 'Videollamada', enlace: null, candidatoId: 1,
+        fecha: '14 oct · 10:00', duracionMin: 45, modalidad: 'Presencial', enlace: null, candidatoId: 1, lugar: 'Dirección: '.TEXTO_HOSTIL,
     );
 
     return [

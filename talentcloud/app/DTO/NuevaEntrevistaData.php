@@ -18,6 +18,8 @@ final readonly class NuevaEntrevistaData
         public ?string $notas,
         /** Mover la postulación a "Entrevista" si aún está en Postulado o En revisión. */
         public bool $moverAEntrevista = false,
+        /** Dirección (presencial) o teléfono/indicación (telefónica). */
+        public ?string $lugar = null,
     ) {}
 
     public function terminaAt(): CarbonImmutable

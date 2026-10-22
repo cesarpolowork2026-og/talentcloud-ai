@@ -64,6 +64,10 @@ class AvisoEntrevistaReprogramada extends Notification implements ShouldQueue
             ->line(TextoDeCorreo::literal($this->texto()))
             ->line("Duración: {$this->datos->duracionMin} min · {$this->datos->modalidad}.");
 
+        if ($this->datos->lugar !== null) {
+            $mensaje->line(TextoDeCorreo::literal($this->datos->lugar));
+        }
+
         if (($enlace = EnlaceExterno::seguro($this->datos->enlace)) !== null) {
             return $mensaje->action('Unirse a la videollamada', $enlace);
         }

@@ -377,6 +377,7 @@ CREATE TABLE public.entrevistas (
     notas text,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
+    lugar character varying(255),
     CONSTRAINT entrevistas_duracion_check CHECK ((duracion_min > 0)),
     CONSTRAINT entrevistas_estado_check CHECK (((estado)::text = ANY (ARRAY[('pendiente'::character varying)::text, ('confirmada'::character varying)::text, ('completada'::character varying)::text, ('cancelada'::character varying)::text]))),
     CONSTRAINT entrevistas_modalidad_check CHECK (((modalidad)::text = ANY (ARRAY[('videollamada'::character varying)::text, ('presencial'::character varying)::text, ('telefonica'::character varying)::text])))

@@ -75,6 +75,10 @@ class AvisoDeEntrevista extends Notification implements ShouldQueue
 
         if (! $this->cancelada) {
             $mensaje->line("Duración: {$this->datos->duracionMin} min · {$this->datos->modalidad}.");
+
+            if ($this->datos->lugar !== null) {
+                $mensaje->line(TextoDeCorreo::literal($this->datos->lugar));
+            }
         }
 
         if (! $this->cancelada && ($enlace = EnlaceExterno::seguro($this->datos->enlace)) !== null) {

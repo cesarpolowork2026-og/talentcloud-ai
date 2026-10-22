@@ -21,6 +21,8 @@ class ReprogramacionForm extends Form
 
     public string $enlace = '';
 
+    public string $lugar = '';
+
     public function cargar(Entrevista $entrevista): void
     {
         $this->resetValidation();
@@ -29,6 +31,7 @@ class ReprogramacionForm extends Form
         $this->duracionMin = (string) $entrevista->duracion_min;
         $this->modalidad = $entrevista->modalidad->value;
         $this->enlace = (string) $entrevista->enlace;
+        $this->lugar = (string) $entrevista->lugar;
     }
 
     /** @return array<string, mixed> */
@@ -39,6 +42,7 @@ class ReprogramacionForm extends Form
             'duracionMin' => ['required', Rule::in(array_keys(Listado::DURACIONES))],
             'modalidad' => ['required', Rule::enum(ModalidadEntrevista::class)],
             'enlace' => ['nullable', 'url:https,http', 'max:500'],
+            'lugar' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -58,6 +62,7 @@ class ReprogramacionForm extends Form
             duracionMin: (int) $this->duracionMin,
             modalidad: ModalidadEntrevista::from($this->modalidad),
             enlace: $this->enlace !== '' ? $this->enlace : null,
+            lugar: $this->lugar !== '' ? $this->lugar : null,
         );
     }
 }

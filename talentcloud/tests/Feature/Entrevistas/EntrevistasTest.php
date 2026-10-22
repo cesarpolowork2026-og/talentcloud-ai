@@ -143,10 +143,12 @@ it('ofrece mover a Entrevista solo si el candidato aún no llegó a esa etapa', 
     expect($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::Oferta);
 });
 
-it('no guarda enlace si la entrevista no es por videollamada', function () {
-    programarEntrevista(['modalidad' => ModalidadEntrevista::Presencial->value])->assertHasNoErrors();
+it('no guarda enlace si la entrevista no es por videollamada y guarda su dirección', function () {
+    programarEntrevista(['modalidad' => ModalidadEntrevista::Presencial->value, 'lugar' => 'Av. Larco 1301, Miraflores'])->assertHasNoErrors();
 
-    expect(Entrevista::where('postulacion_id', $this->sofia->id)->value('enlace'))->toBeNull();
+    $entrevista = Entrevista::where('postulacion_id', $this->sofia->id)->first();
+
+    expect($entrevista->enlace)->toBeNull()->and($entrevista->lugar)->toBe('Av. Larco 1301, Miraflores');
 });
 
 it('aplica las reglas de la agenda', function (array $cambios, string $campo, string $mensaje) {

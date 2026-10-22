@@ -4,7 +4,6 @@ namespace App\Services\Entrevistas;
 
 use App\DTO\ReprogramacionData;
 use App\Enums\EstadoEntrevista;
-use App\Enums\ModalidadEntrevista;
 use App\Events\EntrevistaReprogramada;
 use App\Models\Entrevista;
 use App\Models\User;
@@ -32,7 +31,9 @@ class ReprogramarEntrevista
             throw new OperacionNoPermitida('La entrevista debe ser en una fecha y hora futuras.', 'iniciaAt');
         }
 
-        [$reprogramada, $fechaAnterior] = DB::transaction(function () use ($entrevista, $datos) {
+        $contacto = ContactoDeEntrevista::para($datos->modalidad, $datos->enlace, $datos->lugar);
+
+        [$reprogramada, $fechaAnterior] = DB::transaction(function () use ($entrevista, $datos, $contacto) {
             // Se relee bloqueada, igual que al cambiar de estado.
             $actual = Entrevista::whereKey($entrevista->id)->lockForUpdate()->firstOrFail();
 
@@ -57,7 +58,8 @@ class ReprogramarEntrevista
                 'inicia_at' => $datos->iniciaAt,
                 'duracion_min' => $datos->duracionMin,
                 'modalidad' => $datos->modalidad,
-                'enlace' => $datos->modalidad === ModalidadEntrevista::Videollamada ? $datos->enlace : null,
+                'enlace' => $contacto['enlace'],
+                'lugar' => $contacto['lugar'],
                 'estado' => EstadoEntrevista::Pendiente,
             ]);
 

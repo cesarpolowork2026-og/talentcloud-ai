@@ -14,6 +14,18 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class EntrevistaFactory extends Factory
 {
+    /** Una entrevista presencial, con su dirección. */
+    public function presencial(string $lugar = 'Av. Larco 1301, Miraflores'): static
+    {
+        return $this->state(fn () => ['modalidad' => ModalidadEntrevista::Presencial, 'lugar' => $lugar]);
+    }
+
+    /** Una entrevista telefónica, con su indicación. */
+    public function telefonica(string $lugar = 'Te llamaremos al +51 999 999 999'): static
+    {
+        return $this->state(fn () => ['modalidad' => ModalidadEntrevista::Telefonica, 'lugar' => $lugar]);
+    }
+
     /**
      * @return array<string, mixed>
      */

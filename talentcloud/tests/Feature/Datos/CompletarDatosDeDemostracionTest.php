@@ -1,11 +1,15 @@
 <?php
 
+use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\Jornada;
 use App\Models\Empresa;
+use App\Models\Entrevista;
+use App\Models\Postulacion;
 use App\Models\Vacante;
 use App\Tenancy\TenantContext;
 use Database\Seeders\Demo\CondicionesDeDemostracion;
+use Database\Seeders\Demo\ModalidadesDeEntrevistasDeDemostracion;
 use Database\Seeders\Demo\PerfilesDeEmpresasDeDemostracion;
 
 /*
@@ -66,4 +70,30 @@ it('la bolsa pública muestra el sueldo y la descripción de la empresa tras com
         ->assertOk()
         ->assertSee('1 130')
         ->assertSee('Cafeterías de especialidad con granos de altura');
+});
+
+it('el comando convierte algunas entrevistas futuras en presenciales y telefónicas, sin tocar lo ya ocurrido', function () {
+    $empresa = Empresa::factory()->create(['nombre' => 'Brío Retail']);
+    $p = Postulacion::factory()->paraVacante(Vacante::factory()->deEmpresa($empresa)->enEstado(EstadoVacante::Abierta)->create())->create();
+
+    // Los ids deciden: múltiplo de 4 = presencial; múltiplo de 7 (no de 4) = telefónica.
+    $creadas = [];
+    for ($i = 0; $i < 28; $i++) {
+        $creadas[] = Entrevista::factory()->create(['postulacion_id' => $p->id, 'inicia_at' => now()->addDays(2 + $i), 'estado' => EstadoEntrevista::Confirmada, 'enlace' => 'https://meet.example.com/x']);
+    }
+    $pasada = Entrevista::factory()->create(['postulacion_id' => $p->id, 'inicia_at' => now()->subDays(3), 'estado' => EstadoEntrevista::Completada]);
+
+    $this->artisan('talentcloud:completar-datos-demo')->assertSuccessful();
+
+    $presenciales = Entrevista::sinFiltroDeEmpresa()->where('modalidad', 'presencial')->get();
+    $telefonicas = Entrevista::sinFiltroDeEmpresa()->where('modalidad', 'telefonica')->get();
+
+    expect($presenciales)->not->toBeEmpty()->and($telefonicas)->not->toBeEmpty()
+        ->and($presenciales->every(fn (Entrevista $e) => $e->id % 4 === 0 && $e->lugar === ModalidadesDeEntrevistasDeDemostracion::SEDES['Brío Retail'] && $e->enlace === null))->toBeTrue()
+        ->and($telefonicas->every(fn (Entrevista $e) => $e->id % 4 !== 0 && $e->id % 7 === 0 && $e->lugar === ModalidadesDeEntrevistasDeDemostracion::INDICACION_TELEFONICA))->toBeTrue()
+        // Lo ya ocurrido sigue como estaba.
+        ->and(Entrevista::sinFiltroDeEmpresa()->find($pasada->id)->modalidad->value)->toBe('videollamada');
+
+    // Idempotente: otra vez no convierte nada más.
+    $this->artisan('talentcloud:completar-datos-demo')->expectsOutput('Entrevistas con dirección o teléfono: 0.')->assertSuccessful();
 });

@@ -19,6 +19,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $inicia_at
  * @property int $duracion_min
  * @property ModalidadEntrevista $modalidad
+ * @property string|null $lugar dirección (presencial) o teléfono/indicación (telefónica)
  * @property EstadoEntrevista $estado
  */
 class Entrevista extends Model
@@ -38,6 +39,7 @@ class Entrevista extends Model
         'duracion_min',
         'modalidad',
         'enlace',
+        'lugar',
         'estado',
         'notas',
     ];

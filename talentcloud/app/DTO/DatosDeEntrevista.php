@@ -22,6 +22,8 @@ final readonly class DatosDeEntrevista
         public string $modalidad,
         public ?string $enlace,
         public ?int $candidatoId = null,
+        /** Dónde es, ya con su etiqueta («Dirección: Av. Larco 1301»): lo escribió una persona, así que va como texto literal. */
+        public ?string $lugar = null,
     ) {}
 
     public static function de(Entrevista $entrevista): self
@@ -38,6 +40,7 @@ final readonly class DatosDeEntrevista
             // Solo http/https, aunque el formulario ya lo valide: el aviso lo pone como botón de un correo.
             enlace: EnlaceExterno::seguro($entrevista->enlace),
             candidatoId: $entrevista->postulacion?->candidato_id,
+            lugar: $entrevista->lugar !== null ? $entrevista->modalidad->etiquetaDelLugar().': '.$entrevista->lugar : null,
         );
     }
 }

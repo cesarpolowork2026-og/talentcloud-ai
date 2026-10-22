@@ -103,6 +103,9 @@ Notas: {{ $seleccionada->notas }}@endif</p>
             @if ($enlace = EnlaceExterno::seguro($seleccionada->enlace))
                 <p class="m-0 mt-2"><a href="{{ $enlace }}" target="_blank" rel="noopener noreferrer">Abrir enlace de la videollamada</a></p>
             @endif
+            @if ($seleccionada->lugar)
+                <p class="m-0 mt-2"><strong>{{ $seleccionada->modalidad->etiquetaDelLugar() }}:</strong> {{ $seleccionada->lugar }}</p>
+            @endif
         @endif
         <x-slot:actions>
             <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
@@ -148,6 +151,10 @@ Notas: {{ $seleccionada->notas }}@endif</p>
                 <x-ui.field label="Enlace de la videollamada (opcional)" for="reprogramar-enlace" error="reprogramacion.enlace">
                     <x-ui.input type="url" wire:model="reprogramacion.enlace" id="reprogramar-enlace" placeholder="https://meet.google.com/…" error="reprogramacion.enlace" />
                 </x-ui.field>
+            @elseif ($modalidadElegida = ModalidadEntrevista::tryFrom($reprogramacion->modalidad))
+                <x-ui.field :label="$modalidadElegida->etiquetaDelLugar().($modalidadElegida->exigeLugar() ? '' : ' (opcional)')" for="reprogramar-lugar" error="reprogramacion.lugar">
+                    <x-ui.input wire:model="reprogramacion.lugar" id="reprogramar-lugar" maxlength="255" :placeholder="$modalidadElegida->ejemploDelLugar()" error="reprogramacion.lugar" :required="$modalidadElegida->exigeLugar()" />
+                </x-ui.field>
             @endif
             <p class="m-0 text-13 text-neutral-700">Se avisará al candidato y al entrevistador. Si estaba confirmada, vuelve a quedar pendiente de confirmar.</p>
         </form>
@@ -187,6 +194,10 @@ Notas: {{ $seleccionada->notas }}@endif</p>
             @if ($modalidad === ModalidadEntrevista::Videollamada->value)
                 <x-ui.field label="Enlace de la videollamada (opcional)" for="entrevista-enlace" error="enlace">
                     <x-ui.input type="url" wire:model="enlace" id="entrevista-enlace" placeholder="https://meet.google.com/…" error="enlace" />
+                </x-ui.field>
+            @elseif ($modalidadElegida = ModalidadEntrevista::tryFrom($modalidad))
+                <x-ui.field :label="$modalidadElegida->etiquetaDelLugar().($modalidadElegida->exigeLugar() ? '' : ' (opcional)')" for="entrevista-lugar" error="lugar" hint="Lo verá el candidato en su aviso y en «Mis postulaciones».">
+                    <x-ui.input wire:model="lugar" id="entrevista-lugar" maxlength="255" :placeholder="$modalidadElegida->ejemploDelLugar()" error="lugar" :required="$modalidadElegida->exigeLugar()" />
                 </x-ui.field>
             @endif
             <x-ui.field label="Notas para el entrevistador (opcional)" for="entrevista-notas" error="notas">
