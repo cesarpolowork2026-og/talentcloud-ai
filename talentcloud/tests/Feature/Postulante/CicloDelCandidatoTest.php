@@ -240,7 +240,8 @@ it('«Mis postulaciones» muestra el progreso de cada proceso en marcha y nada d
 
     $html = Livewire::test(MisPostulaciones::class)->html();
 
-    // Una fila con progreso (compacto y oculto a lectores de pantalla) y la descartada sin inventar un recorrido.
-    expect(substr_count($html, 'class="viz progreso progreso-compacto'))->toBe(1)
+    // Una postulación con progreso (compacto y oculto a lectores de pantalla), una vez en la tabla y otra en la tarjeta del
+    // móvil, y la descartada sin inventar un recorrido.
+    expect(substr_count($html, 'class="viz progreso progreso-compacto'))->toBe(2)
         ->and($html)->toContain('En revisión')->toContain('No seleccionado');
 });

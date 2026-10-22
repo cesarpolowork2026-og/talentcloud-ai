@@ -11,6 +11,26 @@
                 <x-ui.button variant="primary" class="mt-4" :href="route('postulante.vacantes')" wire:navigate>Ver vacantes abiertas</x-ui.button>
             </x-ui.empty-state>
         @else
+            {{-- Desde 768 px, la tabla; en el teléfono una tarjeta por postulación (la tabla recortaba la columna Fecha). --}}
+            <ul class="m-0 grid list-none gap-3 p-0 md:hidden" aria-label="Mis postulaciones">
+                @foreach ($postulaciones as $postulacion)
+                    <li wire:key="mi-postulacion-tarjeta-{{ $postulacion->id }}">
+                        <x-ui.card class="tarjeta-clicable" wire:click="verDetalle({{ $postulacion->id }})">
+                            <div class="card-kicker">{{ $postulacion->vacante?->empresa?->nombre }}</div>
+                            <div class="card-title m-0">
+                                <x-ui.boton-fila wire:click.stop="verDetalle({{ $postulacion->id }})">{{ $postulacion->vacante?->titulo }}</x-ui.boton-fila>
+                            </div>
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <x-ui.estado :valor="EstadoDeMiPostulacion::de($postulacion)" />
+                                <span class="text-13 text-neutral-600">Postulaste el {{ Formato::fechaCorta($postulacion->created_at) }}</span>
+                            </div>
+                            <x-postulante.progreso :estado="EstadoDeMiPostulacion::de($postulacion)" compacto />
+                        </x-ui.card>
+                    </li>
+                @endforeach
+            </ul>
+
+            <div class="hidden md:block">
             <x-ui.table>
                 <x-slot:head>
                     <th>Vacante</th><th>Empresa</th><th>Estado</th><th>Fecha</th>
@@ -27,6 +47,7 @@
                     </tr>
                 @endforeach
             </x-ui.table>
+            </div>
         @endif
 
         <div class="grid gap-3">
