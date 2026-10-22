@@ -5,10 +5,13 @@ namespace App\Providers;
 use App\Pagos\PasarelaDePago;
 use App\Pagos\PasarelaStripe;
 use App\Tenancy\TenantContext;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Middleware\TrustProxies;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use LogicException;
@@ -54,6 +57,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Fechas en español ("23 sep", "30 de septiembre").
         Carbon::setLocale(config('app.locale'));
+
+        // API pública: 60 peticiones por minuto y por IP.
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
 
         $this->confiarEnLosProxies();
     }
