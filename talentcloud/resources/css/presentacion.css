@@ -56,6 +56,8 @@
   .legal p { margin: 0 0 var(--space-3); }
   .legal ul { margin: 0 0 var(--space-3); padding-left: 1.25rem; list-style: disc; }
   .legal li + li { margin-top: var(--space-1); }
+  /* Un enlace dentro de un texto se distingue por el subrayado, no solo por el color (WCAG 1.4.1). */
+  .legal a { text-decoration: underline; text-underline-offset: 2px; }
 
   /* El destino de un ancla queda por debajo de la barra fija. */
   .presentacion [id] { scroll-margin-top: 90px; }
