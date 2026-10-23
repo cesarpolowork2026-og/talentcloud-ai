@@ -1,26 +1,28 @@
 # Despliegue en un VPS
 
-TalentCloud AI completo (aplicación, cola, programador, base de datos con pgvector y servicio de IA) en **un solo servidor** con Docker Compose. Probado con 4 GB de RAM: con la IA analizando CV a plena carga, el conjunto usa unos 1,8 GB.
+TalentCloud AI (unidad I: aplicación, cola, planificador, base de datos y servidor web con HTTPS) en **un solo servidor** con Docker Compose. Probado en un servidor de 4 GB de RAM: en reposo los cinco contenedores usan unos 250 MB y sus límites de memoria suman 1,8 GB.
 
 ```
-Internet ──► Caddy (HTTPS, puertos 80/443) ──► app (PHP-FPM) ──► db (PostgreSQL + pgvector)
-                                                  │  └─► queue (cola)   └─► scheduler (tareas diarias)
-                                                  └──► ia (FastAPI + modelo de embeddings)
+Internet ──► Caddy (HTTPS, puertos 80/443) ──► app (PHP-FPM) ──► db (PostgreSQL 17)
+                                                  ├─► queue (cola de trabajos)
+                                                  └─► scheduler (tareas diarias)
 ```
 
-Solo Caddy se publica a internet. La base de datos y el servicio de IA viven en la red interna de Docker.
+Solo Caddy se publica a internet. La base de datos, la cola y el planificador viven en la red interna de Docker.
+
+La base de datos usa la imagen `pgvector/pgvector:pg17` (PostgreSQL 17 con la extensión pgvector): se conserva porque una de las migraciones habilita esa extensión, que se usará en la unidad II.
 
 | Archivo | Para qué sirve |
 | --- | --- |
-| `docker-compose.prod.yml` | Los seis servicios, con límites de memoria |
+| `docker-compose.prod.yml` | Los cinco servicios, con límites de memoria |
 | `.env.example` | Plantilla de configuración (se copia a `.env`, que no se sube a GitHub) |
 | `respaldo.sh` | Copia de la base y de los CV |
 | `../talentcloud/Dockerfile` | Imágenes `app` y `web` |
-| `../.github/workflows/despliegue.yml` | Construye las imágenes en GitHub y, si se pide, actualiza el servidor |
+| `../.github/workflows/despliegue.yml` | Opcional: construye las imágenes en GitHub y, si se pide, actualiza el servidor |
 
 ## 1. Preparar el servidor (una sola vez)
 
-Ubuntu 24.04 LTS o Debian 13, mínimo 4 GB de RAM.
+Ubuntu 24.04 LTS o Debian 13, con 4 GB de RAM.
 
 ```bash
 ssh root@<IP>
@@ -62,26 +64,34 @@ En `.env`, completar como mínimo:
 | `SITE_ADDRESS` y `APP_URL` | Con la IP `203.0.113.10`, usar `203-0-113-10.sslip.io` y `https://203-0-113-10.sslip.io`. Con un dominio propio, ese dominio. |
 | `APP_KEY` | `php -r 'echo "base64:".base64_encode(random_bytes(32));'` (o con Docker: `docker run --rm php:8.2-cli php -r '...'`) |
 | `DB_PASSWORD` | `openssl rand -base64 24` |
-| `IA_API_KEY` | `openssl rand -base64 32` |
 | `MAIL_*` | Un SMTP real (por ejemplo Gmail con una contraseña de aplicación). `MAIL_FROM_ADDRESS` **no puede quedar vacío**: sin remitente, cada aviso por correo falla en la cola. |
 
 ## 3. Obtener las imágenes
 
-Compilar PyTorch y el frontend no cabe en un servidor de 4 GB, así que se construyen en GitHub:
+Hay dos formas; la primera es la que se usa en el servidor de demostración.
+
+**A. Construir en el propio servidor** (la imagen del servidor web incluye la compilación de la interfaz; tarda unos minutos la primera vez y menos con la caché):
+
+```bash
+cd ~/talentcloud/deploy
+COMPOSE_PARALLEL_LIMIT=1 DOCKER_BUILDKIT=1 docker compose -f docker-compose.prod.yml build app web
+```
+
+**B. Construirlas en GitHub** (útil si el servidor es más pequeño):
 
 1. En GitHub: **Actions → despliegue → Run workflow** (deja "desplegar" sin marcar la primera vez).
 2. En el servidor, iniciar sesión en el registro con un token personal que tenga el permiso `read:packages`:
    ```bash
    echo <TOKEN> | docker login ghcr.io -u <usuario-de-github> --password-stdin
+   docker compose -f docker-compose.prod.yml pull
    ```
 
 ## 4. Arrancar
 
 ```bash
 cd ~/talentcloud/deploy
-docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
-docker compose -f docker-compose.prod.yml run --rm app php artisan migrate --force
+docker compose -f docker-compose.prod.yml exec -T app php artisan migrate --force
 curl -s https://<SITE_ADDRESS>/up            # debe responder 200
 ```
 
@@ -96,7 +106,7 @@ $C exec -T db psql -U talentcloud -d talentcloud -v ON_ERROR_STOP=1 < ../talentc
 $C exec -T app php artisan optimize:clear
 ```
 
-> **Seguridad:** las cuentas de demostración usan la contraseña `password`, y el servidor es público. Cambiar al menos la del administrador:
+> **Seguridad:** en el volcado todas las cuentas de demostración usan la contraseña `password`, y el servidor es público. Antes de exponerlo hay que cambiarlas (por ejemplo, una contraseña distinta por cuenta). Ejemplo para una cuenta:
 > ```bash
 > $C exec -T app php artisan tinker --execute="App\Models\User::where('email','admin@talentcloud.ai')->first()->forceFill(['password'=>bcrypt('NUEVA-CLAVE-LARGA')])->save();"
 > ```
@@ -114,28 +124,26 @@ Tras arrancar, comprobar que todo responde y que no hay errores:
 
 ```bash
 C="docker compose -f docker-compose.prod.yml"
-$C ps                                                         # los seis servicios en "Up" (app, db e ia "healthy")
+$C ps                                                         # los cinco servicios en "Up" (app y db "healthy")
 curl -s -o /dev/null -w "%{http_code}
 " https://<SITE_ADDRESS>/up        # 200
-$C exec -T app php -r 'echo file_get_contents("http://ia:8080/health");'   # {"estado":"ok", ...}
+curl -s https://<SITE_ADDRESS>/api/v1/salud                  # {"estado":"ok","base_de_datos":true,"version":"v1"}
 $C exec -T db psql -U talentcloud -d talentcloud -tAc "select count(*) from failed_jobs"   # 0
 ```
 
-Después, iniciar sesión con una cuenta de la tabla de la raíz, subir un CV y comprobar que se analiza y que el matching aparece en la postulación.
+Después, iniciar sesión con una cuenta de la tabla de la raíz, subir un CV y comprobar que pasa a «procesado» y que la ficha de la postulación muestra qué requisitos aparecen en él.
 
 ### Recursos medidos
 
-Pila completa en Docker limitada a 2 núcleos (como un VPS-1) y a 4 (como un VPS-2), con los 2 261 CV de la demostración. La medición se hizo en un PC de escritorio: los núcleos de un VPS pueden ser algo más lentos.
+Medidos el 22 y 23 de octubre de 2026 en el servidor de demostración (4 GB de RAM), con los datos de demostración (2 261 CV):
 
-| Prueba | 2 núcleos | 4 núcleos |
-| --- | --- | --- |
-| Analizar un CV nuevo con IA (mediana) | 123 ms | 108 ms |
-| Cola de 40 análisis | 8 s | 7 s |
-| Web con la IA trabajando: mediana / peor caso | 28 / 307 ms | 29 / 287 ms |
-| Recrear los 2 261 archivos de CV | 8 s | 8 s |
-| Memoria total en plena carga | ~1,1 GB | ~1,1 GB |
+| Medición | Resultado |
+| --- | --- |
+| Memoria de los contenedores en reposo | app 56 MB, db 83 MB, queue 46 MB, scheduler 44 MB, web 14 MB (unos 244 MB en total) |
+| Tiempo hasta el primer byte de las páginas principales | de 144 a 248 ms (mediana de 3 cargas) |
+| Tiempo de carga completa de las páginas principales | de 206 a 401 ms |
 
-El servicio de IA es lo más pesado (~0,95 GB). Con 4 GB de RAM y 2 GB de swap sobra margen.
+Con 4 GB de RAM y los límites del `docker-compose.prod.yml` (1,8 GB en total) sobra margen.
 
 ## 5. Actualizar
 

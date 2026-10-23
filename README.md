@@ -1,59 +1,57 @@
 # TalentCloud AI
 
-Plataforma SaaS para gestionar la selección de talento. La IA extrae información de los CV, compara los requisitos de una vacante con las competencias de cada candidato y explica cada coincidencia con el fragmento del CV que la respalda. La decisión es siempre del reclutador: el porcentaje ordena y explica, nunca mueve ni descarta a nadie.
+Plataforma SaaS para gestionar la selección de talento: la empresa publica vacantes con sus requisitos, recibe postulaciones, revisa los currículos frente a esos requisitos, agenda entrevistas, registra evaluaciones y decide. El sistema ayuda y muestra su evidencia; la decisión es siempre del reclutador.
 
-Proyecto de la asignatura *Aplicaciones en la Nube*.
+Proyecto de la asignatura *Aplicaciones en la Nube*. Este repositorio corresponde a la **unidad I**: aplicación web completa y funcional en Laravel, con base de datos real, API REST inicial y despliegue en un servidor virtual. La comparación semántica con inteligencia artificial, los microservicios y el despliegue en más de una nube se trabajan en las unidades II y III.
+
+- Demostración en vivo: https://40-160-96-65.sslip.io/
+- API REST de vacantes abiertas: https://40-160-96-65.sslip.io/api/v1/vacantes (documentación en [`talentcloud/docs/API.md`](talentcloud/docs/API.md))
 
 ## Qué incluye
 
 **Usuarios:** administrador SaaS, empresa, reclutador y postulante.
 
-**Módulos:** empresas, vacantes, candidatos, CV, competencias, postulaciones, entrevistas, evaluaciones, matching inteligente y dashboard.
+**Módulos:** empresas y planes, vacantes con requisitos, candidatos, CV, catálogo de competencias, postulaciones en un tablero por etapas, entrevistas, evaluaciones, notas internas, portal y bolsa pública de empleos, avisos por correo y campana, exportación a Excel y paneles (dashboard) según el perfil.
 
-**IA:** extracción de información de CV (NLP), embeddings, matching semántico y explicabilidad.
+**Análisis de requisitos de la unidad I (sin IA):** el sistema extrae el texto de cada CV (PDF o Word) y busca en él cada competencia pedida por la vacante, o sus sinónimos del catálogo. Para cada requisito indica si aparece, con el fragmento del CV como evidencia, y avisa de los obligatorios que faltan. Es una ayuda para revisar: que una competencia no aparezca no significa que la persona no la tenga, y el sistema nunca mueve ni descarta a nadie.
 
 | Pedido del enunciado | Dónde está |
 | --- | --- |
-| Cuatro roles | `talentcloud/app/Enums/Rol.php` |
+| Cuatro roles | `talentcloud/app/Enums/Rol.php` y `talentcloud/app/Policies/` |
 | Módulos de la aplicación | `talentcloud/app/Livewire/` |
-| Extracción de datos del CV | `talentcloud-ai/src/talentcloud_ai/extraccion/` |
-| Embeddings | `talentcloud-ai/src/talentcloud_ai/embeddings/` |
-| Matching semántico | `talentcloud-ai/src/talentcloud_ai/matching/` |
-| Explicación de coincidencias y diferencias | `talentcloud-ai/src/talentcloud_ai/explicabilidad/` |
-| Evidencia textual para el reclutador | Pantalla `/matching/{postulacion}` de la aplicación |
-
-Si el servicio de IA no responde, la aplicación calcula un análisis básico por palabras clave y lo marca como tal, para que el proceso no se detenga.
+| Extracción del texto del CV | `talentcloud/app/Services/Cvs/Extraccion/` |
+| Análisis de requisitos con evidencia textual | `talentcloud/app/Services/Postulaciones/AnalisisBasicoDeRequisitos.php` |
+| Aislamiento entre empresas (multi-tenant) | `talentcloud/app/Tenancy/` |
+| API REST inicial | `talentcloud/routes/api.php` y `talentcloud/docs/API.md` |
 
 ## Arquitectura
 
 ```
-Navegador ──► Laravel 12 + Livewire ──► PostgreSQL 17 + pgvector
-                    │
-                    ├── cola de trabajos (IA, correos, avisos)
-                    │
-                    └──► Servicio de IA (FastAPI, sin base de datos)
-                         extracción · embeddings · matching · explicación
+Navegador ──HTTPS──► Caddy ──► Laravel 12 + Livewire ──► PostgreSQL 17
+                                  │
+                                  ├── cola de trabajos (lectura de CV, correos, avisos)
+                                  └── planificador (tareas diarias, avisos de vencimiento de planes)
 ```
 
-Laravel guarda los datos y envía al servicio el texto del CV, el catálogo de competencias y los requisitos. El servicio devuelve el resultado y Laravel lo guarda. Cada empresa solo ve sus datos (multi-tenant a nivel de aplicación, con restricciones adicionales en la base).
+Capas: pantalla (Livewire) → servicio (reglas de negocio) → repositorio → modelo. Cada empresa solo ve sus datos: la aplicación filtra por empresa en cada consulta y la base de datos impide relacionar filas de empresas distintas.
 
 ## Carpetas
 
 | Carpeta | Contenido |
 | --- | --- |
 | `talentcloud/` | Aplicación Laravel 12 (PHP 8.2, Livewire 3, Tailwind 3) |
-| `talentcloud-ai/` | Servicio de IA en Python 3.11 y FastAPI |
-| `.github/workflows/` | Pruebas automáticas de ambos proyectos |
+| `deploy/` | Despliegue en un servidor con Docker Compose y copias de seguridad |
+| `.github/workflows/` | Pruebas automáticas y construcción de imágenes |
 
 Cada carpeta tiene su propio `README.md` con más detalle.
 
 ## Cómo ejecutarlo
 
-Requisitos: PHP 8.2 (con `pdo_pgsql`, `intl`, `zip`, `gd`), Composer 2, Node 20 o superior, Docker y [uv](https://docs.astral.sh/uv/) para el servicio de IA.
+Requisitos: PHP 8.2 (con `pdo_pgsql`, `intl`, `zip`, `gd` y OPcache), Composer 2, Node 22 y Docker.
 
 ```bash
 cd talentcloud
-docker compose up -d              # PostgreSQL + pgvector (puerto 5433) y Mailpit
+docker compose up -d              # PostgreSQL 17 (puerto 5433) y Mailpit
 cp .env.example .env              # completar DB_PASSWORD
 composer install && npm install
 php artisan key:generate
@@ -61,13 +59,11 @@ php artisan migrate:fresh --seed  # estructura y datos de demostración
 composer dev                      # http://localhost:8000
 ```
 
-Para activar la IA: `(cd ../talentcloud-ai && uv sync --extra ml)` y, en el `.env`, `IA_HABILITADA=true` y `MATCHING_ENGINE=http`. La primera vez se descarga el modelo (unos 470 MB). Sin ella, todo funciona con el análisis básico.
-
 Los correos que envía la aplicación se ven en http://localhost:8025 (Mailpit).
 
 ## Cuentas de demostración
 
-Todas usan la contraseña `password`. Los datos son ficticios.
+Todas usan la contraseña `password` en local. Los datos son sintéticos: personas, empresas, teléfonos, correos y CV son ficticios.
 
 | Cuenta | Rol |
 | --- | --- |
@@ -76,29 +72,41 @@ Todas usan la contraseña `password`. Los datos son ficticios.
 | `marta@nimbus.com` | Reclutador (Nimbus Corp) |
 | `marco@correo.com` | Postulante |
 
-La lista completa está en [`talentcloud/README.md`](talentcloud/README.md#datos-de-demostración).
+La lista completa está en [`talentcloud/README.md`](talentcloud/README.md#datos-de-demostración). Las cuentas del servidor desplegado tienen otras contraseñas.
 
 ## Base de datos
 
-- Migraciones: `talentcloud/database/migrations/` (45).
+- 31 tablas y 52 migraciones: `talentcloud/database/migrations/`.
 - Volcados de PostgreSQL en `talentcloud/database/esquema/`:
-  - `talentcloud_esquema.sql`: solo la estructura (33 tablas).
+  - `talentcloud_esquema.sql`: solo la estructura.
   - `talentcloud_completa.sql`: estructura y datos de demostración.
 - Cómo restaurarlos: [`talentcloud/database/esquema/LEEME.md`](talentcloud/database/esquema/LEEME.md).
 
+## API REST
+
+Rutas públicas de solo lectura bajo `/api/v1`: `GET /salud`, `GET /vacantes` (con búsqueda, filtro por modalidad y paginación) y `GET /vacantes/{id}`. Límite de 60 peticiones por minuto por dirección IP.
+
+```bash
+curl "https://40-160-96-65.sslip.io/api/v1/vacantes?modalidad=remoto&por_pagina=2"
+```
+
 ## Despliegue
 
-Pila completa para un servidor con Docker (aplicación, cola, programador, base de datos con pgvector, servicio de IA y HTTPS automático) en [`deploy/`](deploy/). La guía paso a paso, incluidas las copias de seguridad, está en [`deploy/README.md`](deploy/README.md).
+Pila para un servidor con Docker (aplicación, cola, planificador, base de datos y HTTPS automático) en [`deploy/`](deploy/). La guía paso a paso, incluidas las copias de seguridad, está en [`deploy/README.md`](deploy/README.md).
 
 ## Pruebas y calidad
 
 ```bash
 cd talentcloud && composer check      # Pint + Larastan (nivel 6) + Pest
-cd talentcloud-ai && uv run pytest    # + ruff y mypy
 ```
 
-La aplicación tiene más de 800 pruebas automáticas y el servicio de IA, 149. El recorrido completo en navegador real está en `talentcloud/tests/e2e/`.
+La aplicación tiene más de 850 pruebas automáticas contra PostgreSQL. Además hay scripts de Playwright para recorridos en navegador real en `talentcloud/tests/e2e/`.
 
 ## Pagos
 
-Los planes de pago usan Stripe en **modo de prueba**; no se cobra dinero real. Sin las claves de Stripe, la empresa solicita el plan y el administrador SaaS lo aplica desde «Empresas». Más detalle en [`talentcloud/README.md`](talentcloud/README.md#pagos-con-stripe).
+Los planes de pago usan Stripe en **modo de prueba**; no se cobra dinero real. Con la pasarela apagada (`PAGOS_PASARELA` vacío, como en esta unidad), la empresa solicita el plan y el administrador SaaS lo aplica desde «Empresas». Más detalle en [`talentcloud/README.md`](talentcloud/README.md#pagos-con-stripe-unidad-3).
+
+## Próximas unidades
+
+- **Unidad II:** comparación semántica con inteligencia artificial como servicio independiente, API documentada con al menos dos servicios y contenedores para todos los componentes.
+- **Unidad III:** despliegue en Google Cloud y en una segunda plataforma, seguridad, observabilidad y evaluación.
