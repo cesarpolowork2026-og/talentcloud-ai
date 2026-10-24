@@ -116,9 +116,8 @@ Tarjetas de prueba: `4242 4242 4242 4242` (aprobada), `4000 0000 0000 9995` (fon
 
 ### Probar los pagos
 
-- **Automáticas (`composer check`):** `PagosEnLineaTest` y `PasarelaStripeTest` cubren el pago confirmado, el cobro fallido y sus
-  reintentos, la cancelación, los avisos repetidos o tardíos y la firma alterada o vencida, con una pasarela falsa.
-- **Contra el entorno de pruebas real de Stripe (opt-in, con red):** `STRIPE_LIVE_TESTS=1 php artisan test --filter=StripeEnModoDePrueba`.
+- **Automáticas (`composer check`):** en la entrega de la unidad I la suite no incluye pruebas del cobro en línea (la unidad I se entrega sin pasarela activa). Se retomarán con la pasarela en la unidad siguiente.
+- **Contra el entorno de pruebas real de Stripe (opt-in, con red):** `STRIPE_LIVE_TESTS=1 php artisan test --filter=StripeEnModoDePrueba` (esa prueba se retiró de la suite de la unidad I).
   Usa las claves de prueba del `.env`, se niega a correr con una que no sea `sk_test_`, crea clientes y suscripciones sintéticos
   (`example.com`) y los borra al terminar. El aviso se firma localmente con `STRIPE_WEBHOOK_SECRET` y se envía a `/stripe/webhook`:
   no hace falta túnel. Si una ejecución se interrumpe, los clientes huérfanos llevan `metadata.origen = auditoria-talentcloud`.
