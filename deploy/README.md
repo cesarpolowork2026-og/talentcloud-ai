@@ -19,6 +19,7 @@ La base de datos usa la imagen `pgvector/pgvector:pg17` (PostgreSQL 17 con la ex
 | `respaldo.sh` | Copia de la base y de los CV |
 | `../talentcloud/Dockerfile` | Imágenes `app` y `web` |
 | `../.github/workflows/despliegue.yml` | Opcional: construye las imágenes en GitHub y, si se pide, actualiza el servidor |
+| `PLAN_MIGRACION_GCP.md` | Plan de migración a una máquina virtual de Google Compute Engine |
 
 ## 1. Preparar el servidor (una sola vez)
 
