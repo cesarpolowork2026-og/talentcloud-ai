@@ -39,7 +39,7 @@ new #[Layout('layouts.guest')] #[Title('Verificar correo')] class extends Compon
 
 <div class="contents">
     <h2 class="mb-2 text-28">Verifica tu correo</h2>
-    <p class="mb-6 text-15 text-neutral-700">Te enviamos un enlace de verificación. Ábrelo para activar tu cuenta; si no lo encuentras, podemos enviarte otro.</p>
+    <p class="mb-6 text-15 text-neutral-700">Te enviamos un enlace de verificación. Ábrelo para activar tu cuenta. Si no lo ves en unos minutos, revisa la carpeta de spam o correo no deseado; si tampoco está allí, podemos enviarte otro.</p>
 
     @if (session('status') == 'verification-link-sent')
         <p class="mb-4 text-14 text-accent-700" role="status">Enviamos un nuevo enlace de verificación a tu correo.</p>

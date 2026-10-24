@@ -16,9 +16,12 @@ class SitemapController extends Controller
     /** Páginas públicas que se indexan. «/login» no: es la misma presentación con el diálogo abierto. */
     private const FIJAS = ['inicio', 'empleos.index', 'planes', 'privacidad', 'terminos'];
 
+    /** Fuera de la vista: Blade compila mal un `<?xml … ?>` escrito en la plantilla (error de sintaxis de PHP). */
+    private const DECLARACION = '<?xml version="1.0" encoding="UTF-8"?>';
+
     public function __invoke(VacanteRepository $vacantes): Response
     {
-        $xml = BolsaPublica::sitemap(fn (): string => view('sitemap', [
+        $xml = BolsaPublica::sitemap(fn (): string => self::DECLARACION."\n".view('sitemap', [
             'fijas' => array_map(fn (string $ruta) => route($ruta), self::FIJAS),
             'vacantes' => $vacantes->publicadasParaSitemap()->get(),
         ])->render());

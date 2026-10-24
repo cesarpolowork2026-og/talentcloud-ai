@@ -29,6 +29,12 @@
                         <span><strong>Panorama de la plataforma.</strong> Aquí ves cómo avanzan las empresas hoy. Cada empresa decide sobre sus propios candidatos.</span>
                     </p>
                 @endif
+                @if (session('correo_verificado'))
+                    <p class="card mb-6 !flex-row items-center gap-2 text-14" role="status">
+                        <x-ui.icon name="check-circle" :size="18" class="shrink-0 text-accent-700" />
+                        <span><strong>Tu correo quedó verificado.</strong> Tu cuenta ya está activa.</span>
+                    </p>
+                @endif
                 {{ $slot }}
             </div>
         </main>
