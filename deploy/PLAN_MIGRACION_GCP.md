@@ -1,6 +1,6 @@
 # Plan de migración a Google Cloud (Compute Engine)
 
-Este plan describe cómo llevar TalentCloud AI desde el servidor virtual donde hoy se ejecuta (un VPS con Ubuntu 24.04 y Docker Compose, accesible en `https://40-160-96-65.sslip.io/`) a una máquina virtual de Google Compute Engine. El plan es previo a la migración: describe qué se hará, en qué orden y cómo se vuelve atrás si algo falla.
+Este plan describe cómo llevar TalentCloud AI desde el servidor virtual donde hoy se ejecuta (un VPS con Ubuntu 24.04 y Docker Compose, accesible en `https://talentcloudia.online/`) a una máquina virtual de Google Compute Engine. El plan es previo a la migración: describe qué se hará, en qué orden y cómo se vuelve atrás si algo falla.
 
 ## 1. Inventario de la aplicación
 

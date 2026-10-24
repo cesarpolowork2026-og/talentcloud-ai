@@ -62,7 +62,7 @@ En `.env`, completar como mínimo:
 
 | Variable | Valor |
 | --- | --- |
-| `SITE_ADDRESS` y `APP_URL` | Con la IP `203.0.113.10`, usar `203-0-113-10.sslip.io` y `https://203-0-113-10.sslip.io`. Con un dominio propio, ese dominio. |
+| `SITE_ADDRESS` y `APP_URL` | Con un dominio propio, ese dominio (en la demostración, `talentcloudia.online`; se pueden listar varias direcciones separadas por comas). Sin dominio, con la IP `203.0.113.10`, usar `203-0-113-10.sslip.io` y `https://203-0-113-10.sslip.io`. |
 | `APP_KEY` | `php -r 'echo "base64:".base64_encode(random_bytes(32));'` (o con Docker: `docker run --rm php:8.2-cli php -r '...'`) |
 | `DB_PASSWORD` | `openssl rand -base64 24` |
 | `MAIL_*` | Un SMTP real (por ejemplo Gmail con una contraseña de aplicación). `MAIL_FROM_ADDRESS` **no puede quedar vacío**: sin remitente, cada aviso por correo falla en la cola. |

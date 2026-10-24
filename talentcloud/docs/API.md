@@ -2,7 +2,7 @@
 
 API pública y **de solo lectura** con las vacantes abiertas, es decir, lo mismo que muestra la bolsa de empleos (`/empleos`). Sirve para que otras aplicaciones (un portal de empleo, una app móvil, un agregador) consulten las ofertas sin pasar por las pantallas.
 
-- **URL base:** `https://40-160-96-65.sslip.io/api/v1` (en local, `http://localhost:8000/api/v1`).
+- **URL base:** `https://talentcloudia.online/api/v1` (en local, `http://localhost:8000/api/v1`).
 - **Formato:** JSON en UTF-8. Los errores también responden JSON.
 - **Autenticación:** ninguna. Solo se expone información que ya es pública; no hay endpoints de escritura ni de datos de candidatos o de empresas.
 - **Límite:** 60 peticiones por minuto y por IP. Al excederlo responde `429`.
@@ -21,7 +21,7 @@ Cualquier otro método sobre estas rutas (`POST`, `PUT`, `DELETE`) responde `405
 ### GET /salud
 
 ```bash
-curl https://40-160-96-65.sslip.io/api/v1/salud
+curl https://talentcloudia.online/api/v1/salud
 ```
 
 ```json
@@ -44,7 +44,7 @@ Parámetros de consulta (todos opcionales):
 Ordenadas de la más reciente a la más antigua.
 
 ```bash
-curl "https://40-160-96-65.sslip.io/api/v1/vacantes?modalidad=remoto&q=desarrollador&por_pagina=2"
+curl "https://talentcloudia.online/api/v1/vacantes?modalidad=remoto&q=desarrollador&por_pagina=2"
 ```
 
 ```json
@@ -69,7 +69,7 @@ curl "https://40-160-96-65.sslip.io/api/v1/vacantes?modalidad=remoto&q=desarroll
         { "competencia": "PHP", "tipo": "obligatorio", "anios_minimos": 3 },
         { "competencia": "Docker", "tipo": "deseable", "anios_minimos": null }
       ],
-      "url": "https://40-160-96-65.sslip.io/empleos/41"
+      "url": "https://talentcloudia.online/empleos/41"
     }
   ],
   "links": { "first": "…?page=1", "last": "…?page=3", "prev": null, "next": "…?page=2" },
@@ -84,7 +84,7 @@ curl "https://40-160-96-65.sslip.io/api/v1/vacantes?modalidad=remoto&q=desarroll
 Devuelve `{ "data": { … } }` con los mismos campos que el listado más `descripcion`.
 
 ```bash
-curl https://40-160-96-65.sslip.io/api/v1/vacantes/41
+curl https://talentcloudia.online/api/v1/vacantes/41
 ```
 
 Si la vacante no existe **o no es pública** (borrador, cerrada, empresa suspendida) responde `404` con `{"mensaje": "Vacante no encontrada."}`; no se distingue un caso del otro.

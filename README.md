@@ -4,8 +4,8 @@ Plataforma SaaS para gestionar la selección de talento: la empresa publica vaca
 
 Proyecto de la asignatura *Aplicaciones en la Nube*. Este repositorio corresponde a la **unidad I**: aplicación web completa y funcional en Laravel, con base de datos real, API REST inicial y despliegue en un servidor virtual. La comparación semántica con inteligencia artificial, los microservicios y el despliegue en más de una nube se trabajan en las unidades II y III.
 
-- Demostración en vivo: https://40-160-96-65.sslip.io/
-- API REST de vacantes abiertas: https://40-160-96-65.sslip.io/api/v1/vacantes (documentación en [`talentcloud/docs/API.md`](talentcloud/docs/API.md))
+- Demostración en vivo: https://talentcloudia.online/
+- API REST de vacantes abiertas: https://talentcloudia.online/api/v1/vacantes (documentación en [`talentcloud/docs/API.md`](talentcloud/docs/API.md))
 
 ## Qué incluye
 
@@ -91,7 +91,7 @@ La lista completa está en [`talentcloud/README.md`](talentcloud/README.md#datos
 Rutas públicas de solo lectura bajo `/api/v1`: `GET /salud`, `GET /vacantes` (con búsqueda, filtro por modalidad y paginación) y `GET /vacantes/{id}`. Límite de 60 peticiones por minuto por dirección IP.
 
 ```bash
-curl "https://40-160-96-65.sslip.io/api/v1/vacantes?modalidad=remoto&por_pagina=2"
+curl "https://talentcloudia.online/api/v1/vacantes?modalidad=remoto&por_pagina=2"
 ```
 
 ## Despliegue
