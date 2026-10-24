@@ -35,6 +35,10 @@ Navegador ──HTTPS──► Caddy ──► Laravel 12 + Livewire ──► P
 
 Capas: pantalla (Livewire) → servicio (reglas de negocio) → repositorio → modelo. Cada empresa solo ve sus datos: la aplicación filtra por empresa en cada consulta y la base de datos impide relacionar filas de empresas distintas.
 
+## Organización del equipo
+
+El trabajo se organizó con una adaptación de Scrum; el reparto de tareas y el backlog por sprint están en [`TAREAS.md`](TAREAS.md).
+
 ## Carpetas
 
 | Carpeta | Contenido |
