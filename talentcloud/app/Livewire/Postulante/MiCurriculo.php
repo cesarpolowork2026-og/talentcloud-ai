@@ -6,6 +6,7 @@ use App\Livewire\Concerns\EsperaElAnalisisDelCv;
 use App\Models\Candidato;
 use App\Models\Cv;
 use App\Models\User;
+use App\Rules\ArchivoDeCv;
 use App\Services\Cvs\SubirCv;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
@@ -34,7 +35,7 @@ class MiCurriculo extends Component
         $this->authorize('update', $candidato);
 
         $this->validate([
-            'archivoCv' => ['required', 'file', 'mimes:'.implode(',', config('talentcloud.cvs.mimes')), 'max:'.config('talentcloud.cvs.max_kb')],
+            'archivoCv' => ['required', 'file', new ArchivoDeCv, 'max:'.config('talentcloud.cvs.max_kb')],
         ], attributes: ['archivoCv' => 'CV']);
 
         /** @var User $user */

@@ -12,6 +12,7 @@ use App\Models\Empresa;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Rules\ArchivoDeCv;
 use App\Services\Candidatos\CompetenciasDelCandidato;
 use App\Services\Cvs\SubirCv;
 use App\Services\Postulaciones\PostularCandidato;
@@ -100,7 +101,7 @@ class Detalle extends Component
         $this->authorize('subirCv', $candidato);
 
         $this->validate([
-            'archivoCv' => ['required', 'file', 'mimes:'.implode(',', config('talentcloud.cvs.mimes')), 'max:'.config('talentcloud.cvs.max_kb')],
+            'archivoCv' => ['required', 'file', new ArchivoDeCv, 'max:'.config('talentcloud.cvs.max_kb')],
         ], attributes: ['archivoCv' => 'CV']);
 
         /** @var User $user */

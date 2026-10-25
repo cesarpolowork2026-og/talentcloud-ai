@@ -11,6 +11,7 @@ use App\Models\Cv;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Repositories\Contracts\CandidatoRepository;
+use App\Rules\ArchivoDeCv;
 use App\Services\Candidatos\RegistrarCandidato;
 use App\Services\Cvs\SubirCv;
 use App\Services\Postulaciones\PostularCandidato;
@@ -127,7 +128,7 @@ class Listado extends Component
             'telefono' => ['nullable', 'string', 'max:40'],
             'titular' => ['nullable', 'string', 'max:120'],
             'vacanteId' => ['nullable', 'integer'],
-            'archivoCv' => ['nullable', 'file', 'mimes:'.implode(',', config('talentcloud.cvs.mimes')), 'max:'.config('talentcloud.cvs.max_kb')],
+            'archivoCv' => ['nullable', 'file', new ArchivoDeCv, 'max:'.config('talentcloud.cvs.max_kb')],
             'autorizado' => ['accepted'],
         ], [
             'autorizado.accepted' => 'Confirma que el candidato autorizó el tratamiento de sus datos.',
