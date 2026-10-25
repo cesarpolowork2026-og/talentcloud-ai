@@ -45,12 +45,14 @@
                     <p class="m-0 text-14 text-neutral-800">Sigue el estado de este proceso en tus postulaciones.</p>
                     <x-ui.button :href="route('postulante.postulaciones')" wire:navigate>Ver mis postulaciones</x-ui.button>
                 @else
-                    @if ($cvListo)
+                    @if ($cvListo && $cvSubidoAqui)
+                        <p class="m-0 text-14 text-neutral-800" role="status"><strong class="font-semibold">Tu CV ya está listo, pero aún no te postulaste.</strong> Pulsa «Postular con mi CV» para enviar <strong class="font-semibold">{{ $cv->nombre_original }}</strong> a {{ $vacante->empresa?->nombre }}.</p>
+                    @elseif ($cvListo)
                         <p class="m-0 text-14 text-neutral-800">Se enviará tu CV <strong class="font-semibold">{{ $cv->nombre_original }}</strong>. La empresa lo verá junto con tu perfil.</p>
                     @elseif ($cvProcesandose)
-                        <p class="m-0 text-14 text-neutral-800" role="status">Tu CV se está procesando. Podrás postular en unos segundos.</p>
+                        <p class="m-0 text-14 text-neutral-800" role="status">Tu CV se está procesando. En unos segundos te pediremos confirmar la postulación.</p>
                     @elseif ($cv === null)
-                        <p class="m-0 text-14 text-neutral-800">Para postular necesitas subir tu CV.</p>
+                        <p class="m-0 text-14 text-neutral-800">Para postular, primero sube tu CV; después confirmas la postulación.</p>
                     @else
                         <p class="m-0 text-14 text-accent-2-700">Tu CV no se pudo leer. Sube una versión en PDF con texto o en Word para postular.</p>
                     @endif

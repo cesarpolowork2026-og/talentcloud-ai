@@ -288,7 +288,7 @@ it('sube el CV desde la propia vacante y la página espera a que se procese para
     $this->cv->delete();
 
     Livewire::test(DetalleVacante::class, ['id' => $this->backend->id])
-        ->assertSee('Para postular necesitas subir tu CV.')
+        ->assertSee('Para postular, primero sube tu CV; después confirmas la postulación.')
         ->assertSeeLivewire(MiCurriculo::class)
         ->assertDontSee('Postular con mi CV');
 
@@ -301,7 +301,38 @@ it('sube el CV desde la propia vacante y la página espera a que se procese para
 
     // Con la cola simulada, el CV queda pendiente de lectura: la vacante lo indica y espera.
     Livewire::test(DetalleVacante::class, ['id' => $this->backend->id])
-        ->assertSee('Tu CV se está procesando. Podrás postular en unos segundos.');
+        ->assertSee('Tu CV se está procesando. En unos segundos te pediremos confirmar la postulación.');
+});
+
+it('al quedar listo el CV subido desde la vacante pide confirmar la postulación y recuerda que aún no postuló', function () {
+    $this->cv->delete();
+
+    $pantalla = Livewire::test(DetalleVacante::class, ['id' => $this->backend->id])->dispatch('cv-subido');
+    $pantalla->assertSet('mostrarConfirmacion', false);
+
+    // El análisis termina: el sondeo vuelve a pintar y se ofrece la confirmación una sola vez.
+    Cv::factory()->procesado()->create(['candidato_id' => $this->candidato->id, 'nombre_original' => 'CV_Nuevo.docx']);
+    $pantalla->call('esperarCv')
+        ->assertSet('mostrarConfirmacion', true)
+        ->assertSee('Tu CV ya está listo, pero aún no te postulaste.')
+        ->assertSee('Postular con mi CV');
+
+    // Si cierra el diálogo no se vuelve a abrir solo, pero el aviso sigue.
+    $pantalla->set('mostrarConfirmacion', false)->call('$refresh')
+        ->assertSet('mostrarConfirmacion', false)
+        ->assertSee('Tu CV ya está listo, pero aún no te postulaste.');
+
+    // Subir el CV no postula: la postulación solo existe al confirmar.
+    expect($this->candidato->postulacionesEnTodasLasEmpresas()->count())->toBe(0);
+    $pantalla->call('postular')->assertSee('¡Listo! Te postulaste a Desarrollador Backend.');
+    expect($this->candidato->postulacionesEnTodasLasEmpresas()->count())->toBe(1);
+});
+
+it('con un CV que ya tenía no abre la confirmación sin que la pida', function () {
+    Livewire::test(DetalleVacante::class, ['id' => $this->backend->id])
+        ->assertSet('mostrarConfirmacion', false)
+        ->assertSee('Se enviará tu CV')
+        ->assertDontSee('aún no te postulaste');
 });
 
 it('si la vacante a la que postuló cierra mientras la mira, lleva a sus postulaciones', function () {

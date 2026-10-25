@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Postulante;
 
+use App\Enums\EstadoProcesamientoCv;
 use App\Livewire\Concerns\EsperaElAnalisisDelCv;
 use App\Models\Candidato;
 use App\Models\Cv;
@@ -31,6 +32,14 @@ class DetalleVacante extends Component
 
     /** Recién postulado en esta visita: muestra la confirmación. */
     public bool $postulado = false;
+
+    /**
+     * Subió el CV desde esta página para postular: al quedar listo se abre una vez la confirmación y, si la cierra,
+     * se le recuerda que aún no postuló (subir el CV no es postular, y había quien lo creía).
+     */
+    public bool $cvSubidoAqui = false;
+
+    public bool $confirmacionOfrecida = false;
 
     public function mount(int $id, VacanteRepository $vacantes): void
     {
@@ -69,7 +78,10 @@ class DetalleVacante extends Component
 
     /** El CV se subió desde esta misma página: se vuelve a pintar (y a esperar su análisis). */
     #[On('cv-subido')]
-    public function cvSubido(): void {}
+    public function cvSubido(): void
+    {
+        $this->cvSubidoAqui = true;
+    }
 
     public function render(VacanteRepository $vacantes): View
     {
@@ -77,10 +89,17 @@ class DetalleVacante extends Component
         $vacante = $vacantes->buscarPublicada($this->vacanteId);
         $candidato = $this->usuario()->candidato;
         $suPostulacion = $candidato?->postulacionesEnTodasLasEmpresas()->where('vacante_id', $this->vacanteId)->first(['id', 'retirada_at']);
+        $cv = $candidato?->load(['cvActual' => Cv::ligero()])->cvActual;
+
+        if ($this->cvSubidoAqui && ! $this->confirmacionOfrecida && $vacante !== null && $suPostulacion === null
+            && $cv?->estado_procesamiento === EstadoProcesamientoCv::Procesado) {
+            $this->confirmacionOfrecida = true;
+            $this->mostrarConfirmacion = true;
+        }
 
         return view('livewire.postulante.detalle-vacante', [
             'vacante' => $vacante,
-            'cv' => $candidato?->load(['cvActual' => Cv::ligero()])->cvActual,
+            'cv' => $cv,
             'yaPostulo' => $suPostulacion !== null,
             'laRetiro' => $suPostulacion?->estaRetirada() ?? false,
         ])->title($vacante->titulo ?? 'Vacante');
