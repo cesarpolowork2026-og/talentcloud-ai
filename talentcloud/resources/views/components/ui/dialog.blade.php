@@ -3,15 +3,15 @@
     Se abre de dos formas:
       - wire:model="propiedadBooleana" (Livewire, entrelazado con Alpine)
       - name="x" + $dispatch('open-dialog', 'x') / $dispatch('close-dialog', 'x')
-    Cierra con Escape, clic en el fondo o open = false dentro del slot.
-    aspa: el diálogo se cierra solo con una ✕ arriba a la derecha (y con Escape); un clic en el fondo no lo cierra. Para
-    los que no deben cerrarse por un descuido, como el de iniciar sesión. La ✕ va al final del DOM para que el primer
-    campo, y no ella, reciba el foco al abrirse.
+    Se cierra con la ✕ de arriba a la derecha, con Escape o con open = false dentro del slot; un clic en el fondo
+    no lo cierra, para que no se pierda lo escrito por un descuido. La ✕ va al final del DOM para que el primer
+    campo, y no ella, reciba el foco al abrirse, y se queda a la vista al desplazar un diálogo largo.
+    :aspa="false" vuelve al comportamiento anterior (sin ✕ y con cierre al pulsar el fondo).
     Slot "actions": botones alineados a la derecha.
     max-width solo lo estrecha (el DS lo fija en 440 px); ancho="1100px" lo ensancha
     hasta ese valor sin pasar del de la pantalla.
 --}}
-@props(['title' => null, 'name' => null, 'maxWidth' => '440px', 'ancho' => null, 'aspa' => false])
+@props(['title' => null, 'name' => null, 'maxWidth' => '440px', 'ancho' => null, 'aspa' => true])
 
 @php
     $wireModel = $attributes->wire('model');
@@ -36,7 +36,7 @@
     {{ $attributes->whereDoesntStartWith('wire:model')->class('dialog-backdrop') }}
 >
     <div
-        @class(['dialog', 'relative' => $aspa])
+        @class(['dialog', 'dialog-con-aspa' => $aspa])
         role="dialog"
         aria-modal="true"
         @if ($title) aria-labelledby="{{ $titleId }}" @endif

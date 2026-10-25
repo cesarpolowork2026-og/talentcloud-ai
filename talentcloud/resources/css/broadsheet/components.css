@@ -168,13 +168,19 @@
   .dialog-backdrop-desenfocado { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
   /* TalentCloud: en el diálogo de acceso, el título «Iniciar sesión» va centrado y 1 px mayor (21 px). */
   .dialog-backdrop-desenfocado .dialog-title { text-align: center; font-size: 21px; }
-  /* TalentCloud: la ✕ de un diálogo que solo se cierra con ella (arriba a la derecha; área de 32 px). */
+  /* TalentCloud: la ✕ que cierra el diálogo (arriba a la derecha; área de 32 px). Va al final del DOM, pero se pinta
+     primero (order) y pegada arriba (sticky): en un diálogo largo sigue a la vista al desplazarlo. Los márgenes
+     negativos la sacan del flujo, así que el título empieza donde empezaría sin ella; el top descuenta el padding del
+     diálogo, que Chrome resta al pegarla. */
   .dialog-aspa {
-    position: absolute; top: var(--space-2); right: var(--space-2);
+    position: sticky; top: calc(var(--space-2) - var(--space-4)); z-index: 1; order: -1; align-self: flex-end; flex: none;
+    margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) calc(var(--space-2) - 32px - var(--space-3)) 0;
     display: grid; place-items: center; width: 32px; height: 32px;
-    padding: 0; border: 0; border-radius: var(--radius-md); background: transparent;
+    padding: 0; border: 0; border-radius: var(--radius-md); background: var(--color-surface);
     color: var(--color-neutral-700); cursor: pointer;
   }
+  .dialog-con-aspa .dialog-title { padding-right: 32px; }
+  .dialog-backdrop-desenfocado .dialog-con-aspa .dialog-title { padding-left: 32px; }
   @media (hover: hover) { .dialog-aspa:hover { background: var(--color-neutral-100); color: var(--color-text); } }
   .dialog-aspa:focus-visible { outline: 2px solid var(--color-accent-700); outline-offset: 2px; }
 
