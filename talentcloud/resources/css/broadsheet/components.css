@@ -338,3 +338,9 @@
     html[data-ocupado]::before { animation: none; width: 100%; opacity: 0.6; }
   }
 }
+
+/* TalentCloud: el campo de contraseña ya trae su botón para mostrarla; Edge e Internet Explorer añaden el suyo al escribir. */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
