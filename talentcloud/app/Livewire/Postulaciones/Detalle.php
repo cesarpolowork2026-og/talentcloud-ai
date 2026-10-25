@@ -4,6 +4,7 @@ namespace App\Livewire\Postulaciones;
 
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Livewire\Concerns\PreguntaSiCancelarEntrevistas;
 use App\Livewire\Concerns\SeActualizaSola;
 use App\Models\Cv;
 use App\Models\Entrevista;
@@ -28,7 +29,7 @@ use Livewire\Component;
  */
 class Detalle extends Component
 {
-    use SeActualizaSola;
+    use PreguntaSiCancelarEntrevistas, SeActualizaSola;
 
     #[Locked]
     public int $postulacionId;
@@ -60,7 +61,9 @@ class Detalle extends Component
 
         try {
             // Arriba de la columna destino, como «Mover a…» del tablero.
-            $mover->ejecutar($postulacion, $destino, 0, $this->usuario());
+            if (! $this->moverOPreguntar($mover, $postulacion, $destino, 0, $this->usuario())) {
+                return;
+            }
         } catch (OperacionNoPermitida $e) {
             $this->addError('etapaDestino', $e->getMessage());
 
@@ -69,6 +72,30 @@ class Detalle extends Component
 
         $this->etapaDestino = '';
         $this->dispatch('postulacion-movida', etapa: $destino->etiqueta());
+    }
+
+    /** Respuesta a «¿Cancelar la entrevista?» al devolver la postulación antes de «Entrevista». */
+    public function confirmarRetroceso(bool $cancelar, MoverPostulacion $mover): void
+    {
+        $pendiente = $this->tomarRetroceso();
+
+        if ($pendiente === null || $pendiente['postulacion'] !== $this->postulacionId) {
+            return;
+        }
+
+        $postulacion = $this->postulacion();
+        $this->authorize('update', $postulacion);
+
+        try {
+            $mover->ejecutar($postulacion, $pendiente['destino'], 0, $this->usuario(), $cancelar);
+        } catch (OperacionNoPermitida $e) {
+            $this->addError('etapaDestino', $e->getMessage());
+
+            return;
+        }
+
+        $this->etapaDestino = '';
+        $this->dispatch('postulacion-movida', etapa: $pendiente['destino']->etiqueta());
     }
 
     public function confirmarDescarte(): void

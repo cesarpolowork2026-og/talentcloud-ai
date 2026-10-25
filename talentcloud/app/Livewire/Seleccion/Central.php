@@ -5,6 +5,7 @@ namespace App\Livewire\Seleccion;
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Livewire\Concerns\PreguntaSiCancelarEntrevistas;
 use App\Livewire\Concerns\SeActualizaSola;
 use App\Models\Candidato;
 use App\Models\Entrevista;
@@ -33,7 +34,7 @@ use Livewire\Component;
  */
 class Central extends Component
 {
-    use SeActualizaSola;
+    use PreguntaSiCancelarEntrevistas, SeActualizaSola;
 
     /** Tarjetas que muestra cada columna al abrir, y las que suma cada «Ver más». Una vacante masiva tiene miles. */
     public const TARJETAS_POR_COLUMNA = 25;
@@ -132,7 +133,27 @@ class Central extends Component
         $this->resetErrorBag('tablero');
 
         try {
-            $mover->ejecutar($postulacion, $destino, $posicion, $this->usuario());
+            $this->moverOPreguntar($mover, $postulacion, $destino, $posicion, $this->usuario());
+        } catch (OperacionNoPermitida $e) {
+            $this->addError('tablero', $e->getMessage());
+        }
+    }
+
+    /** Respuesta a «¿Cancelar la entrevista?» al devolver a alguien antes de «Entrevista». */
+    public function confirmarRetroceso(bool $cancelar, MoverPostulacion $mover): void
+    {
+        $pendiente = $this->tomarRetroceso();
+
+        if ($pendiente === null) {
+            return;
+        }
+
+        $postulacion = $this->postulacion($pendiente['postulacion']);
+        $this->authorize('update', $postulacion);
+        $this->resetErrorBag('tablero');
+
+        try {
+            $mover->ejecutar($postulacion, $pendiente['destino'], $pendiente['posicion'], $this->usuario(), $cancelar);
         } catch (OperacionNoPermitida $e) {
             $this->addError('tablero', $e->getMessage());
         }
@@ -161,8 +182,9 @@ class Central extends Component
 
         if ($destino !== $postulacion->etapa) {
             try {
-                // Arriba de la columna destino: lo último que se movió es lo primero que se ve.
-                $mover->ejecutar($postulacion, $destino, 0, $this->usuario());
+                // Arriba de la columna destino: lo último que se movió es lo primero que se ve. Si hay que preguntar
+                // por sus entrevistas, la pregunta reemplaza a este diálogo.
+                $this->moverOPreguntar($mover, $postulacion, $destino, 0, $this->usuario());
             } catch (OperacionNoPermitida $e) {
                 $this->addError('etapaDestino', $e->getMessage());
 

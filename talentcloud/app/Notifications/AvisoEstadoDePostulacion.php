@@ -37,10 +37,10 @@ class AvisoEstadoDePostulacion extends Notification implements ShouldQueue
             EstadoDeMiPostulacion::Postulado => $anterior === null
                 ? ["{$empresa} te registró como postulante a {$vacante}", "{$empresa} te registró como postulante a {$vacante}. Puedes seguir tu proceso en «Mis postulaciones»."]
                 : ["Tu postulación a {$vacante} volvió al inicio del proceso", "Tu postulación a {$vacante} en {$empresa} volvió a la etapa «Postulado»: sigues en el proceso."],
-            EstadoDeMiPostulacion::Entrevista => [
-                "Avanzaste a la etapa de entrevistas de {$vacante}",
-                "Avanzaste a la etapa de entrevistas de {$vacante}. {$empresa} se pondrá en contacto contigo para coordinarla.",
-            ],
+            // Desde una etapa posterior (la Oferta, por ejemplo) no «avanza»: vuelve a la etapa de entrevistas.
+            EstadoDeMiPostulacion::Entrevista => in_array($anterior, [EstadoDeMiPostulacion::Oferta, EstadoDeMiPostulacion::Contratado, EstadoDeMiPostulacion::NoSeleccionado], true)
+                ? ["Tu postulación a {$vacante} volvió a la etapa de entrevistas", "Tu postulación a {$vacante} en {$empresa} volvió a la etapa de entrevistas: sigues en el proceso."]
+                : ["Avanzaste a la etapa de entrevistas de {$vacante}", "Avanzaste a la etapa de entrevistas de {$vacante}. {$empresa} se pondrá en contacto contigo para coordinarla."],
             EstadoDeMiPostulacion::Oferta => [
                 "{$empresa} te hizo una oferta para {$vacante}",
                 "¡Buenas noticias! {$empresa} te hizo una oferta para {$vacante}. Pronto se pondrá en contacto contigo para conversar los detalles.",

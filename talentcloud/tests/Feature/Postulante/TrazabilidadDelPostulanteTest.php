@@ -152,3 +152,17 @@ it('avisa si la postulación vuelve al inicio del proceso', function () {
 
     expect(last(campanaDeRenzo($this)))->toBe('Tu postulación a Analista de Datos en Nimbus Corp volvió a la etapa «Postulado»: sigues en el proceso.');
 });
+
+it('si vuelve de la oferta a la etapa de entrevistas, el aviso no dice que avanzó', function () {
+    $postulacion = postulacionRegistradaPorElEquipo($this);
+    moverPostulacionDeRenzo($this, $postulacion, EtapaPostulacion::Entrevista);
+    app(TenantContext::class)->ejecutarGlobal(fn () => Entrevista::factory()->create([
+        'postulacion_id' => $postulacion->id, 'empresa_id' => $this->nimbus->id, 'entrevistador_id' => $this->marta->id,
+        'inicia_at' => now()->subDay(), 'estado' => EstadoEntrevista::Completada,
+    ]));
+    moverPostulacionDeRenzo($this, $postulacion, EtapaPostulacion::Oferta);
+
+    moverPostulacionDeRenzo($this, $postulacion, EtapaPostulacion::Entrevista);
+
+    expect(last(campanaDeRenzo($this)))->toBe('Tu postulación a Analista de Datos en Nimbus Corp volvió a la etapa de entrevistas: sigues en el proceso.');
+});

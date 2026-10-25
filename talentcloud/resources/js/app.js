@@ -43,6 +43,39 @@ document.addEventListener('alpine:init', () => {
     }));
 
     /**
+     * Barra de desplazamiento horizontal también arriba de un contenido ancho (el tablero de Selección).
+     * La de arriba es una copia: mide el ancho del contenido ($refs.tablero) y las dos se mueven juntas.
+     * Solo aparece si el contenido no cabe; se vuelve a medir cuando cambia su tamaño o sus columnas.
+     */
+    window.Alpine.data('desplazamientoDoble', () => ({
+        ancho: 0,
+        desborda: false,
+
+        init() {
+            const tablero = this.$refs.tablero;
+            const medir = () => {
+                this.ancho = tablero.scrollWidth;
+                this.desborda = tablero.scrollWidth > tablero.clientWidth + 1;
+            };
+            const tamanos = new ResizeObserver(medir);
+            const observar = () => {
+                tamanos.disconnect();
+                tamanos.observe(tablero);
+                [...tablero.children].forEach((hijo) => tamanos.observe(hijo));
+            };
+
+            observar();
+            new MutationObserver(observar).observe(tablero, { childList: true });
+        },
+
+        sincronizar(origen, destino) {
+            if (destino.scrollLeft !== origen.scrollLeft) {
+                destino.scrollLeft = origen.scrollLeft;
+            }
+        },
+    }));
+
+    /**
      * Selector de competencias: etiquetas elegidas del catálogo (por nombre o sinónimo),
      * con «¿Quisiste decir…?» ante un error de tipeo y «Crear» para una que no existe.
      * El catálogo viene del servidor; la selección es la lista de nombres de la propiedad

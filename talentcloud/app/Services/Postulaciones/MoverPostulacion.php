@@ -6,9 +6,11 @@ use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
 use App\Events\PostulacionCambioDeEtapa;
+use App\Models\Entrevista;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Services\Entrevistas\CambiarEstadoEntrevista;
 use App\Services\Entrevistas\EntrevistasPorRealizar;
 use App\Services\Vacantes\OperacionNoPermitida;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +22,14 @@ use Illuminate\Support\Facades\DB;
  */
 class MoverPostulacion
 {
-    public function ejecutar(Postulacion $postulacion, EtapaPostulacion $destino, int $posicion, ?User $actor): Postulacion
+    public function __construct(private readonly CambiarEstadoEntrevista $entrevistas) {}
+
+    /**
+     * @param  bool|null  $cancelarEntrevistas  al devolver antes de «Entrevista» a quien tiene entrevistas por realizar:
+     *                                          true las cancela, false las mantiene y null lanza RetrocesoConEntrevistas
+     *                                          (la pantalla lo pregunta).
+     */
+    public function ejecutar(Postulacion $postulacion, EtapaPostulacion $destino, int $posicion, ?User $actor, ?bool $cancelarEntrevistas = null): Postulacion
     {
         $origen = $postulacion->etapa;
 
@@ -35,13 +44,14 @@ class MoverPostulacion
             throw new OperacionNoPermitida($postulacion->loadMissing('candidato')->candidato?->nombre.' retiró su postulación: no se puede volver a mover.');
         }
 
-        DB::transaction(function () use ($postulacion, $origen, $destino, $posicion): void {
+        DB::transaction(function () use ($postulacion, $origen, $destino, $posicion, $cancelarEntrevistas): void {
             // Un candado sobre la vacante basta para que dos movimientos simultáneos no mezclen el orden:
             // no se leen ni se bloquean las postulaciones (una vacante puede tener miles en una columna).
             Vacante::query()->whereKey($postulacion->vacante_id)->lockForUpdate()->first();
 
             $this->verificarDescarte($postulacion, $origen, $destino);
             $this->verificarAvanceFinal($postulacion, $origen, $destino);
+            $this->resolverRetroceso($postulacion, $origen, $destino, $cancelarEntrevistas);
 
             // Se saca de su columna y se deja el resto numerado 0, 1, 2… sin huecos (en SQL, solo se escriben
             // las filas que cambian de número); lo mismo en la columna destino si es otra.
@@ -141,6 +151,30 @@ class MoverPostulacion
                 );
             }
         }
+    }
+
+    /**
+     * Devolver a «Postulado» o «En revisión» a quien ya pasó por las entrevistas y tiene alguna por realizar: la
+     * entrevista seguiría agendada en una etapa anterior. Quien mueve decide (sin decidir, se pregunta). Cancelarlas
+     * avisa al candidato y al entrevistador, como cancelarlas en «Entrevistas»; si el movimiento falla, no se cancela nada.
+     */
+    private function resolverRetroceso(Postulacion $postulacion, EtapaPostulacion $origen, EtapaPostulacion $destino, ?bool $cancelar): void
+    {
+        if (! $destino->antesDeEntrevista() || $origen->antesDeEntrevista() || $postulacion->estaRetirada() || $cancelar === false) {
+            return;
+        }
+
+        $porRealizar = EntrevistasPorRealizar::consulta()->where('postulacion_id', $postulacion->id)->get();
+
+        if ($porRealizar->isEmpty()) {
+            return;
+        }
+
+        if ($cancelar === null) {
+            throw new RetrocesoConEntrevistas($postulacion->id, (string) $postulacion->loadMissing('candidato')->candidato?->nombre, $destino, $porRealizar->count());
+        }
+
+        $porRealizar->each(fn (Entrevista $entrevista) => $this->entrevistas->cancelar($entrevista));
     }
 
     /**

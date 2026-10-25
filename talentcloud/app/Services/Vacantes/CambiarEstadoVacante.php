@@ -91,7 +91,7 @@ class CambiarEstadoVacante
     }
 
     /**
-     * Quien está en Oferta sigue viendo «Entrevista» y, al cerrar, recibiría «El proceso se cerró. Gracias por
+     * Quien está en Oferta ya recibió el aviso de la oferta y, al cerrar, recibiría «El proceso se cerró. Gracias por
      * postular» mientras la empresa le ofrece el puesto. Antes de cerrar se decide: Contratado o Descartado.
      */
     private function verificarSinOfertasAbiertas(Vacante $vacante): void

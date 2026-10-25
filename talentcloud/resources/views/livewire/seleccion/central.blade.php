@@ -73,7 +73,13 @@
         </div>
 
         <x-ui.actualizable target="verMas,mover,buscarPostulante">
-        <div class="flex gap-4 overflow-x-auto pb-2">
+        {{-- Con más columnas de las que caben, una segunda barra de desplazamiento arriba (sincronizada con la de abajo)
+             evita bajar hasta el final del tablero para moverse de izquierda a derecha. --}}
+        <div x-data="desplazamientoDoble">
+        <div x-ref="arriba" x-show="desborda" x-cloak wire:ignore class="mb-2 overflow-x-auto overflow-y-hidden" aria-hidden="true" x-on:scroll="sincronizar($refs.arriba, $refs.tablero)">
+            <div class="h-px" :style="{ width: ancho + 'px' }"></div>
+        </div>
+        <div x-ref="tablero" class="flex gap-4 overflow-x-auto pb-2" x-on:scroll="sincronizar($refs.tablero, $refs.arriba)">
             @foreach ($columnas as $columna)
                 @php($etapa = $columna['etapa'])
                 <section class="flex min-w-[190px] flex-1 basis-0 flex-col gap-3" aria-label="{{ $etapa->etiqueta() }}" wire:key="columna-{{ $etapa->value }}">
@@ -160,6 +166,7 @@
                 </section>
             @endforeach
         </div>
+        </div>
         </x-ui.actualizable>
 
         {{-- Detalle de la tarjeta (prototipo: openCard) + "Mover a…" --}}
@@ -206,5 +213,7 @@ Retiró su postulación el {{ App\Support\Formato::fechaCorta($seleccionada->ret
         <x-ui.confirm wire:model="mostrarDescarte" :title="'Descartar a '.$aDescartar" action-label="Descartar" action="descartar">
             El candidato se moverá fuera del proceso de esta vacante. Esta acción no elimina su perfil ni su CV.
         </x-ui.confirm>
+
+        <x-postulaciones.retroceso-con-entrevistas :retroceso="$retroceso" />
     @endif
 </div>
