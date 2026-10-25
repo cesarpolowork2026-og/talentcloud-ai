@@ -2,6 +2,7 @@
 
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
+use App\Enums\EtapaPostulacion;
 use App\Enums\Modalidad;
 use App\Enums\TipoRequisito;
 use App\Livewire\Vacantes\Detalle;
@@ -290,4 +291,19 @@ it('no cierra una vacante con entrevistas por realizar y nombra a quién', funct
         ->assertSee('La vacante tiene 2 entrevistas por realizar (Elena Ruiz). Cancélalas en «Entrevistas» antes de cerrarla.');
 
     expect($this->backend->fresh()->estado)->not->toBe(EstadoVacante::Cerrada);
+});
+
+it('no cierra una vacante con alguien en Oferta: antes se le contrata o se le descarta', function () {
+    $lucia = Postulacion::factory()->paraVacante($this->backend)->enEtapa(EtapaPostulacion::Oferta)
+        ->create(['candidato_id' => Candidato::factory()->create(['nombre' => 'Lucía Paredes'])->id]);
+
+    Livewire::test(Detalle::class, ['vacante' => $this->backend])
+        ->call('cambiarEstado', 'cerrada')
+        ->assertHasErrors('estado')
+        ->assertSee('Lucía Paredes está en «Oferta». Antes de cerrar la vacante, en «Selección» muévela a «Contratado» o «Descartado».');
+    expect($this->backend->fresh()->estado)->not->toBe(EstadoVacante::Cerrada);
+
+    $lucia->forceFill(['etapa' => EtapaPostulacion::Contratado])->save();
+    Livewire::test(Detalle::class, ['vacante' => $this->backend])->call('cambiarEstado', 'cerrada')->assertHasNoErrors();
+    expect($this->backend->fresh()->estado)->toBe(EstadoVacante::Cerrada);
 });

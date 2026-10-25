@@ -172,6 +172,6 @@
 
     {{-- Cerrar vacante --}}
     <x-ui.confirm wire:model="mostrarCierre" :title="'Cerrar '.$vacante->titulo" action-label="Cerrar vacante" action="cambiarEstado('cerrada')">
-        La vacante dejará de recibir postulaciones y no se podrá volver a abrir. Las postulaciones y evaluaciones se conservan.
+        La vacante dejará de recibir postulaciones y no se podrá volver a abrir. A quienes sigan en el proceso se les avisará que terminó. Las postulaciones y evaluaciones se conservan.
     </x-ui.confirm>
 </div>

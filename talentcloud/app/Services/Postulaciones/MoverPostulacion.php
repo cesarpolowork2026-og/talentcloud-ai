@@ -2,6 +2,7 @@
 
 namespace App\Services\Postulaciones;
 
+use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
 use App\Events\PostulacionCambioDeEtapa;
@@ -40,6 +41,7 @@ class MoverPostulacion
             Vacante::query()->whereKey($postulacion->vacante_id)->lockForUpdate()->first();
 
             $this->verificarDescarte($postulacion, $origen, $destino);
+            $this->verificarAvanceFinal($postulacion, $origen, $destino);
 
             // Se saca de su columna y se deja el resto numerado 0, 1, 2… sin huecos (en SQL, solo se escriben
             // las filas que cambian de número); lo mismo en la columna destino si es otra.
@@ -107,6 +109,37 @@ class MoverPostulacion
                 $postulacion->loadMissing('candidato')->candidato?->nombre.' tiene '.EntrevistasPorRealizar::texto($porRealizar).' por realizar. '
                 .EntrevistasPorRealizar::segun($porRealizar, 'Cancélala', 'Cancélalas').' en «Entrevistas» y vuelve a descartar.'
             );
+        }
+    }
+
+    /**
+     * Oferta y Contratado son decisiones sobre alguien entrevistado: sin una entrevista realizada, un arrastre por
+     * error desde «Postulado» terminaría en un aviso de «¡Felicitaciones!» (la misma regla que exige evaluar).
+     * Al contratar no puede quedar una entrevista pendiente: se completa o se cancela antes.
+     */
+    private function verificarAvanceFinal(Postulacion $postulacion, EtapaPostulacion $origen, EtapaPostulacion $destino): void
+    {
+        if (! in_array($destino, [EtapaPostulacion::Oferta, EtapaPostulacion::Contratado], true) || $destino === $origen) {
+            return;
+        }
+
+        $nombre = (string) $postulacion->loadMissing('candidato')->candidato?->nombre;
+
+        if (! $postulacion->entrevistas()->where('estado', EstadoEntrevista::Completada)->exists()) {
+            throw new OperacionNoPermitida(
+                $nombre.' todavía no tiene una entrevista realizada. Para pasar a «'.$destino->etiqueta().'», programa la entrevista y márcala como realizada.'
+            );
+        }
+
+        if ($destino === EtapaPostulacion::Contratado) {
+            $porRealizar = EntrevistasPorRealizar::consulta()->where('postulacion_id', $postulacion->id)->count();
+
+            if ($porRealizar > 0) {
+                throw new OperacionNoPermitida(
+                    $nombre.' tiene '.EntrevistasPorRealizar::texto($porRealizar).' por realizar. '
+                    .EntrevistasPorRealizar::segun($porRealizar, 'Márcala como realizada o cancélala', 'Márcalas como realizadas o cancélalas').' en «Entrevistas» antes de contratar.'
+                );
+            }
         }
     }
 

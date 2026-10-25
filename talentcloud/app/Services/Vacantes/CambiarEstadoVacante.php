@@ -3,7 +3,9 @@
 namespace App\Services\Vacantes;
 
 use App\Enums\EstadoVacante;
+use App\Enums\EtapaPostulacion;
 use App\Events\VacanteCerrada;
+use App\Models\Postulacion;
 use App\Models\Requisito;
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
@@ -38,6 +40,7 @@ class CambiarEstadoVacante
 
         if ($destino === EstadoVacante::Cerrada) {
             $this->verificarSinEntrevistasPorRealizar($vacante);
+            $this->verificarSinOfertasAbiertas($vacante);
         }
 
         $datos = ['estado' => $destino];
@@ -83,6 +86,28 @@ class CambiarEstadoVacante
             throw new OperacionNoPermitida(
                 'La vacante tiene '.EntrevistasPorRealizar::texto($nombres->count()).' por realizar ('.$nombres->unique()->join(', ', ' y ').'). '
                 .EntrevistasPorRealizar::segun($nombres->count(), 'Cancélala', 'Cancélalas').' en «Entrevistas» antes de cerrarla.'
+            );
+        }
+    }
+
+    /**
+     * Quien está en Oferta sigue viendo «Entrevista» y, al cerrar, recibiría «El proceso se cerró. Gracias por
+     * postular» mientras la empresa le ofrece el puesto. Antes de cerrar se decide: Contratado o Descartado.
+     */
+    private function verificarSinOfertasAbiertas(Vacante $vacante): void
+    {
+        $nombres = Postulacion::query()->withoutGlobalScopes()
+            ->where('vacante_id', $vacante->id)
+            ->where('etapa', EtapaPostulacion::Oferta)
+            ->whereNull('retirada_at')
+            ->with(['candidato' => fn ($q) => $q->withoutGlobalScopes()])
+            ->get()
+            ->map(fn (Postulacion $p) => $p->candidato?->nombre);
+
+        if ($nombres->isNotEmpty()) {
+            throw new OperacionNoPermitida(
+                $nombres->join(', ', ' y ').($nombres->count() === 1 ? ' está' : ' están').' en «Oferta». '
+                .'Antes de cerrar la vacante, en «Selección» '.($nombres->count() === 1 ? 'muévela' : 'muévelas').' a «Contratado» o «Descartado».'
             );
         }
     }

@@ -38,6 +38,21 @@
         {{-- Cerrada = nadie la mueve; abierta pero sin edición (admin SaaS) ya lo dice el aviso de supervisión. --}}
         @if ($vacanteCerrada)
             <p class="-mt-3 mb-4 text-13 text-neutral-600">La vacante está cerrada: la selección es de solo lectura.</p>
+        @elseif ($contratados > 0 && $puedeCerrar)
+            <div class="card mb-4 !flex-row flex-wrap items-center justify-between gap-3 text-14" role="note">
+                <p class="m-0 flex items-start gap-2">
+                    <x-ui.icon name="check-circle" :size="18" class="mt-0.5 shrink-0 text-accent-700" />
+                    <span>
+                        <strong>{{ $contratados === 1 ? 'Ya contrataste a 1 persona' : 'Ya contrataste a '.$contratados.' personas' }}.</strong>
+                        @if ($enCurso > 0)
+                            Si el puesto está cubierto, cierra la vacante: {{ $enCurso === 1 ? 'a la persona que sigue en el proceso se le avisará' : 'a las '.$enCurso.' personas que siguen en el proceso se les avisará' }} que terminó.
+                        @else
+                            Si el puesto está cubierto, cierra la vacante para que deje de recibir postulaciones.
+                        @endif
+                    </span>
+                </p>
+                <x-ui.button :href="route('vacantes.show', $vacante)" wire:navigate>Ir a cerrar la vacante</x-ui.button>
+            </div>
         @endif
 
         @if ($coberturas !== [] && collect($coberturas)->contains(fn ($c) => $c->total() > 0))

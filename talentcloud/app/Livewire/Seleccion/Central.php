@@ -118,6 +118,9 @@ class Central extends Component
         $destino = EtapaPostulacion::tryFrom($etapa);
         abort_if($destino === null, 404);
 
+        // Un rechazo anterior no debe quedar a la vista tras un movimiento que sí se guarda.
+        $this->resetErrorBag('tablero');
+
         try {
             $mover->ejecutar($postulacion, $destino, $posicion, $this->usuario());
         } catch (OperacionNoPermitida $e) {
@@ -174,6 +177,7 @@ class Central extends Component
     {
         $postulacion = $this->postulacion((int) $this->postulacionSeleccionada);
         $this->authorize('update', $postulacion);
+        $this->resetErrorBag('tablero');
 
         try {
             $mover->descartar($postulacion, $this->usuario());
@@ -242,6 +246,11 @@ class Central extends Component
             // Mismo criterio que PostulacionPolicy@update: personal de la empresa de la vacante.
             'editable' => $vacante->estado !== EstadoVacante::Cerrada && $this->usuario()->can('update', $vacante),
             'vacanteCerrada' => $vacante->estado === EstadoVacante::Cerrada,
+            // Con alguien contratado, cerrar la vacante avisa a quienes siguen esperando (nada lo hace solo).
+            'contratados' => $enEtapa(EtapaPostulacion::Contratado),
+            'enCurso' => $enEtapa(EtapaPostulacion::Postulado) + $enEtapa(EtapaPostulacion::EnRevision)
+                + $enEtapa(EtapaPostulacion::Entrevista) + $enEtapa(EtapaPostulacion::Oferta),
+            'puedeCerrar' => $vacante->estado !== EstadoVacante::Cerrada && $this->usuario()->can('cambiarEstado', $vacante),
             'seleccionada' => $seleccionada,
             // "Evaluar" solo cuando se puede (entrevista realizada, no retirada, aún sin evaluar por mí).
             'puedeEvaluar' => $seleccionada !== null && $this->puedeEvaluar($seleccionada),

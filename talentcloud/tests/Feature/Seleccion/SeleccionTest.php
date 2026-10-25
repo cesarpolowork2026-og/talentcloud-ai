@@ -131,11 +131,11 @@ it('mueve desde el diálogo con "Mover a…" (alternativa al arrastre)', functio
     Livewire::test(Central::class, ['vacante' => $this->backend])
         ->call('abrir', $this->marco->id)
         ->assertSee('Columna: Postulado.')
-        ->set('etapaDestino', 'oferta')
+        ->set('etapaDestino', 'entrevista')
         ->call('moverA')
         ->assertSet('mostrarDetalle', false);
 
-    expect($this->marco->fresh()->etapa)->toBe(EtapaPostulacion::Oferta);
+    expect($this->marco->fresh()->etapa)->toBe(EtapaPostulacion::Entrevista);
 });
 
 it('no permite mover en una vacante cerrada', function () {
@@ -202,6 +202,42 @@ it('descarta cuando sus entrevistas ya están realizadas o canceladas', function
     expect($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::Descartado);
 });
 
+// — Oferta y Contratado exigen una entrevista realizada —
+
+it('no pasa a Oferta ni a Contratado a quien no tiene una entrevista realizada y explica qué hacer', function (string $destino, string $etiqueta) {
+    Livewire::test(Central::class, ['vacante' => $this->backend])
+        ->call('mover', $this->elena->id, $destino, 0)
+        ->assertHasErrors('tablero')
+        ->assertSee("Elena Ruiz todavía no tiene una entrevista realizada. Para pasar a «{$etiqueta}», programa la entrevista y márcala como realizada.");
+
+    // Una entrevista solo programada (o cancelada) no basta.
+    Entrevista::factory()->create(['postulacion_id' => $this->elena->id, 'estado' => EstadoEntrevista::Pendiente]);
+    Entrevista::factory()->create(['postulacion_id' => $this->elena->id, 'inicia_at' => now()->subDay(), 'estado' => EstadoEntrevista::Cancelada]);
+    Livewire::test(Central::class, ['vacante' => $this->backend])
+        ->call('abrir', $this->elena->id)->set('etapaDestino', $destino)->call('moverA')
+        ->assertHasErrors('etapaDestino')
+        ->assertSet('mostrarDetalle', true);
+
+    expect($this->elena->fresh()->etapa)->toBe(EtapaPostulacion::Postulado);
+})->with([['oferta', 'Oferta'], ['contratado', 'Contratado']]);
+
+it('pasa a Oferta con una entrevista realizada, pero no contrata con otra entrevista pendiente', function () {
+    Entrevista::factory()->create(['postulacion_id' => $this->sofia->id, 'inicia_at' => now()->subDay(), 'estado' => EstadoEntrevista::Completada]);
+    $pendiente = Entrevista::factory()->create(['postulacion_id' => $this->sofia->id, 'inicia_at' => now()->addDay(), 'estado' => EstadoEntrevista::Confirmada]);
+
+    app(MoverPostulacion::class)->ejecutar($this->sofia->fresh(), EtapaPostulacion::Oferta, 0, $this->marta);
+    expect($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::Oferta);
+
+    Livewire::test(Central::class, ['vacante' => $this->backend])
+        ->call('mover', $this->sofia->id, 'contratado', 0)
+        ->assertSee('Sofía Nieto tiene 1 entrevista por realizar. Márcala como realizada o cancélala en «Entrevistas» antes de contratar.');
+    expect($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::Oferta);
+
+    $pendiente->update(['estado' => EstadoEntrevista::Cancelada]);
+    app(MoverPostulacion::class)->ejecutar($this->sofia->fresh(), EtapaPostulacion::Contratado, 0, $this->marta);
+    expect($this->sofia->fresh()->etapa)->toBe(EtapaPostulacion::Contratado);
+});
+
 it('ofrece "Evaluar" solo a quien ya tuvo una entrevista realizada', function () {
     $tablero = Livewire::test(Central::class, ['vacante' => $this->backend]);
 
@@ -251,10 +287,10 @@ it('un cliente no puede pedir más tarjetas de las permitidas manipulando la pro
 
 it('mover una tarjeta no carga ni bloquea a toda la vacante y deja cada columna numerada sin huecos', function () {
     Postulacion::factory()->count(30)->paraVacante($this->backend)->enEtapa(EtapaPostulacion::Postulado)->create();
-    app(MoverPostulacion::class)->ejecutar($this->elena->fresh(['vacante']), EtapaPostulacion::Oferta, 0, $this->marta);
-    app(MoverPostulacion::class)->ejecutar($this->marco->fresh(['vacante']), EtapaPostulacion::Oferta, 0, $this->marta);
+    app(MoverPostulacion::class)->ejecutar($this->elena->fresh(['vacante']), EtapaPostulacion::Entrevista, 0, $this->marta);
+    app(MoverPostulacion::class)->ejecutar($this->marco->fresh(['vacante']), EtapaPostulacion::Entrevista, 0, $this->marta);
 
-    $ordenes = Postulacion::where('vacante_id', $this->backend->id)->where('etapa', EtapaPostulacion::Oferta)->orderBy('orden')->pluck('orden', 'id')->values()->all();
+    $ordenes = Postulacion::where('vacante_id', $this->backend->id)->where('etapa', EtapaPostulacion::Entrevista)->orderBy('orden')->pluck('orden', 'id')->values()->all();
     $postulado = Postulacion::where('vacante_id', $this->backend->id)->where('etapa', EtapaPostulacion::Postulado)->orderBy('orden')->pluck('orden')->all();
 
     expect($ordenes)->toBe([0, 1])
@@ -280,4 +316,37 @@ it('la ficha de una postulación muestra su etapa, sus entrevistas y las notas d
 
     // El enlace antiguo (/matching/{id}) que quedó en avisos ya enviados lleva a la ficha.
     $this->get('/matching/'.$this->sofia->id)->assertRedirect(route('postulaciones.show', $this->sofia));
+});
+
+// — Después de contratar —
+
+it('con alguien contratado sugiere cerrar la vacante y cuenta a quienes siguen esperando', function () {
+    Postulacion::factory()->paraVacante($this->backend)->enEtapa(EtapaPostulacion::Contratado)->create();
+
+    // Elena, Marco y Sofía siguen en el proceso (Pablo está descartado).
+    Livewire::test(Central::class, ['vacante' => $this->backend])
+        ->assertSee('Ya contrataste a 1 persona.')
+        ->assertSee('a las 3 personas que siguen en el proceso se les avisará que terminó.')
+        ->assertSee('Ir a cerrar la vacante');
+});
+
+it('no sugiere cerrar sin contratados, con la vacante cerrada ni a quien solo supervisa', function () {
+    Livewire::test(Central::class, ['vacante' => $this->backend])->assertDontSee('Ya contrataste');
+
+    Postulacion::factory()->paraVacante($this->backend)->enEtapa(EtapaPostulacion::Contratado)->create();
+    actuarComo(User::factory()->admin()->create());
+    Livewire::test(Central::class, ['vacante' => $this->backend])->assertDontSee('Ir a cerrar la vacante');
+
+    actuarComo($this->marta);
+    $this->backend->update(['estado' => EstadoVacante::Cerrada]);
+    Livewire::test(Central::class, ['vacante' => $this->backend])->assertDontSee('Ya contrataste');
+});
+
+it('un movimiento que se guarda borra el aviso de uno rechazado antes', function () {
+    Livewire::test(Central::class, ['vacante' => $this->backend])
+        ->call('mover', $this->elena->id, 'contratado', 0)
+        ->assertHasErrors('tablero')
+        ->call('mover', $this->elena->id, 'en_revision', 0)
+        ->assertHasNoErrors()
+        ->assertDontSee('todavía no tiene una entrevista realizada');
 });
