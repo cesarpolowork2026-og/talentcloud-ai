@@ -39,6 +39,12 @@ class PostulacionPolicy
             && $postulacion->candidato_id === $user->candidato->id;
     }
 
+    /** «Quitar de mi lista» (y volver a mostrar): solo el propio postulante, sobre su postulación. */
+    public function ocultar(User $user, Postulacion $postulacion): bool
+    {
+        return $this->retirar($user, $postulacion);
+    }
+
     /**
      * Ver y escribir notas internas: solo el personal de la empresa. Son de la empresa: ni el postulante ni el
      * admin SaaS las ven. No depende de view().

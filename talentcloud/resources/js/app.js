@@ -1,5 +1,6 @@
 import './presentacion';
 import './carga';
+import './sesion';
 
 document.addEventListener('alpine:init', () => {
     /**

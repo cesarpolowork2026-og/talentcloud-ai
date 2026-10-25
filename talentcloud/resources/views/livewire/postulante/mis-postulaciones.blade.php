@@ -5,8 +5,32 @@
 <div wire:poll.15s.visible="revisarCambios">
     <x-ui.page-header title="Mis postulaciones" subtitle="Sigue el estado de tus procesos de selección." />
 
+    {{-- Quitar de la lista (solo se oculta aquí: la empresa conserva su historial) y volver a verlas. --}}
+    @if ($verQuitadas || $finalizadas > 0 || $quitadas > 0)
+        <div class="-mt-3 mb-4 flex flex-wrap items-center gap-3 text-14">
+            @if ($verQuitadas)
+                <span class="text-neutral-700">Estas son las postulaciones que quitaste de tu lista. Puedes volver a mostrar cualquiera.</span>
+                <x-ui.button size="sm" wire:click="alternarQuitadas">Volver a mis postulaciones</x-ui.button>
+            @else
+                @if ($finalizadas > 0)
+                    <x-ui.button size="sm" wire:click="$set('mostrarQuitarFinalizadas', true)">Quitar las finalizadas ({{ $finalizadas }})</x-ui.button>
+                @endif
+                @if ($quitadas > 0)
+                    <button type="button" wire:click="alternarQuitadas" class="text-neutral-700 underline hover:text-accent-700">Ver las que quitaste ({{ $quitadas }})</button>
+                @endif
+            @endif
+            <x-ui.action-message on="postulaciones-quitadas">Listo: las quitamos de tu lista. Puedes volver a verlas en «Ver las que quitaste».</x-ui.action-message>
+        </div>
+    @endif
+
     <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        @if ($postulaciones->isEmpty())
+        @if ($postulaciones->isEmpty() && $verQuitadas)
+            <x-ui.empty-state icon="eye" message="No quitaste ninguna postulación de tu lista." />
+        @elseif ($postulaciones->isEmpty() && $quitadas > 0)
+            <x-ui.empty-state icon="check-circle" message="No tienes postulaciones en tu lista: quitaste todas.">
+                <x-ui.button variant="primary" class="mt-4" :href="route('postulante.vacantes')" wire:navigate>Ver vacantes abiertas</x-ui.button>
+            </x-ui.empty-state>
+        @elseif ($postulaciones->isEmpty())
             <x-ui.empty-state ilustracion="sin-postulaciones" titulo="Todavía no tienes postulaciones" message="Sube tu CV una sola vez y postula en un clic a las vacantes que te interesen.">
                 <x-ui.button variant="primary" class="mt-4" :href="route('postulante.vacantes')" wire:navigate>Ver vacantes abiertas</x-ui.button>
             </x-ui.empty-state>
@@ -98,8 +122,13 @@ Postulación enviada el {{ Formato::fechaCorta($seleccionada->created_at) }}.</p
         @endif
         <x-slot:actions>
             <x-ui.button x-on:click="open = false">Cerrar</x-ui.button>
-            @if ($seleccionada && EstadoDeMiPostulacion::de($seleccionada)->puedeRetirarse())
-                <x-ui.button variant="ghost" wire:click="confirmarRetiro">Retirar postulación</x-ui.button>
+            @if ($seleccionada?->oculta_para_postulante_at)
+                <x-ui.button variant="ghost" wire:click="volverAMostrar">Volver a mostrar en mi lista</x-ui.button>
+            @elseif ($seleccionada)
+                <x-ui.button variant="ghost" wire:click="confirmarQuitar">Quitar de mi lista</x-ui.button>
+                @if (EstadoDeMiPostulacion::de($seleccionada)->puedeRetirarse())
+                    <x-ui.button variant="ghost" wire:click="confirmarRetiro">Retirar postulación</x-ui.button>
+                @endif
             @endif
         </x-slot:actions>
     </x-ui.dialog>
@@ -112,5 +141,29 @@ Postulación enviada el {{ Formato::fechaCorta($seleccionada->created_at) }}.</p
         action="retirar"
     >
         {{ $seleccionada?->vacante?->empresa?->nombre }} dejará de considerarte para esta vacante y se cancelarán tus entrevistas pendientes. No se puede deshacer.
+    </x-ui.confirm>
+
+    {{-- Quitar de mi lista: si sigue en curso, antes se retira. --}}
+    @php($enCurso = $seleccionada && EstadoDeMiPostulacion::de($seleccionada)->puedeRetirarse())
+    <x-ui.confirm
+        wire:model="mostrarQuitar"
+        :title="'Quitar '.($seleccionada?->vacante?->titulo ?? 'la postulación').' de tu lista'"
+        :action-label="$enCurso ? 'Retirar y quitar' : 'Quitar de mi lista'"
+        action="quitar"
+    >
+        @if ($enCurso)
+            Esta postulación sigue en curso: para quitarla, primero se retira. {{ $seleccionada?->vacante?->empresa?->nombre }} dejará de considerarte y se cancelarán tus entrevistas pendientes. El retiro no se puede deshacer.
+        @else
+            Dejará de aparecer en «Mis postulaciones». No se borra nada: podrás volver a verla en «Ver las que quitaste».
+        @endif
+    </x-ui.confirm>
+
+    <x-ui.confirm
+        wire:model="mostrarQuitarFinalizadas"
+        title="Quitar las postulaciones finalizadas"
+        action-label="Quitar de mi lista"
+        action="quitarFinalizadas"
+    >
+        Se quitarán de tu lista las {{ $finalizadas }} postulaciones que ya terminaron (contratado, no seleccionado, cerrada o retirada). Las que siguen en curso no cambian. No se borra nada: podrás volver a verlas en «Ver las que quitaste».
     </x-ui.confirm>
 </div>

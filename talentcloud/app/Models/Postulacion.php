@@ -67,6 +67,7 @@ class Postulacion extends Model
             'origen' => OrigenPostulacion::class,
             'retirada_at' => 'datetime',
             'estado_avisado' => EstadoDeMiPostulacion::class,
+            'oculta_para_postulante_at' => 'datetime',
         ];
     }
 

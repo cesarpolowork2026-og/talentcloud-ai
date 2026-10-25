@@ -85,6 +85,17 @@ class AnalisisBasicoDeRequisitos
     }
 
     /**
+     * Cobertura con requisitos ya cargados y solo el texto del CV (sin competencias anotadas, que son de cada empresa):
+     * la que ve el postulante en las vacantes publicadas, donde no hay contexto de empresa.
+     *
+     * @param  Collection<int, Requisito>  $requisitos
+     */
+    public function paraRequisitos(Collection $requisitos, ?string $textoDelCv): CoberturaDeRequisitos
+    {
+        return $this->evaluar($requisitos, (string) $textoDelCv, []);
+    }
+
+    /**
      * @param  Collection<int, Requisito>  $requisitos
      * @param  list<int>  $anotadas
      */
