@@ -8,7 +8,7 @@ Este plan describe cómo llevar TalentCloud AI desde el servidor virtual donde h
 |---|---|
 | Aplicación | Laravel 12 sobre PHP 8.2, interfaz con Livewire 3 y Tailwind 3. |
 | Dependencias | `composer.json`: Livewire, spatie/laravel-permission, maatwebsite/excel, stripe/stripe-php. Recursos de interfaz compilados con Node 22 y Vite en la construcción de la imagen. |
-| Base de datos | PostgreSQL 17, 31 tablas, 52 migraciones. El volcado completo con datos de demostración está en `talentcloud/database/esquema/talentcloud_completa.sql`. |
+| Base de datos | PostgreSQL 17, 31 tablas, 54 migraciones. El volcado completo con datos de demostración está en `talentcloud/database/esquema/talentcloud_completa.sql`. |
 | Archivos | Currículos en un volumen privado (`storage/app/private/cvs`); no están en la base. |
 | Procesos | Cinco contenedores: `web` (Caddy), `app` (PHP-FPM), `queue` (cola), `scheduler` (tareas programadas) y `db` (PostgreSQL). |
 | Servicios externos | Correo SMTP; Stripe en modo de prueba (con aviso firmado). |
