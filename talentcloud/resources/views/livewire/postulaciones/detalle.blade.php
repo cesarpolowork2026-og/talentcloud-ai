@@ -168,7 +168,9 @@
         </section>
     @endcan
 
-    <x-ui.confirm wire:model="mostrarDescarte" :title="'Descartar a '.($candidato?->nombre ?? 'el candidato')" action-label="Descartar" action="descartar">
-        El candidato saldrá del proceso de esta vacante (pasa a «Descartado»). No se elimina su perfil ni su CV. Si tiene entrevistas pendientes, primero hay que cancelarlas.
-    </x-ui.confirm>
+    @if ($editable)
+        <x-ui.confirm wire:model="mostrarDescarte" :title="'Descartar a '.($candidato?->nombre ?? 'el candidato')" action-label="Descartar" action="descartar">
+            El candidato saldrá del proceso de esta vacante (pasa a «Descartado»). No se elimina su perfil ni su CV. Si tiene entrevistas pendientes, primero hay que cancelarlas.
+        </x-ui.confirm>
+    @endif
 </div>

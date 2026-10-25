@@ -435,5 +435,6 @@ it('la ficha no ofrece acciones al admin SaaS ni sobre una postulación retirada
     actuarComo(User::factory()->admin()->create());
     app(TenantContext::class)->ejecutarGlobal(fn () => Livewire::test(Detalle::class, ['postulacion' => $this->elena])
         ->assertDontSee('Programar entrevista')
+        ->assertDontSee('Descartar')
         ->assertDontSeeHtml('wire:submit="moverA"'));
 });
