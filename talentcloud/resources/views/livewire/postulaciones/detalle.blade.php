@@ -17,6 +17,34 @@
         </x-slot:actions>
     </x-ui.page-header>
 
+    {{-- Acciones sobre la postulación, con las mismas reglas que el tablero (Oferta y Contratado exigen una entrevista realizada). --}}
+    @if ($editable)
+        <x-ui.card kicker="Acciones" class="mb-6 max-w-[980px] !bg-white" elev="sm">
+            <div class="flex flex-wrap items-end gap-3">
+                <form wire:submit="moverA" class="flex flex-wrap items-end gap-3">
+                    <x-ui.field label="Mover a" for="ficha-mover" error="etapaDestino" class="!mb-0">
+                        <x-ui.select wire:model="etapaDestino" id="ficha-mover" :options="array_diff_key($etapas, [$postulacion->etapa->value => true])" placeholder="Elige una etapa" class="w-[220px] max-w-full" />
+                    </x-ui.field>
+                    <x-ui.button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="moverA">Mover</x-ui.button>
+                </form>
+                @if ($postulacion->etapa !== \App\Enums\EtapaPostulacion::Descartado)
+                    @can('create', \App\Models\Entrevista::class)
+                        <x-ui.button :href="route('entrevistas.index', ['programar' => $postulacion->id])" wire:navigate>Programar entrevista</x-ui.button>
+                    @endcan
+                @endif
+                @if ($puedeEvaluar)
+                    <x-ui.button :href="route('evaluaciones.index', ['evaluar' => $postulacion->id])" wire:navigate>Evaluar</x-ui.button>
+                @endif
+                @if ($postulacion->etapa !== \App\Enums\EtapaPostulacion::Descartado)
+                    <x-ui.button variant="ghost" wire:click="confirmarDescarte">Descartar</x-ui.button>
+                @endif
+            </div>
+            <x-ui.action-message on="postulacion-movida" class="text-14">Listo: la postulación cambió de etapa.</x-ui.action-message>
+        </x-ui.card>
+    @elseif ($postulacion->estaRetirada())
+        <p class="mb-6 max-w-[980px] text-14 text-neutral-700">El candidato retiró esta postulación: ya no se puede mover.</p>
+    @endif
+
     <div class="mb-6 grid max-w-[980px] gap-4 md:grid-cols-2">
         <x-ui.card kicker="Estado de la postulación">
             <dl class="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-14">
@@ -139,4 +167,8 @@
             <livewire:postulaciones.notas :postulacion-id="$postulacion->id" :key="'notas-'.$postulacion->id" />
         </section>
     @endcan
+
+    <x-ui.confirm wire:model="mostrarDescarte" :title="'Descartar a '.($candidato?->nombre ?? 'el candidato')" action-label="Descartar" action="descartar">
+        El candidato saldrá del proceso de esta vacante (pasa a «Descartado»). No se elimina su perfil ni su CV. Si tiene entrevistas pendientes, primero hay que cancelarlas.
+    </x-ui.confirm>
 </div>

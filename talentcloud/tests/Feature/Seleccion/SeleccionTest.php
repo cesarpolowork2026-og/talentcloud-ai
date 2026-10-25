@@ -4,6 +4,7 @@ use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
 use App\Events\PostulacionCambioDeEtapa;
+use App\Livewire\Postulaciones\Detalle;
 use App\Livewire\Seleccion\Central;
 use App\Models\Candidato;
 use App\Models\Empresa;
@@ -373,6 +374,9 @@ it('«Mover a…» deja la postulación arriba de la columna destino', function 
 });
 
 it('busca postulantes de la vacante por nombre (sin tildes) o correo en todas las columnas', function () {
+    // Correos fijos: los del generador son al azar y alguno podría contener el texto buscado.
+    Candidato::query()->get()->each(fn (Candidato $c) => $c->forceFill(['email' => 'c'.$c->id.'@prueba.test'])->save());
+
     Livewire::test(Central::class, ['vacante' => $this->backend])
         ->set('buscarPostulante', 'sofia')
         ->assertSee('1 postulación coincide con «sofia»')
@@ -391,4 +395,45 @@ it('la migración ordena cada columna de la más reciente a la más antigua', fu
     (require database_path('migrations/2026_10_25_110000_tablero_de_la_mas_reciente_a_la_mas_antigua.php'))->up();
 
     expect(columna($this->backend, EtapaPostulacion::Postulado))->toBe(['Marco Díaz:0', 'Elena Ruiz:1']);
+});
+
+// — Acciones desde la ficha de la postulación —
+
+it('desde la ficha se mueve la postulación con las mismas reglas del tablero', function () {
+    $ficha = Livewire::test(Detalle::class, ['postulacion' => $this->elena])
+        ->assertSee('Acciones')
+        ->assertSee('Programar entrevista')
+        ->set('etapaDestino', 'en_revision')
+        ->call('moverA')
+        ->assertHasNoErrors()
+        ->assertDispatched('postulacion-movida');
+
+    expect($this->elena->fresh()->etapa)->toBe(EtapaPostulacion::EnRevision);
+
+    // Contratar sin entrevista realizada: el mismo motivo que en el tablero.
+    $ficha->set('etapaDestino', 'contratado')->call('moverA')
+        ->assertHasErrors('etapaDestino')
+        ->assertSee('todavía no tiene una entrevista realizada');
+    expect($this->elena->fresh()->etapa)->toBe(EtapaPostulacion::EnRevision);
+});
+
+it('desde la ficha se descarta con confirmación', function () {
+    Livewire::test(Detalle::class, ['postulacion' => $this->marco])
+        ->call('confirmarDescarte')
+        ->assertSet('mostrarDescarte', true)
+        ->call('descartar');
+
+    expect($this->marco->fresh()->etapa)->toBe(EtapaPostulacion::Descartado);
+});
+
+it('la ficha no ofrece acciones al admin SaaS ni sobre una postulación retirada', function () {
+    $this->sofia->forceFill(['retirada_at' => now(), 'etapa' => EtapaPostulacion::Descartado])->save();
+    Livewire::test(Detalle::class, ['postulacion' => $this->sofia])
+        ->assertDontSee('Programar entrevista')
+        ->assertSee('ya no se puede mover');
+
+    actuarComo(User::factory()->admin()->create());
+    app(TenantContext::class)->ejecutarGlobal(fn () => Livewire::test(Detalle::class, ['postulacion' => $this->elena])
+        ->assertDontSee('Programar entrevista')
+        ->assertDontSeeHtml('wire:submit="moverA"'));
 });

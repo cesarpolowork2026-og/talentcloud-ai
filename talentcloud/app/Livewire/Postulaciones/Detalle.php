@@ -2,16 +2,23 @@
 
 namespace App\Livewire\Postulaciones;
 
+use App\Enums\EstadoVacante;
+use App\Enums\EtapaPostulacion;
 use App\Livewire\Concerns\SeActualizaSola;
 use App\Models\Cv;
 use App\Models\Entrevista;
 use App\Models\Evaluacion;
 use App\Models\Postulacion;
+use App\Models\User;
 use App\Models\Vacante;
+use App\Services\Evaluaciones\GuardarEvaluacion;
 use App\Services\Postulaciones\AnalisisBasicoDeRequisitos;
+use App\Services\Postulaciones\MoverPostulacion;
+use App\Services\Vacantes\OperacionNoPermitida;
 use App\Support\BuscadorDeTerminos;
 use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -26,12 +33,100 @@ class Detalle extends Component
     #[Locked]
     public int $postulacionId;
 
+    /** «Mover a…» desde la ficha (las mismas reglas que el tablero: MoverPostulacion). */
+    public string $etapaDestino = '';
+
+    public bool $mostrarDescarte = false;
+
     public function mount(Postulacion $postulacion): void
     {
         $this->authorize('viewAny', Vacante::class);
         $this->authorize('view', $postulacion);
 
         $this->postulacionId = $postulacion->id;
+    }
+
+    public function moverA(MoverPostulacion $mover): void
+    {
+        $postulacion = $this->postulacion();
+        $this->authorize('update', $postulacion);
+
+        $this->validate(['etapaDestino' => ['required', Rule::enum(EtapaPostulacion::class)]], attributes: ['etapaDestino' => 'etapa']);
+        $destino = EtapaPostulacion::from($this->etapaDestino);
+
+        if ($destino === $postulacion->etapa) {
+            return;
+        }
+
+        try {
+            // Arriba de la columna destino, como «Mover a…» del tablero.
+            $mover->ejecutar($postulacion, $destino, 0, $this->usuario());
+        } catch (OperacionNoPermitida $e) {
+            $this->addError('etapaDestino', $e->getMessage());
+
+            return;
+        }
+
+        $this->etapaDestino = '';
+        $this->dispatch('postulacion-movida', etapa: $destino->etiqueta());
+    }
+
+    public function confirmarDescarte(): void
+    {
+        $this->authorize('update', $this->postulacion());
+
+        $this->resetErrorBag();
+        $this->mostrarDescarte = true;
+    }
+
+    public function descartar(MoverPostulacion $mover): void
+    {
+        $postulacion = $this->postulacion();
+        $this->authorize('update', $postulacion);
+
+        $this->mostrarDescarte = false;
+
+        try {
+            $mover->descartar($postulacion, $this->usuario());
+        } catch (OperacionNoPermitida $e) {
+            $this->addError('etapaDestino', $e->getMessage());
+
+            return;
+        }
+
+        $this->dispatch('postulacion-movida', etapa: EtapaPostulacion::Descartado->etiqueta());
+    }
+
+    private function postulacion(): Postulacion
+    {
+        $postulacion = Postulacion::query()->with('vacante')->find($this->postulacionId);
+        abort_if($postulacion === null, 404);
+
+        return $postulacion;
+    }
+
+    private function usuario(): User
+    {
+        /** @var User $usuario */
+        $usuario = auth()->user();
+
+        return $usuario;
+    }
+
+    /** «Evaluar» solo cuando se puede: entrevista realizada, no retirada y aún sin evaluar por esta persona. */
+    private function puedeEvaluar(Postulacion $postulacion): bool
+    {
+        if (! $this->usuario()->can('create', Evaluacion::class)) {
+            return false;
+        }
+
+        try {
+            app(GuardarEvaluacion::class)->verificarEvaluable($postulacion, $this->usuario());
+
+            return true;
+        } catch (OperacionNoPermitida) {
+            return false;
+        }
     }
 
     /** La etapa (la mueve otra persona o la retira el postulante), sus entrevistas y evaluaciones. */
@@ -78,6 +173,12 @@ class Detalle extends Component
                 ? $postulacion->candidato->cvActual
                 : null,
             'cobertura' => $cobertura,
+            // Acciones: el personal de la empresa, con la vacante abierta y la postulación no retirada (el admin SaaS solo supervisa).
+            'editable' => $postulacion->vacante?->estado !== EstadoVacante::Cerrada
+                && ! $postulacion->estaRetirada()
+                && $this->usuario()->can('update', $postulacion),
+            'puedeEvaluar' => $this->puedeEvaluar($postulacion),
+            'etapas' => EtapaPostulacion::opciones(),
             'textoDelCv' => $texto,
             'tramosDelCv' => BuscadorDeTerminos::tramos($texto, $terminos),
             'postulacion' => $postulacion,
