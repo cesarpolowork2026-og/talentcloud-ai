@@ -51,40 +51,43 @@ curl "https://talentcloudia.online/api/v1/vacantes?modalidad=remoto&q=desarrolla
 {
   "data": [
     {
-      "id": 41,
-      "titulo": "Desarrollador Backend",
+      "id": 12,
+      "titulo": "Desarrollador Frontend",
       "modalidad": "remoto",
       "ubicacion": null,
       "jornada": "completa",
       "sueldo": {
         "minimo": 4500,
-        "maximo": 6000,
+        "maximo": 6500,
         "moneda": "PEN",
         "periodo": "mes",
-        "texto": "S/ 4 500 – 6 000 al mes"
+        "texto": "S/ 4 500 – 6 500 al mes"
       },
-      "publicada_en": "2026-10-18T09:30:00-05:00",
-      "empresa": { "nombre": "Nimbus Corp", "sector": "Tecnología", "sitio_web": "https://nimbus.example" },
+      "publicada_en": "2026-10-02T08:45:00-05:00",
+      "empresa": { "nombre": "Brío Retail", "sector": "Retail", "sitio_web": null },
       "requisitos": [
-        { "competencia": "PHP", "tipo": "obligatorio", "anios_minimos": 3 },
-        { "competencia": "Docker", "tipo": "deseable", "anios_minimos": null }
+        { "competencia": "React", "tipo": "obligatorio", "anios_minimos": 2 },
+        { "competencia": "TypeScript", "tipo": "obligatorio", "anios_minimos": null },
+        { "competencia": "JavaScript", "tipo": "obligatorio", "anios_minimos": null },
+        { "competencia": "Figma", "tipo": "deseable", "anios_minimos": null },
+        { "competencia": "Git", "tipo": "deseable", "anios_minimos": null }
       ],
-      "url": "https://talentcloudia.online/empleos/41"
+      "url": "https://talentcloudia.online/empleos/12"
     }
   ],
-  "links": { "first": "…?page=1", "last": "…?page=3", "prev": null, "next": "…?page=2" },
-  "meta": { "current_page": 1, "per_page": 2, "total": 5, "last_page": 3 }
+  "links": { "first": "…?page=1", "last": "…?page=2", "prev": null, "next": "…?page=2" },
+  "meta": { "current_page": 1, "per_page": 2, "total": 3, "last_page": 2 }
 }
 ```
 
-(Los valores del ejemplo son ilustrativos; la estructura es la real.)
+(Respuesta real de la demostración; los valores cambian con los datos.)
 
 ### GET /vacantes/{id}
 
 Devuelve `{ "data": { … } }` con los mismos campos que el listado más `descripcion`.
 
 ```bash
-curl https://talentcloudia.online/api/v1/vacantes/41
+curl https://talentcloudia.online/api/v1/vacantes/7
 ```
 
 Si la vacante no existe **o no es pública** (borrador, cerrada, empresa suspendida) responde `404` con `{"mensaje": "Vacante no encontrada."}`; no se distingue un caso del otro.
