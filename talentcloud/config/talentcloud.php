@@ -85,4 +85,15 @@ return [
         'correo' => env('SOPORTE_CORREO') ?: 'talentcloudia@gmail.com',
     ],
 
+    /*
+    | Dominios a los que nunca se envía correo: los de las cuentas ficticias de la
+    | demostración. Algunos existen de verdad y el correo rebotaría o le llegaría a
+    | un desconocido (y los rebotes dañan la reputación del dominio que envía).
+    | Los avisos siguen apareciendo en la campana.
+    */
+    'correo' => [
+        'dominios_sin_envio' => array_values(array_filter(array_map('trim', explode(',', (string) (env('CORREO_DOMINIOS_SIN_ENVIO')
+            ?: 'correo.com,nimbus.com,vela.studio,rutasur.pe,nunasalud.pe,brioretail.pe,orbita.dev,alturacafe.pe,talentcloud.ai,example.com,example.org,example.net'))))),
+    ],
+
 ];
