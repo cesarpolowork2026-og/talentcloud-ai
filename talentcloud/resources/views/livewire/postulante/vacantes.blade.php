@@ -1,5 +1,6 @@
 {{-- "Vacantes" del postulante: ofertas abiertas de todas las empresas (ampliación sobre el prototipo). --}}
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header title="Vacantes" subtitle="Ofertas abiertas de las empresas en TalentCloud. Postula con tu CV en un clic." compact />
 
     <x-ui.listado-controles

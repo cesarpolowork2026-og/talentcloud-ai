@@ -2,6 +2,7 @@
 @use('App\Enums\EstadoProcesamientoCv')
 @use('App\Support\Formato')
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header :title="$candidato->nombre" :subtitle="collect([$candidato->titular, $candidato->email, $candidato->telefono])->filter()->join(' · ')">
         <x-slot:breadcrumbs>
             <x-ui.breadcrumb :items="[['label' => 'Candidatos', 'href' => route('candidatos.index')], ['label' => $candidato->nombre]]" />

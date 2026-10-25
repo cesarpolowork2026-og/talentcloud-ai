@@ -3,7 +3,10 @@
 namespace App\Livewire\Postulante;
 
 use App\Enums\Modalidad;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Livewire\Concerns\WithListado;
+use App\Models\Candidato;
+use App\Models\Empresa;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
@@ -20,6 +23,7 @@ use Livewire\Component;
 #[Title('Vacantes')]
 class Vacantes extends Component
 {
+    use SeActualizaSola;
     use WithListado;
 
     public function mount(): void
@@ -51,6 +55,18 @@ class Vacantes extends Component
     protected function porPagina(): int
     {
         return 12;
+    }
+
+    /** Vacantes que se publican o cierran y las postulaciones propias (la marca «Ya postulaste»). */
+    protected function partesDeLaFirma(): array
+    {
+        $candidatoId = Candidato::where('user_id', auth()->id())->value('id') ?? 0;
+
+        return [
+            $this->parteDe(Vacante::sinFiltroDeEmpresa()),
+            $this->parteDe(Empresa::query()),
+            $this->parteDe(Postulacion::sinFiltroDeEmpresa()->where('candidato_id', $candidatoId)),
+        ];
     }
 
     public function render(VacanteRepository $vacantes): View

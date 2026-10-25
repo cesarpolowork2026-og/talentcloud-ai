@@ -8,7 +8,9 @@ use App\Enums\EstadoVacante;
 use App\Enums\Jornada;
 use App\Enums\Modalidad;
 use App\Enums\TipoRequisito;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Models\Competencia;
+use App\Models\Postulacion;
 use App\Models\Requisito;
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
@@ -27,6 +29,8 @@ use Livewire\Component;
  */
 class Detalle extends Component
 {
+    use SeActualizaSola;
+
     #[Locked]
     public int $vacanteId;
 
@@ -221,6 +225,16 @@ class Detalle extends Component
 
         $this->mostrarQuitarRequisito = false;
         $this->requisitoSeleccionado = null;
+    }
+
+    /** La vacante (estado y datos), sus requisitos y sus postulaciones, que cambian otras personas del equipo. */
+    protected function partesDeLaFirma(): array
+    {
+        return [
+            $this->parteDeFila(Vacante::query(), $this->vacanteId),
+            $this->parteDe(Requisito::query()->where('vacante_id', $this->vacanteId)),
+            $this->parteDe(Postulacion::query()->where('vacante_id', $this->vacanteId)),
+        ];
     }
 
     public function render(VacanteRepository $vacantes): View

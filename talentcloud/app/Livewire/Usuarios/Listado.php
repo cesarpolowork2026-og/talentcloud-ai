@@ -3,11 +3,14 @@
 namespace App\Livewire\Usuarios;
 
 use App\Enums\Rol;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Livewire\Concerns\WithListado;
+use App\Models\Invitacion;
 use App\Models\User;
 use App\Services\Equipo\CambiarEstadoUsuario;
 use App\Services\Plataforma\RegistroDeAuditoria;
 use App\Services\Vacantes\OperacionNoPermitida;
+use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -22,6 +25,7 @@ use Livewire\Component;
 #[Title('Usuarios')]
 class Listado extends Component
 {
+    use SeActualizaSola;
     use WithListado;
 
     #[Url(except: '')]
@@ -113,6 +117,15 @@ class Listado extends Component
         }
 
         $this->mostrarConfirmacion = false;
+    }
+
+    /** Usuarios que se registran, aceptan una invitación o se activan y desactivan. */
+    protected function partesDeLaFirma(): array
+    {
+        $contexto = app(TenantContext::class);
+        $usuarios = $contexto->esGlobal() ? User::query() : User::query()->where('empresa_id', $contexto->id());
+
+        return [$this->parteDe($usuarios), $this->parteDe(Invitacion::query())];
     }
 
     public function render(): View

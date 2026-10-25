@@ -5,9 +5,11 @@ namespace App\Livewire\Candidatos;
 use App\DTO\NuevoCandidatoData;
 use App\Enums\EstadoVacante;
 use App\Exports\CandidatosExport;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Livewire\Concerns\WithListado;
 use App\Models\Candidato;
 use App\Models\Cv;
+use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Repositories\Contracts\CandidatoRepository;
@@ -33,6 +35,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 #[Title('Candidatos')]
 class Listado extends Component
 {
+    use SeActualizaSola;
     use WithFileUploads, WithListado;
 
     // Diálogo del CV (prototipo: openCv).
@@ -195,6 +198,12 @@ class Listado extends Component
         $this->authorize('create', Candidato::class);
 
         return $buscador->buscar($texto, base: Vacante::query()->where('estado', EstadoVacante::Abierta));
+    }
+
+    /** Postulaciones nuevas o movidas, candidatos registrados y CV subidos por otras personas. */
+    protected function partesDeLaFirma(): array
+    {
+        return [$this->parteDe(Postulacion::query()), $this->parteDe(Candidato::query()), $this->parteDe(Cv::query())];
     }
 
     public function render(CandidatoRepository $candidatos): View

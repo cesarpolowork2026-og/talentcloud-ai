@@ -1,5 +1,6 @@
 {{-- Pantalla "Empresas" del prototipo (TalentCloud App.dc.html, isEmpresas). --}}
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header title="Empresas" subtitle="Empresas registradas en TalentCloud AI." compact>
         <x-slot:actions>
             <x-ui.button variant="primary" wire:click="abrirFormulario">+ Nueva empresa</x-ui.button>

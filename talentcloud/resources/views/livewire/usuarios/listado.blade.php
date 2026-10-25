@@ -1,5 +1,6 @@
 {{-- «Usuarios» del admin SaaS: todas las cuentas de la plataforma, para dar soporte. --}}
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header title="Usuarios" subtitle="Cuentas de todas las empresas y postulantes de la plataforma." compact />
 
     @error('usuario')

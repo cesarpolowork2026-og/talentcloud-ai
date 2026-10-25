@@ -1,5 +1,6 @@
 {{-- Detalle público de una vacante abierta (ampliación sobre el prototipo). --}}
 <div>
+    <x-ui.se-actualiza />
     @if ($vacante === null)
         <x-ui.empty-state icon="briefcase" message="Esta vacante ya no recibe postulaciones.">
             <x-ui.button class="mt-4" :href="route('empleos.index')" wire:navigate>Ver otras vacantes</x-ui.button>

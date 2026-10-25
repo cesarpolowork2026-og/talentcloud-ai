@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Postulaciones;
 
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Models\Nota;
 use App\Models\Postulacion;
 use App\Models\User;
@@ -17,6 +18,8 @@ use Livewire\Component;
  */
 class Notas extends Component
 {
+    use SeActualizaSola;
+
     #[Locked]
     public int $postulacionId;
 
@@ -56,6 +59,12 @@ class Notas extends Component
         $this->authorize('delete', $nota);
 
         $notas->borrar($nota, $this->usuario());
+    }
+
+    /** Notas que escribe otra persona del equipo. */
+    protected function partesDeLaFirma(): array
+    {
+        return [$this->parteDe(Nota::query()->where('postulacion_id', $this->postulacionId))];
     }
 
     public function render(): View

@@ -5,8 +5,11 @@
 --}}
 @props(['maqueta'])
 
-<div {{ $attributes->class('relative -m-[14px] overflow-hidden') }} style="aspect-ratio: 880 / 520" aria-hidden="true" x-data="maquetaEscalada(880, 520)">
-    <div class="p-[14px]" :style="estiloMaqueta" style="width: 880px; height: 520px">
-        <x-dynamic-component :component="'presentacion.maqueta-'.$maqueta" />
+<figure {{ $attributes->class('m-0') }}>
+    <div class="relative -m-[14px] overflow-hidden" style="aspect-ratio: 880 / 520" aria-hidden="true" x-data="maquetaEscalada(880, 520)">
+        <div class="p-[14px]" :style="estiloMaqueta" style="width: 880px; height: 520px">
+            <x-dynamic-component :component="'presentacion.maqueta-'.$maqueta" />
+        </div>
     </div>
-</div>
+    <figcaption class="mt-5"><x-presentacion.ejemplo /></figcaption>
+</figure>

@@ -6,7 +6,9 @@ use App\DTO\EvaluacionData;
 use App\Enums\CriterioEvaluacion;
 use App\Enums\EstadoEvaluacion;
 use App\Exports\EvaluacionesExport;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Livewire\Concerns\WithListado;
+use App\Models\Entrevista;
 use App\Models\Evaluacion;
 use App\Models\Postulacion;
 use App\Models\User;
@@ -33,6 +35,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 #[Title('Evaluaciones')]
 class Listado extends Component
 {
+    use SeActualizaSola;
     use WithListado;
 
     /** «lista» (las evaluaciones, una por fila) o «comparar» (las postulaciones evaluadas de una vacante, lado a lado). */
@@ -222,6 +225,12 @@ class Listado extends Component
     private function etiquetaDePostulacion(?Postulacion $p): string
     {
         return $p === null ? '' : $p->candidato?->nombre.' — '.Formato::vacante($p->vacante);
+    }
+
+    /** Evaluaciones del equipo y entrevistas que se completan (habilitan evaluar). */
+    protected function partesDeLaFirma(): array
+    {
+        return [$this->parteDe(Evaluacion::query()), $this->parteDe(Entrevista::query())];
     }
 
     public function render(EvaluacionRepository $evaluaciones, ComparativaDeFinalistas $comparativa): View

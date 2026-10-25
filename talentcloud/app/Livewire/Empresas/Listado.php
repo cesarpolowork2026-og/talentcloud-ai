@@ -5,9 +5,11 @@ namespace App\Livewire\Empresas;
 use App\DTO\NuevaEmpresaData;
 use App\Enums\EstadoEmpresa;
 use App\Enums\PlanEmpresa;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Livewire\Concerns\WithListado;
 use App\Models\Empresa;
 use App\Models\User;
+use App\Models\Vacante;
 use App\Repositories\Contracts\EmpresaRepository;
 use App\Repositories\Contracts\EquipoRepository;
 use App\Services\Empresas\CambiarEstadoEmpresa;
@@ -29,6 +31,7 @@ use Livewire\Component;
 #[Title('Empresas')]
 class Listado extends Component
 {
+    use SeActualizaSola;
     use WithListado;
 
     // Formulario "Nueva empresa".
@@ -233,6 +236,12 @@ class Listado extends Component
 
         $this->mostrarFormulario = false;
         $this->reset('nombre', 'plan', 'emailAdministrador');
+    }
+
+    /** Empresas que se registran, cambian de plan o se suspenden, y su uso (vacantes y usuarios). */
+    protected function partesDeLaFirma(): array
+    {
+        return [$this->parteDe(Empresa::query()), $this->parteDe(Vacante::query()), $this->parteDe(User::query())];
     }
 
     public function render(EmpresaRepository $empresas, EquipoRepository $equipo, LimitesDelPlan $limites): View

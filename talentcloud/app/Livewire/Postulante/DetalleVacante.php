@@ -4,8 +4,10 @@ namespace App\Livewire\Postulante;
 
 use App\Enums\EstadoProcesamientoCv;
 use App\Livewire\Concerns\EsperaElAnalisisDelCv;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Models\Candidato;
 use App\Models\Cv;
+use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
@@ -24,6 +26,7 @@ use Livewire\Component;
 class DetalleVacante extends Component
 {
     use EsperaElAnalisisDelCv;
+    use SeActualizaSola;
 
     #[Locked]
     public int $vacanteId;
@@ -81,6 +84,15 @@ class DetalleVacante extends Component
     public function cvSubido(): void
     {
         $this->cvSubidoAqui = true;
+    }
+
+    /** La vacante (si cierra o cambia) y la propia postulación (si la empresa la mueve). */
+    protected function partesDeLaFirma(): array
+    {
+        return [
+            $this->parteDeFila(Vacante::sinFiltroDeEmpresa(), $this->vacanteId),
+            $this->parteDe(Postulacion::sinFiltroDeEmpresa()->where('vacante_id', $this->vacanteId)->where('candidato_id', $this->candidatoDelCv() ?? 0)),
+        ];
     }
 
     public function render(VacanteRepository $vacantes): View

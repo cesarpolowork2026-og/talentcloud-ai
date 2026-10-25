@@ -1,6 +1,7 @@
 {{-- Pantalla "Candidatos" del prototipo (TalentCloud App.dc.html, isCandidatos). --}}
 @use('App\Enums\EstadoProcesamientoCv')
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header title="Candidatos" subtitle="CVs recibidos y candidatos de tus vacantes.">
         <x-slot:actions>
             <x-ui.button wire:click="exportar" wire:loading.attr="disabled" wire:target="exportar">Exportar a Excel</x-ui.button>

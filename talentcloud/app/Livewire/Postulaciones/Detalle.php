@@ -2,7 +2,10 @@
 
 namespace App\Livewire\Postulaciones;
 
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Models\Cv;
+use App\Models\Entrevista;
+use App\Models\Evaluacion;
 use App\Models\Postulacion;
 use App\Models\Vacante;
 use App\Services\Postulaciones\AnalisisBasicoDeRequisitos;
@@ -18,6 +21,8 @@ use Livewire\Component;
  */
 class Detalle extends Component
 {
+    use SeActualizaSola;
+
     #[Locked]
     public int $postulacionId;
 
@@ -27,6 +32,16 @@ class Detalle extends Component
         $this->authorize('view', $postulacion);
 
         $this->postulacionId = $postulacion->id;
+    }
+
+    /** La etapa (la mueve otra persona o la retira el postulante), sus entrevistas y evaluaciones. */
+    protected function partesDeLaFirma(): array
+    {
+        return [
+            $this->parteDeFila(Postulacion::query(), $this->postulacionId),
+            $this->parteDe(Entrevista::query()->where('postulacion_id', $this->postulacionId)),
+            $this->parteDe(Evaluacion::query()->where('postulacion_id', $this->postulacionId)),
+        ];
     }
 
     public function render(AnalisisBasicoDeRequisitos $analisis): View

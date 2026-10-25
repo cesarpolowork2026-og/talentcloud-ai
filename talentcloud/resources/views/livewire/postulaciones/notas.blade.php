@@ -1,6 +1,7 @@
 {{-- "Notas del equipo" de una postulación. Internas: nunca las ve el postulante ni otra empresa. --}}
 @use('App\Support\Formato')
 <div class="grid gap-3">
+    <x-ui.se-actualiza />
     <form wire:submit="agregar" class="grid gap-2">
         <x-ui.field label="Nueva nota" for="nota-{{ $postulacionId }}" error="texto">
             <x-ui.textarea wire:model="texto" id="nota-{{ $postulacionId }}" rows="2" placeholder="Buena comunicación, pedir referencias…" error="texto" />

@@ -1,6 +1,7 @@
 {{-- Detalle de vacante: datos, requisitos y ciclo de vida, con los componentes del prototipo. --}}
 @use('App\Enums\EstadoVacante')
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header :title="$vacante->titulo" compact>
         <x-slot:breadcrumbs>
             <x-ui.breadcrumb :items="[['label' => 'Vacantes', 'href' => route('vacantes.index')], ['label' => $vacante->titulo]]" />

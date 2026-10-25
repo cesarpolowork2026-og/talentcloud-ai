@@ -7,9 +7,11 @@ use App\Enums\EstadoVacante;
 use App\Enums\Modalidad;
 use App\Enums\Rol;
 use App\Exports\VacantesExport;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Livewire\Concerns\WithListado;
 use App\Models\Competencia;
 use App\Models\Empresa;
+use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
@@ -27,6 +29,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 #[Title('Vacantes')]
 class Listado extends Component
 {
+    use SeActualizaSola;
     use WithListado;
 
     // Formulario "Nueva vacante".
@@ -186,6 +189,12 @@ class Listado extends Component
         $this->authorize('viewAny', Vacante::class);
 
         return Excel::download(new VacantesExport($this->filtrar($vacantes->consultaListado())), 'vacantes-'.now()->format('Y-m-d').'.xlsx');
+    }
+
+    /** Vacantes que otra persona crea, publica o cierra, y sus postulaciones. */
+    protected function partesDeLaFirma(): array
+    {
+        return [$this->parteDe(Vacante::query()), $this->parteDe(Postulacion::query())];
     }
 
     public function render(VacanteRepository $vacantes): View

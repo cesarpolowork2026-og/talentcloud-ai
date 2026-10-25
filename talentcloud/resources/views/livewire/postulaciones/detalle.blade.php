@@ -1,5 +1,6 @@
 {{-- Una postulación: etapa, CV, requisitos de la vacante, entrevistas, evaluaciones y notas internas del equipo. --}}
 <div>
+    <x-ui.se-actualiza />
     @php($candidato = $postulacion->candidato)
     @php($vacante = $postulacion->vacante)
 

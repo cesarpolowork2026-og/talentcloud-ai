@@ -70,5 +70,6 @@
                 <p class="m-0 text-15 text-neutral-800"><strong class="font-semibold text-ink">{{ $diapositiva['titulo'] }}</strong> {{ $diapositiva['descripcion'] }}</p>
             </div>
         @endforeach
+        <x-presentacion.ejemplo class="mt-2" />
     </div>
 </section>

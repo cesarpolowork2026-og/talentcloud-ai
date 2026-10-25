@@ -1,5 +1,6 @@
 {{-- Pantalla "Evaluaciones" del prototipo (TalentCloud App.dc.html, isEvaluaciones). --}}
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header title="Evaluaciones" subtitle="Resultados de las evaluaciones registradas por los reclutadores." compact>
         <x-slot:actions>
             <x-ui.button wire:click="exportar" wire:loading.attr="disabled" wire:target="exportar">Exportar a Excel</x-ui.button>

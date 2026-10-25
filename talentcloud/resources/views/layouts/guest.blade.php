@@ -54,6 +54,7 @@
                         <x-ui.icon name="check-circle" class="text-accent" />
                         <span class="text-14 text-neutral-800">23 postulaciones en el tablero</span>
                     </div>
+                    <x-presentacion.ejemplo />
                 </x-ui.card>
             @endif
 

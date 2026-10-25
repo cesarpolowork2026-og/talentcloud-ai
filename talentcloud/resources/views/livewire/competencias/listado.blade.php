@@ -1,5 +1,6 @@
 {{-- «Competencias»: el catálogo compartido por todas las empresas, que administra el admin SaaS. --}}
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header title="Competencias" :subtitle="'Catálogo compartido por todas las empresas ('.$total.' competencias).'" compact>
         <x-slot:actions>
             <x-ui.button variant="primary" wire:click="abrirFormulario">+ Nueva competencia</x-ui.button>

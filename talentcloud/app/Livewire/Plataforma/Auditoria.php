@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Plataforma;
 
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Livewire\Concerns\WithListado;
 use App\Models\Auditoria as RegistroDeAccion;
 use App\Models\User;
@@ -16,6 +17,7 @@ use Livewire\Component;
 #[Title('Registro de acciones')]
 class Auditoria extends Component
 {
+    use SeActualizaSola;
     use WithListado;
 
     public function mount(): void
@@ -34,6 +36,12 @@ class Auditoria extends Component
     protected function porPagina(): int
     {
         return 20;
+    }
+
+    /** Acciones nuevas del registro de auditoría (solo se agregan: basta la fecha de creación). */
+    protected function partesDeLaFirma(): array
+    {
+        return [$this->parteDe(RegistroDeAccion::query(), 'created_at')];
     }
 
     public function render(): View

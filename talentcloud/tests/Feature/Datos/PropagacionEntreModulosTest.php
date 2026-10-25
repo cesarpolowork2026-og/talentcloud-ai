@@ -3,10 +3,13 @@
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
 use App\Livewire\Dashboard\Panel;
 use App\Livewire\Entrevistas\Listado;
+use App\Livewire\Postulaciones\Notas;
 use App\Livewire\Postulante\MisPostulaciones;
+use App\Livewire\Postulante\Vacantes;
 use App\Livewire\Seleccion\Central;
 use App\Models\Candidato;
 use App\Models\Empresa;
@@ -21,6 +24,7 @@ use App\Services\Dashboard\EmbudoDeSeleccion;
 use App\Services\Empresas\LimitesDelPlan;
 use App\Services\Plataforma\PanelDePlataforma;
 use App\Services\Postulaciones\MoverPostulacion;
+use App\Services\Postulaciones\NotasDePostulacion;
 use App\Support\CacheDeResumenes;
 use App\Tenancy\TenantContext;
 use Livewire\Volt\Volt;
@@ -187,4 +191,65 @@ it('la campana muestra un aviso nuevo sin recargar la página', function () {
 
     $this->marta->notifyNow(AvisoNuevaPostulacion::de('Rosa Quispe', 'Desarrollador Backend', url('/seleccion')), ['database']);
     $barra->call('revisarNotificaciones')->assertSee('Tienes notificaciones sin leer');
+});
+
+// — El resto de pantallas también se ponen al día solas —
+
+it('Vacantes abierta muestra la vacante que creó otra persona del equipo', function () {
+    $this->travel(2)->seconds();
+    $pantalla = Livewire\Livewire::test(App\Livewire\Vacantes\Listado::class);
+    $this->travel(2)->seconds();
+
+    Vacante::factory()->deEmpresa($this->nimbus)->create(['titulo' => 'Analista de Datos Senior']);
+
+    $pantalla->call('revisarCambios')->assertSee('Analista de Datos Senior');
+});
+
+it('las notas abiertas de una postulación muestran la que escribió otra persona del equipo', function () {
+    $postulacion = postulacionEnBackend($this);
+    $this->travel(2)->seconds();
+    $pantalla = Livewire\Livewire::test(Notas::class, ['postulacionId' => $postulacion->id]);
+    $this->travel(2)->seconds();
+
+    $diego = User::factory()->deEmpresa($this->nimbus)->reclutador()->create();
+    app(NotasDePostulacion::class)->agregar($postulacion, $diego, 'Disponible desde noviembre');
+
+    $pantalla->call('revisarCambios')->assertSee('Disponible desde noviembre');
+});
+
+it('el postulante ve en Vacantes la que se acaba de publicar, sin recargar', function () {
+    $postulante = User::factory()->postulante()->create();
+    Candidato::factory()->create(['user_id' => $postulante->id]);
+    actuarComo($postulante);
+    $this->travel(2)->seconds();
+    $pantalla = Livewire\Livewire::test(Vacantes::class)->assertDontSee('Arquitecto Cloud');
+    $this->travel(2)->seconds();
+
+    app(TenantContext::class)->ejecutarGlobal(fn () => Vacante::factory()->deEmpresa($this->nimbus)
+        ->enEstado(EstadoVacante::Abierta)->create(['titulo' => 'Arquitecto Cloud']));
+
+    $pantalla->call('revisarCambios')->assertSee('Arquitecto Cloud');
+});
+
+it('la cuenta de empresa ve en Mi empresa el plan que le asignó el admin SaaS, sin recargar', function () {
+    actuarComo($this->cuenta);
+    $this->travel(2)->seconds();
+    $pantalla = Livewire\Livewire::test(App\Livewire\MiEmpresa\Panel::class);
+    $this->travel(2)->seconds();
+
+    app(TenantContext::class)->ejecutarGlobal(fn () => $this->nimbus->forceFill(['plan' => PlanEmpresa::Pro, 'prueba_hasta' => null])->save());
+
+    $pantalla->call('revisarCambios');
+    expect($pantalla->effects)->toHaveKey('html');
+});
+
+it('el admin SaaS ve en Empresas la que se acaba de registrar, sin recargar', function () {
+    actuarComo(User::factory()->admin()->create());
+    $this->travel(2)->seconds();
+    $pantalla = app(TenantContext::class)->ejecutarGlobal(fn () => Livewire\Livewire::test(App\Livewire\Empresas\Listado::class));
+    $this->travel(2)->seconds();
+
+    Empresa::factory()->create(['nombre' => 'Cumbre Andina']);
+
+    app(TenantContext::class)->ejecutarGlobal(fn () => $pantalla->call('revisarCambios')->assertSee('Cumbre Andina'));
 });

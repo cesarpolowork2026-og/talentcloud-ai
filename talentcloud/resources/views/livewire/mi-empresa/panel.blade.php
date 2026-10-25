@@ -1,5 +1,6 @@
 {{-- Pantalla "Mi empresa" del prototipo (TalentCloud App.dc.html, isMiEmpresa). --}}
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header title="Mi empresa" :subtitle="$empresa->nombre.' — plan '.$empresa->etiquetaDelPlan().'.'" />
 
     <div class="grid items-start gap-6 md:grid-cols-2">

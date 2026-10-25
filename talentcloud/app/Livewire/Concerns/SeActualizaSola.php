@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Concerns;
 
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * Pantalla que se pone al día sola con lo que hacen otras personas (`wire:poll.15s.visible="revisarCambios"`).
@@ -65,11 +67,34 @@ trait SeActualizaSola
      */
     protected function partesDeModelos(array $modelos): array
     {
-        return array_map(function (string $modelo): array {
-            $fila = $modelo::query()->toBase()->selectRaw('COUNT(*) AS n, MAX(updated_at) AS u')->first();
+        return array_map(fn (string $modelo): array => $this->parteDe($modelo::query()), $modelos);
+    }
 
-            return [$fila->n ?? 0, $fila->u ?? null];
-        }, $modelos);
+    /**
+     * Conteo y última modificación de una consulta (con los filtros que ya traiga).
+     *
+     * @param  EloquentBuilder<*>|Relation<*, *, *>  $consulta
+     * @return array{0: int|string|null, 1: string|null}
+     */
+    protected function parteDe(EloquentBuilder|Relation $consulta, string $columna = 'updated_at'): array
+    {
+        $tabla = $consulta->getModel()->getTable();
+        $fila = $consulta->toBase()->selectRaw("COUNT(*) AS n, MAX({$tabla}.{$columna}) AS u")->first();
+
+        return [$fila->n ?? 0, $fila->u ?? null];
+    }
+
+    /**
+     * Última modificación de una sola fila, como parte de la firma (null si ya no existe).
+     *
+     * @param  EloquentBuilder<*>  $consulta
+     * @return array{0: int, 1: mixed}
+     */
+    protected function parteDeFila(EloquentBuilder $consulta, int $id): array
+    {
+        $modelo = $consulta->getModel();
+
+        return [0, $consulta->toBase()->where($modelo->getTable().'.'.$modelo->getKeyName(), $id)->value($modelo->getTable().'.updated_at')];
     }
 
     /** @param  list<array{0: int|string|null, 1: string|null}>  $partes */

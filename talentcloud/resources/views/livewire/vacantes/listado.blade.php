@@ -1,6 +1,7 @@
 {{-- Pantalla "Vacantes" del prototipo (TalentCloud App.dc.html, isVacantes). --}}
 @use('App\Support\Formato')
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header title="Vacantes" :subtitle="$subtitulo" compact>
         <x-slot:actions>
             <x-ui.button wire:click="exportar" wire:loading.attr="disabled" wire:target="exportar">Exportar a Excel</x-ui.button>

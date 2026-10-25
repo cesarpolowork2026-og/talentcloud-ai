@@ -11,4 +11,5 @@
             {{ $slot }}
         </div>
     </div>
+    <x-presentacion.ejemplo class="mt-3 text-center" />
 </div>

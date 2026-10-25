@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Competencias;
 
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Livewire\Concerns\WithListado;
 use App\Models\Competencia;
 use App\Models\User;
@@ -21,6 +22,7 @@ use Livewire\Component;
 #[Title('Competencias')]
 class Listado extends Component
 {
+    use SeActualizaSola;
     use WithListado;
 
     public bool $mostrarFormulario = false;
@@ -212,6 +214,12 @@ class Listado extends Component
         }
 
         $this->mostrarEliminar = false;
+    }
+
+    /** El catálogo que también editan otras personas. */
+    protected function partesDeLaFirma(): array
+    {
+        return [$this->parteDe(Competencia::query())];
     }
 
     public function render(): View

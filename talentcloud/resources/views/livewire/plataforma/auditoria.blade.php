@@ -1,5 +1,6 @@
 {{-- «Registro de acciones» del admin SaaS. --}}
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header title="Registro de acciones" subtitle="Lo que se hizo sobre empresas, usuarios y competencias, de lo más reciente a lo más antiguo." compact>
         <x-slot:breadcrumbs>
             <x-ui.breadcrumb :items="[['label' => 'Panel', 'href' => route('dashboard')], ['label' => 'Registro de acciones']]" />

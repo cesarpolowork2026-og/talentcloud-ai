@@ -1,5 +1,6 @@
 {{-- Bolsa pública de empleos: vacantes abiertas, sin iniciar sesión (ampliación sobre el prototipo). --}}
 <div>
+    <x-ui.se-actualiza />
     <x-ui.page-header title="Empleos" subtitle="Vacantes abiertas de las empresas en TalentCloud AI. Regístrate, sube tu CV una vez y postula en un clic." compact />
 
     <x-ui.listado-controles

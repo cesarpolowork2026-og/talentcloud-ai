@@ -7,9 +7,11 @@ use App\DTO\InvitacionData;
 use App\Enums\Periodicidad;
 use App\Enums\PlanEmpresa;
 use App\Enums\Rol;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Models\Empresa;
 use App\Models\Invitacion;
 use App\Models\User;
+use App\Models\Vacante;
 use App\Pagos\CobroEnLinea;
 use App\Repositories\Contracts\EmpresaRepository;
 use App\Repositories\Contracts\EquipoRepository;
@@ -32,6 +34,8 @@ use Livewire\Component;
 #[Title('Mi empresa')]
 class Panel extends Component
 {
+    use SeActualizaSola;
+
     // Invitar usuario.
     public bool $mostrarInvitacion = false;
 
@@ -290,6 +294,23 @@ class Panel extends Component
         if (! $this->empresa()->tieneSuscripcionVigente()) {
             $this->skipRender();
         }
+    }
+
+    /** El plan (lo cambia el admin SaaS o el aviso de pago), el equipo, las invitaciones y el uso. */
+    protected function partesDeLaFirma(): array
+    {
+        $empresaId = auth()->user()?->empresa_id;
+
+        if ($empresaId === null) {
+            return [];
+        }
+
+        return [
+            $this->parteDeFila(Empresa::query(), $empresaId),
+            $this->parteDe(User::query()->where('empresa_id', $empresaId)),
+            $this->parteDe(Invitacion::query()),
+            $this->parteDe(Vacante::query()),
+        ];
     }
 
     public function render(EquipoRepository $equipo, EmpresaRepository $empresas, LimitesDelPlan $limites): View

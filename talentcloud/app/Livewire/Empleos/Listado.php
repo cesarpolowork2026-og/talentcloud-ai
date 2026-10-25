@@ -3,7 +3,10 @@
 namespace App\Livewire\Empleos;
 
 use App\Enums\Modalidad;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Livewire\Concerns\WithListado;
+use App\Models\Empresa;
+use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
@@ -19,6 +22,7 @@ use Livewire\Component;
 #[Title('Empleos')]
 class Listado extends Component
 {
+    use SeActualizaSola;
     use WithListado;
 
     /** @return list<string> */
@@ -41,6 +45,12 @@ class Listado extends Component
     protected function porPagina(): int
     {
         return 12;
+    }
+
+    /** Vacantes que se publican o cierran y empresas que se suspenden (la bolsa pública). */
+    protected function partesDeLaFirma(): array
+    {
+        return [$this->parteDe(Vacante::sinFiltroDeEmpresa()), $this->parteDe(Empresa::query())];
     }
 
     public function render(VacanteRepository $vacantes): View

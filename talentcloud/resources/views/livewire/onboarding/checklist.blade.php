@@ -1,5 +1,6 @@
 {{-- Onboarding del prototipo (TalentCloud App.dc.html, isOnboarding). --}}
 <div class="max-w-[640px]">
+    <x-ui.se-actualiza />
     <h1 class="mb-1 text-30">Bienvenido a TalentCloud</h1>
     <p class="mb-3 text-15 text-neutral-700">Configuremos {{ $empresa->nombre }} en {{ count($pasos) }} pasos.</p>
     <p class="mb-4 text-13 text-neutral-600">{{ $completados }} de {{ count($pasos) }} completadas</p>

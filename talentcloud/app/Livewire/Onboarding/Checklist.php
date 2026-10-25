@@ -2,8 +2,11 @@
 
 namespace App\Livewire\Onboarding;
 
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Models\Empresa;
+use App\Models\Invitacion;
 use App\Models\User;
+use App\Models\Vacante;
 use App\Services\Empresas\ProgresoOnboarding;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Title;
@@ -13,9 +16,23 @@ use Livewire\Component;
 #[Title('Bienvenido a TalentCloud')]
 class Checklist extends Component
 {
+    use SeActualizaSola;
+
     public function mount(): void
     {
         $this->authorize('update', $this->empresa());
+    }
+
+    /** El avance de la puesta en marcha: datos de la empresa, primera vacante e invitaciones. */
+    protected function partesDeLaFirma(): array
+    {
+        $empresaId = auth()->user()?->empresa_id;
+
+        if ($empresaId === null) {
+            return [];
+        }
+
+        return [$this->parteDeFila(Empresa::query(), $empresaId), $this->parteDe(Vacante::query()), $this->parteDe(Invitacion::query())];
     }
 
     public function render(ProgresoOnboarding $progreso): View

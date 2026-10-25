@@ -5,10 +5,13 @@ namespace App\Livewire\Candidatos;
 use App\Enums\EstadoVacante;
 use App\Enums\FuenteCompetencia;
 use App\Livewire\Concerns\EsperaElAnalisisDelCv;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Models\Candidato;
 use App\Models\Competencia;
 use App\Models\Cv;
 use App\Models\Empresa;
+use App\Models\Entrevista;
+use App\Models\Nota;
 use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
@@ -36,6 +39,7 @@ use Livewire\WithFileUploads;
 class Detalle extends Component
 {
     use EsperaElAnalisisDelCv;
+    use SeActualizaSola;
     use WithFileUploads;
 
     #[Locked]
@@ -148,6 +152,20 @@ class Detalle extends Component
         }
 
         $this->reset('vacanteId');
+    }
+
+    /** Lo que cambia del candidato mientras se mira: sus procesos, sus entrevistas, sus notas y su CV. */
+    protected function partesDeLaFirma(): array
+    {
+        $suyas = fn () => Postulacion::query()->where('candidato_id', $this->candidatoId)->select('postulaciones.id');
+
+        return [
+            $this->parteDeFila(Candidato::query(), $this->candidatoId),
+            $this->parteDe(Postulacion::query()->where('candidato_id', $this->candidatoId)),
+            $this->parteDe(Entrevista::query()->whereIn('postulacion_id', $suyas())),
+            $this->parteDe(Nota::query()->whereIn('postulacion_id', $suyas())),
+            $this->parteDe(Cv::query()->where('candidato_id', $this->candidatoId)),
+        ];
     }
 
     public function render(): View
