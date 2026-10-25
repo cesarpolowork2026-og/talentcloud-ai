@@ -2,7 +2,7 @@
 @use('App\Support\EnlaceExterno')
 @use('App\Support\Formato')
 @use('App\Enums\ModalidadEntrevista')
-<div>
+<div wire:poll.15s.visible="revisarCambios">
     <x-ui.page-header title="Entrevistas" subtitle="Agenda de entrevistas programadas." compact>
         <x-slot:actions>
             @can('create', App\Models\Entrevista::class)

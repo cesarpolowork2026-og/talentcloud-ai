@@ -6,6 +6,7 @@ use App\DTO\NuevaEntrevistaData;
 use App\Enums\EstadoEntrevista;
 use App\Enums\ModalidadEntrevista;
 use App\Enums\Rol;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Livewire\Concerns\WithListado;
 use App\Livewire\Forms\ReprogramacionForm;
 use App\Models\Entrevista;
@@ -34,6 +35,7 @@ use Livewire\Component;
 #[Title('Entrevistas')]
 class Listado extends Component
 {
+    use SeActualizaSola;
     use WithListado {
         hayFiltros as private hayFiltrosDelListado;
     }
@@ -271,6 +273,12 @@ class Listado extends Component
     private function etiquetaDePostulacion(?Postulacion $p): string
     {
         return $p === null ? '' : $p->candidato?->nombre.' — '.Formato::vacante($p->vacante);
+    }
+
+    /** Entrevistas que otra persona programa, reprograma, confirma, completa o cancela (y postulaciones retiradas). */
+    protected function partesDeLaFirma(): array
+    {
+        return $this->partesDeModelos([Entrevista::class, Postulacion::class]);
     }
 
     public function render(EntrevistaRepository $entrevistas, ResumenDeAgenda $agenda): View

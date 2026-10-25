@@ -2,7 +2,7 @@
 @use('App\Enums\EstadoDeMiPostulacion')
 @use('App\Livewire\Postulante\MisPostulaciones')
 @use('App\Support\Formato')
-<div>
+<div wire:poll.15s.visible="revisarCambios">
     <x-ui.page-header title="Mis postulaciones" subtitle="Sigue el estado de tus procesos de selección." />
 
     <div class="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">

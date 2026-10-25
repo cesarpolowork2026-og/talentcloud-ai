@@ -1,6 +1,6 @@
 {{-- «Selección»: Kanban del prototipo (TalentCloud App.dc.html, isKanban) de las postulaciones de una vacante. --}}
 @use('App\Enums\EtapaPostulacion')
-<div>
+<div wire:poll.15s.visible="revisarCambios">
     @if (! $vacante)
         <x-ui.page-header title="Selección" subtitle="Seguimiento de postulaciones por vacante." />
         <x-ui.empty-state ilustracion="primera-vacante" titulo="Aún no hay nada que seleccionar" message="Cuando tengas una vacante abierta, aquí verás a sus postulantes en el tablero, de «Postulado» a «Contratado».">

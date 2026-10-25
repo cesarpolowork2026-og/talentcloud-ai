@@ -6,8 +6,13 @@ Son 30 pasos: empresa (dashboard, gráfico, Kanban, mover, matching, entrevistas
 móvil de 390 px (sin desplazamiento horizontal), postulante (calendario sin datos internos, retirar postulación),
 admin y bloqueo del iframe.
 
-Hay dos guiones: `recorrido.js` (flujos, 30 pasos) e `interaccion.js` (13 pasos: hover y presionado, estados de carga con la red
-ralentizada, «reducir movimiento» y estados vacíos). Los dos pasan contra una base recién sembrada.
+Hay tres guiones: `recorrido.js` (flujos, 30 pasos), `interaccion.js` (13 pasos: hover y presionado, estados de carga con la red
+ralentizada, «reducir movimiento» y estados vacíos) y `propagacion.js` (10 pasos con cuatro sesiones abiertas a la vez: lo que hace
+un rol aparece en la pantalla abierta de otro sin recargar —tablero, campana, dashboard y «Mis postulaciones»— e imprime cuánto
+tardó; espera ≤ 20 s). Los tres pasan contra una base recién sembrada; `recorrido.js` y `propagacion.js` modifican datos, así que
+cada uno necesita su propia base nueva. Para `propagacion.js` el servidor necesita `QUEUE_CONNECTION=database` con un
+`php artisan queue:work` aparte (la campana recibe avisos de la cola) y conviene `DASHBOARD_CACHE_SEGUNDOS=60`, como en producción.
+Si existe un `public/hot` de un `composer dev` que ya no corre, los assets apuntan a Vite y fallan: apártalo mientras tanto.
 
 **No es parte de `composer check` ni del CI**: es una verificación manual antes de integrar o desplegar. No añade
 dependencias al proyecto.

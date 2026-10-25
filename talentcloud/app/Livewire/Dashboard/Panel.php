@@ -3,6 +3,12 @@
 namespace App\Livewire\Dashboard;
 
 use App\Enums\Rol;
+use App\Livewire\Concerns\SeActualizaSola;
+use App\Models\Empresa;
+use App\Models\Entrevista;
+use App\Models\Evaluacion;
+use App\Models\Invitacion;
+use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Repositories\Contracts\VacanteRepository;
@@ -31,6 +37,8 @@ use Livewire\Component;
 #[Title('Dashboard')]
 class Panel extends Component
 {
+    use SeActualizaSola;
+
     public bool $mostrarVistaPrevia = false;
 
     #[Locked]
@@ -79,6 +87,18 @@ class Panel extends Component
 
         $this->vacanteSeleccionada = $vacante->id;
         $this->mostrarVistaPrevia = true;
+    }
+
+    /** Todo lo que alimenta el panel de cada rol; el admin SaaS además ve las empresas cliente. */
+    protected function partesDeLaFirma(): array
+    {
+        $modelos = [Postulacion::class, Entrevista::class, Evaluacion::class, Vacante::class, Invitacion::class];
+
+        if (auth()->user()?->tieneRol(Rol::Admin)) {
+            $modelos[] = Empresa::class;
+        }
+
+        return $this->partesDeModelos($modelos);
     }
 
     public function render(DashboardService $dashboard, EmbudoDeSeleccion $embudo, VacanteRepository $vacantes, PanelDePlataforma $panel, LimitesDelPlan $limites, TendenciaDePostulaciones $tendencia, MiDiaDelReclutadorService $miDia): View

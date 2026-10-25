@@ -14,10 +14,11 @@ async function sinDesborde(pagina, url) {
 }
 
 (async () => {
-  // ───────────── EMPRESA (reclutador) ─────────────
-  console.log('\n== Empresa: reclutador de Nimbus Corp ==');
+  // ───────────── EMPRESA (cuenta de empresa: panel de gerencia con gráficos) ─────────────
+  // Desde el 22-10 la reclutadora ve «Mi día»; la evolución, el embudo y el periodo son del panel de la cuenta de empresa.
+  console.log('\n== Empresa: cuenta de empresa de Nimbus Corp ==');
   let { navegador, pagina, errores } = await abrir({ ancho: 1440, alto: 1000 });
-  await iniciarSesion(pagina, 'marta@nimbus.com');
+  await iniciarSesion(pagina, 'admin@nimbus.com');
 
   await paso('E1 dashboard: encabezado, gráfico y sin errores de consola', pagina, async () => {
     await pagina.goto(BASE + '/dashboard', { waitUntil: 'load' });
@@ -60,7 +61,15 @@ async function sinDesborde(pagina, url) {
     afirmar((await pagina.locator('body').innerText()).includes('(90 días)'), 'el embudo no cambió de periodo');
   });
 
-  await paso('E5 atención: «Ir directo a» lleva a Selección', pagina, async () => {
+  await navegador.close();
+
+  // ───────────── EMPRESA (reclutadora) ─────────────
+  console.log('\n== Empresa: reclutadora de Nimbus Corp ==');
+  ({ navegador, pagina, errores } = await abrir({ ancho: 1440, alto: 1000 }));
+  await iniciarSesion(pagina, 'marta@nimbus.com');
+
+  await paso('E5 «Mi día» y su acceso a Selección', pagina, async () => {
+    await pagina.goto(BASE + '/dashboard', { waitUntil: 'load' });
     await pagina.getByRole('link', { name: 'Selección', exact: true }).last().click();
     await pagina.waitForURL(/\/seleccion/, { timeout: 8000 });
   });
@@ -83,20 +92,18 @@ async function sinDesborde(pagina, url) {
     afirmar((await pagina.getByRole('button', { name: /^Marco Díaz, En revisión/ }).count()) === 1, 'la tarjeta no quedó en En revisión');
   });
 
-  await paso('E8 selección: vista de ranking por coincidencia', pagina, async () => {
+  // Unidad I sin IA: no hay ranking ni matching; el tablero muestra el análisis básico de requisitos.
+  await paso('E8 selección: análisis básico «Cubre X de Y requisitos» y sin ranking por IA', pagina, async () => {
     await pagina.goto(BASE + '/seleccion/7?vista=ranking', { waitUntil: 'load' });
-    await pagina.getByText(/Ordenado por coincidencia/).first().waitFor({ timeout: 8000 });
-    afirmar((await pagina.locator('[wire\\:key^="ranking-"]').count()) >= 1, 'el ranking no tiene filas');
+    await pagina.getByText(/Cubre \d+ de \d+/).first().waitFor({ timeout: 8000 });
+    afirmar((await pagina.getByText(/Ordenado por coincidencia/).count()) === 0, 'aparece el ranking por IA');
   });
 
-  await paso('E9 matching: «Recalcular» y límite de frecuencia tras 5 pedidos', pagina, async () => {
-    await pagina.goto(BASE + '/seleccion/7?vista=ranking', { waitUntil: 'load' });
-    const href = await pagina.locator('a[href*="/matching/"]').first().getAttribute('href');
-    await pagina.goto(new URL(href, BASE).href, { waitUntil: 'load' });
-    await pagina.getByText('Evidencia por requisito').first().waitFor({ timeout: 10000 });
-    const boton = pagina.getByRole('button', { name: /Recalcular/ }).first();
-    for (let i = 0; i < 6; i++) { await boton.click(); await pagina.waitForTimeout(1200); }
-    await pagina.getByText(/Ya pediste varios recálculos seguidos/).first().waitFor({ timeout: 6000 });
+  await paso('E9 un enlace antiguo /matching/{id} lleva a la ficha de la postulación', pagina, async () => {
+    const id = await pagina.locator('[wire\\:key^="postulacion-"]').first().getAttribute('wire:key');
+    await pagina.goto(BASE + '/matching/' + id.replace('postulacion-', ''), { waitUntil: 'load' });
+    afirmar(/\/postulaciones\/\d+/.test(pagina.url()), 'no llevó a la ficha: ' + pagina.url());
+    await pagina.getByText('Notas del equipo').first().waitFor({ timeout: 8000 });
   });
 
   await paso('E10 programar una entrevista para Marco desde su tarjeta', pagina, async () => {
@@ -203,14 +210,14 @@ async function sinDesborde(pagina, url) {
   console.log('\n== Admin SaaS ==');
   ({ navegador, pagina, errores } = await abrir({ ancho: 1440, alto: 900 }));
   await iniciarSesion(pagina, 'admin@talentcloud.ai');
-  await paso('A1 panel de la plataforma y avisos con el nombre de la empresa', pagina, async () => {
+  await paso('A1 panel de la plataforma: empresas cliente por plan, con su nombre', pagina, async () => {
     await pagina.goto(BASE + '/dashboard', { waitUntil: 'load' });
     await pagina.getByRole('heading', { name: 'Panel de la plataforma' }).waitFor({ timeout: 8000 });
     const t = await pagina.locator('body').innerText();
-    afirmar(/ · (Nimbus Corp|Vela Studio|Brío Retail|Ruta Sur|Nuna Salud|Altura Café)/.test(t), 'los avisos no nombran la empresa');
+    afirmar(/Nimbus Corp/.test(t) && /Vela Studio/.test(t), 'el reparto por plan no nombra las empresas');
   });
-  await paso('A2 empresas, calidad de la IA y reclamaciones cargan', pagina, async () => {
-    for (const u of ['/empresas', '/calidad-ia', '/reclamaciones']) {
+  await paso('A2 empresas, usuarios, competencias y auditoría cargan', pagina, async () => {
+    for (const u of ['/empresas', '/usuarios', '/competencias', '/auditoria']) {
       // goto devuelve null si otra navegación en curso lo supera (p. ej. recién llegado del dashboard): se reintenta una vez.
       const r = (await pagina.goto(BASE + u, { waitUntil: 'load' })) ?? (await pagina.goto(BASE + u, { waitUntil: 'load' }));
       afirmar(r && r.status() === 200, `${u} → ${r ? r.status() : 'sin respuesta'}`);

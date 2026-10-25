@@ -49,6 +49,11 @@ const estilo = (loc, prop) => loc.evaluate((el, p) => getComputedStyle(el)[p], p
     afirmar(/matrix\(1, 0, 0, 1, 0, 1\)/.test(t), 'al pulsar debe bajar 1 px: ' + t);
   });
 
+  // Los indicadores y el periodo son del panel de la cuenta de empresa (la reclutadora ve «Mi día» desde el 22-10).
+  await navegador.close();
+  ({ navegador, pagina } = await abrir({ ancho: 1440, alto: 900 }));
+  await iniciarSesion(pagina, 'admin@nimbus.com');
+
   await paso('H4 el indicador pulsable del dashboard se realza y el que no se pulsa, no', pagina, async () => {
     await pagina.goto(BASE + '/dashboard', { waitUntil: 'load' });
     const pulsable = pagina.locator('button.tarjeta-clicable').first();
@@ -64,7 +69,7 @@ const estilo = (loc, prop) => loc.evaluate((el, p) => getComputedStyle(el)[p], p
 
   console.log('\n== Carga (red ralentizada a 1,6 s por petición de Livewire) ==');
   ({ navegador, pagina } = await abrir({ ancho: 1440, alto: 900 }));
-  await iniciarSesion(pagina, 'marta@nimbus.com');
+  await iniciarSesion(pagina, 'admin@nimbus.com'); // la cuenta de empresa: busca, programa y tiene el periodo del panel
   await pagina.route('**/livewire/update', async (ruta) => { await new Promise((r) => setTimeout(r, 1600)); await ruta.continue(); });
 
   await paso('C1 al buscar, la lista se atenúa, aparece la barra superior y todo vuelve al terminar', pagina, async () => {

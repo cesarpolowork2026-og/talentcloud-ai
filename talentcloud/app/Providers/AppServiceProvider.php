@@ -2,14 +2,26 @@
 
 namespace App\Providers;
 
+use App\Models\Candidato;
+use App\Models\Cv;
+use App\Models\Empresa;
+use App\Models\Entrevista;
+use App\Models\Evaluacion;
+use App\Models\Invitacion;
+use App\Models\Postulacion;
+use App\Models\PostulacionEtapa;
+use App\Models\User;
+use App\Models\Vacante;
 use App\Pagos\PasarelaDePago;
 use App\Pagos\PasarelaStripe;
+use App\Support\CacheDeResumenes;
 use App\Tenancy\TenantContext;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -62,6 +74,30 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
 
         $this->confiarEnLosProxies();
+        $this->invalidarResumenes();
+    }
+
+    /**
+     * Las cifras del dashboard se guardan unos segundos (CacheDeResumenes). Toda escritura en lo que las alimenta
+     * las deja viejas en el acto: una postulación, un cambio de etapa, una entrevista o un usuario nuevo se ven en
+     * la siguiente carga. Escuchar los modelos (y no los eventos de dominio) cubre también lo que no emite evento.
+     */
+    private function invalidarResumenes(): void
+    {
+        $modelos = [Postulacion::class, PostulacionEtapa::class, Entrevista::class, Evaluacion::class, Vacante::class,
+            User::class, Invitacion::class, Empresa::class, Candidato::class, Cv::class];
+
+        // Tras confirmar la transacción: antes, otra petición podría recalcular con los datos viejos y guardarlos
+        // bajo la versión nueva.
+        $invalidar = function (Model $fila): void {
+            $empresaId = $fila instanceof Empresa ? (int) $fila->getKey() : $fila->getAttribute('empresa_id');
+            DB::afterCommit(fn () => CacheDeResumenes::invalidar($empresaId));
+        };
+
+        foreach ($modelos as $modelo) {
+            $modelo::saved($invalidar);
+            $modelo::deleted($invalidar);
+        }
     }
 
     /**

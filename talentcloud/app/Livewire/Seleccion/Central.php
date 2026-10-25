@@ -5,6 +5,8 @@ namespace App\Livewire\Seleccion;
 use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
+use App\Livewire\Concerns\SeActualizaSola;
+use App\Models\Entrevista;
 use App\Models\Evaluacion;
 use App\Models\Postulacion;
 use App\Models\User;
@@ -29,6 +31,8 @@ use Livewire\Component;
  */
 class Central extends Component
 {
+    use SeActualizaSola;
+
     /** Tarjetas que muestra cada columna al abrir, y las que suma cada «Ver más». Una vacante masiva tiene miles. */
     public const TARJETAS_POR_COLUMNA = 25;
 
@@ -186,6 +190,30 @@ class Central extends Component
         }
 
         $this->mostrarDescarte = false;
+    }
+
+    /**
+     * Lo que otra persona del equipo (o el postulante, al retirarse) cambia en la vacante: postulaciones nuevas,
+     * etapas y orden, entrevistas y el estado de la vacante.
+     */
+    protected function partesDeLaFirma(): array
+    {
+        if ($this->vacanteId === null) {
+            return [];
+        }
+
+        // Mover (también dentro de la misma columna) guarda la postulación movida: cambia su updated_at.
+        $postulaciones = Postulacion::query()->where('vacante_id', $this->vacanteId)->toBase()
+            ->selectRaw('COUNT(*) AS n, MAX(updated_at) AS u')->first();
+        $entrevistas = Entrevista::query()
+            ->whereIn('postulacion_id', Postulacion::query()->select('id')->where('vacante_id', $this->vacanteId))
+            ->toBase()->selectRaw('COUNT(*) AS n, MAX(updated_at) AS u')->first();
+
+        return [
+            [$postulaciones->n ?? 0, $postulaciones->u ?? null],
+            [$entrevistas->n ?? 0, $entrevistas->u ?? null],
+            [0, Vacante::query()->whereKey($this->vacanteId)->value('updated_at')?->format('Y-m-d H:i:s')],
+        ];
     }
 
     public function render(): View

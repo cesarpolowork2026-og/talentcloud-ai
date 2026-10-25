@@ -14,9 +14,36 @@ new class extends Component
     #[Locked]
     public string $rutaActual = '';
 
+    /**
+     * Última notificación y cuántas sin leer ('' hasta el primer sondeo): el sondeo solo vuelve a pintar la barra
+     * si cambia. Al cargar la página no se consulta: el primer sondeo compara con la hora en que se pintó.
+     */
+    public string $firmaNotificaciones = '';
+
+    public string $pintadaA = '';
+
     public function mount(): void
     {
         $this->rutaActual = request()->route()?->getName() ?? '';
+        $this->pintadaA = now()->format('Y-m-d H:i:s');
+    }
+
+    /** Sondeo de la campana (wire:poll): un aviso nuevo aparece sin recargar la página. */
+    public function revisarNotificaciones(): void
+    {
+        $user = $this->usuario();
+        $ultima = $user->notifications()->latest()->first(['id', 'created_at']);
+        $firma = $ultima?->id.'|'.$user->unreadNotifications()->count();
+
+        $cambio = $this->firmaNotificaciones === ''
+            ? $ultima !== null && $ultima->created_at?->format('Y-m-d H:i:s') >= $this->pintadaA
+            : $firma !== $this->firmaNotificaciones;
+
+        $this->firmaNotificaciones = $firma;
+
+        if (! $cambio) {
+            $this->skipRender();
+        }
     }
 
     /**
@@ -114,6 +141,7 @@ new class extends Component
     class="nav barra relative flex-wrap"
     x-data="{ notificaciones: false, perfil: false, menu: false }"
     x-on:keydown.escape.window="notificaciones = false; perfil = false; menu = false"
+    wire:poll.15s.visible="revisarNotificaciones"
 >
     <a href="{{ Navegacion::rutaInicio(auth()->user()) }}" wire:navigate.hover class="nav-brand hover:!no-underline" aria-label="TalentCloud AI, inicio">
         <x-marca />

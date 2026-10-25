@@ -3,6 +3,7 @@
 namespace App\Livewire\Postulante;
 
 use App\Enums\EstadoEntrevista;
+use App\Livewire\Concerns\SeActualizaSola;
 use App\Models\Candidato;
 use App\Models\Entrevista;
 use App\Models\Postulacion;
@@ -14,6 +15,7 @@ use App\Tenancy\EmpresaScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -26,6 +28,8 @@ use Livewire\Component;
 #[Title('Mis postulaciones')]
 class MisPostulaciones extends Component
 {
+    use SeActualizaSola;
+
     public bool $mostrarDetalle = false;
 
     public bool $mostrarRetiro = false;
@@ -113,6 +117,32 @@ class MisPostulaciones extends Component
             ?->select(['postulaciones.id', 'postulaciones.empresa_id', 'postulaciones.vacante_id', 'postulaciones.candidato_id', 'postulaciones.etapa', 'postulaciones.created_at', 'postulaciones.retirada_at', 'postulaciones.estado_avisado'])
             ->latest()
             ->get() ?? collect();
+    }
+
+    /**
+     * Lo que la empresa cambia en sus procesos: etapa, entrevistas y cierre de la vacante (sin contexto de empresa:
+     * las postulaciones del propio candidato en todas las empresas).
+     */
+    protected function partesDeLaFirma(): array
+    {
+        $ids = $this->consulta()?->toBase()->select('postulaciones.id');
+
+        if ($ids === null) {
+            return [];
+        }
+
+        $postulaciones = Postulacion::query()->withoutGlobalScope(EmpresaScope::class)->whereIn('id', $ids)
+            ->toBase()->selectRaw('COUNT(*) AS n, MAX(updated_at) AS u')->first();
+        $entrevistas = Entrevista::query()->withoutGlobalScope(EmpresaScope::class)->whereIn('postulacion_id', $ids)
+            ->toBase()->selectRaw('COUNT(*) AS n, MAX(updated_at) AS u')->first();
+        $vacantes = DB::table('vacantes')->whereIn('id', Postulacion::query()->withoutGlobalScope(EmpresaScope::class)
+            ->whereIn('id', $ids)->select('vacante_id'))->max('updated_at');
+
+        return [
+            [$postulaciones->n ?? 0, $postulaciones->u ?? null],
+            [$entrevistas->n ?? 0, $entrevistas->u ?? null],
+            [0, $vacantes],
+        ];
     }
 
     /** @return HasMany<Postulacion, Candidato>|null */

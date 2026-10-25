@@ -1,6 +1,6 @@
 {{-- "Dashboard" del prototipo (TalentCloud App.dc.html, isDashboard). Para el admin SaaS, "Panel de la plataforma". --}}
 @use('App\Enums\PlanEmpresa')
-<div>
+<div wire:poll.15s.visible="revisarCambios">
     <x-ui.page-header :title="$titulo" :subtitle="$subtitulo" />
 
     @if ($plataforma)
