@@ -6,6 +6,7 @@ use App\Enums\EstadoDeMiPostulacion;
 use App\Models\Postulacion;
 use App\Notifications\AvisoEstadoDePostulacion;
 use App\Services\Avisos\AvisoAlCandidato;
+use App\Services\Entrevistas\EntrevistasPorRealizar;
 use App\Tenancy\ConEmpresa;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -53,14 +54,22 @@ class AvisarEstadoDePostulacion implements ShouldQueue
                 return;
             }
 
+            $anterior = $postulacion->estado_avisado;
             $postulacion->estado_avisado = $estado;
             $postulacion->save();
+
+            // Con una entrevista ya programada, el aviso de la entrevista (fecha y hora) ya le dijo que está en esa etapa.
+            if ($estado === EstadoDeMiPostulacion::Entrevista
+                && EntrevistasPorRealizar::consulta()->where('postulacion_id', $postulacion->id)->exists()) {
+                return;
+            }
 
             $avisos->enviar($postulacion->candidato, AvisoEstadoDePostulacion::de(
                 $estado,
                 (string) $postulacion->vacante?->titulo,
                 (string) $postulacion->vacante?->empresa?->nombre,
                 AvisoAlCandidato::urlPara($postulacion->candidato),
+                $anterior,
             ));
         });
     }

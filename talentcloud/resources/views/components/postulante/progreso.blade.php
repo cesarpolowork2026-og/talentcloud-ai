@@ -1,8 +1,8 @@
 {{--
-    Progreso de una postulación para el postulante: Postulado → En revisión → Entrevista → Contratación.
+    Progreso de una postulación para el postulante: Postulado → En revisión → Entrevista → Oferta → Contratación.
     Solo para los estados en marcha (y Contratado): quien no fue seleccionado, la vacante cerrada o una postulación
-    retirada no muestran pasos, porque no se sabe hasta dónde llegó y no se inventa. La Oferta, interna, se le muestra
-    como «Entrevista» (ver EstadoDeMiPostulacion). El paso actual lleva aria-current y cada paso dice su estado en
+    retirada no muestran pasos, porque no se sabe hasta dónde llegó y no se inventa. El paso actual lleva aria-current
+    y cada paso dice su estado en
     texto: el color y las marcas no son lo único que informa.
 
     estado: EstadoDeMiPostulacion. compacto: solo las marcas (para una fila de tabla, donde la etiqueta de estado ya
@@ -16,10 +16,11 @@
         EstadoDeMiPostulacion::Postulado => 0,
         EstadoDeMiPostulacion::EnRevision => 1,
         EstadoDeMiPostulacion::Entrevista => 2,
-        EstadoDeMiPostulacion::Contratado => 3,
+        EstadoDeMiPostulacion::Oferta => 3,
+        EstadoDeMiPostulacion::Contratado => 4,
         default => null,
     };
-    $pasos = ['Postulado', 'En revisión', 'Entrevista', 'Contratación'];
+    $pasos = ['Postulado', 'En revisión', 'Entrevista', 'Oferta', 'Contratación'];
 @endphp
 
 @if ($actual !== null)

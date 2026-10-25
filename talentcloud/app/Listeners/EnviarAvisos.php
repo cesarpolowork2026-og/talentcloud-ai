@@ -4,12 +4,15 @@ namespace App\Listeners;
 
 use App\DTO\DatosDeEntrevista;
 use App\Enums\EtapaPostulacion;
+use App\Enums\OrigenPostulacion;
 use App\Enums\Rol;
 use App\Events\CandidatoSePostulo;
 use App\Events\ContrasenaCambiada;
 use App\Events\CorreoCambiado;
 use App\Events\EntrevistaCancelada;
+use App\Events\EntrevistaConfirmada;
 use App\Events\EntrevistaProgramada;
+use App\Events\EntrevistaRealizada;
 use App\Events\EntrevistaReprogramada;
 use App\Events\PagoFallido;
 use App\Events\PlanEmpresaCambiado;
@@ -17,6 +20,7 @@ use App\Events\PlanPorVencer;
 use App\Events\PlanSolicitado;
 use App\Events\PlanVencido;
 use App\Events\PostulacionCambioDeEtapa;
+use App\Events\PostulacionCreada;
 use App\Events\PostulacionRetirada;
 use App\Events\VacanteCerrada;
 use App\Jobs\AvisarEstadoDePostulacion;
@@ -44,10 +48,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Notification as Notificaciones;
 
 /**
- * Notificaciones (campana y correo según preferencia): entrevistas programadas
- * o canceladas, postulaciones del candidato, cambios de plan y
- * cambios de estado o cierre del proceso. Los avisos al candidato salen
- * diferidos (AvisarEstadoDePostulacion) y nadie recibe aviso de lo que hizo él.
+ * Notificaciones (campana y correo según preferencia): entrevistas (programadas, reprogramadas, confirmadas,
+ * realizadas o canceladas), postulaciones, cambios de plan y cada paso del proceso del candidato (también cuando el
+ * equipo lo registra en una vacante). Los avisos de estado al candidato pasan por AvisarEstadoDePostulacion y nadie
+ * recibe aviso de lo que hizo él mismo.
  */
 class EnviarAvisos
 {
@@ -78,6 +82,28 @@ class EnviarAvisos
 
         $this->alEntrevistador($entrevista, AvisoEntrevistaReprogramada::paraEntrevistador($datos, $evento->fechaAnterior));
         $this->alCandidato($entrevista->postulacion?->candidato, AvisoEntrevistaReprogramada::paraCandidato($datos, $evento->fechaAnterior));
+    }
+
+    /** Entrevista confirmada por el equipo: aviso al candidato. */
+    public function handleEntrevistaConfirmada(EntrevistaConfirmada $evento): void
+    {
+        $entrevista = $this->cargar($evento->entrevista);
+        $this->alCandidato($entrevista->postulacion?->candidato, AvisoDeEntrevista::confirmadaParaCandidato(DatosDeEntrevista::de($entrevista)));
+    }
+
+    /** Entrevista marcada como realizada: aviso al candidato. */
+    public function handleEntrevistaRealizada(EntrevistaRealizada $evento): void
+    {
+        $entrevista = $this->cargar($evento->entrevista);
+        $this->alCandidato($entrevista->postulacion?->candidato, AvisoDeEntrevista::realizadaParaCandidato(DatosDeEntrevista::de($entrevista)));
+    }
+
+    /** El equipo registró al candidato en una vacante: se le avisa como cualquier otro paso de su proceso. */
+    public function handlePostulacionCreada(PostulacionCreada $evento): void
+    {
+        if ($evento->postulacion->origen === OrigenPostulacion::Equipo) {
+            AvisarEstadoDePostulacion::programar($evento->postulacion);
+        }
     }
 
     /** Postulación propia del candidato: aviso a quien creó la vacante y a la cuenta de empresa. */

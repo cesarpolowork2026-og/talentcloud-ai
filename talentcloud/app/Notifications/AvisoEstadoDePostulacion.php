@@ -27,10 +27,24 @@ class AvisoEstadoDePostulacion extends Notification implements ShouldQueue
         $this->afterCommit();
     }
 
-    /** @param  string|null  $url  "Mis postulaciones", solo si el candidato tiene cuenta. */
-    public static function de(EstadoDeMiPostulacion $estado, string $vacante, string $empresa, ?string $url): self
+    /**
+     * @param  string|null  $url  "Mis postulaciones", solo si el candidato tiene cuenta.
+     * @param  EstadoDeMiPostulacion|null  $anterior  lo último que se le avisó (null: es el primer aviso de esta postulación).
+     */
+    public static function de(EstadoDeMiPostulacion $estado, string $vacante, string $empresa, ?string $url, ?EstadoDeMiPostulacion $anterior = null): self
     {
         [$asunto, $texto] = match ($estado) {
+            EstadoDeMiPostulacion::Postulado => $anterior === null
+                ? ["{$empresa} te registró como postulante a {$vacante}", "{$empresa} te registró como postulante a {$vacante}. Puedes seguir tu proceso en «Mis postulaciones»."]
+                : ["Tu postulación a {$vacante} volvió al inicio del proceso", "Tu postulación a {$vacante} en {$empresa} volvió a la etapa «Postulado»: sigues en el proceso."],
+            EstadoDeMiPostulacion::Entrevista => [
+                "Avanzaste a la etapa de entrevistas de {$vacante}",
+                "Avanzaste a la etapa de entrevistas de {$vacante}. {$empresa} se pondrá en contacto contigo para coordinarla.",
+            ],
+            EstadoDeMiPostulacion::Oferta => [
+                "{$empresa} te hizo una oferta para {$vacante}",
+                "¡Buenas noticias! {$empresa} te hizo una oferta para {$vacante}. Pronto se pondrá en contacto contigo para conversar los detalles.",
+            ],
             EstadoDeMiPostulacion::EnRevision => [
                 "Tu postulación a {$vacante} está en revisión",
                 "{$empresa} está revisando tu postulación a {$vacante}.",

@@ -4,6 +4,8 @@ namespace App\Services\Entrevistas;
 
 use App\Enums\EstadoEntrevista;
 use App\Events\EntrevistaCancelada;
+use App\Events\EntrevistaConfirmada;
+use App\Events\EntrevistaRealizada;
 use App\Models\Entrevista;
 use App\Services\Vacantes\OperacionNoPermitida;
 use Closure;
@@ -17,18 +19,26 @@ class CambiarEstadoEntrevista
 {
     public function confirmar(Entrevista $entrevista): Entrevista
     {
-        return $this->cambiar($entrevista, EstadoEntrevista::Confirmada, fn (Entrevista $e) => $e->estado->puedeConfirmarse());
+        $confirmada = $this->cambiar($entrevista, EstadoEntrevista::Confirmada, fn (Entrevista $e) => $e->estado->puedeConfirmarse());
+
+        EntrevistaConfirmada::dispatch($confirmada);
+
+        return $confirmada;
     }
 
     public function completar(Entrevista $entrevista): Entrevista
     {
-        return $this->cambiar($entrevista, EstadoEntrevista::Completada, function (Entrevista $e) {
+        $realizada = $this->cambiar($entrevista, EstadoEntrevista::Completada, function (Entrevista $e) {
             if ($e->estado->puedeCompletarse() && $e->inicia_at->isFuture()) {
                 throw new OperacionNoPermitida('Solo se puede dar por completada una entrevista que ya empezó.');
             }
 
             return $e->estado->puedeCompletarse();
         });
+
+        EntrevistaRealizada::dispatch($realizada);
+
+        return $realizada;
     }
 
     public function cancelar(Entrevista $entrevista): Entrevista
