@@ -776,7 +776,7 @@ CREATE TABLE public.postulaciones (
     origen character varying(20) DEFAULT 'equipo'::character varying NOT NULL,
     retirada_at timestamp(0) without time zone,
     oculta_para_postulante_at timestamp(0) without time zone,
-    CONSTRAINT postulaciones_estado_avisado_check CHECK (((estado_avisado IS NULL) OR ((estado_avisado)::text = ANY (ARRAY[('postulado'::character varying)::text, ('en_revision'::character varying)::text, ('entrevista'::character varying)::text, ('contratado'::character varying)::text, ('no_seleccionado'::character varying)::text, ('cerrada'::character varying)::text, ('retirada'::character varying)::text])))),
+    CONSTRAINT postulaciones_estado_avisado_check CHECK (((estado_avisado IS NULL) OR ((estado_avisado)::text = ANY ((ARRAY['postulado'::character varying, 'en_revision'::character varying, 'entrevista'::character varying, 'contratado'::character varying, 'no_seleccionado'::character varying, 'cerrada'::character varying, 'retirada'::character varying, 'oferta'::character varying])::text[])))),
     CONSTRAINT postulaciones_etapa_check CHECK (((etapa)::text = ANY (ARRAY[('postulado'::character varying)::text, ('en_revision'::character varying)::text, ('entrevista'::character varying)::text, ('oferta'::character varying)::text, ('contratado'::character varying)::text, ('descartado'::character varying)::text]))),
     CONSTRAINT postulaciones_orden_check CHECK ((orden >= 0)),
     CONSTRAINT postulaciones_origen_check CHECK (((origen)::text = ANY (ARRAY[('equipo'::character varying)::text, ('postulante'::character varying)::text])))

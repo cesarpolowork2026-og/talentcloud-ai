@@ -776,7 +776,7 @@ CREATE TABLE public.postulaciones (
     origen character varying(20) DEFAULT 'equipo'::character varying NOT NULL,
     retirada_at timestamp(0) without time zone,
     oculta_para_postulante_at timestamp(0) without time zone,
-    CONSTRAINT postulaciones_estado_avisado_check CHECK (((estado_avisado IS NULL) OR ((estado_avisado)::text = ANY (ARRAY[('postulado'::character varying)::text, ('en_revision'::character varying)::text, ('entrevista'::character varying)::text, ('contratado'::character varying)::text, ('no_seleccionado'::character varying)::text, ('cerrada'::character varying)::text, ('retirada'::character varying)::text])))),
+    CONSTRAINT postulaciones_estado_avisado_check CHECK (((estado_avisado IS NULL) OR ((estado_avisado)::text = ANY ((ARRAY['postulado'::character varying, 'en_revision'::character varying, 'entrevista'::character varying, 'contratado'::character varying, 'no_seleccionado'::character varying, 'cerrada'::character varying, 'retirada'::character varying, 'oferta'::character varying])::text[])))),
     CONSTRAINT postulaciones_etapa_check CHECK (((etapa)::text = ANY (ARRAY[('postulado'::character varying)::text, ('en_revision'::character varying)::text, ('entrevista'::character varying)::text, ('oferta'::character varying)::text, ('contratado'::character varying)::text, ('descartado'::character varying)::text]))),
     CONSTRAINT postulaciones_orden_check CHECK ((orden >= 0)),
     CONSTRAINT postulaciones_origen_check CHECK (((origen)::text = ANY (ARRAY[('equipo'::character varying)::text, ('postulante'::character varying)::text])))
@@ -13264,6 +13264,9 @@ COPY public.migrations (id, migration, batch) FROM stdin;
 57	2026_10_21_110000_plan_vence_at_en_empresas	9
 58	2026_10_21_120000_avisos_de_vencimiento_del_plan	10
 91	2026_10_22_100000_lugar_de_la_entrevista	11
+92	2026_10_25_100000_postulaciones_ocultas_para_el_postulante	12
+93	2026_10_25_110000_tablero_de_la_mas_reciente_a_la_mas_antigua	12
+94	2026_10_26_100000_estado_avisado_admite_oferta	13
 \.
 
 
@@ -31425,7 +31428,7 @@ SELECT pg_catalog.setval('public.jobs_id_seq', 2771, true);
 -- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.migrations_id_seq', 91, true);
+SELECT pg_catalog.setval('public.migrations_id_seq', 94, true);
 
 
 --

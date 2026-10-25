@@ -80,7 +80,7 @@ La lista completa está en [`talentcloud/README.md`](talentcloud/README.md#datos
 
 ## Base de datos
 
-- 31 tablas y 54 migraciones: `talentcloud/database/migrations/`.
+- 31 tablas y 55 migraciones: `talentcloud/database/migrations/`.
 - Volcados de PostgreSQL en `talentcloud/database/esquema/`:
   - `talentcloud_esquema.sql`: solo la estructura.
   - `talentcloud_completa.sql`: estructura y datos de demostración.
