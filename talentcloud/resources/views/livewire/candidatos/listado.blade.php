@@ -12,10 +12,17 @@
     </x-ui.page-header>
 
     <x-ui.listado-controles
-        placeholder="Buscar candidato…"
+        placeholder="Nombre, correo o competencia…"
         :ordenes="$this->opcionesOrden()"
         :direccion="$direccion"
     />
+    <div class="-mt-1 mb-4 flex flex-wrap items-center gap-3">
+        <label for="candidatos-vacante" class="sr-only">Filtrar por vacante</label>
+        <x-ui.select wire:model.live="filtroVacante" id="candidatos-vacante" class="w-[320px] max-w-full" :options="$opcionesVacante" placeholder="Todas las vacantes" />
+        @if ($filtroVacante !== '')
+            <button type="button" wire:click="$set('filtroVacante', '')" class="text-14 text-neutral-700 underline hover:text-accent-700">Ver todas</button>
+        @endif
+    </div>
 
     @if ($filas->isEmpty())
         @if ($this->hayFiltros())
@@ -38,6 +45,9 @@
                 <x-ui.card class="tarjeta-clicable" wire:key="candidato-{{ $candidato->id }}" wire:click="verDetalle({{ $candidato->id }})">
                     <div class="card-kicker">{{ $candidato->titular ?? 'Candidato' }}</div>
                     <div class="card-title"><x-ui.boton-fila wire:click.stop="verDetalle({{ $candidato->id }})">{{ $candidato->nombre }}</x-ui.boton-fila></div>
+                    @if (\App\Models\Postulacion::esFechaNueva($candidato->getAttribute('ultima_postulacion_at')))
+                        <div><x-ui.tag tone="accent">Postulación nueva</x-ui.tag></div>
+                    @endif
                     @if ($vistaGlobal && $candidato->postulaciones->isNotEmpty())
                         {{-- Admin SaaS: todos sus procesos, agrupados por empresa (puede estar en varias). --}}
                         <x-candidatos.procesos :postulaciones="$candidato->postulaciones" />

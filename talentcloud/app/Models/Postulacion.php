@@ -71,6 +71,20 @@ class Postulacion extends Model
         ];
     }
 
+    /** Horas durante las que una postulación se marca «Nueva» (tablero, «Mi día» y Candidatos). */
+    public const HORAS_NUEVA = 48;
+
+    /** Llegó hace menos de HORAS_NUEVA: el reclutador la encuentra de un vistazo. */
+    public function esNueva(): bool
+    {
+        return self::esFechaNueva($this->created_at);
+    }
+
+    public static function esFechaNueva(mixed $fecha): bool
+    {
+        return $fecha !== null && Carbon::parse($fecha)->gte(now()->subHours(self::HORAS_NUEVA));
+    }
+
     /**
      * El CV que la empresa debe ver en esta postulación: el enviado y, si no quedó registrado (una postulación anterior a
      * ese registro o un CV que se borró), el actual del candidato. Requiere cargadas `cv` y `candidato.cvActual`.

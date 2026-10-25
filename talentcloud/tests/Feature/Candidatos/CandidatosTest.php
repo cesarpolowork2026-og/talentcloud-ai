@@ -46,8 +46,8 @@ it('muestra la pantalla Candidatos del prototipo', function () {
     $this->get('/candidatos')
         ->assertOk()
         ->assertSee('CVs recibidos y candidatos de tus vacantes.')
-        ->assertSee('Buscar candidato…')
-        ->assertSeeInOrder(['Nombre', 'Postulación más reciente'])
+        ->assertSee('Nombre, correo o competencia…')
+        ->assertSeeInOrder(['Postulación más reciente', 'Nombre'])
         ->assertSee('Desarrolladora Backend')
         ->assertSee('Desarrollador Backend · Postulado')
         ->assertSeeHtml('wire:click.stop="verDetalle(')
@@ -79,15 +79,27 @@ it('muestra al admin SaaS todos los candidatos', function () {
     Livewire::test(Listado::class)->assertSee('Iván Torres')->assertSee('Rosa Paredes');
 });
 
-it('ordena por la postulación más reciente, con los candidatos sin postulación al final', function () {
+it('por defecto ordena de la postulación más reciente a la más antigua, con los candidatos sin postulación al final', function () {
     // Marco postuló después que Elena. assertSeeInOrder de Livewire compara el JSON (con "í" escapada); se revisa el HTML.
-    $html = Livewire::test(Listado::class)
-        ->set('orden', 'reciente')
-        ->call('alternarDireccion')
-        ->html();
+    $html = Livewire::test(Listado::class)->html();
 
     expect(strpos($html, 'Marco Díaz</button>'))->toBeLessThan(strpos($html, 'Elena Ruiz</button>'))
         ->and(strpos($html, 'Elena Ruiz</button>'))->toBeLessThan(strpos($html, 'Rosa Paredes</button>'));
+
+    // Por nombre, de la A a la Z.
+    $html = Livewire::test(Listado::class)->set('orden', 'nombre')->html();
+    expect(strpos($html, 'Elena Ruiz</button>'))->toBeLessThan(strpos($html, 'Marco Díaz</button>'));
+});
+
+it('filtra por vacante y busca también por correo', function () {
+    Livewire::test(Listado::class)
+        ->set('filtroVacante', (string) $this->backend->id)
+        ->assertSee('Elena Ruiz')
+        ->assertDontSee('Rosa Paredes')
+        ->set('filtroVacante', '')
+        ->set('busqueda', $this->elena->email)
+        ->assertSee('Elena Ruiz')
+        ->assertDontSee('Marco Díaz</button>', false);
 });
 
 it('muestra el estado de error del CV con "Reintentar lectura"', function () {

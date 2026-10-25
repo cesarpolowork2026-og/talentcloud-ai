@@ -108,7 +108,8 @@ class MiDiaDelReclutadorService
     }
 
     /**
-     * Las que más esperan primero. Una postulación nueva no tiene `etapa_cambiada_at`: espera desde que llegó.
+     * Las más recientes primero (quien acaba de postular es lo primero que se revisa); el indicador «Por revisar»
+     * cuenta todas. Una postulación nueva no tiene `etapa_cambiada_at`: espera desde que llegó.
      *
      * @return Collection<int, Postulacion>
      */
@@ -118,8 +119,8 @@ class MiDiaDelReclutadorService
             ->select(['postulaciones.id', 'postulaciones.empresa_id', 'postulaciones.vacante_id', 'postulaciones.candidato_id', 'postulaciones.created_at', 'postulaciones.etapa_cambiada_at'])
             ->selectRaw('COALESCE(postulaciones.etapa_cambiada_at, postulaciones.created_at) AS en_espera_desde')
             ->with(['candidato:id,nombre', 'vacante:id,titulo'])
-            ->orderByRaw('COALESCE(postulaciones.etapa_cambiada_at, postulaciones.created_at)')
-            ->orderBy('postulaciones.id')
+            ->orderByDesc('postulaciones.created_at')
+            ->orderByDesc('postulaciones.id')
             ->limit(self::FILAS)
             ->get();
     }

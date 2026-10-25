@@ -57,10 +57,13 @@ class PostularCandidato
             throw new OperacionNoPermitida($candidato->nombre.' ya postuló a '.$vacante->titulo.'.');
         }
 
-        $orden = (int) Postulacion::sinFiltroDeEmpresa()
-            ->where('vacante_id', $vacante->id)
-            ->where('etapa', EtapaPostulacion::Postulado)
-            ->max('orden') + 1;
+        // La nueva entra arriba de «Postulado» (orden 0): quien acaba de postular se ve primero en el tablero, aunque
+        // la columna tenga cientos. Las demás bajan un lugar, en SQL y sin tocar su updated_at (como MoverPostulacion).
+        DB::update(
+            'UPDATE postulaciones SET orden = orden + 1 WHERE empresa_id = ? AND vacante_id = ? AND etapa = ?',
+            [$vacante->empresa_id, $vacante->id, EtapaPostulacion::Postulado->value],
+        );
+        $orden = 0;
 
         $postulacion = new Postulacion([
             'vacante_id' => $vacante->id,

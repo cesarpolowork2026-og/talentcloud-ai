@@ -119,7 +119,12 @@
                         <li class="border-b border-divider last:border-b-0" wire:key="por-evaluar-{{ $postulacion->id }}">
                             <a href="{{ route('postulaciones.show', $postulacion->id) }}" wire:navigate class="flex items-center gap-3 px-4 py-3 text-14 no-underline hover:bg-neutral-100">
                                 <span class="min-w-0 flex-1">
-                                    <span class="block truncate font-semibold text-neutral-800">{{ $postulacion->candidato?->nombre }}</span>
+                                    <span class="flex items-center gap-2">
+                                    <span class="truncate font-semibold text-neutral-800">{{ $postulacion->candidato?->nombre }}</span>
+                                    @if ($postulacion->esNueva())
+                                        <x-ui.tag tone="accent">Nueva</x-ui.tag>
+                                    @endif
+                                </span>
                                     <span class="block truncate text-13 text-neutral-700">{{ $postulacion->vacante?->titulo }} · ya entrevistaste</span>
                                 </span>
                                 <span class="text-13 text-accent-700">Evaluar</span>
@@ -143,7 +148,7 @@
 {{-- Cola de trabajo: lo que más espera primero --}}
 <section class="mb-8" aria-labelledby="por-revisar-titulo">
     <h2 id="por-revisar-titulo" class="mb-1 text-16">Postulaciones por revisar</h2>
-    <p class="mb-3 mt-0 text-13 text-neutral-700">Las de toda la empresa que siguen en «Postulado», las que más esperan primero.</p>
+    <p class="mb-3 mt-0 text-13 text-neutral-700">Las de toda la empresa que siguen en «Postulado», las más recientes primero.</p>
     <x-ui.card class="!gap-0 !p-0">
         @if ($dia->porRevisar->isEmpty())
             <div class="grid justify-items-center gap-2 px-4 py-8 text-center">

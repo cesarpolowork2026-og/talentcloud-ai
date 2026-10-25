@@ -12,6 +12,7 @@ use App\Models\Postulacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Services\Postulaciones\MoverPostulacion;
+use App\Services\Postulaciones\PostularCandidato;
 use App\Services\Vacantes\OperacionNoPermitida;
 use App\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Event;
@@ -349,4 +350,45 @@ it('un movimiento que se guarda borra el aviso de uno rechazado antes', function
         ->call('mover', $this->elena->id, 'en_revision', 0)
         ->assertHasNoErrors()
         ->assertDontSee('todavía no tiene una entrevista realizada');
+});
+
+// — Lo más reciente, primero —
+
+it('una postulación nueva entra arriba de «Postulado» y lleva la etiqueta «Nueva»', function () {
+    $rosa = Candidato::factory()->create(['nombre' => 'Rosa Quispe']);
+    app(PostularCandidato::class)->ejecutar($this->backend, $rosa);
+
+    expect(columna($this->backend, EtapaPostulacion::Postulado))->toBe(['Rosa Quispe:0', 'Elena Ruiz:1', 'Marco Díaz:2']);
+
+    $html = Livewire::test(Central::class, ['vacante' => $this->backend])->html();
+    expect(strpos($html, 'Rosa Quispe'))->toBeLessThan(strpos($html, 'Elena Ruiz'))
+        ->and($html)->toContain('Nueva');
+});
+
+it('«Mover a…» deja la postulación arriba de la columna destino', function () {
+    Livewire::test(Central::class, ['vacante' => $this->backend])
+        ->call('abrir', $this->marco->id)->set('etapaDestino', 'en_revision')->call('moverA');
+
+    expect(columna($this->backend, EtapaPostulacion::EnRevision))->toBe(['Marco Díaz:0', 'Sofía Nieto:1']);
+});
+
+it('busca postulantes de la vacante por nombre (sin tildes) o correo en todas las columnas', function () {
+    Livewire::test(Central::class, ['vacante' => $this->backend])
+        ->set('buscarPostulante', 'sofia')
+        ->assertSee('1 postulación coincide con «sofia»')
+        ->assertSeeHtml('wire:key="postulacion-'.$this->sofia->id.'"')
+        ->assertDontSeeHtml('wire:key="postulacion-'.$this->elena->id.'"')
+        ->set('buscarPostulante', 'nadie-asi')
+        ->assertSee('Nadie coincide con «nadie-asi»')
+        ->set('buscarPostulante', '')
+        ->assertSeeHtml('wire:key="postulacion-'.$this->elena->id.'"');
+});
+
+it('la migración ordena cada columna de la más reciente a la más antigua', function () {
+    $this->elena->forceFill(['etapa_cambiada_at' => now()->subDays(5), 'orden' => 0])->save();
+    $this->marco->forceFill(['etapa_cambiada_at' => now()->subDay(), 'orden' => 1])->save();
+
+    (require database_path('migrations/2026_10_25_110000_tablero_de_la_mas_reciente_a_la_mas_antigua.php'))->up();
+
+    expect(columna($this->backend, EtapaPostulacion::Postulado))->toBe(['Marco Díaz:0', 'Elena Ruiz:1']);
 });

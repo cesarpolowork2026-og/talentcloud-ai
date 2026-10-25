@@ -266,17 +266,19 @@ it('las evaluaciones pendientes son las entrevistas que hizo y aún no evaluó',
     expect(app(MiDiaDelReclutadorService::class)->calcular($otro)->totalPorEvaluar)->toBe(2);
 });
 
-it('la cola por revisar pone primero a quien más espera y no incluye retiradas ni vacantes cerradas', function () {
+it('la cola por revisar pone primero la postulación más reciente y no incluye retiradas ni vacantes cerradas', function () {
     $this->elena->forceFill(['etapa_cambiada_at' => now()->subDays(6)])->save();
     $this->sofia->forceFill(['etapa_cambiada_at' => now()->subDays(2)])->save();
     $retirada = Postulacion::factory()->paraVacante($this->backend)->create(['retirada_at' => now(), 'etapa' => EtapaPostulacion::Descartado]);
     $cerrada = Vacante::sinFiltroDeEmpresa()->where('titulo', 'DevOps Engineer')->firstOrFail();
     $deCerrada = Postulacion::factory()->paraVacante($cerrada)->create();
+    $recienLlegada = Postulacion::factory()->paraVacante($this->backend)->create(['created_at' => now()->addMinute()]);
 
     $dia = app(MiDiaDelReclutadorService::class)->calcular($this->marta);
 
-    expect($dia->totalPorRevisar)->toBe(3)
-        ->and($dia->porRevisar->first()->id)->toBe($this->elena->id)
+    expect($dia->totalPorRevisar)->toBe(4)
+        ->and($dia->porRevisar->first()->id)->toBe($recienLlegada->id)
+        ->and($dia->porRevisar->pluck('id')->all())->toContain($this->elena->id)
         ->and($dia->porRevisar->pluck('id')->all())->not->toContain($retirada->id, $deCerrada->id);
 
     actuarComo($this->marta);

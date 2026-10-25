@@ -19,12 +19,14 @@ use App\Services\Cvs\SubirCv;
 use App\Services\Postulaciones\PostularCandidato;
 use App\Services\Vacantes\BuscadorDeVacantes;
 use App\Services\Vacantes\OperacionNoPermitida;
+use App\Support\OpcionesPorEmpresa;
 use App\Tenancy\TenantContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -62,9 +64,34 @@ class Listado extends Component
 
     public bool $autorizado = false;
 
+    /** Solo los candidatos con una postulación a esta vacante. */
+    #[Url(as: 'vacante', except: '')]
+    public string $filtroVacante = '';
+
     public function mount(): void
     {
         $this->authorize('viewAny', Candidato::class);
+
+        // «Postulación más reciente» va de la más nueva a la más antigua (el nombre, de la A a la Z).
+        if (in_array($this->orden, ['', 'reciente'], true) && $this->direccion === 'asc') {
+            $this->direccion = 'desc';
+        }
+    }
+
+    public function updatedOrden(): void
+    {
+        $this->direccion = $this->orden === 'nombre' ? 'asc' : 'desc';
+        $this->resetPage();
+    }
+
+    public function updatedFiltroVacante(): void
+    {
+        $this->resetPage();
+    }
+
+    public function hayFiltros(): bool
+    {
+        return trim($this->busqueda) !== '' || $this->estado !== '' || $this->filtroVacante !== '';
     }
 
     /**
@@ -75,13 +102,14 @@ class Listado extends Component
      */
     protected function camposBusqueda(): array
     {
-        return ['nombre', 'titular', 'competencias.nombre'];
+        return ['nombre', 'email', 'titular', 'competencias.nombre'];
     }
 
     /** @return array<string, string> */
     protected function opcionesOrden(): array
     {
-        return ['nombre' => 'Nombre', 'reciente' => 'Postulación más reciente'];
+        // Lo primero: quien postuló más recientemente (para no buscarlo al final de la lista).
+        return ['reciente' => 'Postulación más reciente', 'nombre' => 'Nombre'];
     }
 
     protected function columnaDeOrden(string $clave): string
@@ -214,7 +242,16 @@ class Listado extends Component
             : null;
 
         return view('livewire.candidatos.listado', [
-            'filas' => $this->listar($candidatos->consultaListado()),
+            'filas' => $this->listar($candidatos->consultaListado()->when(
+                ctype_digit($this->filtroVacante),
+                fn ($q) => $q->whereHas('postulaciones', fn ($p) => $p->where('vacante_id', (int) $this->filtroVacante)),
+            )),
+            // Filtro por vacante: las de la empresa (en la vista global, agrupadas por empresa), de la más reciente.
+            'opcionesVacante' => OpcionesPorEmpresa::de(
+                Vacante::query()->with('empresa:id,nombre')->orderByDesc('publicada_at')->orderByDesc('id')->get(['id', 'titulo', 'empresa_id', 'publicada_at']),
+                fn (Vacante $v) => $v,
+                fn (Vacante $v) => $v->titulo,
+            ),
             'seleccionado' => $seleccionado,
             // Admin SaaS: cada candidato con sus procesos agrupados por empresa.
             'vistaGlobal' => app(TenantContext::class)->esGlobal(),

@@ -59,7 +59,20 @@
             <p class="-mt-2 mb-4 max-w-[90ch] text-13 text-neutral-700">«Cubre X de Y requisitos» compara los requisitos de la vacante con el texto del CV (búsqueda exacta de la competencia o sus sinónimos) y con las competencias que anotó tu equipo. Es una ayuda para revisar: la decisión es tuya y nunca mueve ni descarta a nadie.</p>
         @endif
 
-        <x-ui.actualizable target="verMas,mover">
+        {{-- Encontrar a un postulante sin recorrer columnas largas: filtra todas las etapas por nombre o correo. --}}
+        <div class="mb-4 flex flex-wrap items-center gap-3">
+            <label for="buscar-postulante" class="sr-only">Buscar postulante en esta vacante</label>
+            <x-ui.input type="search" id="buscar-postulante" wire:model.live.debounce.300ms="buscarPostulante" placeholder="Buscar postulante por nombre o correo…" class="w-[320px] max-w-full" autocomplete="off" />
+            @if (trim($buscarPostulante) !== '')
+                @php($coinciden = collect($columnas)->sum('total'))
+                <span class="text-14 text-neutral-700" role="status">{{ $coinciden === 0 ? 'Nadie coincide con «'.$buscarPostulante.'»' : $coinciden.' '.($coinciden === 1 ? 'postulación coincide' : 'postulaciones coinciden').' con «'.$buscarPostulante.'»' }}.</span>
+                <button type="button" wire:click="$set('buscarPostulante', '')" class="text-14 text-neutral-700 underline hover:text-accent-700">Ver todas</button>
+            @else
+                <span class="text-13 text-neutral-700">Las postulaciones más recientes aparecen arriba de cada columna.</span>
+            @endif
+        </div>
+
+        <x-ui.actualizable target="verMas,mover,buscarPostulante">
         <div class="flex gap-4 overflow-x-auto pb-2">
             @foreach ($columnas as $columna)
                 @php($etapa = $columna['etapa'])
@@ -104,6 +117,9 @@
                                         class="block min-w-0 text-left text-14 font-semibold leading-tight text-ink"
                                     >{{ $postulacion->candidato?->nombre }}</button>
                                 </div>
+                                @if ($postulacion->esNueva() && ! $postulacion->estaRetirada())
+                                    <div><x-ui.tag tone="accent">Nueva</x-ui.tag></div>
+                                @endif
                                 <div class="text-13 text-neutral-700">{{ $postulacion->candidato?->titular }}</div>
                                 @if ($postulacion->estaRetirada())
                                     <div class="mt-1"><x-ui.tag tone="outline">Retirada</x-ui.tag></div>

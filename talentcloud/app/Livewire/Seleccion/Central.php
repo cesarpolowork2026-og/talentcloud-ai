@@ -6,6 +6,7 @@ use App\Enums\EstadoEntrevista;
 use App\Enums\EstadoVacante;
 use App\Enums\EtapaPostulacion;
 use App\Livewire\Concerns\SeActualizaSola;
+use App\Models\Candidato;
 use App\Models\Entrevista;
 use App\Models\Evaluacion;
 use App\Models\Postulacion;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
@@ -51,6 +53,10 @@ class Central extends Component
 
     #[Locked]
     public ?int $vacanteId = null;
+
+    /** Busca postulantes de la vacante por nombre o correo (sin distinguir tildes): filtra todas las columnas. */
+    #[Url(as: 'buscar', except: '')]
+    public string $buscarPostulante = '';
 
     public bool $mostrarDetalle = false;
 
@@ -154,10 +160,9 @@ class Central extends Component
         $destino = EtapaPostulacion::from($this->etapaDestino);
 
         if ($destino !== $postulacion->etapa) {
-            $alFinal = Postulacion::where('vacante_id', $postulacion->vacante_id)->where('etapa', $destino)->count();
-
             try {
-                $mover->ejecutar($postulacion, $destino, $alFinal, $this->usuario());
+                // Arriba de la columna destino: lo último que se movió es lo primero que se ve.
+                $mover->ejecutar($postulacion, $destino, 0, $this->usuario());
             } catch (OperacionNoPermitida $e) {
                 $this->addError('etapaDestino', $e->getMessage());
 
@@ -226,8 +231,7 @@ class Central extends Component
 
         // Cada consulta pide solo lo que se ve: las primeras tarjetas de cada columna. Con miles de
         // postulaciones nada recorre ni hidrata la vacante entera.
-        $totales = Postulacion::query()
-            ->where('vacante_id', $vacante->id)
+        $totales = $this->conBusqueda(Postulacion::query()->where('vacante_id', $vacante->id))
             ->toBase()
             ->selectRaw('etapa, COUNT(*) AS total')
             ->groupBy('etapa')
@@ -300,7 +304,7 @@ class Central extends Component
             $limites[$etapa->value] = $this->tarjetasMostradas($etapa);
         }
 
-        $numeradas = Postulacion::query()->where('vacante_id', $vacanteId)
+        $numeradas = $this->conBusqueda(Postulacion::query()->where('vacante_id', $vacanteId))
             ->toBase()
             ->selectRaw('id, etapa, ROW_NUMBER() OVER (PARTITION BY etapa ORDER BY orden, id) AS fila');
 
@@ -322,6 +326,33 @@ class Central extends Component
             ->groupBy(fn (Postulacion $p) => $p->etapa->value)
             ->map(fn ($grupo) => $grupo->values()->all())
             ->all();
+    }
+
+    public function updatedBuscarPostulante(): void
+    {
+        $this->buscarPostulante = mb_substr($this->buscarPostulante, 0, 80);
+        $this->mostrando = [];
+    }
+
+    /**
+     * Postulaciones cuyo candidato coincide con la búsqueda (nombre o correo, sin tildes). Sin búsqueda, todas.
+     *
+     * @param  Builder<Postulacion>  $consulta
+     * @return Builder<Postulacion>
+     */
+    private function conBusqueda(Builder $consulta): Builder
+    {
+        $texto = trim($this->buscarPostulante);
+
+        if ($texto === '') {
+            return $consulta;
+        }
+
+        $patron = '%'.addcslashes($texto, '%_'.chr(92)).'%';
+
+        return $consulta->whereIn('candidato_id', Candidato::query()->select('id')
+            ->where(fn ($q) => $q->whereRaw('unaccent(nombre) ilike unaccent(?)', [$patron])
+                ->orWhereRaw('unaccent(email) ilike unaccent(?)', [$patron])));
     }
 
     /**
