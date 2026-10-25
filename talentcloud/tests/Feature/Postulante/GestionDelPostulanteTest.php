@@ -138,9 +138,11 @@ it('no puede quitar la postulación de otra persona', function () {
 
 // — Vacantes según el CV —
 
-it('muestra cuánto de cada vacante menciona su CV y recomienda la más compatible', function () {
+it('muestra cuánto de cada vacante menciona su CV y recomienda una sola: la que más requisitos menciona', function () {
     Livewire::test(Vacantes::class)
-        ->assertSee('Recomendadas para ti')
+        ->assertSee('Recomendada para ti')
+        ->assertSeeHtml('wire:key="recomendada-'.$this->backend->id.'"')
+        ->assertDontSeeHtml('wire:key="recomendada-'.$this->cocina->id.'"')
         ->assertSee('Tu CV menciona los obligatorios')
         ->assertSee('Tu CV menciona 2 de 2 requisitos')
         ->assertSee('Tu CV menciona 0 de 1 requisito')
@@ -158,6 +160,13 @@ it('ordena por compatibilidad y filtra las que su CV cumple en lo obligatorio', 
         ->assertSee('1 vacante abierta con esos filtros');
 });
 
+it('no recomienda una vacante a la que ya postuló', function () {
+    postulacionDeRenzo($this, $this->backend, EtapaPostulacion::EnRevision);
+
+    // La de cocina no menciona ningún requisito del CV: sin candidata, no hay recomendación.
+    Livewire::test(Vacantes::class)->assertDontSee('Recomendada para ti');
+});
+
 it('filtra por lugar y por jornada', function () {
     Livewire::test(Vacantes::class)->set('lugar', 'Trujillo')->assertSee('Cocinero de Línea')->assertDontSee('Desarrollador Backend');
     Livewire::test(Vacantes::class)->set('jornada', 'completa')->assertSee('Desarrollador Backend')->assertDontSee('Cocinero de Línea');
@@ -168,7 +177,7 @@ it('sin un CV listo invita a subirlo y no ofrece ordenar por compatibilidad', fu
 
     Livewire::test(Vacantes::class)
         ->assertSee('Sube tu CV')
-        ->assertDontSee('Recomendadas para ti')
+        ->assertDontSee('Recomendada para ti')
         ->assertDontSee('Más compatibles con mi CV')
         ->assertDontSee('Tu CV menciona');
 });

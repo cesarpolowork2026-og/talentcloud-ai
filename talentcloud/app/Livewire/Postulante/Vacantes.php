@@ -140,7 +140,7 @@ class Vacantes extends Component
         $postuladas = $user->candidato?->postulacionesEnTodasLasEmpresas()->get(['vacante_id', 'retirada_at'])
             ->mapWithKeys(fn (Postulacion $p) => [$p->vacante_id => $p->estaRetirada()])->all() ?? [];
 
-        // La compatibilidad de todas las abiertas (son pocas: decenas). Ordena, filtra y elige las recomendadas.
+        // La compatibilidad de todas las abiertas (son pocas: decenas). Ordena, filtra y elige la recomendada.
         $coberturas = $texto === null ? collect() : $this->coberturas($vacantes, $analisis, $texto);
         $ordenCompatible = $coberturas->sortByDesc(fn (CoberturaDeRequisitos $c) => $this->puntaje($c))->keys();
 
@@ -172,13 +172,9 @@ class Vacantes extends Component
             'cv' => $cv,
             'conCv' => $texto !== null,
             'coberturas' => $coberturas,
-            // Recomendadas: las 3 más compatibles a las que aún no postuló (solo sin filtros, en la primera página).
-            'recomendadas' => $this->hayFiltros() || $filas->currentPage() > 1 ? collect() : $ordenCompatible
-                ->reject(fn ($id) => array_key_exists($id, $postuladas))
-                ->filter(fn ($id) => $coberturas[$id]->cubiertos() > 0)
-                ->take(3)
-                ->values(),
-            'nombresRecomendadas' => $vacantes->publicadas()->whereIn('vacantes.id', $ordenCompatible->take(10)->all())->get(['vacantes.id', 'vacantes.empresa_id', 'vacantes.titulo', 'vacantes.ubicacion', 'vacantes.modalidad'])->keyBy('id'),
+            // Una sola recomendación (solo sin filtros, en la primera página): la vacante a la que aún no postuló donde
+            // su CV menciona más requisitos; a igual cantidad, la de mayor porcentaje y la que cumple los obligatorios.
+            'recomendada' => $this->hayFiltros() || $filas->currentPage() > 1 ? null : $this->recomendada($vacantes, $coberturas, $postuladas),
         ]);
     }
 
@@ -199,6 +195,21 @@ class Vacantes extends Component
             ->limit(self::MAXIMO_ANALIZADAS)
             ->get(['vacantes.id', 'vacantes.publicada_at'])
             ->mapWithKeys(fn (Vacante $v) => [$v->id => $analisis->paraRequisitos($v->requisitos, $texto)]);
+    }
+
+    /**
+     * @param  Collection<int, CoberturaDeRequisitos>  $coberturas
+     * @param  array<int, bool>  $postuladas
+     */
+    private function recomendada(VacanteRepository $vacantes, Collection $coberturas, array $postuladas): ?Vacante
+    {
+        $id = $coberturas
+            ->reject(fn (CoberturaDeRequisitos $c, int $id) => array_key_exists($id, $postuladas) || $c->cubiertos() === 0)
+            ->sortByDesc(fn (CoberturaDeRequisitos $c) => [$c->cubiertos(), $c->porcentaje() ?? 0, $c->obligatoriosFaltantes() === [] ? 1 : 0])
+            ->keys()
+            ->first();
+
+        return $id === null ? null : $vacantes->publicadasParaListado()->find($id);
     }
 
     /** Primero las que cumplen todos los obligatorios, luego el porcentaje y la cantidad de requisitos que nombra. */

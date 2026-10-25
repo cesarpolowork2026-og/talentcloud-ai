@@ -16,29 +16,28 @@
                 @endif
             </span>
         </p>
-    @elseif ($recomendadas->isNotEmpty())
-        <section class="mb-6" aria-labelledby="recomendadas-titulo">
-            <h2 id="recomendadas-titulo" class="mb-1 text-16">Recomendadas para ti</h2>
-            <p class="mb-3 mt-0 text-13 text-neutral-700">Las vacantes cuyos requisitos más menciona tu CV y a las que aún no postulaste.</p>
-            <div class="grid gap-3 md:grid-cols-3">
-                @foreach ($recomendadas as $id)
-                    @php($v = $nombresRecomendadas->get($id))
-                    @continue($v === null)
-                    @php($c = $coberturas[$id])
-                    <a href="{{ route('postulante.vacantes.show', $id) }}" wire:navigate wire:key="recomendada-{{ $id }}"
-                       class="card tarjeta-clicable !bg-white text-ink no-underline hover:!no-underline">
-                        <span class="card-kicker">{{ $v->empresa?->nombre }}</span>
-                        <span class="card-title m-0 text-16">{{ $v->titulo }}</span>
-                        <span class="text-13 text-neutral-700">{{ $v->lugarYModalidad() }}</span>
-                        <span class="flex flex-wrap items-center gap-2 text-13">
-                            @if ($c->obligatoriosFaltantes() === [])
-                                <x-ui.tag tone="accent">Menciona los obligatorios</x-ui.tag>
-                            @endif
-                            <span class="text-neutral-800">{{ $c->cubiertos() }} de {{ $c->total() }} requisitos</span>
-                        </span>
-                    </a>
-                @endforeach
-            </div>
+    @elseif ($recomendada)
+        @php($c = $coberturas[$recomendada->id])
+        <section class="mb-6" aria-labelledby="recomendada-titulo">
+            <h2 id="recomendada-titulo" class="mb-1 text-16">Recomendada para ti</h2>
+            <p class="mb-3 mt-0 text-13 text-neutral-700">La vacante a la que aún no postulaste donde tu CV menciona más requisitos.</p>
+            <x-ui.card elev="sm" class="!bg-white md:!flex-row md:items-center md:justify-between" wire:key="recomendada-{{ $recomendada->id }}">
+                <div class="grid gap-1">
+                    <div class="card-kicker">{{ $recomendada->empresa?->nombre }}</div>
+                    <h3 class="card-title m-0 text-18">{{ $recomendada->titulo }}</h3>
+                    <p class="m-0 text-14 text-neutral-700">{{ $recomendada->lugarYModalidad() }}@if ($recomendada->sueldoEnTexto()) · {{ $recomendada->sueldoEnTexto() }}@endif</p>
+                    <p class="m-0 flex flex-wrap items-center gap-2 text-14">
+                        @if ($c->obligatoriosFaltantes() === [])
+                            <x-ui.tag tone="accent">Tu CV menciona los obligatorios</x-ui.tag>
+                        @endif
+                        <span class="font-semibold text-neutral-800">Tu CV menciona {{ $c->cubiertos() }} de {{ $c->total() }} requisitos</span>
+                        @if ($c->obligatoriosFaltantes() !== [])
+                            <span class="text-neutral-700">· no menciona: {{ implode(', ', array_slice($c->obligatoriosFaltantes(), 0, 3)) }}</span>
+                        @endif
+                    </p>
+                </div>
+                <x-ui.button variant="primary" :href="route('postulante.vacantes.show', $recomendada->id)" wire:navigate class="shrink-0">Ver y postular</x-ui.button>
+            </x-ui.card>
         </section>
     @endif
 
