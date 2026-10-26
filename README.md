@@ -104,7 +104,7 @@ Pila para un servidor con Docker (aplicación, cola, planificador, base de datos
 cd talentcloud && composer check      # Pint + Larastan (nivel 6) + Pest
 ```
 
-La aplicación tiene 337 pruebas automáticas contra PostgreSQL. Además hay scripts de Playwright para recorridos en navegador real en `talentcloud/tests/e2e/`.
+La aplicación tiene 445 pruebas automáticas (Pest) contra PostgreSQL: 439 se ejecutan siempre y 6, que usan el entorno de pruebas de Stripe, se activan a pedido. Además hay scripts de Playwright para recorridos en navegador real en `talentcloud/tests/e2e/`.
 
 ## Pagos
 
