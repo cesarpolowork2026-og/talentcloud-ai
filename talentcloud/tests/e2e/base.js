@@ -14,7 +14,7 @@ const CHROME = process.env.E2E_CHROME || null; // null = Chrome instalado en el 
 
 async function abrir({ ancho = 1440, alto = 900 } = {}) {
   const navegador = await chromium.launch(CHROME ? { executablePath: CHROME, headless: true } : { channel: 'chrome', headless: true });
-  // Contexto nuevo por recorrido (CLAUDE.md: las pestañas viejas dejan de enviar las acciones de Livewire).
+  // Contexto nuevo por recorrido: las pestañas viejas dejan de enviar las acciones de Livewire.
   const contexto = await navegador.newContext({ viewport: { width: ancho, height: alto }, acceptDownloads: true, locale: 'es-PE' });
   const pagina = await contexto.newPage();
   const errores = [];

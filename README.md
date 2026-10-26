@@ -47,7 +47,7 @@ El trabajo se organizó con una adaptación de Scrum; el reparto de tareas y el 
 | `deploy/` | Despliegue en un servidor con Docker Compose y copias de seguridad |
 | `.github/workflows/` | Pruebas automáticas y construcción de imágenes |
 
-Cada carpeta tiene su propio `README.md` con más detalle.
+`talentcloud/` y `deploy/` tienen su propio `README.md` con más detalle.
 
 ## Cómo ejecutarlo
 
@@ -108,7 +108,7 @@ La aplicación tiene 445 pruebas automáticas (Pest) contra PostgreSQL: 439 se e
 
 ## Pagos
 
-Los planes de pago usan Stripe en **modo de prueba**; no se cobra dinero real. Con la pasarela apagada (`PAGOS_PASARELA` vacío, como en esta unidad), la empresa solicita el plan y el administrador SaaS lo aplica desde «Empresas». Más detalle en [`talentcloud/README.md`](talentcloud/README.md#pagos-con-stripe-unidad-3).
+Starter y Pro se contratan en línea con Stripe en **modo de prueba**: no se cobra dinero real. Enterprise se solicita y lo aplica el administrador SaaS desde «Empresas», igual que cualquier plan cuando la pasarela está apagada (`PAGOS_PASARELA` vacío, por defecto en local). Más detalle en [`talentcloud/README.md`](talentcloud/README.md#pagos-con-stripe-modo-de-prueba).
 
 ## Próximas unidades
 

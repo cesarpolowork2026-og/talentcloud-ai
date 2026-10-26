@@ -86,10 +86,10 @@ por consulta) y las cifras agregadas del dashboard se guardan 60 s por empresa (
 
 `docker compose` toma `DB_PASSWORD` del `.env`. Crea las bases `talentcloud` y `talentcloud_testing`, ambas con la extensión `vector`.
 
-## Pagos con Stripe (unidad 3)
+## Pagos con Stripe (modo de prueba)
 
-El cobro en línea está implementado pero **apagado** en esta entrega (`PAGOS_PASARELA` vacío): en la primera unidad el plan se solicita y lo aplica el
-administrador de la plataforma. Se evalúa en la tercera unidad.
+En el servidor desplegado el cobro en línea está **activo en modo de prueba**: no se cobra dinero real. En local queda apagado mientras
+`PAGOS_PASARELA` esté vacío; entonces la empresa solicita el plan y lo aplica el administrador de la plataforma.
 
 La empresa es el cliente de Stripe. «Pagar» en «Mi empresa» abre Stripe Checkout (precio en soles más IGV) y
 el plan cambia **solo** cuando llega el aviso firmado de Stripe a `POST /stripe/webhook`: la suscripción se
@@ -116,8 +116,8 @@ Tarjetas de prueba: `4242 4242 4242 4242` (aprobada), `4000 0000 0000 9995` (fon
 
 ### Probar los pagos
 
-- **Automáticas (`composer check`):** en la entrega de la unidad I la suite no incluye pruebas del cobro en línea (la unidad I se entrega sin pasarela activa). Se retomarán con la pasarela en la unidad siguiente.
-- **Contra el entorno de pruebas real de Stripe (opt-in, con red):** `STRIPE_LIVE_TESTS=1 php artisan test --filter=StripeEnModoDePrueba` (esa prueba se retiró de la suite de la unidad I).
+- **Automáticas (`composer check`):** `PagosEnLineaTest` y `PasarelaStripeTest` cubren, con una pasarela falsa, la contratación, el aviso firmado que cambia el plan, los avisos repetidos o alterados, el cobro fallido y la cancelación.
+- **Contra el entorno de pruebas real de Stripe (opt-in, con red):** `STRIPE_LIVE_TESTS=1 php artisan test --filter=StripeEnModoDePrueba` (6 pruebas que se omiten si no se activan).
   Usa las claves de prueba del `.env`, se niega a correr con una que no sea `sk_test_`, crea clientes y suscripciones sintéticos
   (`example.com`) y los borra al terminar. El aviso se firma localmente con `STRIPE_WEBHOOK_SECRET` y se envía a `/stripe/webhook`:
   no hace falta túnel. Si una ejecución se interrumpe, los clientes huérfanos llevan `metadata.origen = auditoria-talentcloud`.
