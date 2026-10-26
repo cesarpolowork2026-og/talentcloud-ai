@@ -8,7 +8,7 @@ Organización del trabajo de la unidad I (21 de septiembre al 25 de octubre de 2
 | Scrum Master | Soto Rumiche Marlon Alessandro |
 | Equipo de desarrollo | Laiza Infantes Luis Daniel, Manrique Barrionuevo Henyer Manuel, Polo Cipriano Cesar Alexis, Silva Quesada Jeremi Ashley y Soto Rumiche Marlon Alessandro |
 
-> Los commits de este repositorio se hicieron desde una sola cuenta (la de Polo Cipriano Cesar Alexis); el trabajo fue conjunto. La tabla siguiente recoge quién se hizo cargo de cada tarea.
+> Cada integrante desarrolló y probó los cambios de su área; el equipo los revisó en conjunto en cada sprint y los integró en una sola rama estable, la que se despliega en el servidor. La tabla siguiente recoge quién se hizo cargo de cada tarea.
 
 ## Reparto de tareas
 
